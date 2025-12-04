@@ -1,0 +1,194 @@
+Types
+=====
+
+R-type
+------
+
+xxxx xxx   xxx   xxxxx   xxxxx   0000000   xxxxx
+ opcode  | cond|   rd  |  rs1  |    --   |  rs2
+
+I-type
+------
+
+xxxx xxx   xxx   xxxxx   xxxxx   xxxxxxxxxxxx
+ opcode  | cond|   rd  |  rs1  |    imm12
+
+B-type
+------
+
+1001 xxx   xxx   xxxxx   xxxxx   xxxxxxx   xxxxx
+ opcode  | cond|  up5  |  rs1  |   low7  |  rs2  (offset12 = up5 << 7 | low7)
+
+U-type
+------
+
+1000 100   xxx   xxxxx   xxxxxxxxxxxxxxxxx
+   lui  |uimm20u|  rd  |      uimm20l      (uimm20 = uimm20u << 17 | uimm20l)
+
+C-type
+------
+
+1101 000   0   xxxxxxxx xxxxxxxx xxxxxxxx
+   col   | - |           color24
+
+Instructions
+============
+
+R-type (register compute)
+-------------------------
+
+0000 000 add
+0000 001 sub
+0000 010 mulh
+0000 011 mull
+0000 100 mod
+0000 101 div
+
+0001 000 and
+0001 001 nand
+0001 010 or
+0001 011 nor
+0001 100 xor
+0001 101 xnor
+0001 110 not rd rs1 ___
+
+0010 000 shl
+0010 001 shr
+0010 010 rol
+0010 011 ror
+0010 100 ashr
+
+0011 000 cmp __ rs1 rs2
+
+I-type (immediate compute)
+--------------------------
+
+0100 000 addi
+0100 001 subi
+0100 010 mulhi
+0100 011 mulli
+0100 100 modi
+0100 101 divi
+
+0101 000 andi
+0101 001 nandi
+0101 010 ori
+0101 011 nori
+0101 100 xori
+0101 101 xnori
+
+0110 000 shli
+0110 001 shri
+0110 010 roli
+0110 011 rori
+0110 100 ashri
+
+0111 000 cmpi __ rs1 imm12
+
+I-type (load)
+-------------
+
+1000 000 lw rd base=(rs1) offset12
+
+B-type (store)
+--------------
+
+1000 001 sw offsetu base=(rs1) offsetl rs2
+
+I-type (load immediate)
+-----------------------
+
+1000 010 li rd ___ imm12
+
+U-type (load upper immediate)
+-----------------------------
+
+1000 011 lui rd uimm20
+
+B-type (branch)
+-------------
+
+1001 000 jmp addru ___ addrl ___
+1001 001 beq
+1001 010 bne
+1001 011 blt
+1001 100 ble
+1001 101 bgt
+1001 110 bge
+
+I-type (stack)
+--------------
+
+1010 000 peek  rd ___ _____
+1010 001 pop   rd ___ _____
+1010 010 push  __ rs1 _____
+1010 011 pushi __ ___ imm12
+
+I-type (call/ret)
+-----------------
+
+1010 100 ret  __ ___ ____________
+1010 101 call __ ___ addr12=imm12
+
+I-type (random)
+---------------
+
+1100 000 rnd rd ___ ___
+
+C-type (set color)
+------------------
+
+1101 000 col imm24
+
+R-type (set pixel)
+------------------
+
+1101 001 spx __ rs1 rs2
+
+Registers
+=========
+
+00000 r0
+00001 r1
+00010 r2
+00011 r3
+00100 r4
+00101 r5
+
+00110 s0
+00111 s1
+01000 s2
+01001 s3
+01010 s4
+01011 s5
+
+01100 t0
+01101 t1
+01110 t2
+01111 t3
+10000 t4
+10001 t5
+
+10010 a0
+10011 a1
+10100 a2
+10101 a3
+10110 a4
+10111 a5
+
+11000 pc  - the program counter (unimplemented)
+11001 io  - the level input/output (unimplemented)
+11010 kb  - the keyboard input (only in sandbox mode)
+11011
+11100
+11101
+
+Pseudo Commands
+===============
+
+mv rs rd  =>  addi rd rs 0
+
+clr rd  =>  li rd 0
+
+inc rd  =>  addi rd rd 1
+dec rd  =>  subi rd rd 1

@@ -1,0 +1,17 @@
+[package]
+authors = ["PFiS1737 <pfis1737@gmail.com>"]
+description = "Assembly implementation of the ArchP ISA"
+edition = "2024"
+homepage = "https://github.cim/PFiS1737/ArchP#readme"
+license = "MIT"
+name = "archp_asmc"
+repository = "https://github.cim/PFiS1737/ArchP"
+version = "0.1.0"
+
+[dependencies]
+anyhow = "1.0.100"
+clap = { version = "4.5.53", features = ["derive"] }
+clap_complete = "4.5.61"
+inventory = "0.3.21"
+log = "0.4.28"
+once_cell = "1.21.3"
