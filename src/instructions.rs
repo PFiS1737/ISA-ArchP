@@ -117,9 +117,9 @@ impl Instruction {
         }
 
         if let Some(format) = self.encode_format {
-            if !matches!(self.itype, InstrType::R | InstrType::I) {
+            if !matches!(self.itype, InstrType::R | InstrType::I | InstrType::B) {
                 panic!(
-                    "Internal Error: 'encode_format' is only supported for R/I-type instructions, foundinstruction '{}'",
+                    "Internal Error: 'encode_format' is only supported for R/I/B-type instructions, foundinstruction '{}'",
                     self.name
                 );
             }
