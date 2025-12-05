@@ -26,8 +26,8 @@ impl<'a> Pass2<'a> {
         }
     }
 
-    pub fn run(&self, processed_lines: Vec<Vec<&'a str>>) -> Result<Vec<u32>> {
-        let mut machine_code = Vec::new();
+    pub fn run(&self, processed_lines: Vec<Vec<&'a str>>) -> Result<Vec<(u32, String)>> {
+        let mut result = Vec::new();
 
         for (pc, line) in processed_lines.iter().enumerate() {
             let encoded = self.line_handler(line).map_err(|e| {
@@ -39,10 +39,34 @@ impl<'a> Pass2<'a> {
                     e
                 )
             })?;
-            machine_code.push(encoded);
+
+            let (_, original_line) = self.pc_to_original[pc];
+            let joined = line.join(" ");
+
+            let mut display = if joined == original_line {
+                joined
+            } else {
+                format!("{joined} ({original_line})")
+            };
+
+            if let Some(label_name) = self.find_label_for_pc(pc) {
+                display = format!("{display} [label: {label_name}]");
+            }
+
+            result.push((encoded, display));
         }
 
-        Ok(machine_code)
+        Ok(result)
+    }
+
+    fn find_label_for_pc(&self, pc: usize) -> Option<&'a str> {
+        let pc_str = pc.to_string();
+        for (name, addr) in &self.labels {
+            if addr == &pc_str {
+                return Some(name);
+            }
+        }
+        None
     }
 
     fn line_handler(&self, line: &[&'a str]) -> Result<u32> {

@@ -48,11 +48,11 @@ fn main() -> Result<()> {
     let mut out = BufWriter::new(cli.output.get()?);
 
     let asmblr = Assembler::new(source_lines);
-    for (code, line) in asmblr.assemble()? {
+    for (code, display) in asmblr.assemble()? {
         if cli.bin {
             out.write_all(&code.to_be_bytes())?;
         } else {
-            writeln!(out, "0x{:08X} # {}", code, line)?;
+            writeln!(out, "0x{:08X} # {}", code, display)?;
         }
     }
 

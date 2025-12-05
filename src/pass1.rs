@@ -125,7 +125,7 @@ impl<'a> Pass1<'a> {
         line.push(name);
         line.extend(operands);
 
-        self.pc_to_original.push((orig_idx, raw_line));
+        self.pc_to_original.push((orig_idx, raw_line.trim()));
         self.processed.push(line);
 
         Ok(())
