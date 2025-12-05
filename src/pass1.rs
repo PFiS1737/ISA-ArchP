@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use anyhow::{Result, bail};
+use anyhow::{Result, anyhow, bail};
 
 use crate::pseudo_instructions::PSEUDO_INSTRUCTIONS;
 
@@ -51,7 +51,7 @@ impl<'a> Pass1<'a> {
                 if in_const_zone {
                     // expected form: const NAME VALUE
                     if tokens.len() != 3 {
-                        bail!("Malformed const at line {}: {}", orig_idx + 1, raw_line);
+                        bail!("Malformed const at line {}: '{}'", orig_idx + 1, raw_line);
                     }
                     let [name, value, ..] = tokens[1..] else {
                         unreachable!()
@@ -61,7 +61,7 @@ impl<'a> Pass1<'a> {
                 }
 
                 bail!(
-                    "Constants must be declared at the start of file (line {}): {}",
+                    "Constants must be declared at the start of file (line {}): '{}'",
                     orig_idx + 1,
                     raw_line
                 )
@@ -82,7 +82,7 @@ impl<'a> Pass1<'a> {
 
             if tokens[0].ends_with(':') {
                 bail!(
-                    "Labels must be on their own line (line {}): {}",
+                    "Labels must be on their own line (line {}): '{}'",
                     orig_idx + 1,
                     raw_line
                 );
@@ -97,7 +97,14 @@ impl<'a> Pass1<'a> {
             let operands = &tokens[1..];
 
             if let Some(pseudo) = PSEUDO_INSTRUCTIONS.get(name) {
-                let expanded = pseudo.expand(operands)?;
+                let expanded = pseudo.expand(operands).map_err(|e| {
+                    anyhow!(
+                        "Error expanding pseudo-instruction at line {}: '{}' ({})",
+                        orig_idx + 1,
+                        raw_line,
+                        e,
+                    )
+                })?;
                 for (ex_name, ex_ops) in expanded {
                     self.emit(ex_name.to_string() + cond, ex_ops, orig_idx, raw_line)?;
                 }

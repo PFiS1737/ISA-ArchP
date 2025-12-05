@@ -33,7 +33,7 @@ impl<'a> Pass2<'a> {
             let encoded = self.line_handler(line).map_err(|e| {
                 let (original_line_number, original_line) = self.pc_to_original[pc];
                 anyhow!(
-                    "Error encoding line {}: {} ({})",
+                    "Error encoding line {}: '{}' ({})",
                     original_line_number + 1,
                     original_line,
                     e
@@ -78,7 +78,7 @@ impl<'a> Pass2<'a> {
 
         let instr = INSTRUCTIONS
             .get(name)
-            .ok_or_else(|| anyhow!("Unknown instruction: {}", name))?;
+            .ok_or_else(|| anyhow!("Unknown instruction: '{}'", name))?;
 
         instr.encode(
             cond,
