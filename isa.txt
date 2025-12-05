@@ -31,6 +31,17 @@ C-type
 1101 000   0   xxxxxxxx xxxxxxxx xxxxxxxx
    col   | - |           color24
 
+Conditions
+==========
+
+000 always
+001 eq
+010 ne
+011 lt
+100 ge
+101 gt
+110 le
+
 Instructions
 ============
 

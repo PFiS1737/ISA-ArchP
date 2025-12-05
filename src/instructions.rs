@@ -299,9 +299,9 @@ fn parse_cond(cond: &str) -> Result<u32> {
         "eq" => Ok(0b001),
         "ne" => Ok(0b010),
         "lt" => Ok(0b011),
-        "le" => Ok(0b100),
+        "ge" => Ok(0b100),
         "gt" => Ok(0b101),
-        "ge" => Ok(0b110),
+        "le" => Ok(0b110),
         _ => bail!("Invalid condition: {}", cond),
     }
 }
@@ -364,9 +364,9 @@ mod tests {
         assert_eq!(parse_cond("eq").unwrap(), 0b001);
         assert_eq!(parse_cond("ne").unwrap(), 0b010);
         assert_eq!(parse_cond("lt").unwrap(), 0b011);
-        assert_eq!(parse_cond("le").unwrap(), 0b100);
+        assert_eq!(parse_cond("ge").unwrap(), 0b100);
         assert_eq!(parse_cond("gt").unwrap(), 0b101);
-        assert_eq!(parse_cond("ge").unwrap(), 0b110);
+        assert_eq!(parse_cond("le").unwrap(), 0b110);
         assert!(parse_cond("invalid").is_err()); // TODO: 'thiserror'
     }
 
@@ -412,7 +412,7 @@ mod tests {
         assert!(instr.encode(Some("invalid"), &["r1", "r2", "123"]).is_err());
 
         let encoded = instr.encode(Some("ge"), &["r4", "r5", "0b100"]).unwrap();
-        assert_eq!(encoded, 0b_0100_000_110_00100_00101_000000000100);
+        assert_eq!(encoded, 0b_0100_000_100_00100_00101_000000000100);
     }
 
     #[test]
