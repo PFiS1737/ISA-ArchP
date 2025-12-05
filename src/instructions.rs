@@ -14,10 +14,8 @@ use std::{collections::HashMap, fmt::Display};
 use anyhow::{Result, anyhow, bail};
 use once_cell::sync::Lazy;
 
-use crate::code;
-
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum InstrType {
+enum InstrType {
     R,
     I,
     B,
@@ -26,12 +24,16 @@ pub enum InstrType {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum OperandType {
+enum OperandType {
     Reg,
     Imm(u8), // bits
 }
 
-type EncoderFn = fn(u32, u32, &[u32]) -> Result<u32>;
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum FormatPlaceholder {
+    None,
+    Some,
+}
 
 #[derive(Debug, Clone, Copy)]
 pub struct Instruction {
@@ -39,7 +41,7 @@ pub struct Instruction {
     opcode: u32,
     itype: InstrType,
     operand_types: Option<&'static [OperandType]>,
-    encoder: Option<EncoderFn>,
+    encode_format: Option<[FormatPlaceholder; 3]>,
 }
 
 inventory::collect!(Instruction);
@@ -52,38 +54,43 @@ pub static INSTRUCTIONS: Lazy<HashMap<&'static str, Instruction>> = Lazy::new(||
     map
 });
 
+macro_rules! code {
+    // R/I-type
+    ($opcode:expr, $cond:expr, $rd:expr, $rs1:expr, $rs2_or_imm12:expr) => {
+        Ok(($opcode << 25) | ($cond << 22) | ($rd << 17) | ($rs1 << 12) | $rs2_or_imm12)
+    };
+
+    // B-type
+    ($opcode:expr, $cond:expr, $up5:expr, $rs1:expr, $low7:expr, $rs2:expr) => {
+        Ok(($opcode << 25) | ($cond << 22) | ($up5 << 17) | ($rs1 << 12) | ($low7 << 5) | $rs2)
+    };
+
+    // U/C-type
+    ($opcode:expr, $uimm20u:expr, $rd:expr, $uimm20l:expr) => {
+        Ok(($opcode << 25) | ($uimm20u << 22) | ($rd << 17) | $uimm20l)
+    };
+}
+
 impl Instruction {
     pub fn encode(&self, cond: Option<&str>, operands: &[&str]) -> Result<u32> {
         let cond = cond.map(parse_cond).transpose()?.unwrap_or(0);
 
-        let operands = self.parse(operands)?;
-
-        if let Some(custom) = self.encoder {
-            return custom(self.opcode, cond, &operands);
+        if matches!(self.itype, InstrType::U | InstrType::C) && cond != 0 {
+            bail!(
+                "Condition is not allowed for {}-type instruction '{}'",
+                self.itype,
+                self.name
+            );
         }
 
+        let operands = self.parse(operands)?;
+
         match self.itype {
-            InstrType::R => self.default_encoder_r(cond, &operands),
-            InstrType::I => self.default_encoder_i(cond, &operands),
-            InstrType::B => self.default_encoder_b(cond, &operands),
-            InstrType::U => {
-                if cond != 0 {
-                    bail!(
-                        "U-type instruction '{}' does not support condition codes",
-                        self.name
-                    );
-                }
-                self.default_encoder_u(&operands)
-            }
-            InstrType::C => {
-                if cond != 0 {
-                    bail!(
-                        "C-type instruction '{}' does not support condition codes",
-                        self.name
-                    );
-                }
-                self.default_encoder_c(&operands)
-            }
+            InstrType::R => self.encode_r(cond, &operands),
+            InstrType::I => self.encode_i(cond, &operands),
+            InstrType::B => self.encode_b(cond, &operands),
+            InstrType::U => self.encode_u(cond, &operands),
+            InstrType::C => self.encode_c(cond, &operands),
         }
     }
 
@@ -109,12 +116,38 @@ impl Instruction {
             }
         }
 
-        Ok(parsed_operands)
+        if let Some(format) = self.encode_format {
+            if !matches!(self.itype, InstrType::R | InstrType::I) {
+                panic!(
+                    "Internal Error: 'encode_format' is only supported for R/I-type instructions, foundinstruction '{}'",
+                    self.name
+                );
+            }
+
+            let mut formatted_operands = Vec::new();
+            let mut operand_index = 0;
+
+            for placeholder in format.iter() {
+                match placeholder {
+                    FormatPlaceholder::Some => {
+                        formatted_operands.push(parsed_operands[operand_index]);
+                        operand_index += 1;
+                    }
+                    FormatPlaceholder::None => {
+                        formatted_operands.push(0);
+                    }
+                }
+            }
+
+            Ok(formatted_operands)
+        } else {
+            Ok(parsed_operands)
+        }
     }
 
     // xxxx xxx   xxx   xxxxx   xxxxx   0000000   xxxxx
     //  opcode  | cond|   rd  |  rs1  |    --   |  rs2
-    fn default_encoder_r(&self, cond: u32, operands: &[u32]) -> Result<u32> {
+    fn encode_r(&self, cond: u32, operands: &[u32]) -> Result<u32> {
         let rd = operands[0];
         let rs1 = operands[1];
         let rs2 = operands[2];
@@ -124,7 +157,7 @@ impl Instruction {
 
     // xxxx xxx   xxx   xxxxx   xxxxx   xxxxxxxxxxxx
     //  opcode  | cond|   rd  |  rs1  |    imm12
-    fn default_encoder_i(&self, cond: u32, operands: &[u32]) -> Result<u32> {
+    fn encode_i(&self, cond: u32, operands: &[u32]) -> Result<u32> {
         let rd = operands[0];
         let rs1 = operands[1];
         let imm12 = operands[2];
@@ -134,7 +167,7 @@ impl Instruction {
 
     // 1001 xxx   xxx   xxxxx   xxxxx   xxxxxxx   xxxxx
     //  opcode  | cond|  up5  |  rs1  |   low7  |  rs2  (offset12 = up5 << 7 | low7)
-    fn default_encoder_b(&self, cond: u32, operands: &[u32]) -> Result<u32> {
+    fn encode_b(&self, cond: u32, operands: &[u32]) -> Result<u32> {
         let rs1 = operands[0];
         let rs2 = operands[1];
         let offset12 = operands[2];
@@ -151,7 +184,7 @@ impl Instruction {
 
     // 1000 100   xxx   xxxxx   xxxxxxxxxxxxxxxxx
     //    lui  |uimm20u|  rd  |      uimm20l      (uimm20 = uimm20u << 17 | uimm20l)
-    fn default_encoder_u(&self, operands: &[u32]) -> Result<u32> {
+    fn encode_u(&self, _: u32, operands: &[u32]) -> Result<u32> {
         let rd = operands[0];
         let imm20 = operands[1];
 
@@ -160,7 +193,7 @@ impl Instruction {
 
     // 1101 000   0   xxxxxxxx xxxxxxxx xxxxxxxx
     //    col   | - |           color24
-    fn default_encoder_c(&self, operands: &[u32]) -> Result<u32> {
+    fn encode_c(&self, _: u32, operands: &[u32]) -> Result<u32> {
         let color24 = operands[0];
 
         code!(self.opcode, 0, 0, color24)
@@ -209,46 +242,11 @@ impl Instruction {
 }
 
 #[macro_export]
-macro_rules! code {
-    // R/I-type
-    ($opcode:expr, $cond:expr, $rd:expr, $rs1:expr, $rs2_or_imm12:expr) => {
-        Ok(($opcode << 25) | ($cond << 22) | ($rd << 17) | ($rs1 << 12) | $rs2_or_imm12)
-    };
-
-    // B-type
-    ($opcode:expr, $cond:expr, $up5:expr, $rs1:expr, $low7:expr, $rs2:expr) => {
-        Ok(($opcode << 25) | ($cond << 22) | ($up5 << 17) | ($rs1 << 12) | ($low7 << 5) | $rs2)
-    };
-
-    // U/C-type
-    ($opcode:expr, $uimm20u:expr, $rd:expr, $uimm20l:expr) => {
-        Ok(($opcode << 25) | ($uimm20u << 22) | ($rd << 17) | $uimm20l)
-    };
-}
-
-#[macro_export]
 macro_rules! instruction {
     (
         name: $name:expr,
         opcode: $opcode:expr,
-        itype: $itype:ident $(,)?
-    ) => {
-        inventory::submit! {
-            $crate::instructions::Instruction {
-                name: $name,
-                opcode: $opcode,
-                itype: $crate::instructions::InstrType::$itype,
-                operand_types: None,
-                encoder: None,
-            }
-        }
-    };
-
-    (
-        name: $name:expr,
-        opcode: $opcode:expr,
         itype: $itype:ident,
-        encoder: $encoder:expr $(,)?
     ) => {
         inventory::submit! {
             $crate::instructions::Instruction {
@@ -256,7 +254,7 @@ macro_rules! instruction {
                 opcode: $opcode,
                 itype: $crate::instructions::InstrType::$itype,
                 operand_types: None,
-                encoder: Some($encoder),
+                encode_format: None,
             }
         }
     };
@@ -266,7 +264,7 @@ macro_rules! instruction {
         opcode: $opcode:expr,
         itype: $itype:ident,
         operand_types: [ $( $operand_type:ident $(($v:expr))? ),* ],
-        encoder: $encoder:expr $(,)?
+        encode_format: [ $rd:ident, $rs1:ident, $rs2:ident ],
     ) => {
         inventory::submit! {
             $crate::instructions::Instruction {
@@ -274,7 +272,11 @@ macro_rules! instruction {
                 opcode: $opcode,
                 itype: $crate::instructions::InstrType::$itype,
                 operand_types: Some(&[ $( $crate::instructions::OperandType::$operand_type $(($v))? ),* ]),
-                encoder: Some($encoder),
+                encode_format: Some([
+                    $crate::instructions::FormatPlaceholder::$rd,
+                    $crate::instructions::FormatPlaceholder::$rs1,
+                    $crate::instructions::FormatPlaceholder::$rs2
+                ]),
             }
         }
     };
@@ -386,7 +388,7 @@ mod tests {
     }
 
     #[test]
-    fn test_default_encoder_r() {
+    fn test_encode_r() {
         let instr = INSTRUCTIONS.get("add").unwrap();
 
         assert!(instr.encode(None, &["r1", "r2"]).is_err());
@@ -400,7 +402,7 @@ mod tests {
     }
 
     #[test]
-    fn test_default_encoder_i() {
+    fn test_encode_i() {
         let instr = INSTRUCTIONS.get("addi").unwrap();
 
         assert!(instr.encode(None, &["r1", "r2"]).is_err());
@@ -414,7 +416,7 @@ mod tests {
     }
 
     #[test]
-    fn test_default_encoder_b() {
+    fn test_enocde_b() {
         let instr = INSTRUCTIONS.get("beq").unwrap();
 
         let encoded = instr.encode(Some("ne"), &["r1", "r2", "3456"]).unwrap();
@@ -423,7 +425,7 @@ mod tests {
     }
 
     #[test]
-    fn test_default_encoder_u() {
+    fn test_encode_u() {
         let instr = INSTRUCTIONS.get("lui").unwrap();
 
         assert!(instr.encode(None, &["r1"]).is_err());

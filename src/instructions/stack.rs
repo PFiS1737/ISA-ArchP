@@ -1,15 +1,11 @@
-use crate::{code, instruction};
+use crate::instruction;
 
 instruction! {
     name: "peek",
     opcode: 0b_1010_000,
     itype: I,
     operand_types: [ Reg ],
-    encoder: |opcode, cond, operands| {
-        let rd = operands[0];
-
-        code!(opcode, cond, rd, 0, 0)
-    }
+    encode_format: [ Some, None, None ],
 }
 
 instruction! {
@@ -17,11 +13,7 @@ instruction! {
     opcode: 0b_1010_001,
     itype: I,
     operand_types: [ Reg ],
-    encoder: |opcode, cond, operands| {
-        let rd = operands[0];
-
-        code!(opcode, cond, rd, 0, 0)
-    }
+    encode_format: [ Some, None, None ],
 }
 
 instruction! {
@@ -29,11 +21,7 @@ instruction! {
     opcode: 0b_1010_010,
     itype: I,
     operand_types: [ Reg ],
-    encoder: |opcode, cond, operands| {
-        let rs1 = operands[0];
-
-        code!(opcode, cond, 0, rs1, 0)
-    }
+    encode_format: [ None, Some, None ],
 }
 
 instruction! {
@@ -41,9 +29,5 @@ instruction! {
     opcode: 0b_1010_011,
     itype: I,
     operand_types: [ Imm(12) ],
-    encoder: |opcode, cond, operands| {
-        let imm12 = operands[0];
-
-        code!(opcode, cond, 0, 0, imm12)
-    }
+    encode_format: [ None, None, Some ],
 }

@@ -1,4 +1,4 @@
-use crate::{code, instruction};
+use crate::instruction;
 
 instruction! {
     name: "and",
@@ -41,12 +41,7 @@ instruction! {
     opcode: 0b_0001_110,
     itype: R,
     operand_types: [ Reg, Reg ],
-    encoder: |opcode, cond, operands| {
-        let rd = operands[0];
-        let rs = operands[1];
-
-        code!(opcode, cond, rd, rs, 0)
-    }
+    encode_format: [ Some, Some, None ],
 }
 
 instruction! {

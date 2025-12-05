@@ -1,13 +1,11 @@
-use crate::{code, instruction};
+use crate::instruction;
 
 instruction! {
     name: "ret",
     opcode: 0b_1010_100,
     itype: I,
     operand_types: [],
-    encoder: |opcode, cond, _| {
-        code!(opcode, cond, 0, 0, 0)
-    }
+    encode_format: [ None, None, None ],
 }
 
 instruction! {
@@ -15,9 +13,5 @@ instruction! {
     opcode: 0b_1010_101,
     itype: I,
     operand_types: [ Imm(12) ],
-    encoder: |opcode, cond, operands| {
-        let imm12 = operands[0];
-
-        code!(opcode, cond, 0, 0, imm12)
-    }
+    encode_format: [ None, None, Some ],
 }
