@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::{Result, anyhow};
+use indexmap::IndexMap;
 
 use crate::instructions::INSTRUCTIONS;
 
@@ -26,37 +27,54 @@ impl<'a> Pass2<'a> {
         }
     }
 
-    pub fn run(&self, processed_lines: Vec<Vec<&'a str>>) -> Result<Vec<(u32, String)>> {
-        let mut result = Vec::new();
+    pub fn run(&self, processed_lines: Vec<Vec<&'a str>>) -> Result<(Vec<u32>, Vec<String>)> {
+        let mut codes = Vec::new();
+        let mut displays = Vec::new();
 
         for (pc, line) in processed_lines.iter().enumerate() {
-            let encoded = self.line_handler(line).map_err(|e| {
-                let (original_line_number, original_line) = self.pc_to_original[pc];
+            let (original_idx, original_line) = self.pc_to_original[pc];
+
+            let (encoded, used_consts) = self.line_handler(line).map_err(|e| {
                 anyhow!(
                     "Error encoding line {}: '{}' ({})",
-                    original_line_number + 1,
+                    original_idx + 1,
                     original_line,
                     e
                 )
             })?;
 
-            let (_, original_line) = self.pc_to_original[pc];
-            let joined = line.join(" ");
+            let mut display = line.join(" ");
 
-            let mut display = if joined == original_line {
-                joined
+            if display != original_line {
+                display = format!("{display}\t({original_line})");
             } else {
-                format!("{joined} ({original_line})")
-            };
-
-            if let Some(label_name) = self.find_label_for_pc(pc) {
-                display = format!("{display} [label: {label_name}]");
+                display += "\t";
             }
 
-            result.push((encoded, display));
+            if !used_consts.is_empty() {
+                display = format!(
+                    "{display}\t[ {} ]",
+                    used_consts
+                        .iter()
+                        .map(|(name, value)| format!("{name} = {value}"))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
+            } else {
+                display += "\t";
+            }
+
+            if let Some(label_name) = self.find_label_for_pc(pc) {
+                display = format!("{display}\t<label: {label_name}>");
+            } else {
+                display += "\t";
+            }
+
+            codes.push(encoded);
+            displays.push(display);
         }
 
-        Ok(result)
+        Ok((codes, displays))
     }
 
     fn find_label_for_pc(&self, pc: usize) -> Option<&'a str> {
@@ -69,7 +87,7 @@ impl<'a> Pass2<'a> {
         None
     }
 
-    fn line_handler(&self, line: &[&'a str]) -> Result<u32> {
+    fn line_handler(&self, line: &[&'a str]) -> Result<(u32, IndexMap<&'a str, &'a str>)> {
         let (name, cond) = if let Some((name, cond)) = line[0].split_once('.') {
             (name, Some(cond))
         } else {
@@ -80,12 +98,14 @@ impl<'a> Pass2<'a> {
             .get(name)
             .ok_or_else(|| anyhow!("Unknown instruction: '{}'", name))?;
 
-        instr.encode(
+        let mut used_consts = IndexMap::new();
+        let code = instr.encode(
             cond,
             &(line[1..]
                 .iter()
                 .map(|e| {
                     if let Some(&const_value) = self.constants.get(e) {
+                        used_consts.insert(*e, const_value);
                         const_value
                     } else if let Some(label_addr) = self.labels.get(e) {
                         label_addr.as_str()
@@ -94,6 +114,8 @@ impl<'a> Pass2<'a> {
                     }
                 })
                 .collect::<Vec<_>>()),
-        )
+        )?;
+
+        Ok((code, used_consts))
     }
 }

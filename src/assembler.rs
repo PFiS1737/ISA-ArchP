@@ -11,7 +11,7 @@ impl Assembler {
         Assembler { source_lines }
     }
 
-    pub fn assemble(&self) -> Result<Vec<(u32, String)>> {
+    pub fn assemble(&self) -> Result<(Vec<u32>, Vec<String>)> {
         let mut pass1 = Pass1::new();
         pass1.run(&self.source_lines)?;
 

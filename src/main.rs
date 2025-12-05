@@ -7,6 +7,7 @@ mod instructions;
 mod pass1;
 mod pass2;
 mod pseudo_instructions;
+mod utils;
 
 use std::{
     fs::read_to_string,
@@ -17,7 +18,7 @@ use anyhow::{Result, bail};
 use clap::{CommandFactory, Parser};
 use clap_complete::generate;
 
-use crate::{assembler::Assembler, cli::Cli};
+use crate::{assembler::Assembler, cli::Cli, utils::align_tabbed_lines};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -48,7 +49,9 @@ fn main() -> Result<()> {
     let mut out = BufWriter::new(cli.output.get()?);
 
     let asmblr = Assembler::new(source_lines);
-    for (code, display) in asmblr.assemble()? {
+    let (codes, displays) = asmblr.assemble()?;
+
+    for (code, display) in codes.iter().zip(align_tabbed_lines(&displays)) {
         if cli.bin {
             out.write_all(&code.to_be_bytes())?;
         } else {
