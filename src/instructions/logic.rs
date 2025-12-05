@@ -1,4 +1,4 @@
-use crate::{code, instruction, instructions::parse_reg};
+use crate::{code, instruction};
 
 instruction! {
     name: "and",
@@ -40,10 +40,11 @@ instruction! {
     name: "not",
     opcode: 0b_0001_110,
     itype: R,
-    operand_count: 2,
+    operand_types: [ Reg, Reg ],
     encoder: |opcode, cond, operands| {
-        let rd = parse_reg(operands[0])?;
-        let rs = parse_reg(operands[1])?;
+        let rd = operands[0];
+        let rs = operands[1];
+
         code!(opcode, cond, rd, rs, 0)
     }
 }

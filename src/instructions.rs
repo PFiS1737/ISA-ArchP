@@ -9,7 +9,7 @@ mod random;
 mod shift;
 mod stack;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 
 use anyhow::{Result, anyhow, bail};
 use once_cell::sync::Lazy;
@@ -25,14 +25,20 @@ pub enum InstrType {
     C,
 }
 
-type EncoderFn = fn(u32, u32, &[&str]) -> Result<u32>;
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum OperandType {
+    Reg,
+    Imm(u8), // bits
+}
+
+type EncoderFn = fn(u32, u32, &[u32]) -> Result<u32>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Instruction {
     name: &'static str,
     opcode: u32,
     itype: InstrType,
-    operand_count: Option<usize>,
+    operand_types: Option<&'static [OperandType]>,
     encoder: Option<EncoderFn>,
 }
 
@@ -47,46 +53,19 @@ pub static INSTRUCTIONS: Lazy<HashMap<&'static str, Instruction>> = Lazy::new(||
 });
 
 impl Instruction {
-    fn assert_operand_count(&self, count: usize) -> Result<()> {
-        let expected = self.get_expected_operand_count();
-        if count != expected {
-            bail!(
-                "Instruction '{}' requires {} operands, got {}",
-                self.name,
-                expected,
-                count
-            );
-        }
-        Ok(())
-    }
-
-    fn get_expected_operand_count(&self) -> usize {
-        if let Some(count) = self.operand_count {
-            count
-        } else {
-            match self.itype {
-                InstrType::R => 3,
-                InstrType::I => 3,
-                InstrType::B => 3,
-                InstrType::U => 2,
-                InstrType::C => 1,
-            }
-        }
-    }
-
     pub fn encode(&self, cond: Option<&str>, operands: &[&str]) -> Result<u32> {
         let cond = cond.map(parse_cond).transpose()?.unwrap_or(0);
 
-        self.assert_operand_count(operands.len())?;
+        let operands = self.parse(operands)?;
 
         if let Some(custom) = self.encoder {
-            return custom(self.opcode, cond, operands);
+            return custom(self.opcode, cond, &operands);
         }
 
         match self.itype {
-            InstrType::R => self.default_encoder_r(cond, operands),
-            InstrType::I => self.default_encoder_i(cond, operands),
-            InstrType::B => self.default_encoder_b(cond, operands),
+            InstrType::R => self.default_encoder_r(cond, &operands),
+            InstrType::I => self.default_encoder_i(cond, &operands),
+            InstrType::B => self.default_encoder_b(cond, &operands),
             InstrType::U => {
                 if cond != 0 {
                     bail!(
@@ -94,7 +73,7 @@ impl Instruction {
                         self.name
                     );
                 }
-                self.default_encoder_u(operands)
+                self.default_encoder_u(&operands)
             }
             InstrType::C => {
                 if cond != 0 {
@@ -103,35 +82,63 @@ impl Instruction {
                         self.name
                     );
                 }
-                self.default_encoder_c(operands)
+                self.default_encoder_c(&operands)
             }
         }
     }
 
+    fn parse(&self, operands: &[&str]) -> Result<Vec<u32>> {
+        let mut parsed_operands = Vec::new();
+        let operand_types = self.get_operand_types();
+
+        self.assert_operand_count(operands.len(), operand_types.len())?;
+
+        for (i, operand_str) in operands.iter().enumerate() {
+            match operand_types[i] {
+                OperandType::Reg => {
+                    let reg = parse_reg(operand_str)?;
+                    parsed_operands.push(reg);
+                }
+                OperandType::Imm(bits) => {
+                    let imm = parse_imm(operand_str)?;
+
+                    self.assert_immediate_range(imm, bits)?;
+
+                    parsed_operands.push(imm);
+                }
+            }
+        }
+
+        Ok(parsed_operands)
+    }
+
     // xxxx xxx   xxx   xxxxx   xxxxx   0000000   xxxxx
     //  opcode  | cond|   rd  |  rs1  |    --   |  rs2
-    fn default_encoder_r(&self, cond: u32, operands: &[&str]) -> Result<u32> {
-        let rd = parse_reg(operands[0])?;
-        let rs1 = parse_reg(operands[1])?;
-        let rs2 = parse_reg(operands[2])?;
+    fn default_encoder_r(&self, cond: u32, operands: &[u32]) -> Result<u32> {
+        let rd = operands[0];
+        let rs1 = operands[1];
+        let rs2 = operands[2];
+
         code!(self.opcode, cond, rd, rs1, rs2)
     }
 
     // xxxx xxx   xxx   xxxxx   xxxxx   xxxxxxxxxxxx
     //  opcode  | cond|   rd  |  rs1  |    imm12
-    fn default_encoder_i(&self, cond: u32, operands: &[&str]) -> Result<u32> {
-        let rd = parse_reg(operands[0])?;
-        let rs1 = parse_reg(operands[1])?;
-        let imm12 = parse_imm(operands[2])?;
+    fn default_encoder_i(&self, cond: u32, operands: &[u32]) -> Result<u32> {
+        let rd = operands[0];
+        let rs1 = operands[1];
+        let imm12 = operands[2];
+
         code!(self.opcode, cond, rd, rs1, imm12)
     }
 
     // 1001 xxx   xxx   xxxxx   xxxxx   xxxxxxx   xxxxx
     //  opcode  | cond|  up5  |  rs1  |   low7  |  rs2  (offset12 = up5 << 7 | low7)
-    fn default_encoder_b(&self, cond: u32, operands: &[&str]) -> Result<u32> {
-        let rs1 = parse_reg(operands[0])?;
-        let rs2 = parse_reg(operands[1])?;
-        let offset12 = parse_imm(operands[2])?;
+    fn default_encoder_b(&self, cond: u32, operands: &[u32]) -> Result<u32> {
+        let rs1 = operands[0];
+        let rs2 = operands[1];
+        let offset12 = operands[2];
+
         code!(
             self.opcode,
             cond,
@@ -144,17 +151,60 @@ impl Instruction {
 
     // 1000 100   xxx   xxxxx   xxxxxxxxxxxxxxxxx
     //    lui  |uimm20u|  rd  |      uimm20l      (uimm20 = uimm20u << 17 | uimm20l)
-    fn default_encoder_u(&self, operands: &[&str]) -> Result<u32> {
-        let rd = parse_reg(operands[0])?;
-        let imm20 = parse_imm(operands[1])?;
+    fn default_encoder_u(&self, operands: &[u32]) -> Result<u32> {
+        let rd = operands[0];
+        let imm20 = operands[1];
+
         code!(self.opcode, (imm20 >> 17), rd, (imm20 & 0x1FFFF))
     }
 
     // 1101 000   0   xxxxxxxx xxxxxxxx xxxxxxxx
     //    col   | - |           color24
-    fn default_encoder_c(&self, operands: &[&str]) -> Result<u32> {
-        let color24 = parse_imm(operands[0])?;
+    fn default_encoder_c(&self, operands: &[u32]) -> Result<u32> {
+        let color24 = operands[0];
+
         code!(self.opcode, 0, 0, color24)
+    }
+
+    fn assert_operand_count(&self, count: usize, expected: usize) -> Result<()> {
+        if count != expected {
+            bail!(
+                "Instruction '{}' requires {} operands, got {}",
+                self.name,
+                expected,
+                count
+            );
+        }
+
+        Ok(())
+    }
+
+    fn assert_immediate_range(&self, imm: u32, bits: u8) -> Result<()> {
+        if imm >= (1 << bits) {
+            bail!(
+                "Immediate value '{}' out of range for {}-type instruction '{}', expected {} bits",
+                imm,
+                self.itype,
+                self.name,
+                bits
+            );
+        }
+
+        Ok(())
+    }
+
+    fn get_operand_types(&self) -> &'static [OperandType] {
+        if let Some(ops) = self.operand_types {
+            ops
+        } else {
+            match self.itype {
+                InstrType::R => &[OperandType::Reg, OperandType::Reg, OperandType::Reg],
+                InstrType::I => &[OperandType::Reg, OperandType::Reg, OperandType::Imm(12)],
+                InstrType::B => &[OperandType::Reg, OperandType::Reg, OperandType::Imm(12)],
+                InstrType::U => &[OperandType::Reg, OperandType::Imm(20)],
+                InstrType::C => &[OperandType::Imm(24)],
+            }
+        }
     }
 }
 
@@ -188,7 +238,7 @@ macro_rules! instruction {
                 name: $name,
                 opcode: $opcode,
                 itype: $crate::instructions::InstrType::$itype,
-                operand_count: None,
+                operand_types: None,
                 encoder: None,
             }
         }
@@ -205,7 +255,7 @@ macro_rules! instruction {
                 name: $name,
                 opcode: $opcode,
                 itype: $crate::instructions::InstrType::$itype,
-                operand_count: None,
+                operand_types: None,
                 encoder: Some($encoder),
             }
         }
@@ -215,7 +265,7 @@ macro_rules! instruction {
         name: $name:expr,
         opcode: $opcode:expr,
         itype: $itype:ident,
-        operand_count: $operand_count:expr,
+        operand_types: [ $( $operand_type:ident $(($v:expr))? ),* ],
         encoder: $encoder:expr $(,)?
     ) => {
         inventory::submit! {
@@ -223,11 +273,23 @@ macro_rules! instruction {
                 name: $name,
                 opcode: $opcode,
                 itype: $crate::instructions::InstrType::$itype,
-                operand_count: Some($operand_count),
+                operand_types: Some(&[ $( $crate::instructions::OperandType::$operand_type $(($v))? ),* ]),
                 encoder: Some($encoder),
             }
         }
     };
+}
+
+impl Display for InstrType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            InstrType::R => write!(f, "R"),
+            InstrType::I => write!(f, "I"),
+            InstrType::B => write!(f, "B"),
+            InstrType::U => write!(f, "U"),
+            InstrType::C => write!(f, "C"),
+        }
+    }
 }
 
 fn parse_cond(cond: &str) -> Result<u32> {

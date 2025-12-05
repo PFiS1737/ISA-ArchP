@@ -1,12 +1,12 @@
-use crate::{code, instruction, instructions::parse_reg};
+use crate::{code, instruction};
 
 instruction! {
     name: "rnd",
     opcode: 0b_1100_000,
-    itype: R,
-    operand_count: 1,
+    itype: I,
+    operand_types: [ Reg ],
     encoder: |opcode, cond, operands| {
-        let rd = parse_reg(operands[0])?;
+        let rd = operands[0];
         code!(opcode, cond, rd, 0, 0)
     }
 }
