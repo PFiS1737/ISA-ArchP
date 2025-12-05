@@ -33,11 +33,10 @@ fn main() {
         .map(|s| s.to_string())
         .collect();
 
-    for n in Assembler::new(source_lines)
+    for (code, line) in Assembler::new(source_lines)
         .assemble()
         .expect("Assembly failed")
     {
-        println!("0x{:08X}", n);
-        println!("0b{:032b}", n);
+        println!("0x{:08X} # {}", code, line);
     }
 }

@@ -10,14 +10,14 @@ use crate::instructions::INSTRUCTIONS;
 pub struct Pass2<'a> {
     constants: HashMap<&'a str, &'a str>,
     labels: HashMap<&'a str, String>,
-    pc_to_original: Vec<(usize, &'a str)>,
+    pc_to_original: &'a Vec<(usize, &'a str)>,
 }
 
 impl<'a> Pass2<'a> {
     pub fn new(
         constants: HashMap<&'a str, &'a str>,
         labels: HashMap<&'a str, String>,
-        pc_to_original: Vec<(usize, &'a str)>,
+        pc_to_original: &'a Vec<(usize, &'a str)>,
     ) -> Self {
         Pass2 {
             constants,
