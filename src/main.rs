@@ -8,15 +8,18 @@ mod pass1;
 mod pass2;
 mod pseudo_instructions;
 
-use std::{fs::read_to_string, io::stdout, process::ExitCode};
+use std::{
+    fs::read_to_string,
+    io::{BufWriter, Write, stdout},
+};
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use clap::{CommandFactory, Parser};
 use clap_complete::generate;
 
 use crate::{assembler::Assembler, cli::Cli};
 
-fn main() -> Result<ExitCode> {
+fn main() -> Result<()> {
     let cli = Cli::parse();
 
     if let Some(shell) = cli.complete {
@@ -26,7 +29,7 @@ fn main() -> Result<ExitCode> {
             env!("CARGO_BIN_NAME"),
             &mut stdout(),
         );
-        return Ok(ExitCode::SUCCESS);
+        return Ok(());
     }
 
     let Some(src_file) = cli.src_file else {
@@ -38,11 +41,20 @@ fn main() -> Result<ExitCode> {
         .map(|s| s.to_string())
         .collect();
 
-    let mut out = cli.output.get()?;
-
-    for (code, line) in Assembler::new(source_lines).assemble()? {
-        writeln!(out, "0x{:08X} # {}", code, line)?;
+    if matches!(cli.output, cli::Output::Stdout) && cli.bin {
+        bail!("Cannot write binary output to stdout.");
     }
 
-    Ok(ExitCode::SUCCESS)
+    let mut out = BufWriter::new(cli.output.get()?);
+
+    let asmblr = Assembler::new(source_lines);
+    for (code, line) in asmblr.assemble()? {
+        if cli.bin {
+            out.write_all(&code.to_be_bytes())?;
+        } else {
+            writeln!(out, "0x{:08X} # {}", code, line)?;
+        }
+    }
+
+    Ok(())
 }

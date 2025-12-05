@@ -27,6 +27,10 @@ pub struct Cli {
     /// The output file path.
     #[arg(short, long, value_hint = FilePath, default_value_t = Output::Stdout)]
     pub output: Output,
+
+    /// Output binary machine code instead of formatted hex.
+    #[arg(long)]
+    pub bin: bool,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -37,10 +41,10 @@ pub enum Output {
 
 impl Output {
     pub fn get(&self) -> Result<Box<dyn Write>> {
-        match self {
-            Self::Stdout => Ok(Box::new(stdout())),
-            Self::File(path) => Ok(Box::new(File::create(path)?)),
-        }
+        Ok(match self {
+            Self::Stdout => Box::new(stdout()),
+            Self::File(path) => Box::new(File::create(path)?),
+        })
     }
 }
 
