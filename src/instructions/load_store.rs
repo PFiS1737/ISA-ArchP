@@ -16,6 +16,8 @@ instruction! {
     name: "li",
     opcode: 0b_1000_010,
     itype: I,
+    operand_types: [ Reg, Imm(12) ],
+    encode_format: [ Some, None, Some ],
 }
 
 instruction! {
