@@ -31,20 +31,20 @@ impl<'a> Pass1<'a> {
         let mut in_const_zone = true;
 
         for (orig_idx, raw_line) in source_lines.iter().enumerate() {
-            let line_trimmed = raw_line.trim();
-            if line_trimmed.is_empty() {
+            let raw_line = raw_line.trim();
+            if raw_line.is_empty() {
                 continue;
             }
 
             // strip comments (; or #)
-            let code = strip_comment(line_trimmed).trim();
-            if code.is_empty() {
+            let raw_line = strip_comment(raw_line).trim();
+            if raw_line.is_empty() {
                 continue;
             }
 
-            let tokens = code.split_whitespace().collect::<Vec<_>>();
+            let tokens = raw_line.split_whitespace().collect::<Vec<_>>();
             if tokens.is_empty() {
-                continue;
+                unreachable!()
             }
 
             if tokens[0] == "const" {
