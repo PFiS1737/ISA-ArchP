@@ -83,6 +83,8 @@ impl Instruction {
             );
         }
 
+        // TODO: check readonly registers?
+
         let operands = self.parse(operands)?;
 
         match self.itype {
@@ -314,27 +316,28 @@ pub fn parse_reg(reg: &str) -> Result<u32> {
         "r3" => Ok(3),
         "r4" => Ok(4),
         "r5" => Ok(5),
-        "s0" => Ok(6),
-        "s1" => Ok(7),
-        "s2" => Ok(8),
-        "s3" => Ok(9),
-        "s4" => Ok(10),
-        "s5" => Ok(11),
-        "t0" => Ok(12),
-        "t1" => Ok(13),
-        "t2" => Ok(14),
-        "t3" => Ok(15),
-        "t4" => Ok(16),
-        "t5" => Ok(17),
-        "a0" => Ok(18),
-        "a1" => Ok(19),
-        "a2" => Ok(20),
-        "a3" => Ok(21),
-        "a4" => Ok(22),
-        "a5" => Ok(23),
-        // "pc" => Ok(24),
-        // "io" => Ok(25),
-        "kb" => Ok(26),
+        "r6" => Ok(6),
+        "r7" => Ok(7),
+        "r8" => Ok(8),
+        "r9" => Ok(9),
+        "r10" => Ok(10),
+        "r11" => Ok(11),
+        "r12" => Ok(12),
+        "r13" => Ok(13),
+        "r14" => Ok(14),
+        "r15" => Ok(15),
+        "r16" => Ok(16),
+        "r17" => Ok(17),
+        "r18" => Ok(18),
+        "r19" => Ok(19),
+        "r20" => Ok(20),
+        "r21" => Ok(21),
+        "r22" => Ok(22),
+        "r23" => Ok(23),
+        "r24" => Ok(24),
+        // "pc" => Ok(25),
+        "io" => Ok(26),
+        "kb" => Ok(27),
         _ => {
             if parse_imm(reg).is_ok() {
                 bail!("Expected register, found immediate: {}", reg)
@@ -373,8 +376,8 @@ mod tests {
     #[test]
     fn test_parse_reg() {
         assert_eq!(parse_reg("r0").unwrap(), 0);
-        assert_eq!(parse_reg("s3").unwrap(), 9);
-        assert_eq!(parse_reg("a5").unwrap(), 23);
+        assert_eq!(parse_reg("r9").unwrap(), 9);
+        assert_eq!(parse_reg("kb").unwrap(), 27);
         assert!(parse_reg("invalid").is_err());
     }
 

@@ -159,40 +159,19 @@ R-type (set pixel)
 Registers
 =========
 
-00000 r0
+00000 r0  - the zero register (always 0, read-only)
 00001 r1
 00010 r2
 00011 r3
-00100 r4
-00101 r5
+  ~
+11000 r24 - total 24 general purpose registers
 
-00110 s0
-00111 s1
-01000 s2
-01001 s3
-01010 s4
-01011 s5
-
-01100 t0
-01101 t1
-01110 t2
-01111 t3
-10000 t4
-10001 t5
-
-10010 a0
-10011 a1
-10100 a2
-10101 a3
-10110 a4
-10111 a5
-
-11000 pc  - the program counter (unimplemented)
-11001 io  - the level input/output (unimplemented)
-11010 kb  - the keyboard input (only in sandbox mode)
-11011
+11001 pc  - the program counter (read-only) [unimplemented]
+11010 io  - the level input/output (only in level mode)
+11011 kb  - the keyboard input (only in sandbox mode)
 11100
 11101
+11110
 
 Pseudo Commands
 ===============
