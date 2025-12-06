@@ -25,6 +25,8 @@ use crate::{
 };
 
 fn main() -> Result<()> {
+    env_logger::init();
+
     let cli = Cli::parse();
 
     if let Some(shell) = cli.complete {
