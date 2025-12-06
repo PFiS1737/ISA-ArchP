@@ -24,7 +24,7 @@ enum InstrType {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-enum OperandType {
+pub enum OperandType {
     Reg,
     Imm(u8), // bits
 }
@@ -246,8 +246,8 @@ impl Instruction {
 #[macro_export]
 macro_rules! instruction {
     (
-        name: $name:expr,
-        opcode: $opcode:expr,
+        name: $name:literal,
+        opcode: $opcode:literal,
         itype: $itype:ident,
     ) => {
         inventory::submit! {
@@ -262,8 +262,8 @@ macro_rules! instruction {
     };
 
     (
-        name: $name:expr,
-        opcode: $opcode:expr,
+        name: $name:literal,
+        opcode: $opcode:literal,
         itype: $itype:ident,
         operand_types: [ $( $operand_type:ident $(($v:expr))? ),* ],
         encode_format: [ $rd:ident, $rs1:ident, $rs2:ident ],

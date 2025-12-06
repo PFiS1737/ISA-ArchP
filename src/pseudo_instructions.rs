@@ -7,14 +7,15 @@ use std::collections::HashMap;
 use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
+use crate::instructions::OperandType;
+
 type ExpandRet<'a> = Result<Vec<(&'static str, Vec<String>)>>;
 type ExpandFn = for<'a> fn(&'static str, &[&'a str]) -> ExpandRet<'a>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct PseudoInstruction {
     name: &'static str,
-    operand_count: usize,
-    check_operand_count: bool,
+    format: &'static [OperandType],
     expander: ExpandFn,
 }
 
@@ -29,61 +30,90 @@ pub static PSEUDO_INSTRUCTIONS: Lazy<HashMap<&'static str, PseudoInstruction>> =
 });
 
 impl PseudoInstruction {
-    fn assert_operand_count(&self, count: usize) -> Result<()> {
-        if count != self.operand_count {
+    pub fn expand<'a>(&self, operands: &[&'a str]) -> ExpandRet<'a> {
+        self.assert_operand_format(operands)?;
+
+        (self.expander)(self.name, operands)
+    }
+
+    fn assert_operand_format(&self, operands: &[&str]) -> Result<()> {
+        if operands.len() != self.format.len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",
                 self.name,
-                self.operand_count,
-                count
+                self.format.len(),
+                operands.len()
             );
         }
-        Ok(())
-    }
 
-    pub fn expand<'a>(&self, operands: &[&'a str]) -> ExpandRet<'a> {
-        if self.check_operand_count {
-            self.assert_operand_count(operands.len())?;
+        for (i, operand) in operands.iter().enumerate() {
+            match self.format[i] {
+                OperandType::Reg => {
+                    if !may_be_reg(operand) {
+                        bail!("Expected register, got '{}'", operand);
+                    }
+                }
+                OperandType::Imm(_) => {
+                    if may_be_reg(operand) {
+                        bail!("Expected immediate value, got '{}'", operand);
+                    }
+                }
+            };
         }
 
-        (self.expander)(self.name, operands)
+        Ok(())
     }
 }
 
 #[macro_export]
 macro_rules! pseudo_instruction {
     (
-        name: [ $($name:expr),+ ],
-        operand_count: $operand_count:expr,
-        expander: $expander:expr $(,)?
+        name: [ $($name:literal),+ ],
+        format: $format:tt,
+        expander: $expander:expr,
     ) => {
         $(
-            inventory::submit! {
-                $crate::pseudo_instructions::PseudoInstruction {
-                    name: $name,
-                    operand_count: $operand_count,
-                    check_operand_count: true,
-                    expander: $expander,
-                }
+            $crate::pseudo_instruction! {
+                name: $name,
+                format: $format,
+                expander: $expander,
             }
         )+
     };
 
     (
-        name: [ $($name:expr),+ ],
-        expander: $expander:expr $(,)?
+        name: $name:literal,
+        format: [ $( $type:ident $(($v:expr))? ),* ],
+        expander: $expander:expr,
     ) => {
-        $(
-            inventory::submit! {
-                $crate::pseudo_instructions::PseudoInstruction {
-                    name: $name,
-                    operand_count: 0,
-                    check_operand_count: false,
-                    expander: $expander,
-                }
+        inventory::submit! {
+            $crate::pseudo_instructions::PseudoInstruction {
+                name: $name,
+                format: &[ $( $crate::instructions::OperandType::$type $(($v))? ),* ],
+                expander: $expander,
             }
-        )+
+        }
     };
+
+    // (
+    //     name: [ $($name:expr),+ ],
+    //     expander: $expander:expr,
+    // ) => {
+    //     $(
+    //         inventory::submit! {
+    //             $crate::pseudo_instructions::PseudoInstruction {
+    //                 name: $name,
+    //                 operand_count: 0,
+    //                 check_operand_count: false,
+    //                 expander: $expander,
+    //             }
+    //         }
+    //     )+
+    // };
+}
+
+fn may_be_reg(operand: &str) -> bool {
+    !operand.chars().next().unwrap().is_ascii_digit() // FIXME: Better check for register
 }
 
 // pub fn load_imm(num: u32) -> (Option<String>, String) {
