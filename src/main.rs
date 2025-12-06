@@ -18,7 +18,11 @@ use anyhow::{Result, bail};
 use clap::{CommandFactory, Parser};
 use clap_complete::generate;
 
-use crate::{assembler::Assembler, cli::Cli, utils::align_tabbed_lines};
+use crate::{
+    assembler::Assembler,
+    cli::{Cli, Output},
+    utils::align_tabbed_lines,
+};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -42,7 +46,7 @@ fn main() -> Result<()> {
         .map(|s| s.to_string())
         .collect();
 
-    if matches!(cli.output, cli::Output::Stdout) && cli.bin {
+    if matches!(cli.output, Output::Stdout) && cli.bin {
         bail!("Cannot write binary output to stdout.");
     }
 
