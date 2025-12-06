@@ -4,7 +4,7 @@ use crate::pseudo_instruction;
 // dec rd  =>  subi rd rd 1
 pseudo_instruction! {
     name: [ "inc", "dec" ],
-    format: [ Reg ],
+    format: [ RegD ],
     expander: |name, operands| {
         let inst = match name {
             "inc" => "addi",

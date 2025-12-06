@@ -40,7 +40,7 @@ instruction! {
     name: "not",
     opcode: 0b_0001_110,
     itype: R,
-    operand_types: [ Reg, Reg ],
+    operand_types: [ RegD, RegS ],
     encode_format: [ Some, Some, None ],
 }
 

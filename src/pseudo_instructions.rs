@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
-use crate::instructions::{OperandType, parse_imm, parse_reg};
+use crate::instructions::{OperandType, parse_imm, parse_reg_d, parse_reg_s};
 
 type ExpandRet<'a> = Result<Vec<(&'static str, Vec<String>)>>;
 type ExpandFn = for<'a> fn(&'static str, &[&'a str]) -> ExpandRet<'a>;
@@ -48,7 +48,8 @@ impl PseudoInstruction {
 
         for (i, operand) in operands.iter().enumerate() {
             match self.format[i] {
-                OperandType::Reg => parse_reg(operand)?,
+                OperandType::RegD => parse_reg_d(operand)?,
+                OperandType::RegS => parse_reg_s(operand)?,
                 OperandType::Imm(_) => parse_imm(operand)?,
             };
         }

@@ -25,7 +25,8 @@ enum InstrType {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum OperandType {
-    Reg,
+    RegD,
+    RegS,
     Imm(u8), // bits
 }
 
@@ -102,14 +103,18 @@ impl Instruction {
 
         self.assert_operand_count(operands.len(), operand_types.len())?;
 
-        for (i, operand_str) in operands.iter().enumerate() {
+        for (i, op) in operands.iter().enumerate() {
             match operand_types[i] {
-                OperandType::Reg => {
-                    let reg = parse_reg(operand_str)?;
+                OperandType::RegD => {
+                    let reg = parse_reg_d(op)?;
+                    parsed_operands.push(reg);
+                }
+                OperandType::RegS => {
+                    let reg = parse_reg_s(op)?;
                     parsed_operands.push(reg);
                 }
                 OperandType::Imm(bits) => {
-                    let imm = parse_imm(operand_str)?;
+                    let imm = parse_imm(op)?;
 
                     self.assert_immediate_range(imm, bits)?;
 
@@ -233,10 +238,10 @@ impl Instruction {
             ops
         } else {
             match self.itype {
-                InstrType::R => &[OperandType::Reg, OperandType::Reg, OperandType::Reg],
-                InstrType::I => &[OperandType::Reg, OperandType::Reg, OperandType::Imm(12)],
-                InstrType::B => &[OperandType::Reg, OperandType::Reg, OperandType::Imm(12)],
-                InstrType::U => &[OperandType::Reg, OperandType::Imm(20)],
+                InstrType::R => &[OperandType::RegD, OperandType::RegS, OperandType::RegS],
+                InstrType::I => &[OperandType::RegD, OperandType::RegS, OperandType::Imm(12)],
+                InstrType::B => &[OperandType::RegS, OperandType::RegS, OperandType::Imm(12)],
+                InstrType::U => &[OperandType::RegD, OperandType::Imm(20)],
                 InstrType::C => &[OperandType::Imm(24)],
             }
         }
@@ -308,36 +313,46 @@ fn parse_cond(cond: &str) -> Result<u32> {
     }
 }
 
-pub fn parse_reg(reg: &str) -> Result<u32> {
+pub fn parse_reg_d(reg: &str) -> Result<u32> {
     match reg {
-        "r0" => Ok(0),
-        "r1" => Ok(1),
-        "r2" => Ok(2),
-        "r3" => Ok(3),
-        "r4" => Ok(4),
-        "r5" => Ok(5),
-        "r6" => Ok(6),
-        "r7" => Ok(7),
-        "r8" => Ok(8),
-        "r9" => Ok(9),
-        "r10" => Ok(10),
-        "r11" => Ok(11),
-        "r12" => Ok(12),
-        "r13" => Ok(13),
-        "r14" => Ok(14),
-        "r15" => Ok(15),
-        "r16" => Ok(16),
-        "r17" => Ok(17),
-        "r18" => Ok(18),
-        "r19" => Ok(19),
-        "r20" => Ok(20),
-        "r21" => Ok(21),
-        "r22" => Ok(22),
-        "r23" => Ok(23),
-        "r24" => Ok(24),
-        // "pc" => Ok(25),
+        "io" => Ok(26),
+
+        "r0" | "pc" | "kb" => bail!("Register '{}' is raed-only", reg),
+
+        r if let Some(n) = r.strip_prefix("r")
+            && let Ok(n) = n.parse::<u32>() =>
+        {
+            if n > 24 {
+                bail!("Register number out of range (1-24): {}", reg);
+            }
+            Ok(n)
+        }
+
+        _ => {
+            if parse_imm(reg).is_ok() {
+                bail!("Expected register, found immediate: {}", reg)
+            } else {
+                bail!("Invalid register: {}", reg)
+            }
+        }
+    }
+}
+
+pub fn parse_reg_s(reg: &str) -> Result<u32> {
+    match reg {
+        "pc" => Ok(25),
         "io" => Ok(26),
         "kb" => Ok(27),
+
+        r if let Some(n) = r.strip_prefix("r")
+            && let Ok(n) = n.parse::<u32>() =>
+        {
+            if n > 24 {
+                bail!("Register number out of range (0-24): {}", reg);
+            }
+            Ok(n)
+        }
+
         _ => {
             if parse_imm(reg).is_ok() {
                 bail!("Expected register, found immediate: {}", reg)
@@ -374,11 +389,23 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_reg() {
-        assert_eq!(parse_reg("r0").unwrap(), 0);
-        assert_eq!(parse_reg("r9").unwrap(), 9);
-        assert_eq!(parse_reg("kb").unwrap(), 27);
-        assert!(parse_reg("invalid").is_err());
+    fn test_parse_reg_d() {
+        assert_eq!(parse_reg_d("r9").unwrap(), 9);
+
+        assert!(parse_reg_d("r0").is_err());
+        assert!(parse_reg_d("kb").is_err());
+        assert!(parse_reg_d("r27").is_err());
+        assert!(parse_reg_d("invalid").is_err());
+    }
+
+    #[test]
+    fn test_parse_reg_s() {
+        assert_eq!(parse_reg_s("r0").unwrap(), 0);
+        assert_eq!(parse_reg_s("r9").unwrap(), 9);
+        assert_eq!(parse_reg_s("kb").unwrap(), 27);
+
+        assert!(parse_reg_s("r27").is_err());
+        assert!(parse_reg_s("invalid").is_err());
     }
 
     #[test]
@@ -398,6 +425,7 @@ mod tests {
         assert!(instr.encode(None, &["r1", "r2", "r3", "r4"]).is_err());
         assert!(instr.encode(None, &["r1", "r2", "rrr"]).is_err());
         assert!(instr.encode(None, &["r1", "r2", "123"]).is_err());
+        assert!(instr.encode(None, &["r0", "r2", "r3"]).is_err());
         assert!(instr.encode(Some("invalid"), &["r1", "r2", "r3"]).is_err());
 
         let encoded = instr.encode(Some("lt"), &["r1", "r2", "r3"]).unwrap();
@@ -412,6 +440,7 @@ mod tests {
         assert!(instr.encode(None, &["r1", "r2", "r3", "r4"]).is_err());
         assert!(instr.encode(None, &["r1", "rrr", "123"]).is_err());
         assert!(instr.encode(None, &["r1", "r2", "r3"]).is_err());
+        assert!(instr.encode(None, &["r0", "r2", "123"]).is_err());
         assert!(instr.encode(Some("invalid"), &["r1", "r2", "123"]).is_err());
 
         let encoded = instr.encode(Some("ge"), &["r4", "r5", "0b100"]).unwrap();
@@ -422,9 +451,9 @@ mod tests {
     fn test_enocde_b() {
         let instr = INSTRUCTIONS.get("beq").unwrap();
 
-        let encoded = instr.encode(Some("ne"), &["r1", "r2", "3456"]).unwrap();
+        let encoded = instr.encode(Some("ne"), &["r1", "r0", "3456"]).unwrap();
         // 3456 = 0b_11011_0000000
-        assert_eq!(encoded, 0b_1001_001_010_11011_00001_0000000_00010);
+        assert_eq!(encoded, 0b_1001_001_010_11011_00001_0000000_00000);
     }
 
     #[test]
@@ -434,6 +463,7 @@ mod tests {
         assert!(instr.encode(None, &["r1"]).is_err());
         assert!(instr.encode(None, &["r1", "r2"]).is_err());
         assert!(instr.encode(None, &["r1", "r2", "r3"]).is_err());
+        assert!(instr.encode(None, &["r0", "r2"]).is_err());
         assert!(instr.encode(Some("eq"), &["r3", "0xABCDE"]).is_err());
 
         let encoded = instr.encode(None, &["r3", "0xABCDE"]).unwrap();

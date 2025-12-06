@@ -10,6 +10,6 @@ instruction! {
     name: "spx",
     opcode: 0b_1101_001,
     itype: R,
-    operand_types: [ Reg, Reg ],
+    operand_types: [ RegS, RegS ],
     encode_format: [ None, Some, Some ],
 }

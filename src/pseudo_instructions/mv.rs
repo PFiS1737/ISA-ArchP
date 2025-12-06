@@ -3,7 +3,7 @@ use crate::pseudo_instruction;
 // mv rd rs  =>  addi rd rs 0
 pseudo_instruction! {
     name: "mv",
-    format: [ Reg, Reg ],
+    format: [ RegD, RegS ],
     expander: |_, operands| {
         Ok(vec![(
             "addi",

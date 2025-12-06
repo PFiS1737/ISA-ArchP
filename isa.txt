@@ -166,7 +166,7 @@ Registers
   ~
 11000 r24 - total 24 general purpose registers
 
-11001 pc  - the program counter (read-only) [unimplemented]
+11001 pc  - the program counter (read-only)
 11010 io  - the level input/output (only in level mode)
 11011 kb  - the keyboard input (only in sandbox mode)
 11100

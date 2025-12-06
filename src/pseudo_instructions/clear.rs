@@ -3,7 +3,7 @@ use crate::pseudo_instruction;
 // clr rd  =>  li rd 0
 pseudo_instruction! {
     name: "clr",
-    format: [ Reg ],
+    format: [ RegD ],
     expander: |_, operands| {
         Ok(vec![(
             "li",
