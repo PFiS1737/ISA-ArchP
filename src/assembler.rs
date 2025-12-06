@@ -15,8 +15,8 @@ impl Assembler {
         let mut pass1 = Pass1::new();
         pass1.run(&self.source_lines)?;
 
-        let pass3 = Pass2::new(pass1.constants, pass1.labels, &pass1.pc_to_original);
-        pass3.run(
+        let pass2 = Pass2::new(pass1.labels, pass1.pc_to_original);
+        pass2.run(
             pass1
                 .processed
                 .iter()

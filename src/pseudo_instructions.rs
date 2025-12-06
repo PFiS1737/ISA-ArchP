@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
-use crate::instructions::OperandType;
+use crate::instructions::{OperandType, parse_imm, parse_reg};
 
 type ExpandRet<'a> = Result<Vec<(&'static str, Vec<String>)>>;
 type ExpandFn = for<'a> fn(&'static str, &[&'a str]) -> ExpandRet<'a>;
@@ -48,16 +48,8 @@ impl PseudoInstruction {
 
         for (i, operand) in operands.iter().enumerate() {
             match self.format[i] {
-                OperandType::Reg => {
-                    if !may_be_reg(operand) {
-                        bail!("Expected register, got '{}'", operand);
-                    }
-                }
-                OperandType::Imm(_) => {
-                    if may_be_reg(operand) {
-                        bail!("Expected immediate value, got '{}'", operand);
-                    }
-                }
+                OperandType::Reg => parse_reg(operand)?,
+                OperandType::Imm(_) => parse_imm(operand)?,
             };
         }
 
@@ -110,10 +102,6 @@ macro_rules! pseudo_instruction {
     //         }
     //     )+
     // };
-}
-
-fn may_be_reg(operand: &str) -> bool {
-    !operand.chars().next().unwrap().is_ascii_digit() // FIXME: Better check for register
 }
 
 // pub fn load_imm(num: u32) -> (Option<String>, String) {

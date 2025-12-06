@@ -1,27 +1,21 @@
 use std::collections::HashMap;
 
 use anyhow::{Result, anyhow};
-use indexmap::IndexMap;
 
 use crate::instructions::INSTRUCTIONS;
 
 /// Pass 3
 ///
-/// Encodes assembly instructions into machine code.
+/// 1. Substitutes label addresses.
+/// 2. Encodes assembly instructions into machine code.
 pub struct Pass2<'a> {
-    constants: HashMap<&'a str, &'a str>,
     labels: HashMap<&'a str, String>,
-    pc_to_original: &'a Vec<(usize, &'a str)>,
+    pc_to_original: Vec<(usize, &'a str)>,
 }
 
 impl<'a> Pass2<'a> {
-    pub fn new(
-        constants: HashMap<&'a str, &'a str>,
-        labels: HashMap<&'a str, String>,
-        pc_to_original: &'a Vec<(usize, &'a str)>,
-    ) -> Self {
+    pub fn new(labels: HashMap<&'a str, String>, pc_to_original: Vec<(usize, &'a str)>) -> Self {
         Pass2 {
-            constants,
             labels,
             pc_to_original,
         }
@@ -34,7 +28,7 @@ impl<'a> Pass2<'a> {
         for (pc, line) in processed_lines.iter().enumerate() {
             let (original_idx, original_line) = self.pc_to_original[pc];
 
-            let (encoded, used_consts) = self.line_handler(line).map_err(|e| {
+            let encoded = self.line_handler(line).map_err(|e| {
                 anyhow!(
                     "Error encoding line {}: '{}' ({})",
                     original_idx + 1,
@@ -46,20 +40,7 @@ impl<'a> Pass2<'a> {
             let mut display = line.join(" ");
 
             if display != original_line {
-                display = format!("{display}\t({original_line})");
-            } else {
-                display += "\t";
-            }
-
-            if !used_consts.is_empty() {
-                display = format!(
-                    "{display}\t[ {} ]",
-                    used_consts
-                        .iter()
-                        .map(|(name, value)| format!("{name} = {value}"))
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                )
+                display = format!("{display}\t[{original_line}]");
             } else {
                 display += "\t";
             }
@@ -87,7 +68,7 @@ impl<'a> Pass2<'a> {
         None
     }
 
-    fn line_handler(&self, line: &[&'a str]) -> Result<(u32, IndexMap<&'a str, &'a str>)> {
+    fn line_handler(&self, line: &[&'a str]) -> Result<u32> {
         let (name, cond) = if let Some((name, cond)) = line[0].split_once('.') {
             (name, Some(cond))
         } else {
@@ -98,16 +79,12 @@ impl<'a> Pass2<'a> {
             .get(name)
             .ok_or_else(|| anyhow!("Unknown instruction: '{}'", name))?;
 
-        let mut used_consts = IndexMap::new();
         let code = instr.encode(
             cond,
             &(line[1..]
                 .iter()
                 .map(|e| {
-                    if let Some(&const_value) = self.constants.get(e) {
-                        used_consts.insert(*e, const_value);
-                        const_value
-                    } else if let Some(label_addr) = self.labels.get(e) {
+                    if let Some(label_addr) = self.labels.get(e) {
                         label_addr.as_str()
                     } else {
                         e
@@ -116,6 +93,6 @@ impl<'a> Pass2<'a> {
                 .collect::<Vec<_>>()),
         )?;
 
-        Ok((code, used_consts))
+        Ok(code)
     }
 }

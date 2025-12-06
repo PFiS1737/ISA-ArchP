@@ -10,8 +10,9 @@ use crate::pseudo_instructions::PSEUDO_INSTRUCTIONS;
 /// 2. Handle immediate values.
 /// 3. Expand pseudo-instructions.
 /// 4. Build a mapping between new lines and the original lines.
+/// 5. Substitute constants.
 pub struct Pass1<'a> {
-    pub constants: HashMap<&'a str, &'a str>,
+    constants: HashMap<&'a str, &'a str>,
     pub labels: HashMap<&'a str, String>,
     pub pc_to_original: Vec<(usize, &'a str)>,
     pub processed: Vec<Vec<String>>,
@@ -89,51 +90,46 @@ impl<'a> Pass1<'a> {
             }
 
             let (name, cond) = if let Some(idx) = tokens[0].find(".") {
-                (&tokens[0][..idx], &tokens[0][idx..])
+                (&tokens[0][..idx], &tokens[0][idx..]) // 'cond' includes the dot
             } else {
                 (tokens[0], "")
             };
 
-            let operands = &tokens[1..];
+            let operands = tokens[1..]
+                .iter()
+                .map(|e| {
+                    if let Some(&value) = self.constants.get(e) {
+                        value
+                    } else {
+                        e
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            let mut expanded = Vec::new();
 
             if let Some(pseudo) = PSEUDO_INSTRUCTIONS.get(name) {
-                let expanded = pseudo.expand(operands).map_err(|e| {
+                expanded.extend(pseudo.expand(&operands).map_err(|e| {
                     anyhow!(
                         "Error expanding pseudo-instruction at line {}: '{}' ({})",
                         orig_idx + 1,
                         raw_line,
                         e,
                     )
-                })?;
-                for (ex_name, ex_ops) in expanded {
-                    self.emit(ex_name.to_string() + cond, ex_ops, orig_idx, raw_line)?;
-                }
+                })?);
             } else {
-                self.emit(
-                    tokens[0].to_string(),
-                    operands.iter().map(|e| e.to_string()).collect(),
-                    orig_idx,
-                    raw_line,
-                )?;
+                expanded.push((name, operands.iter().map(|e| e.to_string()).collect()));
+            }
+
+            for (ex_name, ex_ops) in expanded {
+                let mut line = Vec::new();
+                line.push(ex_name.to_string() + cond);
+                line.extend(ex_ops);
+
+                self.pc_to_original.push((orig_idx, raw_line.trim()));
+                self.processed.push(line);
             }
         }
-
-        Ok(())
-    }
-
-    fn emit(
-        &mut self,
-        name: String,
-        operands: Vec<String>,
-        orig_idx: usize,
-        raw_line: &'a str,
-    ) -> Result<()> {
-        let mut line = Vec::new();
-        line.push(name);
-        line.extend(operands);
-
-        self.pc_to_original.push((orig_idx, raw_line.trim()));
-        self.processed.push(line);
 
         Ok(())
     }
