@@ -37,7 +37,6 @@ impl<'a> Pass1<'a> {
                 continue;
             }
 
-            // strip comments (; or #)
             let raw_line = strip_comment(raw_line).trim();
             if raw_line.is_empty() {
                 continue;
@@ -50,7 +49,6 @@ impl<'a> Pass1<'a> {
 
             if tokens[0] == "const" {
                 if in_const_zone {
-                    // expected form: const NAME VALUE
                     if tokens.len() != 3 {
                         bail!("Malformed const at line {}: '{}'", orig_idx + 1, raw_line);
                     }
@@ -65,32 +63,29 @@ impl<'a> Pass1<'a> {
                     "Constants must be declared at the start of file (line {}): '{}'",
                     orig_idx + 1,
                     raw_line
-                )
+                );
             }
 
-            // first non-const line -> close const zone forever
             if in_const_zone {
                 in_const_zone = false;
             }
 
-            if tokens.len() == 1
-                && let Some(label) = tokens[0].strip_suffix(":")
-            {
-                let pc = self.processed.len();
-                self.labels.insert(label, pc.to_string());
-                continue;
-            }
+            let (raw_line, tokens) = match tokens[0].strip_suffix(':') {
+                Some(label) => {
+                    let pc = self.processed.len();
+                    self.labels.insert(label, pc.to_string());
 
-            if tokens[0].ends_with(':') {
-                bail!(
-                    "Labels must be on their own line (line {}): '{}'",
-                    orig_idx + 1,
-                    raw_line
-                );
-            }
+                    if tokens.len() == 1 {
+                        continue;
+                    }
 
-            let (name, cond) = if let Some(idx) = tokens[0].find(".") {
-                (&tokens[0][..idx], &tokens[0][idx..]) // 'cond' includes the dot
+                    (&raw_line[label.len() + 1..], &tokens[1..])
+                }
+                None => (raw_line, tokens.as_ref()),
+            };
+
+            let (name, cond) = if let Some(idx) = tokens[0].find('.') {
+                (&tokens[0][..idx], &tokens[0][idx..])
             } else {
                 (tokens[0], "")
             };

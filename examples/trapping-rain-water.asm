@@ -31,8 +31,7 @@ lw lmax l 0
 lw rmax r 0
 
 # while l < r:
-_while:
-bge l r _endwhile # {
+_while: bge l r _endwhile # {
 
   # if lmax < rmax:
   bge lmax rmax _else # {
