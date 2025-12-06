@@ -176,7 +176,7 @@ Registers
 Pseudo Commands
 ===============
 
-mv rs rd  =>  addi rd rs 0
+mv rd rs  =>  addi rd rs 0
 
 clr rd  =>  li rd 0
 
