@@ -7,6 +7,8 @@ mod instructions;
 mod pass1;
 mod pass2;
 mod pseudo_instructions;
+#[cfg(test)]
+mod testkit;
 mod utils;
 
 use std::{

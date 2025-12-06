@@ -375,99 +375,113 @@ pub fn parse_imm(imm: &str) -> Result<u32> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::testkit::*;
+    use anyhow::Result;
+
+    fn test(func: fn(&str) -> Result<u32>) -> impl Fn(&str) -> String {
+        move |s| match func(s) {
+            Ok(n) => format!("{n}"),
+            Err(e) => format!("Error: {e}"),
+        }
+    }
+
+    // WARN: 也许这里不适合用快照测试?
+    // TODO: 以后如果有迁移到 thiserror 的打算，再回来改
 
     #[test]
-    fn test_parse_cond() {
-        assert_eq!(parse_cond("eq").unwrap(), 0b001);
-        assert_eq!(parse_cond("ne").unwrap(), 0b010);
-        assert_eq!(parse_cond("lt").unwrap(), 0b011);
-        assert_eq!(parse_cond("ge").unwrap(), 0b100);
-        assert_eq!(parse_cond("gt").unwrap(), 0b101);
-        assert_eq!(parse_cond("le").unwrap(), 0b110);
-        assert!(parse_cond("invalid").is_err()); // TODO: 'thiserror'
+    fn parse_cond() {
+        let f = test(super::parse_cond);
+        assert_snapshot!(f("eq"), @"1");
+        assert_snapshot!(f("ne"), @"2");
+        assert_snapshot!(f("lt"), @"3");
+        assert_snapshot!(f("ge"), @"4");
+        assert_snapshot!(f("gt"), @"5");
+        assert_snapshot!(f("le"), @"6");
+        assert_snapshot!(f("invalid"), @"Error: Invalid condition: invalid");
     }
 
     #[test]
-    fn test_parse_reg_d() {
-        assert_eq!(parse_reg_d("r9").unwrap(), 9);
-
-        assert!(parse_reg_d("r0").is_err());
-        assert!(parse_reg_d("kb").is_err());
-        assert!(parse_reg_d("r27").is_err());
-        assert!(parse_reg_d("invalid").is_err());
+    fn parse_reg_d() {
+        let f = test(super::parse_reg_d);
+        assert_snapshot!(f("r0"), @"Error: Register 'r0' is raed-only");
+        assert_snapshot!(f("r9"), @"9");
+        assert_snapshot!(f("r27"), @"Error: Register number out of range (1-24): r27");
+        assert_snapshot!(f("kb"), @"Error: Register 'kb' is raed-only");
+        assert_snapshot!(f("invalid"), @"Error: Invalid register: invalid");
     }
 
     #[test]
-    fn test_parse_reg_s() {
-        assert_eq!(parse_reg_s("r0").unwrap(), 0);
-        assert_eq!(parse_reg_s("r9").unwrap(), 9);
-        assert_eq!(parse_reg_s("kb").unwrap(), 27);
-
-        assert!(parse_reg_s("r27").is_err());
-        assert!(parse_reg_s("invalid").is_err());
+    fn parse_reg_s() {
+        let f = test(super::parse_reg_s);
+        assert_snapshot!(f("r0"), @"0");
+        assert_snapshot!(f("r15"), @"15");
+        assert_snapshot!(f("r30"), @"Error: Register number out of range (0-24): r30");
+        assert_snapshot!(f("pc"), @"25");
+        assert_snapshot!(f("invalid"), @"Error: Invalid register: invalid");
     }
 
     #[test]
-    fn test_parse_imm() {
-        assert_eq!(parse_imm("42").unwrap(), 42);
-        assert_eq!(parse_imm("0x2A").unwrap(), 42);
-        assert_eq!(parse_imm("0b101010").unwrap(), 42);
-        assert!(parse_imm("r1").is_err());
-        assert!(parse_imm("invalid").is_err());
+    fn parse_imm() {
+        let f = test(super::parse_imm);
+        assert_snapshot!(f("42"), @"42");
+        assert_snapshot!(f("0x2A"), @"42");
+        assert_snapshot!(f("0b101010"), @"42");
+        assert_snapshot!(f("r1"), @"Error: Invalid immediate: r1");
+        assert_snapshot!(f("invalid"), @"Error: Invalid immediate: invalid");
     }
 
     #[test]
-    fn test_encode_r() {
-        let instr = INSTRUCTIONS.get("add").unwrap();
-
-        assert!(instr.encode(None, &["r1", "r2"]).is_err());
-        assert!(instr.encode(None, &["r1", "r2", "r3", "r4"]).is_err());
-        assert!(instr.encode(None, &["r1", "r2", "rrr"]).is_err());
-        assert!(instr.encode(None, &["r1", "r2", "123"]).is_err());
-        assert!(instr.encode(None, &["r0", "r2", "r3"]).is_err());
-        assert!(instr.encode(Some("invalid"), &["r1", "r2", "r3"]).is_err());
-
-        let encoded = instr.encode(Some("lt"), &["r1", "r2", "r3"]).unwrap();
-        assert_eq!(encoded, 0b_0000_000_011_00001_00010_0000000_00011);
+    fn encode_r() {
+        let cmd = instr("add");
+        assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Instruction 'add' requires 3 operands, got 2");
+        assert_snapshot!(cmd("", &["r1", "r2", "r3", "r4"]), @"Error: Instruction 'add' requires 3 operands, got 4");
+        assert_snapshot!(cmd("", &["r1", "r2", "rrr"]), @"Error: Invalid register: rrr");
+        assert_snapshot!(cmd("", &["r1", "r2", "123"]), @"Error: Expected register, found immediate: 123");
+        assert_snapshot!(cmd("", &["r0", "r2", "r3"]), @"Error: Register 'r0' is raed-only");
+        assert_snapshot!(cmd("invalid", &["r1", "r2", "r3"]), @"Error: Invalid condition: invalid");
+        assert_snapshot!(cmd("lt", &["r1", "r2", "r3"]), @"0000 000 011 00001 00010 0000000 00011");
     }
 
     #[test]
-    fn test_encode_i() {
-        let instr = INSTRUCTIONS.get("addi").unwrap();
-
-        assert!(instr.encode(None, &["r1", "r2"]).is_err());
-        assert!(instr.encode(None, &["r1", "r2", "r3", "r4"]).is_err());
-        assert!(instr.encode(None, &["r1", "rrr", "123"]).is_err());
-        assert!(instr.encode(None, &["r1", "r2", "r3"]).is_err());
-        assert!(instr.encode(None, &["r0", "r2", "123"]).is_err());
-        assert!(instr.encode(Some("invalid"), &["r1", "r2", "123"]).is_err());
-
-        let encoded = instr.encode(Some("ge"), &["r4", "r5", "0b100"]).unwrap();
-        assert_eq!(encoded, 0b_0100_000_100_00100_00101_000000000100);
+    fn encode_i() {
+        let cmd = instr("addi");
+        assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Instruction 'addi' requires 3 operands, got 2");
+        assert_snapshot!(cmd("", &["r1", "r2", "r3", "r4"]), @"Error: Instruction 'addi' requires 3 operands, got 4");
+        assert_snapshot!(cmd("", &["r1", "rrr", "123"]), @"Error: Invalid register: rrr");
+        assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Invalid immediate: r3");
+        assert_snapshot!(cmd("", &["r0", "r2", "123"]), @"Error: Register 'r0' is raed-only");
+        assert_snapshot!(cmd("", &["r1", "r2", "0xFFFF"]), @"Error: Immediate value '65535' out of range for I-type instruction 'addi', expected 12 bits");
+        assert_snapshot!(cmd("invalid", &["r1", "r2", "123"]), @"Error: Invalid condition: invalid");
+        assert_snapshot!(cmd("ge", &["r4", "r5", "0b100"]), @"0100 000 100 00100 00101 0000000 00100");
     }
 
     #[test]
-    fn test_enocde_b() {
-        let instr = INSTRUCTIONS.get("beq").unwrap();
-
-        let encoded = instr.encode(Some("ne"), &["r1", "r0", "3456"]).unwrap();
-        // 3456 = 0b_11011_0000000
-        assert_eq!(encoded, 0b_1001_001_010_11011_00001_0000000_00000);
+    fn enocde_b() {
+        let cmd = instr("beq");
+        // Same to I-type, omitting ...
+        assert_snapshot!(cmd("ne", &["r1", "r0", "3456"]), @"1001 001 010 11011 00001 0000000 00000");
     }
 
     #[test]
-    fn test_encode_u() {
-        let instr = INSTRUCTIONS.get("lui").unwrap();
+    fn encode_u() {
+        let cmd = instr("lui");
+        assert_snapshot!(cmd("", &["r1"]), @"Error: Instruction 'lui' requires 2 operands, got 1");
+        assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Instruction 'lui' requires 2 operands, got 3");
+        assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Invalid immediate: r2");
+        assert_snapshot!(cmd("", &["r0", "r2"]), @"Error: Register 'r0' is raed-only");
+        assert_snapshot!(cmd("", &["r3", "0x200000"]), @"Error: Immediate value '2097152' out of range for U-type instruction 'lui', expected 20 bits");
+        assert_snapshot!(cmd("eq", &["r3", "0xABCDE"]), @"Error: Condition is not allowed for U-type instruction 'lui'");
+        assert_snapshot!(cmd("", &["r3", "0xABCDE"]), @"1000 011 101 00011 01011 1100110 11110");
+    }
 
-        assert!(instr.encode(None, &["r1"]).is_err());
-        assert!(instr.encode(None, &["r1", "r2"]).is_err());
-        assert!(instr.encode(None, &["r1", "r2", "r3"]).is_err());
-        assert!(instr.encode(None, &["r0", "r2"]).is_err());
-        assert!(instr.encode(Some("eq"), &["r3", "0xABCDE"]).is_err());
-
-        let encoded = instr.encode(None, &["r3", "0xABCDE"]).unwrap();
-        // 0xABCDE = 0b_101_01011110011011110
-        assert_eq!(encoded, 0b_1000_011_101_00011_01011110011011110);
+    #[test]
+    fn encode_c() {
+        let cmd = instr("col");
+        assert_snapshot!(cmd("", &[]), @"Error: Instruction 'col' requires 1 operands, got 0");
+        assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Instruction 'col' requires 1 operands, got 2");
+        assert_snapshot!(cmd("", &["r1"]), @"Error: Invalid immediate: r1");
+        assert_snapshot!(cmd("", &["0x1FFFFFF"]), @"Error: Immediate value '33554431' out of range for C-type instruction 'col', expected 24 bits");
+        assert_snapshot!(cmd("ne", &["0x123456"]), @"Error: Condition is not allowed for C-type instruction 'col'");
+        assert_snapshot!(cmd("", &["0x123456"]), @"1101 000 000 01001 00011 0100010 10110");
     }
 }
