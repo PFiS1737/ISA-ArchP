@@ -15,7 +15,7 @@ type ExpandFn = for<'a> fn(&'static str, &[&'a str]) -> ExpandRet<'a>;
 #[derive(Debug, Clone, Copy)]
 pub struct PseudoInstruction {
     name: &'static str,
-    format: &'static [OperandType],
+    operand_types: &'static [OperandType],
     expander: ExpandFn,
 }
 
@@ -37,17 +37,17 @@ impl PseudoInstruction {
     }
 
     fn assert_operand_format(&self, operands: &[&str]) -> Result<()> {
-        if operands.len() != self.format.len() {
+        if operands.len() != self.operand_types.len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",
                 self.name,
-                self.format.len(),
+                self.operand_types.len(),
                 operands.len()
             );
         }
 
         for (i, operand) in operands.iter().enumerate() {
-            match self.format[i] {
+            match self.operand_types[i] {
                 OperandType::RegD => parse_reg_d(operand)?,
                 OperandType::RegS => parse_reg_s(operand)?,
                 OperandType::Imm(_) => parse_imm(operand)?,
@@ -61,13 +61,13 @@ impl PseudoInstruction {
 macro pseudo_instruction {
     (
         name: [ $($name:literal),+ ],
-        format: $format:tt,
+        operand_types: $types:tt,
         expander: $expander:expr,
     ) => {
         $(
             $crate::pseudo_instructions::pseudo_instruction! {
                 name: $name,
-                format: $format,
+                operand_types: $types,
                 expander: $expander,
             }
         )+
@@ -75,13 +75,13 @@ macro pseudo_instruction {
 
     (
         name: $name:literal,
-        format: [ $( $type:ident $(($v:expr))? ),* ],
+        operand_types: [ $( $type:ident $(($v:expr))? ),* ],
         expander: $expander:expr,
     ) => {
         inventory::submit! {
             $crate::pseudo_instructions::PseudoInstruction {
                 name: $name,
-                format: &[ $( $crate::instructions::OperandType::$type $(($v))? ),* ],
+                operand_types: &[ $( $crate::instructions::OperandType::$type $(($v))? ),* ],
                 expander: $expander,
             }
         }
