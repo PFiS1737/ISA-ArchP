@@ -271,6 +271,23 @@ macro_rules! instruction {
         opcode: $opcode:literal,
         itype: $itype:ident,
         operand_types: [ $( $operand_type:ident $(($v:expr))? ),* ],
+    ) => {
+        inventory::submit! {
+            $crate::instructions::Instruction {
+                name: $name,
+                opcode: $opcode,
+                itype: $crate::instructions::InstrType::$itype,
+                operand_types: Some(&[ $( $crate::instructions::OperandType::$operand_type $(($v))? ),* ]),
+                encode_format: None,
+            }
+        }
+    };
+
+    (
+        name: $name:literal,
+        opcode: $opcode:literal,
+        itype: $itype:ident,
+        operand_types: [ $( $operand_type:ident $(($v:expr))? ),* ],
         encode_format: [ $rd:ident, $rs1:ident, $rs2:ident ],
     ) => {
         inventory::submit! {
@@ -453,6 +470,10 @@ mod tests {
         assert_snapshot!(cmd("", &["r1", "r2", "0xFFFF"]), @"Error: Immediate value '65535' out of range for I-type instruction 'addi', expected 12 bits");
         assert_snapshot!(cmd("invalid", &["r1", "r2", "123"]), @"Error: Invalid condition: invalid");
         assert_snapshot!(cmd("ge", &["r4", "r5", "0b100"]), @"0100 000 100 00100 00101 0000000 00100");
+
+        let cmd = instr("shri");
+        assert_snapshot!(cmd("", &["r1", "r2", "32"]), @"Error: Immediate value '32' out of range for I-type instruction 'shri', expected 5 bits");
+        assert_snapshot!(cmd("", &["r1", "r2", "31"]), @"0110 001 000 00001 00010 0000000 11111");
     }
 
     #[test]
