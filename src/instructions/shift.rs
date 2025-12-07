@@ -31,18 +31,6 @@ instruction! {
 }
 
 instruction! {
-    name: "xori",
-    opcode: 0b_0101_100,
-    itype: I,
-}
-
-instruction! {
-    name: "xnori",
-    opcode: 0b_0101_101,
-    itype: I,
-}
-
-instruction! {
     name: "shli",
     opcode: 0b_0110_000,
     itype: I,
