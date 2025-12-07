@@ -1,4 +1,4 @@
-use crate::pseudo_instruction;
+use crate::pseudo_instructions::pseudo_instruction;
 
 // mv rd rs  =>  addi rd rs 0
 pseudo_instruction! {

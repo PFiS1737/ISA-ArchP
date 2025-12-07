@@ -55,23 +55,6 @@ pub static INSTRUCTIONS: Lazy<HashMap<&'static str, Instruction>> = Lazy::new(||
     map
 });
 
-macro_rules! code {
-    // R/I-type
-    ($opcode:expr, $cond:expr, $rd:expr, $rs1:expr, $rs2_or_imm12:expr) => {
-        Ok(($opcode << 25) | ($cond << 22) | ($rd << 17) | ($rs1 << 12) | $rs2_or_imm12)
-    };
-
-    // B-type
-    ($opcode:expr, $cond:expr, $up5:expr, $rs1:expr, $low7:expr, $rs2:expr) => {
-        Ok(($opcode << 25) | ($cond << 22) | ($up5 << 17) | ($rs1 << 12) | ($low7 << 5) | $rs2)
-    };
-
-    // U/C-type
-    ($opcode:expr, $uimm20u:expr, $rd:expr, $uimm20l:expr) => {
-        Ok(($opcode << 25) | ($uimm20u << 22) | ($rd << 17) | $uimm20l)
-    };
-}
-
 impl Instruction {
     pub fn encode(&self, cond: Option<&str>, operands: &[&str]) -> Result<u32> {
         let cond = cond.map(parse_cond).transpose()?.unwrap_or(0);
@@ -238,18 +221,40 @@ impl Instruction {
             ops
         } else {
             match self.itype {
-                InstrType::R => &[OperandType::RegD, OperandType::RegS, OperandType::RegS],
-                InstrType::I => &[OperandType::RegD, OperandType::RegS, OperandType::Imm(12)],
-                InstrType::B => &[OperandType::RegS, OperandType::RegS, OperandType::Imm(12)],
-                InstrType::U => &[OperandType::RegD, OperandType::Imm(20)],
-                InstrType::C => &[OperandType::Imm(24)],
+                InstrType::R => op_types![RegD, RegS, RegS],
+                InstrType::I => op_types![RegD, RegS, Imm(12)],
+                InstrType::B => op_types![RegS, RegS, Imm(12)],
+                InstrType::U => op_types![RegD, Imm(20)],
+                InstrType::C => op_types![Imm(24)],
             }
         }
     }
 }
 
-#[macro_export]
-macro_rules! instruction {
+macro code {
+    // R/I-type
+    ($opcode:expr, $cond:expr, $rd:expr, $rs1:expr, $rs2_or_imm12:expr) => {
+        Ok(($opcode << 25) | ($cond << 22) | ($rd << 17) | ($rs1 << 12) | $rs2_or_imm12)
+    },
+
+    // B-type
+    ($opcode:expr, $cond:expr, $up5:expr, $rs1:expr, $low7:expr, $rs2:expr) => {
+        Ok(($opcode << 25) | ($cond << 22) | ($up5 << 17) | ($rs1 << 12) | ($low7 << 5) | $rs2)
+    },
+
+    // U/C-type
+    ($opcode:expr, $uimm20u:expr, $rd:expr, $uimm20l:expr) => {
+        Ok(($opcode << 25) | ($uimm20u << 22) | ($rd << 17) | $uimm20l)
+    },
+}
+
+macro op_types {
+    ( $( $type:ident $(($v:literal))? ),* ) => {
+        &[ $( $crate::instructions::OperandType::$type $(($v))? ),* ]
+    }
+}
+
+macro instruction {
     (
         name: $name:literal,
         opcode: $opcode:literal,
@@ -264,30 +269,30 @@ macro_rules! instruction {
                 encode_format: None,
             }
         }
-    };
+    },
 
     (
         name: $name:literal,
         opcode: $opcode:literal,
         itype: $itype:ident,
-        operand_types: [ $( $operand_type:ident $(($v:expr))? ),* ],
+        operand_types: $types:tt,
     ) => {
         inventory::submit! {
             $crate::instructions::Instruction {
                 name: $name,
                 opcode: $opcode,
                 itype: $crate::instructions::InstrType::$itype,
-                operand_types: Some(&[ $( $crate::instructions::OperandType::$operand_type $(($v))? ),* ]),
+                operand_types: Some($crate::instructions::op_types! $types),
                 encode_format: None,
             }
         }
-    };
+    },
 
     (
         name: $name:literal,
         opcode: $opcode:literal,
         itype: $itype:ident,
-        operand_types: [ $( $operand_type:ident $(($v:expr))? ),* ],
+        operand_types: $types:tt,
         encode_format: [ $rd:ident, $rs1:ident, $rs2:ident ],
     ) => {
         inventory::submit! {
@@ -295,7 +300,7 @@ macro_rules! instruction {
                 name: $name,
                 opcode: $opcode,
                 itype: $crate::instructions::InstrType::$itype,
-                operand_types: Some(&[ $( $crate::instructions::OperandType::$operand_type $(($v))? ),* ]),
+                operand_types: Some($crate::instructions::op_types! $types),
                 encode_format: Some([
                     $crate::instructions::FormatPlaceholder::$rd,
                     $crate::instructions::FormatPlaceholder::$rs1,
@@ -303,7 +308,7 @@ macro_rules! instruction {
                 ]),
             }
         }
-    };
+    },
 }
 
 impl Display for InstrType {

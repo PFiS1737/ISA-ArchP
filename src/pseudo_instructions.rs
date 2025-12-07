@@ -58,21 +58,20 @@ impl PseudoInstruction {
     }
 }
 
-#[macro_export]
-macro_rules! pseudo_instruction {
+macro pseudo_instruction {
     (
         name: [ $($name:literal),+ ],
         format: $format:tt,
         expander: $expander:expr,
     ) => {
         $(
-            $crate::pseudo_instruction! {
+            $crate::pseudo_instructions::pseudo_instruction! {
                 name: $name,
                 format: $format,
                 expander: $expander,
             }
         )+
-    };
+    },
 
     (
         name: $name:literal,
@@ -86,23 +85,7 @@ macro_rules! pseudo_instruction {
                 expander: $expander,
             }
         }
-    };
-
-    // (
-    //     name: [ $($name:expr),+ ],
-    //     expander: $expander:expr,
-    // ) => {
-    //     $(
-    //         inventory::submit! {
-    //             $crate::pseudo_instructions::PseudoInstruction {
-    //                 name: $name,
-    //                 operand_count: 0,
-    //                 check_operand_count: false,
-    //                 expander: $expander,
-    //             }
-    //         }
-    //     )+
-    // };
+    },
 }
 
 // pub fn load_imm(num: u32) -> (Option<String>, String) {

@@ -1,4 +1,4 @@
-use crate::pseudo_instruction;
+use crate::pseudo_instructions::pseudo_instruction;
 
 // inc rd  =>  addi rd rd 1
 // dec rd  =>  subi rd rd 1

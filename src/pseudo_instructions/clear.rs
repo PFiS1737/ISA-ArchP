@@ -1,4 +1,4 @@
-use crate::pseudo_instruction;
+use crate::pseudo_instructions::pseudo_instruction;
 
 // clr rd  =>  li rd 0
 pseudo_instruction! {

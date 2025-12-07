@@ -1,5 +1,6 @@
 #![allow(clippy::unusual_byte_groupings)]
 #![feature(if_let_guard)]
+#![feature(decl_macro)]
 
 mod assembler;
 mod cli;

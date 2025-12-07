@@ -1,4 +1,4 @@
-use crate::instruction;
+use crate::instructions::instruction;
 
 instruction! {
     name: "lw",
