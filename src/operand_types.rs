@@ -22,7 +22,11 @@ impl ImmRange {
         *value >= self.start() && *value <= self.end()
     }
     fn start(&self) -> u32 {
-        Self::ones(self.0)
+        if self.0 == 0 {
+            0
+        } else {
+            Self::ones(self.0 - 1) + 1
+        }
     }
     fn end(&self) -> u32 {
         Self::ones(self.1)
@@ -76,5 +80,32 @@ fn fmt_hex(n: u32) -> String {
         n.to_string()
     } else {
         format!("0x{:X}", n)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn imm_range_contains() {
+        let range = ImmRange(8, 16);
+        assert!(!range.contains(&0));
+        assert!(!range.contains(&0b1111111));
+        assert!(range.contains(&0b10000000));
+        assert!(range.contains(&255));
+        assert!(range.contains(&65535));
+        assert!(!range.contains(&65536));
+
+        let range = ImmRange(0, 32);
+        assert!(range.contains(&0));
+        assert!(range.contains(&u32::MAX));
+
+        let range = ImmRange(13, 31);
+        assert!(!range.contains(&0x123));
+        assert!(range.contains(&0x1234));
+        assert!(range.contains(&0x1234567));
+        assert!(range.contains(&0x12345678));
+        assert!(!range.contains(&0x82345678));
     }
 }
