@@ -5,12 +5,12 @@ pseudo_instruction! {
     name: "clr",
     operand_types: [ RegD ],
     expander: |_, operands| {
-        Ok(vec![(
+        vec![(
             "li",
             vec![
                 operands[0].to_string(),
                 "0".to_string(),
             ],
-        )])
+        )]
     },
 }

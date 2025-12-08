@@ -12,13 +12,13 @@ pseudo_instruction! {
             _ => unreachable!(),
         };
 
-        Ok(vec![(
+        vec![(
             inst,
             vec![
                 operands[0].to_string(),
                 operands[0].to_string(),
                 "1".to_string(),
             ],
-        )])
+        )]
     },
 }

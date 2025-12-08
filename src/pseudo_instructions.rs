@@ -1,5 +1,7 @@
+mod branch_imm;
 mod clear;
 mod inc_dec;
+mod load_imm32;
 mod mv;
 
 use std::collections::HashMap;
@@ -12,7 +14,7 @@ use crate::{
     operand_types::OperandType,
 };
 
-type ExpandRet<'a> = Result<Vec<(&'static str, Vec<String>)>>;
+type ExpandRet<'a> = Vec<(&'static str, Vec<String>)>;
 type ExpandFn = for<'a> fn(&'static str, &[&'a str]) -> ExpandRet<'a>;
 
 #[derive(Debug, Clone, Copy)]
@@ -33,13 +35,18 @@ pub static PSEUDO_INSTRUCTIONS: Lazy<HashMap<&'static str, PseudoInstruction>> =
 });
 
 impl PseudoInstruction {
-    pub fn expand<'a>(&self, operands: &[&'a str]) -> ExpandRet<'a> {
-        self.assert_operand_format(operands)?;
-
-        (self.expander)(self.name, operands)
+    pub fn expand<'a>(&self, operands: &[&'a str]) -> Result<ExpandRet<'a>> {
+        if self.assert_operand_format(operands)? {
+            Ok((self.expander)(self.name, operands))
+        } else {
+            Ok(vec![(
+                self.name,
+                operands.iter().map(|e| e.to_string()).collect::<Vec<_>>(),
+            )])
+        }
     }
 
-    fn assert_operand_format(&self, operands: &[&str]) -> Result<()> {
+    fn assert_operand_format(&self, operands: &[&str]) -> Result<bool> {
         if operands.len() != self.operand_types.len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",
@@ -50,14 +57,23 @@ impl PseudoInstruction {
         }
 
         for (i, operand) in operands.iter().enumerate() {
-            match self.operand_types[i] {
-                OperandType::RegD => parse_reg_d(operand)?,
-                OperandType::RegS => parse_reg_s(operand)?,
-                OperandType::Imm(_) => parse_imm(operand)?,
+            match &self.operand_types[i] {
+                OperandType::RegD => {
+                    parse_reg_d(operand)?;
+                }
+                OperandType::RegS => {
+                    parse_reg_s(operand)?;
+                }
+                OperandType::Imm(range) => {
+                    let num = parse_imm(operand)?;
+                    if !range.contains(&num) {
+                        return Ok(false);
+                    }
+                }
             };
         }
 
-        Ok(())
+        Ok(true)
     }
 }
 
@@ -91,26 +107,7 @@ macro pseudo_instruction {
     },
 }
 
-// pub fn load_imm(num: u32) -> (Option<String>, String) {
-//     if num > 0xFFF {
-//         (Some((num >> 12).to_string()), (num & 0xFFF).to_string())
-//     } else {
-//         (None, num.to_string())
-//     }
-// }
-//
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//
-//     #[test]
-//     fn test_load_imm() {
-//         let (up20, low12) = load_imm(0x123456);
-//         assert_eq!(up20, Some(0x123.to_string()));
-//         assert_eq!(low12, 0x456.to_string());
-//
-//         let (up20, low12) = load_imm(0xABC);
-//         assert_eq!(up20, None);
-//         assert_eq!(low12, 0xABC.to_string());
-//     }
-// }
+pub fn load_upper_imm(s: &str) -> (String, String) {
+    let num = parse_imm(s).unwrap(); // INFO: Safe to unwrap
+    (format!("0x{:X}", num >> 12), format!("0x{:X}", num & 0xFFF))
+}

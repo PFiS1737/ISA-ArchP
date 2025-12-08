@@ -5,13 +5,13 @@ pseudo_instruction! {
     name: "mv",
     operand_types: [ RegD, RegS ],
     expander: |_, operands| {
-        Ok(vec![(
+        vec![(
             "addi",
             vec![
                 operands[0].to_string(),
                 operands[1].to_string(),
                 "0".to_string(),
             ],
-        )])
+        )]
     },
 }

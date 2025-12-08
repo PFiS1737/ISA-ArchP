@@ -9,7 +9,7 @@ mod random;
 mod shift;
 mod stack;
 
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display, num::IntErrorKind};
 
 use anyhow::{Result, anyhow, bail};
 use once_cell::sync::Lazy;
@@ -327,6 +327,7 @@ fn parse_cond(cond: &str) -> Result<u32> {
 pub fn parse_reg_d(reg: &str) -> Result<u32> {
     match reg {
         "io" => Ok(26),
+        "tmp" => Ok(31),
 
         "r0" | "pc" | "kb" => bail!("Register '{}' is raed-only", reg),
 
@@ -354,6 +355,7 @@ pub fn parse_reg_s(reg: &str) -> Result<u32> {
         "pc" => Ok(25),
         "io" => Ok(26),
         "kb" => Ok(27),
+        "tmp" => Ok(31),
 
         r if let Some(n) = r.strip_prefix("r")
             && let Ok(n) = n.parse::<u32>() =>
@@ -381,7 +383,13 @@ pub fn parse_imm(imm: &str) -> Result<u32> {
         s => s.parse(),
     };
 
-    parsed.map_err(|_| anyhow!("Invalid immediate: {}", imm))
+    parsed.map_err(|err| {
+        if err.kind() == &IntErrorKind::PosOverflow {
+            anyhow!("Immediate out of range of 32-bits: {}", imm)
+        } else {
+            anyhow!("Invalid immediate: {}", imm)
+        }
+    })
 }
 
 #[cfg(test)]
@@ -439,6 +447,7 @@ mod tests {
         assert_snapshot!(f("0b101010"), @"42");
         assert_snapshot!(f("r1"), @"Error: Invalid immediate: r1");
         assert_snapshot!(f("invalid"), @"Error: Invalid immediate: invalid");
+        assert_snapshot!(f("0x1FFFFFFFF"), @"Error: Immediate out of range of 32-bits: 0x1FFFFFFFF");
     }
 
     #[test]
