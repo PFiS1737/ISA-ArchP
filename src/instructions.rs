@@ -14,6 +14,8 @@ use std::{collections::HashMap, fmt::Display};
 use anyhow::{Result, anyhow, bail};
 use once_cell::sync::Lazy;
 
+use crate::operand_types::{ImmRange, OperandType, op_types};
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum InstrType {
     R,
@@ -21,13 +23,6 @@ enum InstrType {
     B,
     U,
     C,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum OperandType {
-    RegD,
-    RegS,
-    Imm(u8), // bits
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -87,7 +82,7 @@ impl Instruction {
         self.assert_operand_count(operands.len(), operand_types.len())?;
 
         for (i, op) in operands.iter().enumerate() {
-            match operand_types[i] {
+            match &operand_types[i] {
                 OperandType::RegD => {
                     let reg = parse_reg_d(op)?;
                     parsed_operands.push(reg);
@@ -96,10 +91,10 @@ impl Instruction {
                     let reg = parse_reg_s(op)?;
                     parsed_operands.push(reg);
                 }
-                OperandType::Imm(bits) => {
+                OperandType::Imm(range) => {
                     let imm = parse_imm(op)?;
 
-                    self.assert_immediate_range(imm, bits)?;
+                    self.assert_immediate_range(imm, range)?;
 
                     parsed_operands.push(imm);
                 }
@@ -202,14 +197,14 @@ impl Instruction {
         Ok(())
     }
 
-    fn assert_immediate_range(&self, imm: u32, bits: u8) -> Result<()> {
-        if imm >= (1 << bits) {
+    fn assert_immediate_range(&self, imm: u32, range: &ImmRange) -> Result<()> {
+        if !range.contains(&imm) {
             bail!(
-                "Immediate value '{}' out of range for {}-type instruction '{}', expected {} bits",
+                "Immediate value '{}' out of range for {}-type instruction '{}', expected {}",
                 imm,
                 self.itype,
                 self.name,
-                bits
+                range
             );
         }
 
@@ -248,12 +243,6 @@ macro code {
     },
 }
 
-macro op_types {
-    ( $( $type:ident $(($v:literal))? ),* ) => {
-        &[ $( $crate::instructions::OperandType::$type $(($v))? ),* ]
-    }
-}
-
 macro instruction {
     (
         name: $name:literal,
@@ -282,7 +271,7 @@ macro instruction {
                 name: $name,
                 opcode: $opcode,
                 itype: $crate::instructions::InstrType::$itype,
-                operand_types: Some($crate::instructions::op_types! $types),
+                operand_types: Some($crate::operand_types::op_types! $types),
                 encode_format: None,
             }
         }
@@ -300,7 +289,7 @@ macro instruction {
                 name: $name,
                 opcode: $opcode,
                 itype: $crate::instructions::InstrType::$itype,
-                operand_types: Some($crate::instructions::op_types! $types),
+                operand_types: Some($crate::operand_types::op_types! $types),
                 encode_format: Some([
                     $crate::instructions::FormatPlaceholder::$rd,
                     $crate::instructions::FormatPlaceholder::$rs1,
@@ -472,12 +461,12 @@ mod tests {
         assert_snapshot!(cmd("", &["r1", "rrr", "123"]), @"Error: Invalid register: rrr");
         assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Invalid immediate: r3");
         assert_snapshot!(cmd("", &["r0", "r2", "123"]), @"Error: Register 'r0' is raed-only");
-        assert_snapshot!(cmd("", &["r1", "r2", "0xFFFF"]), @"Error: Immediate value '65535' out of range for I-type instruction 'addi', expected 12 bits");
+        assert_snapshot!(cmd("", &["r1", "r2", "0xFFFF"]), @"Error: Immediate value '65535' out of range for I-type instruction 'addi', expected 0 ~ 0xFFF");
         assert_snapshot!(cmd("invalid", &["r1", "r2", "123"]), @"Error: Invalid condition: invalid");
         assert_snapshot!(cmd("ge", &["r4", "r5", "0b100"]), @"0100 000 100 00100 00101 0000000 00100");
 
         let cmd = instr("shri");
-        assert_snapshot!(cmd("", &["r1", "r2", "32"]), @"Error: Immediate value '32' out of range for I-type instruction 'shri', expected 5 bits");
+        assert_snapshot!(cmd("", &["r1", "r2", "32"]), @"Error: Immediate value '32' out of range for I-type instruction 'shri', expected 0 ~ 31");
         assert_snapshot!(cmd("", &["r1", "r2", "31"]), @"0110 001 000 00001 00010 0000000 11111");
     }
 
@@ -495,7 +484,7 @@ mod tests {
         assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Instruction 'lui' requires 2 operands, got 3");
         assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Invalid immediate: r2");
         assert_snapshot!(cmd("", &["r0", "r2"]), @"Error: Register 'r0' is raed-only");
-        assert_snapshot!(cmd("", &["r3", "0x200000"]), @"Error: Immediate value '2097152' out of range for U-type instruction 'lui', expected 20 bits");
+        assert_snapshot!(cmd("", &["r3", "0x200000"]), @"Error: Immediate value '2097152' out of range for U-type instruction 'lui', expected 0 ~ 0xFFFFF");
         assert_snapshot!(cmd("eq", &["r3", "0xABCDE"]), @"Error: Condition is not allowed for U-type instruction 'lui'");
         assert_snapshot!(cmd("", &["r3", "0xABCDE"]), @"1000 011 101 00011 01011 1100110 11110");
     }
@@ -506,7 +495,7 @@ mod tests {
         assert_snapshot!(cmd("", &[]), @"Error: Instruction 'col' requires 1 operands, got 0");
         assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Instruction 'col' requires 1 operands, got 2");
         assert_snapshot!(cmd("", &["r1"]), @"Error: Invalid immediate: r1");
-        assert_snapshot!(cmd("", &["0x1FFFFFF"]), @"Error: Immediate value '33554431' out of range for C-type instruction 'col', expected 24 bits");
+        assert_snapshot!(cmd("", &["0x1FFFFFF"]), @"Error: Immediate value '33554431' out of range for C-type instruction 'col', expected 0 ~ 0xFFFFFF");
         assert_snapshot!(cmd("ne", &["0x123456"]), @"Error: Condition is not allowed for C-type instruction 'col'");
         assert_snapshot!(cmd("", &["0x123456"]), @"1101 000 000 01001 00011 0100010 10110");
     }

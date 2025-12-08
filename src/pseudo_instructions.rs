@@ -7,7 +7,10 @@ use std::collections::HashMap;
 use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
-use crate::instructions::{OperandType, parse_imm, parse_reg_d, parse_reg_s};
+use crate::{
+    instructions::{parse_imm, parse_reg_d, parse_reg_s},
+    operand_types::OperandType,
+};
 
 type ExpandRet<'a> = Result<Vec<(&'static str, Vec<String>)>>;
 type ExpandFn = for<'a> fn(&'static str, &[&'a str]) -> ExpandRet<'a>;
@@ -75,13 +78,13 @@ macro pseudo_instruction {
 
     (
         name: $name:literal,
-        operand_types: [ $( $type:ident $(($v:expr))? ),* ],
+        operand_types: $types:tt,
         expander: $expander:expr,
     ) => {
         inventory::submit! {
             $crate::pseudo_instructions::PseudoInstruction {
                 name: $name,
-                operand_types: &[ $( $crate::instructions::OperandType::$type $(($v))? ),* ],
+                operand_types: $crate::operand_types::op_types! $types,
                 expander: $expander,
             }
         }

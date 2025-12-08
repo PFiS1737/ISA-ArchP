@@ -1,10 +1,12 @@
 #![allow(clippy::unusual_byte_groupings)]
 #![feature(if_let_guard)]
 #![feature(decl_macro)]
+#![feature(new_range_api)]
 
 mod assembler;
 mod cli;
 mod instructions;
+mod operand_types;
 mod pass1;
 mod pass2;
 mod pseudo_instructions;
