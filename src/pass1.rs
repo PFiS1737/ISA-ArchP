@@ -14,7 +14,7 @@ use crate::pseudo_instructions::PSEUDO_INSTRUCTIONS;
 pub struct Pass1<'a> {
     constants: HashMap<&'a str, &'a str>,
     pub labels: HashMap<&'a str, String>,
-    pub pc_to_original: Vec<(usize, &'a str)>,
+    pub addr_to_original: Vec<(usize, &'a str)>,
     pub processed: Vec<Vec<String>>,
 }
 
@@ -23,7 +23,7 @@ impl<'a> Pass1<'a> {
         Self {
             constants: HashMap::new(),
             labels: HashMap::new(),
-            pc_to_original: Vec::new(),
+            addr_to_original: Vec::new(),
             processed: Vec::new(),
         }
     }
@@ -121,7 +121,7 @@ impl<'a> Pass1<'a> {
                 line.push(ex_name.to_string() + cond);
                 line.extend(ex_ops);
 
-                self.pc_to_original.push((orig_idx, raw_line.trim()));
+                self.addr_to_original.push((orig_idx, raw_line.trim()));
                 self.processed.push(line);
             }
         }

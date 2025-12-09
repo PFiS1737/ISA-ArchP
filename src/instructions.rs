@@ -62,8 +62,6 @@ impl Instruction {
             );
         }
 
-        // TODO: check readonly registers?
-
         let operands = self.parse(operands)?;
 
         match self.itype {

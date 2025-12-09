@@ -1,7 +1,5 @@
-mod branch_imm;
 mod clear;
 mod inc_dec;
-mod load_imm32;
 mod mv;
 
 use std::collections::HashMap;
@@ -10,7 +8,7 @@ use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
 use crate::{
-    instructions::{parse_imm, parse_reg_d, parse_reg_s},
+    instructions::{parse_reg_d, parse_reg_s},
     operand_types::OperandType,
 };
 
@@ -36,17 +34,12 @@ pub static PSEUDO_INSTRUCTIONS: Lazy<HashMap<&'static str, PseudoInstruction>> =
 
 impl PseudoInstruction {
     pub fn expand<'a>(&self, operands: &[&'a str]) -> Result<ExpandRet<'a>> {
-        if self.assert_operand_format(operands)? {
-            Ok((self.expander)(self.name, operands))
-        } else {
-            Ok(vec![(
-                self.name,
-                operands.iter().map(|e| e.to_string()).collect::<Vec<_>>(),
-            )])
-        }
+        self.assert_operand_format(operands)?;
+
+        Ok((self.expander)(self.name, operands))
     }
 
-    fn assert_operand_format(&self, operands: &[&str]) -> Result<bool> {
+    fn assert_operand_format(&self, operands: &[&str]) -> Result<()> {
         if operands.len() != self.operand_types.len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",
@@ -58,22 +51,13 @@ impl PseudoInstruction {
 
         for (i, operand) in operands.iter().enumerate() {
             match &self.operand_types[i] {
-                OperandType::RegD => {
-                    parse_reg_d(operand)?;
-                }
-                OperandType::RegS => {
-                    parse_reg_s(operand)?;
-                }
-                OperandType::Imm(range) => {
-                    let num = parse_imm(operand)?;
-                    if !range.contains(&num) {
-                        return Ok(false);
-                    }
-                }
+                OperandType::RegD => parse_reg_d(operand)?,
+                OperandType::RegS => parse_reg_s(operand)?,
+                OperandType::Imm(_) => unimplemented!(),
             };
         }
 
-        Ok(true)
+        Ok(())
     }
 }
 
@@ -105,9 +89,4 @@ macro pseudo_instruction {
             }
         }
     },
-}
-
-pub fn load_upper_imm(s: &str) -> (String, String) {
-    let num = parse_imm(s).unwrap(); // INFO: Safe to unwrap
-    (format!("0x{:X}", num >> 12), format!("0x{:X}", num & 0xFFF))
 }

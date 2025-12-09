@@ -6,7 +6,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 0x8408000A # li r4 10      [li a0 10]      <label: main>
-0xAA000003 # call fib
+0xAA000003 # call 3        [call fib]
 0x40345000 # addi io r5 0  [mv io rt]
 0x40024000 # addi r1 r4 0  [mv s0 a0]      <label: fib>
 0x70001002 # cmpi r1 2     [cmpi s0 2]
@@ -17,7 +17,7 @@ exit_code: 0
 0xA4003000 # push r3       [push s2]
 0x42021001 # subi r1 r1 1  [subi s0 s0 1]
 0x40081000 # addi r4 r1 0  [mv a0 s0]
-0xAA000003 # call fib
+0xAA000003 # call 3        [call fib]
 0xA2060000 # pop r3        [pop s2]
 0xA2040000 # pop r2        [pop s1]
 0xA2020000 # pop r1        [pop s0]
@@ -27,7 +27,7 @@ exit_code: 0
 0xA4003000 # push r3       [push s2]
 0x42021002 # subi r1 r1 2  [subi s0 s0 2]
 0x40081000 # addi r4 r1 0  [mv a0 s0]
-0xAA000003 # call fib
+0xAA000003 # call 3        [call fib]
 0xA2060000 # pop r3        [pop s2]
 0xA2040000 # pop r2        [pop s1]
 0xA2020000 # pop r1        [pop s0]

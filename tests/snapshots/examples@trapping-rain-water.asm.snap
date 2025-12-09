@@ -5,39 +5,39 @@ input_file: examples/trapping-rain-water.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x840C0010 # li r6 16            [li t0 16]            <label: main>
-0x8200701A # sw r7 io 0          [sw t1 io 0]          <label: input>
-0x400E7001 # addi r7 r7 1        [inc t1]
-0x420C6001 # subi r6 r6 1        [dec t0]
-0x9A006020 # bgt r6 r0 input     [bgt t0 r0 input]
-0xAA000007 # call solve
-0x4034A000 # addi io r10 0       [mv io rt]
-0x84020000 # li r1 0             [li l 0]              <label: solve>
-0x8404000F # li r2 15            [li r 15]
-0x80061000 # lw r3 r1 0          [lw lmax l 0]
-0x80082000 # lw r4 r2 0          [lw rmax r 0]
-0x9C0013A2 # bge r1 r2 endwhile  [bge l r endwhile]    <label: while>
-0x9C0032A4 # bge r3 r4 else      [bge lmax rmax else]
-0x40021001 # addi r1 r1 1        [inc l]
-0x80101000 # lw r8 r1 0          [lw a0 l 0]
-0x40123000 # addi r9 r3 0        [mv a1 lmax]
-0xAA00001F # call max
-0x4006A000 # addi r3 r10 0       [mv lmax rt]
-0x020E3008 # sub r7 r3 r8        [sub t1 lmax a0]
-0x000A5007 # add r5 r5 r7        [add water water t1]
-0x90000380 # jmp endif
-0x42042001 # subi r2 r2 1        [dec r]               <label: else>
-0x80102000 # lw r8 r2 0          [lw a0 r 0]
-0x40124000 # addi r9 r4 0        [mv a1 rmax]
-0xAA00001F # call max
-0x4008A000 # addi r4 r10 0       [mv rmax rt]
-0x020E4008 # sub r7 r4 r8        [sub t1 rmax a0]
-0x000A5007 # add r5 r5 r7        [add water water t1]
-0x90000160 # jmp while                                 <label: endif>
-0x40145000 # addi r10 r5 0       [mv rt water]         <label: endwhile>
+0x840C0010 # li r6 16          [li t0 16]            <label: main>
+0x8200701A # sw r7 io 0        [sw t1 io 0]          <label: input>
+0x400E7001 # addi r7 r7 1      [inc t1]
+0x420C6001 # subi r6 r6 1      [dec t0]
+0x9A006020 # bgt r6 r0 1       [bgt t0 r0 input]
+0xAA000007 # call 7            [call solve]
+0x4034A000 # addi io r10 0     [mv io rt]
+0x84020000 # li r1 0           [li l 0]              <label: solve>
+0x8404000F # li r2 15          [li r 15]
+0x80061000 # lw r3 r1 0        [lw lmax l 0]
+0x80082000 # lw r4 r2 0        [lw rmax r 0]
+0x9C0013A2 # bge r1 r2 29      [bge l r endwhile]    <label: while>
+0x9C0032A4 # bge r3 r4 21      [bge lmax rmax else]
+0x40021001 # addi r1 r1 1      [inc l]
+0x80101000 # lw r8 r1 0        [lw a0 l 0]
+0x40123000 # addi r9 r3 0      [mv a1 lmax]
+0xAA00001F # call 31           [call max]
+0x4006A000 # addi r3 r10 0     [mv lmax rt]
+0x020E3008 # sub r7 r3 r8      [sub t1 lmax a0]
+0x000A5007 # add r5 r5 r7      [add water water t1]
+0x90000380 # jmp 28            [jmp endif]
+0x42042001 # subi r2 r2 1      [dec r]               <label: else>
+0x80102000 # lw r8 r2 0        [lw a0 r 0]
+0x40124000 # addi r9 r4 0      [mv a1 rmax]
+0xAA00001F # call 31           [call max]
+0x4008A000 # addi r4 r10 0     [mv rmax rt]
+0x020E4008 # sub r7 r4 r8      [sub t1 rmax a0]
+0x000A5007 # add r5 r5 r7      [add water water t1]
+0x90000160 # jmp 11            [jmp while]           <label: endif>
+0x40145000 # addi r10 r5 0     [mv rt water]         <label: endwhile>
 0xA8000000 # ret
-0x30008009 # cmp r8 r9           [cmp a0 a1]           <label: max>
-0x41548000 # addi.gt r10 r8 0    [mv.gt rt a0]
-0x41949000 # addi.le r10 r9 0    [mv.le rt a1]
+0x30008009 # cmp r8 r9         [cmp a0 a1]           <label: max>
+0x41548000 # addi.gt r10 r8 0  [mv.gt rt a0]
+0x41949000 # addi.le r10 r9 0  [mv.le rt a1]
 0xA8000000 # ret
 ----- stderr -----

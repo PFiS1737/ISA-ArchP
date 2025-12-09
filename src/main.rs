@@ -6,6 +6,7 @@
 mod assembler;
 mod cli;
 mod instructions;
+mod macro_instructions;
 mod operand_types;
 mod pass1;
 mod pass2;

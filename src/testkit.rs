@@ -1,6 +1,7 @@
-pub use crate::instructions::*;
-pub use crate::pseudo_instructions::*;
 pub use insta::assert_snapshot;
+
+use crate::instructions::*;
+use crate::macro_instructions::*;
 
 pub fn instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
     let instr = INSTRUCTIONS.get(cmd).unwrap();
@@ -10,14 +11,17 @@ pub fn instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
     }
 }
 
-pub fn ps_instr(cmd: &str) -> impl Fn(&[&str]) -> String {
-    let ps_instr = PSEUDO_INSTRUCTIONS.get(cmd).unwrap();
+pub fn mc_instr(cmd: &str) -> impl Fn(&[&str]) -> String {
+    let ps_instr = MACRO_INSTRUCTIONS.get(cmd).unwrap();
     |ops| match ps_instr.expand(ops) {
-        Ok(expanded) => expanded
-            .into_iter()
-            .map(|(name, ops)| format!("{name} {}", ops.join(" ")))
-            .collect::<Vec<_>>()
-            .join("; "),
+        Ok(expanded) => match expanded {
+            Some(expanded) => expanded
+                .into_iter()
+                .map(|(name, ops)| format!("{name} {}", ops.join(" ")))
+                .collect::<Vec<_>>()
+                .join("; "),
+            None => "".to_string(),
+        },
         Err(e) => format!("Error: {}", e),
     }
 }
