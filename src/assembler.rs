@@ -15,7 +15,7 @@ impl Assembler {
         let mut pass1 = Pass1::new();
         pass1.run(&self.source_lines)?;
 
-        let mut pass2 = Pass2::new(pass1.labels, pass1.addr_to_original);
+        let pass2 = Pass2::new(pass1.labels, pass1.addr_to_original);
         pass2.run(
             pass1
                 .processed

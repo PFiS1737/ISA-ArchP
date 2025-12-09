@@ -2,15 +2,14 @@ use std::collections::HashMap;
 
 use anyhow::{Result, anyhow, bail};
 
-use crate::pseudo_instructions::PSEUDO_INSTRUCTIONS;
+use crate::macro_instructions::MACRO_INSTRUCTIONS;
 
 /// Pass 1
 ///
 /// 1. Record constants and labels.
-/// 2. Handle immediate values.
-/// 3. Expand pseudo-instructions.
+/// 2. Expand macro-instructions.
+/// 3. Substitute constants.
 /// 4. Build a mapping between new lines and the original lines.
-/// 5. Substitute constants.
 pub struct Pass1<'a> {
     constants: HashMap<&'a str, &'a str>,
     pub labels: HashMap<&'a str, String>,
@@ -101,25 +100,27 @@ impl<'a> Pass1<'a> {
                 })
                 .collect::<Vec<_>>();
 
-            let mut expanded = Vec::new();
+            let mut res = Vec::new();
 
-            if let Some(pseudo) = PSEUDO_INSTRUCTIONS.get(name) {
-                expanded.extend(pseudo.expand(&operands).map_err(|e| {
+            if let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
+                && let Some(expanded) = mc_instr.expand(&operands).map_err(|e| {
                     anyhow!(
-                        "Error expanding pseudo-instruction at line {}: '{}' ({})",
+                        "Error expanding macro-instruction at line {}: '{}' ({})",
                         orig_idx + 1,
                         raw_line,
-                        e,
+                        e
                     )
-                })?);
+                })?
+            {
+                res.extend(expanded);
             } else {
-                expanded.push((name, operands.iter().map(|e| e.to_string()).collect()));
+                res.push((name, operands.iter().map(|e| e.to_string()).collect()));
             }
 
-            for (ex_name, ex_ops) in expanded {
+            for (name, ops) in res {
                 let mut line = Vec::new();
-                line.push(ex_name.to_string() + cond);
-                line.extend(ex_ops);
+                line.push(name.to_string() + cond);
+                line.extend(ops);
 
                 self.addr_to_original.push((orig_idx, raw_line.trim()));
                 self.processed.push(line);

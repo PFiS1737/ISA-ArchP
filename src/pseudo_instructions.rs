@@ -12,7 +12,7 @@ use crate::{
     operand_types::OperandType,
 };
 
-type ExpandRet<'a> = Vec<(&'static str, Vec<String>)>;
+type ExpandRet<'a> = (&'static str, Vec<&'a str>);
 type ExpandFn = for<'a> fn(&'static str, &[&'a str]) -> ExpandRet<'a>;
 
 #[derive(Debug, Clone, Copy)]

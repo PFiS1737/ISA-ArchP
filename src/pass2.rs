@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::{Result, anyhow};
 
-use crate::{instructions::INSTRUCTIONS, macro_instructions::MACRO_INSTRUCTIONS};
+use crate::{instructions::INSTRUCTIONS, pseudo_instructions::PSEUDO_INSTRUCTIONS};
 
 /// Pass 3
 ///
@@ -22,14 +22,14 @@ impl<'a> Pass2<'a> {
         }
     }
 
-    pub fn run(&mut self, processed_lines: Vec<Vec<&'a str>>) -> Result<(Vec<u32>, Vec<String>)> {
+    pub fn run(&self, processed_lines: Vec<Vec<&'a str>>) -> Result<(Vec<u32>, Vec<String>)> {
         let mut codes = Vec::new();
         let mut displays = Vec::new();
 
         for (addr, line) in processed_lines.iter().enumerate() {
             let (original_idx, original_line) = self.addr_to_original[addr];
 
-            let encoded = self.line_handler(line).map_err(|e| {
+            let (code, mut display) = self.line_handler(line).map_err(|e| {
                 anyhow!(
                     "Error encoding line {}: '{}' ({})",
                     original_idx + 1,
@@ -38,31 +38,20 @@ impl<'a> Pass2<'a> {
                 )
             })?;
 
-            // FIXME: perf
-
-            for (_, addr_str) in self.labels.iter_mut() {
-                let addr_num = addr_str.parse::<usize>().unwrap();
-                if addr_num > addr {
-                    *addr_str = (addr_num + encoded.len() - 1).to_string();
-                }
+            if display != original_line {
+                display = format!("{display}\t[{original_line}]");
+            } else {
+                display += "\t";
             }
 
-            for (mut display, code) in encoded {
-                if display != original_line {
-                    display = format!("{display}\t[{original_line}]");
-                } else {
-                    display += "\t";
-                }
-
-                if let Some(label_name) = self.find_label_for(codes.len()) {
-                    display = format!("{display}\t<label: {label_name}>");
-                } else {
-                    display += "\t";
-                }
-
-                codes.push(code);
-                displays.push(display.clone());
+            if let Some(label_name) = self.find_label_for(codes.len()) {
+                display = format!("{display}\t<label: {label_name}>");
+            } else {
+                display += "\t";
             }
+
+            codes.push(code);
+            displays.push(display);
         }
 
         Ok((codes, displays))
@@ -78,14 +67,14 @@ impl<'a> Pass2<'a> {
         None
     }
 
-    fn line_handler(&self, line: &[&'a str]) -> Result<Vec<(String, u32)>> {
+    fn line_handler(&self, line: &[&'a str]) -> Result<(u32, String)> {
         let (name, cond) = if let Some((name, cond)) = line[0].split_once('.') {
             (name, Some(cond))
         } else {
             (line[0], None)
         };
 
-        let operands = &line[1..]
+        let operands = line[1..]
             .iter()
             .map(|e| {
                 if let Some(label_addr) = self.labels.get(e) {
@@ -96,35 +85,41 @@ impl<'a> Pass2<'a> {
             })
             .collect::<Vec<_>>();
 
-        let expanded = if let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
-            && let Some(expanded) = mc_instr
-                .expand(operands)
-                .map_err(|e| anyhow!("Error expanding macro-instruction '{}': {}", name, e))?
-        {
-            expanded
+        let (name, ops) = if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
+            ps_instr
+                .expand(&operands)
+                .map_err(|e| anyhow!("Error expanding pseudo-instruction '{}': {}", name, e))?
         } else {
-            vec![(name, operands.iter().map(|e| e.to_string()).collect())]
+            (name, operands)
         };
 
-        let mut codes = Vec::new();
+        let code = INSTRUCTIONS
+            .get(name)
+            .ok_or_else(|| anyhow!("Unknown instruction: '{}'", name))?
+            .encode(cond, &ops)?;
 
-        for (name, ops) in expanded {
-            let instr = INSTRUCTIONS
-                .get(name)
-                .ok_or_else(|| anyhow!("Unknown instruction: '{}'", name))?;
+        let mut display = String::with_capacity(
+            name.len()
+                + cond.map(|c| 1 + c.len()).unwrap_or(0)
+                + if ops.is_empty() { 0 } else { 1 }
+                + ops.iter().map(|o| o.len()).sum::<usize>()
+                + ops.len().saturating_sub(1),
+        );
 
-            codes.push((
-                format!(
-                    "{name}{} {}",
-                    cond.map(|e| format!(".{e}")).unwrap_or("".to_string()),
-                    ops.join(" ")
-                )
-                .trim()
-                .to_string(),
-                instr.encode(cond, &ops.iter().map(|e| e.as_str()).collect::<Vec<_>>())?,
-            ));
+        display.push_str(name);
+
+        if let Some(c) = cond {
+            display.push('.');
+            display.push_str(c);
         }
 
-        Ok(codes)
+        if !ops.is_empty() {
+            for op in ops {
+                display.push(' ');
+                display.push_str(op);
+            }
+        }
+
+        Ok((code, display))
     }
 }

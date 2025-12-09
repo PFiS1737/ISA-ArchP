@@ -4,14 +4,12 @@ use crate::pseudo_instructions::pseudo_instruction;
 pseudo_instruction! {
     name: "mv",
     operand_types: [ RegD, RegS ],
-    expander: |_, operands| {
-        vec![(
-            "addi",
-            vec![
-                operands[0].to_string(),
-                operands[1].to_string(),
-                "0".to_string(),
-            ],
-        )]
-    },
+    expander: |_, ops| (
+        "addi",
+        vec![
+            ops[0],
+            ops[1],
+            "0",
+        ],
+    ),
 }

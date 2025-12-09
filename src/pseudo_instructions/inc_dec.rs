@@ -5,20 +5,20 @@ use crate::pseudo_instructions::pseudo_instruction;
 pseudo_instruction! {
     name: [ "inc", "dec" ],
     operand_types: [ RegD ],
-    expander: |name, operands| {
+    expander: |name, ops| {
         let inst = match name {
             "inc" => "addi",
             "dec" => "subi",
             _ => unreachable!(),
         };
 
-        vec![(
+        (
             inst,
             vec![
-                operands[0].to_string(),
-                operands[0].to_string(),
-                "1".to_string(),
+                ops[0],
+                ops[0],
+                "1",
             ],
-        )]
+        )
     },
 }
