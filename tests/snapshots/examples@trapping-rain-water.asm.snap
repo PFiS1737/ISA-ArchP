@@ -9,7 +9,7 @@ exit_code: 0
 0x8200701A # sw r7 io 0        [sw t1 io 0]          <label: input>
 0x400E7001 # addi r7 r7 1      [inc t1]
 0x420C6001 # subi r6 r6 1      [dec t0]
-0x9A006020 # bgt r6 r0 1       [bgt t0 r0 input]
+0x9A006020 # bgt r6 r0 1       [bgti t0 0 input]
 0xAA000007 # call 7            [call solve]
 0x4034A000 # addi io r10 0     [mv io rt]
 0x84020000 # li r1 0           [li l 0]              <label: solve>

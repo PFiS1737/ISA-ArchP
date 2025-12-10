@@ -1,3 +1,4 @@
+mod branch_imm;
 mod load_imm32;
 
 use std::collections::HashMap;
@@ -78,7 +79,7 @@ macro macro_instruction {
     },
 }
 
-fn load_upper_imm(s: &str) -> Result<(Option<String>, String)> {
+fn load_imm(s: &str) -> Result<(Option<String>, String)> {
     let num = parse_imm(s)?;
     if num > 0xFFF {
         Ok((

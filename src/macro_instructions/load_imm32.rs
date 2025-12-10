@@ -2,7 +2,7 @@ use anyhow::bail;
 
 use crate::{
     instructions::parse_reg_d,
-    macro_instructions::{ExpandFn, load_upper_imm, macro_instruction},
+    macro_instructions::{ExpandFn, load_imm, macro_instruction},
 };
 
 // li rd imm32  => lui rd imm32[31:12]; ori rd rd imm32[11:0]
@@ -15,7 +15,7 @@ macro_instruction! {
 const F: ExpandFn = |name, cond, ops| {
     parse_reg_d(ops[0])?;
 
-    let (up20, low12) = load_upper_imm(ops[1])?;
+    let (up20, low12) = load_imm(ops[1])?;
 
     if let Some(up20) = up20 {
         if cond.is_some() {
