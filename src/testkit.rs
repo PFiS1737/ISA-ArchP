@@ -2,6 +2,7 @@ pub use insta::assert_snapshot;
 
 use crate::instructions::*;
 use crate::macro_instructions::*;
+use crate::utils::fmt_line;
 
 pub fn instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
     let instr = INSTRUCTIONS.get(cmd).unwrap();
@@ -11,13 +12,19 @@ pub fn instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
     }
 }
 
-pub fn mc_instr(cmd: &str) -> impl Fn(&[&str]) -> String {
+pub fn mc_instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
     let ps_instr = MACRO_INSTRUCTIONS.get(cmd).unwrap();
-    |ops| match ps_instr.expand(ops) {
+    |cond, ops| match ps_instr.expand(if cond.is_empty() { None } else { Some(cond) }, ops) {
         Ok(expanded) => match expanded {
             Some(expanded) => expanded
                 .into_iter()
-                .map(|(name, ops)| format!("{name} {}", ops.join(" ")))
+                .map(|(name, cond, ops)| {
+                    fmt_line(
+                        name,
+                        cond,
+                        &ops.iter().map(|s| s.as_str()).collect::<Vec<_>>(),
+                    )
+                })
                 .collect::<Vec<_>>()
                 .join("; "),
             None => "".to_string(),

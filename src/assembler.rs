@@ -16,12 +16,6 @@ impl Assembler {
         pass1.run(&self.source_lines)?;
 
         let pass2 = Pass2::new(pass1.labels, pass1.addr_to_original);
-        pass2.run(
-            pass1
-                .processed
-                .iter()
-                .map(|e| e.iter().map(|s| s.as_str()).collect())
-                .collect(),
-        )
+        pass2.run(pass1.processed)
     }
 }

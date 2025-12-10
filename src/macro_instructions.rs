@@ -5,18 +5,15 @@ use std::collections::HashMap;
 use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
-use crate::{
-    instructions::{parse_imm, parse_reg_d, parse_reg_s},
-    operand_types::OperandType,
-};
+use crate::instructions::parse_imm;
 
-type ExpandRet<'a> = Vec<(&'static str, Vec<String>)>;
-type ExpandFn = for<'a> fn(&'static str, &[&'a str]) -> ExpandRet<'a>;
+type ExpandRet<'a> = Result<Option<Vec<(&'static str, Option<&'a str>, Vec<String>)>>>;
+type ExpandFn = for<'a> fn(&'static str, Option<&'a str>, &[&'a str]) -> ExpandRet<'a>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct MacroInstruction {
     name: &'static str,
-    operand_types: &'static [OperandType],
+    operand_count: usize,
     expander: ExpandFn,
 }
 
@@ -31,55 +28,36 @@ pub static MACRO_INSTRUCTIONS: Lazy<HashMap<&'static str, MacroInstruction>> = L
 });
 
 impl MacroInstruction {
-    pub fn expand<'a>(&self, operands: &[&'a str]) -> Result<Option<ExpandRet<'a>>> {
-        if self.assert_operand_format(operands)? {
-            Ok(Some((self.expander)(self.name, operands)))
-        } else {
-            Ok(None)
-        }
+    pub fn expand<'a>(&self, cond: Option<&'a str>, operands: &[&'a str]) -> ExpandRet<'a> {
+        self.assert_operand_count(operands)?;
+
+        (self.expander)(self.name, cond, operands)
     }
 
-    fn assert_operand_format(&self, operands: &[&str]) -> Result<bool> {
-        if operands.len() != self.operand_types.len() {
+    fn assert_operand_count(&self, operands: &[&str]) -> Result<()> {
+        if operands.len() != self.operand_count {
             bail!(
                 "Macro-instruction '{}' requires {} operands, got {}",
                 self.name,
-                self.operand_types.len(),
+                self.operand_count,
                 operands.len()
             );
         }
 
-        for (i, operand) in operands.iter().enumerate() {
-            match &self.operand_types[i] {
-                OperandType::RegD => {
-                    parse_reg_d(operand)?;
-                }
-                OperandType::RegS => {
-                    parse_reg_s(operand)?;
-                }
-                OperandType::Imm(range) => {
-                    let num = parse_imm(operand)?;
-                    if !range.contains(&num) {
-                        return Ok(false);
-                    }
-                }
-            };
-        }
-
-        Ok(true)
+        Ok(())
     }
 }
 
 macro macro_instruction {
     (
         name: [ $($name:literal),+ ],
-        operand_types: $types:tt,
+        operand_count: $count:literal,
         expander: $expander:expr,
     ) => {
         $(
             $crate::macro_instructions::macro_instruction! {
                 name: $name,
-                operand_types: $types,
+                operand_count: $count,
                 expander: $expander,
             }
         )+
@@ -87,20 +65,27 @@ macro macro_instruction {
 
     (
         name: $name:literal,
-        operand_types: $types:tt,
+        operand_count: $count:literal,
         expander: $expander:expr,
     ) => {
         inventory::submit! {
             $crate::macro_instructions::MacroInstruction {
                 name: $name,
-                operand_types: $crate::operand_types::op_types! $types,
+                operand_count: $count,
                 expander: $expander,
             }
         }
     },
 }
 
-pub fn load_upper_imm(s: &str) -> (String, String) {
-    let num = parse_imm(s).unwrap(); // INFO: Safe to unwrap
-    (format!("0x{:X}", num >> 12), format!("0x{:X}", num & 0xFFF))
+fn load_upper_imm(s: &str) -> Result<(Option<String>, String)> {
+    let num = parse_imm(s)?;
+    if num > 0xFFF {
+        Ok((
+            Some(format!("0x{:X}", num >> 12)),
+            format!("0x{:X}", num & 0xFFF),
+        ))
+    } else {
+        Ok((None, format!("0x{:X}", num)))
+    }
 }

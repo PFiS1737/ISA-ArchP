@@ -2,7 +2,9 @@ use std::collections::HashMap;
 
 use anyhow::{Result, anyhow};
 
-use crate::{instructions::INSTRUCTIONS, pseudo_instructions::PSEUDO_INSTRUCTIONS};
+use crate::{
+    instructions::INSTRUCTIONS, pseudo_instructions::PSEUDO_INSTRUCTIONS, utils::fmt_line,
+};
 
 /// Pass 3
 ///
@@ -22,11 +24,14 @@ impl<'a> Pass2<'a> {
         }
     }
 
-    pub fn run(&self, processed_lines: Vec<Vec<&'a str>>) -> Result<(Vec<u32>, Vec<String>)> {
+    pub fn run(
+        &self,
+        processed_lines: Vec<(&'a str, Option<&'a str>, Vec<String>)>,
+    ) -> Result<(Vec<u32>, Vec<String>)> {
         let mut codes = Vec::new();
         let mut displays = Vec::new();
 
-        for (addr, line) in processed_lines.iter().enumerate() {
+        for (addr, line) in processed_lines.into_iter().enumerate() {
             let (original_idx, original_line) = self.addr_to_original[addr];
 
             let (code, mut display) = self.line_handler(line).map_err(|e| {
@@ -67,17 +72,13 @@ impl<'a> Pass2<'a> {
         None
     }
 
-    fn line_handler(&self, line: &[&'a str]) -> Result<(u32, String)> {
-        let (name, cond) = if let Some((name, cond)) = line[0].split_once('.') {
-            (name, Some(cond))
-        } else {
-            (line[0], None)
-        };
+    fn line_handler(&self, line: (&'a str, Option<&'a str>, Vec<String>)) -> Result<(u32, String)> {
+        let (name, cond, operands) = line;
 
-        let operands = line[1..]
+        let operands = operands
             .iter()
             .map(|e| {
-                if let Some(label_addr) = self.labels.get(e) {
+                if let Some(label_addr) = self.labels.get(e.as_str()) {
                     label_addr.as_str()
                 } else {
                     e
@@ -98,28 +99,6 @@ impl<'a> Pass2<'a> {
             .ok_or_else(|| anyhow!("Unknown instruction: '{}'", name))?
             .encode(cond, &ops)?;
 
-        let mut display = String::with_capacity(
-            name.len()
-                + cond.map(|c| 1 + c.len()).unwrap_or(0)
-                + if ops.is_empty() { 0 } else { 1 }
-                + ops.iter().map(|o| o.len()).sum::<usize>()
-                + ops.len().saturating_sub(1),
-        );
-
-        display.push_str(name);
-
-        if let Some(c) = cond {
-            display.push('.');
-            display.push_str(c);
-        }
-
-        if !ops.is_empty() {
-            for op in ops {
-                display.push(' ');
-                display.push_str(op);
-            }
-        }
-
-        Ok((code, display))
+        Ok((code, fmt_line(name, cond, &ops)))
     }
 }

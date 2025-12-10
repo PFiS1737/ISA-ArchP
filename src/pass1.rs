@@ -14,7 +14,7 @@ pub struct Pass1<'a> {
     constants: HashMap<&'a str, &'a str>,
     pub labels: HashMap<&'a str, String>,
     pub addr_to_original: Vec<(usize, &'a str)>,
-    pub processed: Vec<Vec<String>>,
+    pub processed: Vec<(&'a str, Option<&'a str>, Vec<String>)>,
 }
 
 impl<'a> Pass1<'a> {
@@ -83,10 +83,10 @@ impl<'a> Pass1<'a> {
                 None => (raw_line, tokens.as_ref()),
             };
 
-            let (name, cond) = if let Some(idx) = tokens[0].find('.') {
-                (&tokens[0][..idx], &tokens[0][idx..])
+            let (name, cond) = if let Some((name, cond)) = tokens[0].split_once('.') {
+                (name, Some(cond))
             } else {
-                (tokens[0], "")
+                (tokens[0], None)
             };
 
             let operands = tokens[1..]
@@ -100,10 +100,10 @@ impl<'a> Pass1<'a> {
                 })
                 .collect::<Vec<_>>();
 
-            let mut res = Vec::new();
+            let mut lines = Vec::new();
 
             if let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
-                && let Some(expanded) = mc_instr.expand(&operands).map_err(|e| {
+                && let Some(expanded) = mc_instr.expand(cond, &operands).map_err(|e| {
                     anyhow!(
                         "Error expanding macro-instruction at line {}: '{}' ({})",
                         orig_idx + 1,
@@ -112,16 +112,12 @@ impl<'a> Pass1<'a> {
                     )
                 })?
             {
-                res.extend(expanded);
+                lines.extend(expanded);
             } else {
-                res.push((name, operands.iter().map(|e| e.to_string()).collect()));
+                lines.push((name, cond, operands.iter().map(|e| e.to_string()).collect()));
             }
 
-            for (name, ops) in res {
-                let mut line = Vec::new();
-                line.push(name.to_string() + cond);
-                line.extend(ops);
-
+            for line in lines {
                 self.addr_to_original.push((orig_idx, raw_line.trim()));
                 self.processed.push(line);
             }
