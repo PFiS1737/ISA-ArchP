@@ -31,6 +31,10 @@ pub struct Cli {
     /// Output binary machine code instead of formatted hex.
     #[arg(long)]
     pub bin: bool,
+
+    /// Disable the macro-instructions.
+    #[arg(long)]
+    pub disable_macro: bool,
 }
 
 #[derive(Debug, Clone, PartialEq)]

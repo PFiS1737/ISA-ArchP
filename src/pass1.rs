@@ -11,6 +11,7 @@ use crate::macro_instructions::MACRO_INSTRUCTIONS;
 /// 3. Substitute constants.
 /// 4. Build a mapping between new lines and the original lines.
 pub struct Pass1<'a> {
+    disable_macro: bool,
     constants: HashMap<&'a str, &'a str>,
     pub labels: HashMap<&'a str, String>,
     pub addr_to_original: Vec<(usize, &'a str)>,
@@ -18,8 +19,9 @@ pub struct Pass1<'a> {
 }
 
 impl<'a> Pass1<'a> {
-    pub fn new() -> Self {
+    pub fn new(disable_macro: bool) -> Self {
         Self {
+            disable_macro,
             constants: HashMap::new(),
             labels: HashMap::new(),
             addr_to_original: Vec::new(),
@@ -102,7 +104,8 @@ impl<'a> Pass1<'a> {
 
             let mut lines = Vec::new();
 
-            if let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
+            if !self.disable_macro
+                && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
                 && let Some(expanded) = mc_instr.expand(cond, &operands).map_err(|e| {
                     anyhow!(
                         "Error expanding macro-instruction at line {}: '{}' ({})",

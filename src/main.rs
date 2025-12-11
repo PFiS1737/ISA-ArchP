@@ -25,7 +25,7 @@ use clap::{CommandFactory, Parser};
 use clap_complete::generate;
 
 use crate::{
-    assembler::Assembler,
+    assembler::{Assembler, AssemblerSettings},
     cli::{Cli, Output},
     utils::align_tabbed_lines,
 };
@@ -58,10 +58,14 @@ fn main() -> Result<()> {
         bail!("Cannot write binary output to stdout.");
     }
 
-    let mut out = BufWriter::new(cli.output.get()?);
+    let settings = AssemblerSettings {
+        disable_macro: cli.disable_macro,
+    };
 
-    let asmblr = Assembler::new(source_lines);
+    let asmblr = Assembler::new(settings, source_lines);
     let (codes, displays) = asmblr.assemble()?;
+
+    let mut out = BufWriter::new(cli.output.get()?);
 
     for (code, display) in codes.iter().zip(align_tabbed_lines(&displays)) {
         if cli.bin {
