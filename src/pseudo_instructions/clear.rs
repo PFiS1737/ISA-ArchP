@@ -1,4 +1,4 @@
-use crate::pseudo_instructions::pseudo_instruction;
+use crate::{operand::op_values, pseudo_instructions::pseudo_instruction};
 
 // clr rd  =>  li rd 0
 pseudo_instruction! {
@@ -6,7 +6,7 @@ pseudo_instruction! {
     operand_types: [ RegD ],
     expander: |_, ops| (
         "li",
-        vec![
+        op_values![
             ops[0],
             "0",
         ],

@@ -1,12 +1,15 @@
 pub use insta::assert_snapshot;
 
-use crate::instructions::*;
-use crate::macro_instructions::*;
-use crate::utils::fmt_line;
+use crate::{instructions::*, macro_instructions::*, operand::OperandValue, utils::fmt_line};
 
 pub fn instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
     let instr = INSTRUCTIONS.get(cmd).unwrap();
-    |cond, ops| match instr.encode(if cond.is_empty() { None } else { Some(cond) }, ops) {
+    |cond, ops| match instr.encode(
+        if cond.is_empty() { None } else { Some(cond) },
+        &ops.iter()
+            .map(|e| OperandValue::from(*e))
+            .collect::<Vec<_>>(),
+    ) {
         Ok(code) => fmt_bits(code),
         Err(e) => format!("Error: {}", e),
     }
@@ -14,17 +17,16 @@ pub fn instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
 
 pub fn mc_instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
     let ps_instr = MACRO_INSTRUCTIONS.get(cmd).unwrap();
-    |cond, ops| match ps_instr.expand(if cond.is_empty() { None } else { Some(cond) }, ops) {
+    |cond, ops| match ps_instr.expand(
+        if cond.is_empty() { None } else { Some(cond) },
+        &ops.iter()
+            .map(|e| OperandValue::from(*e))
+            .collect::<Vec<_>>(),
+    ) {
         Ok(expanded) => match expanded {
             Some(expanded) => expanded
                 .into_iter()
-                .map(|(name, cond, ops)| {
-                    fmt_line(
-                        name,
-                        cond,
-                        &ops.iter().map(|s| s.as_str()).collect::<Vec<_>>(),
-                    )
-                })
+                .map(|(name, cond, ops)| fmt_line(name, cond, ops))
                 .collect::<Vec<_>>()
                 .join("; "),
             None => "".to_string(),

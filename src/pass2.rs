@@ -3,7 +3,8 @@ use std::collections::HashMap;
 use anyhow::{Result, anyhow};
 
 use crate::{
-    instructions::INSTRUCTIONS, pseudo_instructions::PSEUDO_INSTRUCTIONS, utils::fmt_line,
+    instructions::INSTRUCTIONS, operand::OperandValue, pseudo_instructions::PSEUDO_INSTRUCTIONS,
+    utils::fmt_line,
 };
 
 /// Pass 3
@@ -12,12 +13,12 @@ use crate::{
 /// 2. Expand macro-instructions.
 /// 3. Encode assembly instructions into machine code.
 pub struct Pass2<'a> {
-    labels: HashMap<&'a str, String>,
+    labels: HashMap<&'a str, usize>,
     addr_to_original: Vec<(usize, &'a str)>,
 }
 
 impl<'a> Pass2<'a> {
-    pub fn new(labels: HashMap<&'a str, String>, addr_to_original: Vec<(usize, &'a str)>) -> Self {
+    pub fn new(labels: HashMap<&'a str, usize>, addr_to_original: Vec<(usize, &'a str)>) -> Self {
         Pass2 {
             labels,
             addr_to_original,
@@ -26,7 +27,7 @@ impl<'a> Pass2<'a> {
 
     pub fn run(
         &self,
-        processed_lines: Vec<(&'a str, Option<&'a str>, Vec<String>)>,
+        processed_lines: Vec<(&'a str, Option<&'a str>, Vec<OperandValue<'a>>)>,
     ) -> Result<(Vec<u32>, Vec<String>)> {
         let mut codes = Vec::new();
         let mut displays = Vec::new();
@@ -63,7 +64,6 @@ impl<'a> Pass2<'a> {
     }
 
     fn find_label_for(&self, pc: usize) -> Option<&'a str> {
-        let pc = pc.to_string();
         for (name, addr) in &self.labels {
             if addr == &pc {
                 return Some(name);
@@ -72,14 +72,19 @@ impl<'a> Pass2<'a> {
         None
     }
 
-    fn line_handler(&self, line: (&'a str, Option<&'a str>, Vec<String>)) -> Result<(u32, String)> {
+    fn line_handler(
+        &self,
+        line: (&'a str, Option<&'a str>, Vec<OperandValue<'a>>),
+    ) -> Result<(u32, String)> {
         let (name, cond, operands) = line;
 
         let operands = operands
-            .iter()
+            .into_iter()
             .map(|e| {
-                if let Some(label_addr) = self.labels.get(e.as_str()) {
-                    label_addr.as_str()
+                if let Some(s) = e.as_str()
+                    && let Some(&label_addr) = self.labels.get(s)
+                {
+                    OperandValue::Unsigned(label_addr.try_into().unwrap()) // WARN: unsafe
                 } else {
                     e
                 }
@@ -99,6 +104,6 @@ impl<'a> Pass2<'a> {
             .ok_or_else(|| anyhow!("Unknown instruction: '{}'", name))?
             .encode(cond, &ops)?;
 
-        Ok((code, fmt_line(name, cond, &ops)))
+        Ok((code, fmt_line(name, cond, ops)))
     }
 }

@@ -1,5 +1,43 @@
 use std::fmt::Display;
 
+use crate::utils::fmt_hex;
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum OperandValue<'a> {
+    StringSlice(&'a str),
+    Unsigned(u32),
+}
+
+impl OperandValue<'_> {
+    pub fn as_str(&self) -> Option<&str> {
+        match self {
+            Self::StringSlice(s) => Some(s),
+            _ => None,
+        }
+    }
+}
+
+impl<'a> From<&'a str> for OperandValue<'a> {
+    fn from(s: &'a str) -> Self {
+        OperandValue::StringSlice(s)
+    }
+}
+
+impl From<u32> for OperandValue<'_> {
+    fn from(n: u32) -> Self {
+        OperandValue::Unsigned(n)
+    }
+}
+
+impl Display for OperandValue<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            OperandValue::StringSlice(s) => write!(f, "{}", s),
+            OperandValue::Unsigned(n) => write!(f, "{}", n),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum OperandType {
     RegD,
@@ -14,7 +52,7 @@ impl ImmRange {
     pub fn contains(&self, value: &u32) -> bool {
         if self.1 <= self.0 {
             panic!(
-                "Internal Error: Invalid ImmRange: {}_bits ~ {}_bits",
+                "Internal Error: Invalid ImmRange: {}-bits ~ {}-bits",
                 self.0, self.1
             );
         }
@@ -57,8 +95,8 @@ pub macro op_types {
     ( $( $type:ident $(($v:literal))? ),* ) => {
         &[
             $(
-                $crate::operand_types::OperandType::$type $(
-                    ( $crate::operand_types::ImmRange(0, $v) )
+                $crate::operand::OperandType::$type $(
+                    ( $crate::operand::ImmRange(0, $v) )
                 )?
             ),*
         ]
@@ -67,20 +105,22 @@ pub macro op_types {
     ( $( $type:ident $(($start:tt, $end:tt))? ),* ) => {
         &[
             $(
-                $crate::operand_types::OperandType::$type $(
-                    ( $crate::operand_types::ImmRange($start, $end) )
+                $crate::operand::OperandType::$type $(
+                    ( $crate::operand::ImmRange($start, $end) )
                 )?
             ),*
         ]
     },
 }
 
-fn fmt_hex(n: u32) -> String {
-    if n < 256 {
-        n.to_string()
-    } else {
-        format!("0x{:X}", n)
-    }
+pub macro op_values {
+    ( $( $value:expr ),* $(,)? ) => {
+        vec![
+            $(
+                $crate::operand::OperandValue::from($value)
+            ),*
+        ]
+    },
 }
 
 #[cfg(test)]

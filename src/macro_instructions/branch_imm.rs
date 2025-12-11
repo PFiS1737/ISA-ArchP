@@ -3,6 +3,7 @@ use anyhow::bail;
 use crate::{
     instructions::parse_reg_s,
     macro_instructions::{ExpandFn, load_imm, macro_instruction},
+    operand::op_values,
 };
 
 macro_instruction! {
@@ -22,9 +23,9 @@ const F: ExpandFn = |name, cond, ops| {
         _ => unreachable!(),
     };
 
-    parse_reg_s(ops[0])?;
+    parse_reg_s(&ops[0])?;
 
-    let (up20, low12) = load_imm(ops[1])?;
+    let (up20, low12) = load_imm(&ops[1])?;
 
     // INFO: We don't check the branch target (ops[2]) here, as it can be a label.
 
@@ -34,32 +35,16 @@ const F: ExpandFn = |name, cond, ops| {
         }
 
         Ok(Some(vec![
-            ("lui", None, vec!["tmp".to_string(), up20]),
-            (
-                "ori",
-                None,
-                vec!["tmp".to_string(), "tmp".to_string(), low12],
-            ),
-            (
-                inst,
-                None,
-                vec![ops[0].to_string(), "tmp".to_string(), ops[2].to_string()],
-            ),
+            ("lui", None, op_values!["tmp", up20]),
+            ("ori", None, op_values!["tmp", "tmp", low12]),
+            (inst, None, op_values![ops[0], "tmp", ops[2]]),
         ]))
-    } else if low12 == "0x0" {
-        Ok(Some(vec![(
-            inst,
-            cond,
-            vec![ops[0].to_string(), "r0".to_string(), ops[2].to_string()],
-        )]))
+    } else if low12 == 0 {
+        Ok(Some(vec![(inst, cond, op_values![ops[0], "r0", ops[2]])]))
     } else {
         Ok(Some(vec![
-            ("li", cond, vec!["tmp".to_string(), ops[1].to_string()]),
-            (
-                inst,
-                cond,
-                vec![ops[0].to_string(), "tmp".to_string(), ops[2].to_string()],
-            ),
+            ("li", cond, op_values!["tmp", ops[1]]),
+            (inst, cond, op_values![ops[0], "tmp", ops[2]]),
         ]))
     }
 };
@@ -77,7 +62,7 @@ mod tests {
         assert_snapshot!(beqi("", &["123", "123", "0"]), @"Error: Expected register, found immediate: 123");
 
         assert_snapshot!(beqi("", &["r1", "0x123", "0"]), @"li tmp 0x123; beq r1 tmp 0");
-        assert_snapshot!(beqi("", &["r1", "0x1234", "0"]), @"lui tmp 0x1; ori tmp tmp 0x234; beq r1 tmp 0");
+        assert_snapshot!(beqi("", &["r1", "0x1234", "0"]), @"lui tmp 1; ori tmp tmp 0x234; beq r1 tmp 0");
         assert_snapshot!(beqi("", &["r1", "0x12345678", "0"]), @"lui tmp 0x12345; ori tmp tmp 0x678; beq r1 tmp 0");
         assert_snapshot!(beqi("", &["r1", "0", "0"]), @"beq r1 r0 0");
 

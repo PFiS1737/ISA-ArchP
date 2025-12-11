@@ -1,4 +1,4 @@
-use crate::pseudo_instructions::pseudo_instruction;
+use crate::{operand::op_values, pseudo_instructions::pseudo_instruction};
 
 // mv rd rs  =>  addi rd rs 0
 pseudo_instruction! {
@@ -6,7 +6,7 @@ pseudo_instruction! {
     operand_types: [ RegD, RegS ],
     expander: |_, ops| (
         "addi",
-        vec![
+        op_values![
             ops[0],
             ops[1],
             "0",

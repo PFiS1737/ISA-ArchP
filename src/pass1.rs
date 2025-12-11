@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::{Result, anyhow, bail};
 
-use crate::macro_instructions::MACRO_INSTRUCTIONS;
+use crate::{macro_instructions::MACRO_INSTRUCTIONS, operand::OperandValue};
 
 /// Pass 1
 ///
@@ -13,9 +13,9 @@ use crate::macro_instructions::MACRO_INSTRUCTIONS;
 pub struct Pass1<'a> {
     disable_macro: bool,
     constants: HashMap<&'a str, &'a str>,
-    pub labels: HashMap<&'a str, String>,
+    pub labels: HashMap<&'a str, usize>,
     pub addr_to_original: Vec<(usize, &'a str)>,
-    pub processed: Vec<(&'a str, Option<&'a str>, Vec<String>)>,
+    pub processed: Vec<(&'a str, Option<&'a str>, Vec<OperandValue<'a>>)>,
 }
 
 impl<'a> Pass1<'a> {
@@ -74,7 +74,7 @@ impl<'a> Pass1<'a> {
             let (raw_line, tokens) = match tokens[0].strip_suffix(':') {
                 Some(label) => {
                     let pc = self.processed.len();
-                    self.labels.insert(label, pc.to_string());
+                    self.labels.insert(label, pc);
 
                     if tokens.len() == 1 {
                         continue;
@@ -91,14 +91,14 @@ impl<'a> Pass1<'a> {
                 (tokens[0], None)
             };
 
-            let operands = tokens[1..]
+            let ops = tokens[1..]
                 .iter()
                 .map(|e| {
-                    if let Some(&value) = self.constants.get(e) {
+                    OperandValue::from(if let Some(&value) = self.constants.get(e) {
                         value
                     } else {
                         e
-                    }
+                    })
                 })
                 .collect::<Vec<_>>();
 
@@ -106,7 +106,7 @@ impl<'a> Pass1<'a> {
 
             if !self.disable_macro
                 && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
-                && let Some(expanded) = mc_instr.expand(cond, &operands).map_err(|e| {
+                && let Some(expanded) = mc_instr.expand(cond, &ops).map_err(|e| {
                     anyhow!(
                         "Error expanding macro-instruction at line {}: '{}' ({})",
                         orig_idx + 1,
@@ -117,7 +117,7 @@ impl<'a> Pass1<'a> {
             {
                 lines.extend(expanded);
             } else {
-                lines.push((name, cond, operands.iter().map(|e| e.to_string()).collect()));
+                lines.push((name, cond, ops));
             }
 
             for line in lines {

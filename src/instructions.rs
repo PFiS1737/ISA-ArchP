@@ -14,7 +14,7 @@ use std::{collections::HashMap, fmt::Display, num::IntErrorKind};
 use anyhow::{Result, anyhow, bail};
 use once_cell::sync::Lazy;
 
-use crate::operand_types::{ImmRange, OperandType, op_types};
+use crate::operand::{ImmRange, OperandType, OperandValue, op_types};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum InstrType {
@@ -51,7 +51,7 @@ pub static INSTRUCTIONS: Lazy<HashMap<&'static str, Instruction>> = Lazy::new(||
 });
 
 impl Instruction {
-    pub fn encode(&self, cond: Option<&str>, operands: &[&str]) -> Result<u32> {
+    pub fn encode(&self, cond: Option<&str>, operands: &[OperandValue]) -> Result<u32> {
         let cond = cond.map(parse_cond).transpose()?.unwrap_or(0);
 
         if matches!(self.itype, InstrType::U | InstrType::C) && cond != 0 {
@@ -73,7 +73,7 @@ impl Instruction {
         }
     }
 
-    fn parse(&self, operands: &[&str]) -> Result<Vec<u32>> {
+    fn parse(&self, operands: &[OperandValue]) -> Result<Vec<u32>> {
         let mut parsed_operands = Vec::new();
         let operand_types = self.get_operand_types();
 
@@ -269,7 +269,7 @@ macro instruction {
                 name: $name,
                 opcode: $opcode,
                 itype: $crate::instructions::InstrType::$itype,
-                operand_types: Some($crate::operand_types::op_types! $types),
+                operand_types: Some($crate::operand::op_types! $types),
                 encode_format: None,
             }
         }
@@ -287,7 +287,7 @@ macro instruction {
                 name: $name,
                 opcode: $opcode,
                 itype: $crate::instructions::InstrType::$itype,
-                operand_types: Some($crate::operand_types::op_types! $types),
+                operand_types: Some($crate::operand::op_types! $types),
                 encode_format: Some([
                     $crate::instructions::FormatPlaceholder::$rd,
                     $crate::instructions::FormatPlaceholder::$rs1,
@@ -322,33 +322,56 @@ fn parse_cond(cond: &str) -> Result<u32> {
     }
 }
 
-pub fn parse_reg_d(reg: &str) -> Result<u32> {
+macro err_expect_reg($e:expr) {
+    bail!("Expected register, found immediate: {}", $e)
+}
+macro err_inval_reg($e:expr) {
+    bail!("Invalid register: {}", $e)
+}
+macro err_reg_out_of_range($e:expr, $s:expr) {
+    bail!("Register number out of range ({}-24): {}", $s, $e)
+}
+macro err_read_only_reg($e:expr) {
+    bail!("Register '{}' is raed-only", $e)
+}
+
+pub fn parse_reg_d(op: &OperandValue) -> Result<u32> {
+    let reg = match op {
+        OperandValue::StringSlice(s) => *s,
+        OperandValue::Unsigned(n) => err_expect_reg!(n),
+    };
+
     match reg {
         "io" => Ok(26),
         "tmp" => Ok(31),
 
-        "r0" | "pc" | "kb" => bail!("Register '{}' is raed-only", reg),
+        "r0" | "pc" | "kb" => err_read_only_reg!(reg),
 
         r if let Some(n) = r.strip_prefix("r")
             && let Ok(n) = n.parse::<u32>() =>
         {
             if n > 24 {
-                bail!("Register number out of range (1-24): {}", reg);
+                err_reg_out_of_range!(reg, "1");
             }
             Ok(n)
         }
 
         _ => {
-            if parse_imm(reg).is_ok() {
-                bail!("Expected register, found immediate: {}", reg)
+            if parse_imm(op).is_ok() {
+                err_expect_reg!(reg)
             } else {
-                bail!("Invalid register: {}", reg)
+                err_inval_reg!(reg)
             }
         }
     }
 }
 
-pub fn parse_reg_s(reg: &str) -> Result<u32> {
+pub fn parse_reg_s(op: &OperandValue) -> Result<u32> {
+    let reg = match op {
+        OperandValue::StringSlice(s) => *s,
+        OperandValue::Unsigned(n) => err_expect_reg!(n),
+    };
+
     match reg {
         "pc" => Ok(25),
         "io" => Ok(26),
@@ -359,26 +382,31 @@ pub fn parse_reg_s(reg: &str) -> Result<u32> {
             && let Ok(n) = n.parse::<u32>() =>
         {
             if n > 24 {
-                bail!("Register number out of range (0-24): {}", reg);
+                err_reg_out_of_range!(reg, "0");
             }
             Ok(n)
         }
 
         _ => {
-            if parse_imm(reg).is_ok() {
-                bail!("Expected register, found immediate: {}", reg)
+            if parse_imm(op).is_ok() {
+                err_expect_reg!(reg)
             } else {
-                bail!("Invalid register: {}", reg)
+                err_inval_reg!(reg)
             }
         }
     }
 }
 
-pub fn parse_imm(imm: &str) -> Result<u32> {
-    let parsed = match imm {
+pub fn parse_imm(imm: &OperandValue) -> Result<u32> {
+    let parse_str = |s: &str| match s {
         s if let Some(hex) = s.strip_prefix("0x") => u32::from_str_radix(hex, 16),
         s if let Some(bin) = s.strip_prefix("0b") => u32::from_str_radix(bin, 2),
         s => s.parse(),
+    };
+
+    let parsed = match imm {
+        OperandValue::StringSlice(s) => parse_str(s),
+        OperandValue::Unsigned(n) => Ok(*n),
     };
 
     parsed.map_err(|err| {
@@ -392,22 +420,18 @@ pub fn parse_imm(imm: &str) -> Result<u32> {
 
 #[cfg(test)]
 mod tests {
-    use crate::testkit::*;
+    use crate::{operand::OperandValue, testkit::*};
     use anyhow::Result;
-
-    fn test(func: fn(&str) -> Result<u32>) -> impl Fn(&str) -> String {
-        move |s| match func(s) {
-            Ok(n) => format!("{n}"),
-            Err(e) => format!("Error: {e}"),
-        }
-    }
 
     // WARN: 也许这里不适合用快照测试?
     // TODO: 以后如果有迁移到 thiserror 的打算，再回来改
 
     #[test]
     fn parse_cond() {
-        let f = test(super::parse_cond);
+        let f = |s| match super::parse_cond(s) {
+            Ok(n) => format!("{n}"),
+            Err(e) => format!("Error: {e}"),
+        };
         assert_snapshot!(f("eq"), @"1");
         assert_snapshot!(f("ne"), @"2");
         assert_snapshot!(f("lt"), @"3");
@@ -415,6 +439,13 @@ mod tests {
         assert_snapshot!(f("gt"), @"5");
         assert_snapshot!(f("le"), @"6");
         assert_snapshot!(f("invalid"), @"Error: Invalid condition: invalid");
+    }
+
+    fn test(func: fn(&OperandValue) -> Result<u32>) -> impl Fn(&str) -> String {
+        move |s| match func(&OperandValue::from(s)) {
+            Ok(n) => format!("{n}"),
+            Err(e) => format!("Error: {e}"),
+        }
     }
 
     #[test]

@@ -1,5 +1,7 @@
 use std::iter::repeat_n;
 
+use crate::operand::OperandValue;
+
 pub fn align_tabbed_lines(lines: &[String]) -> impl Iterator<Item = String> {
     let split_lines: Vec<Vec<&str>> = lines
         .iter()
@@ -31,7 +33,15 @@ pub fn align_tabbed_lines(lines: &[String]) -> impl Iterator<Item = String> {
     })
 }
 
-pub fn fmt_line(name: &str, cond: Option<&str>, ops: &[&str]) -> String {
+pub fn fmt_line(name: &str, cond: Option<&str>, ops: Vec<OperandValue>) -> String {
+    let ops = ops
+        .into_iter()
+        .map(|e| match e {
+            OperandValue::StringSlice(s) => s.to_string(),
+            OperandValue::Unsigned(n) => fmt_hex(n),
+        })
+        .collect::<Vec<_>>();
+
     let mut line = String::with_capacity(
         name.len()
             + cond.map(|c| 1 + c.len()).unwrap_or(0)
@@ -50,9 +60,17 @@ pub fn fmt_line(name: &str, cond: Option<&str>, ops: &[&str]) -> String {
     if !ops.is_empty() {
         for op in ops {
             line.push(' ');
-            line.push_str(op);
+            line.push_str(&op);
         }
     }
 
     line
+}
+
+pub fn fmt_hex(n: u32) -> String {
+    if n < 256 {
+        n.to_string()
+    } else {
+        format!("0x{:X}", n)
+    }
 }

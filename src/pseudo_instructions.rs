@@ -9,11 +9,11 @@ use once_cell::sync::Lazy;
 
 use crate::{
     instructions::{parse_reg_d, parse_reg_s},
-    operand_types::OperandType,
+    operand::{OperandType, OperandValue},
 };
 
-type ExpandRet<'a> = (&'static str, Vec<&'a str>);
-type ExpandFn = for<'a> fn(&'static str, &[&'a str]) -> ExpandRet<'a>;
+type ExpandRet<'a> = (&'static str, Vec<OperandValue<'a>>);
+type ExpandFn = for<'a> fn(&'static str, &[OperandValue<'a>]) -> ExpandRet<'a>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct PseudoInstruction {
@@ -33,13 +33,13 @@ pub static PSEUDO_INSTRUCTIONS: Lazy<HashMap<&'static str, PseudoInstruction>> =
 });
 
 impl PseudoInstruction {
-    pub fn expand<'a>(&self, operands: &[&'a str]) -> Result<ExpandRet<'a>> {
+    pub fn expand<'a>(&self, operands: &[OperandValue<'a>]) -> Result<ExpandRet<'a>> {
         self.assert_operand_format(operands)?;
 
         Ok((self.expander)(self.name, operands))
     }
 
-    fn assert_operand_format(&self, operands: &[&str]) -> Result<()> {
+    fn assert_operand_format(&self, operands: &[OperandValue]) -> Result<()> {
         if operands.len() != self.operand_types.len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",
@@ -84,7 +84,7 @@ macro pseudo_instruction {
         inventory::submit! {
             $crate::pseudo_instructions::PseudoInstruction {
                 name: $name,
-                operand_types: $crate::operand_types::op_types! $types,
+                operand_types: $crate::operand::op_types! $types,
                 expander: $expander,
             }
         }

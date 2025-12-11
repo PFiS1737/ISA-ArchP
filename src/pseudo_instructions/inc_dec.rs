@@ -1,4 +1,4 @@
-use crate::pseudo_instructions::pseudo_instruction;
+use crate::{operand::op_values, pseudo_instructions::pseudo_instruction};
 
 // inc rd  =>  addi rd rd 1
 // dec rd  =>  subi rd rd 1
@@ -14,7 +14,7 @@ pseudo_instruction! {
 
         (
             inst,
-            vec![
+            op_values![
                 ops[0],
                 ops[0],
                 "1",

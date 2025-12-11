@@ -6,10 +6,10 @@ use std::collections::HashMap;
 use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
-use crate::instructions::parse_imm;
+use crate::{instructions::parse_imm, operand::OperandValue};
 
-type ExpandRet<'a> = Result<Option<Vec<(&'static str, Option<&'a str>, Vec<String>)>>>;
-type ExpandFn = for<'a> fn(&'static str, Option<&'a str>, &[&'a str]) -> ExpandRet<'a>;
+type ExpandRet<'a> = Result<Option<Vec<(&'static str, Option<&'a str>, Vec<OperandValue<'a>>)>>>;
+type ExpandFn = for<'a> fn(&'static str, Option<&'a str>, &[OperandValue<'a>]) -> ExpandRet<'a>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct MacroInstruction {
@@ -29,13 +29,17 @@ pub static MACRO_INSTRUCTIONS: Lazy<HashMap<&'static str, MacroInstruction>> = L
 });
 
 impl MacroInstruction {
-    pub fn expand<'a>(&self, cond: Option<&'a str>, operands: &[&'a str]) -> ExpandRet<'a> {
+    pub fn expand<'a>(
+        &self,
+        cond: Option<&'a str>,
+        operands: &[OperandValue<'a>],
+    ) -> ExpandRet<'a> {
         self.assert_operand_count(operands)?;
 
         (self.expander)(self.name, cond, operands)
     }
 
-    fn assert_operand_count(&self, operands: &[&str]) -> Result<()> {
+    fn assert_operand_count(&self, operands: &[OperandValue]) -> Result<()> {
         if operands.len() != self.operand_count {
             bail!(
                 "Macro-instruction '{}' requires {} operands, got {}",
@@ -79,14 +83,11 @@ macro macro_instruction {
     },
 }
 
-fn load_imm(s: &str) -> Result<(Option<String>, String)> {
+fn load_imm(s: &OperandValue) -> Result<(Option<u32>, u32)> {
     let num = parse_imm(s)?;
     if num > 0xFFF {
-        Ok((
-            Some(format!("0x{:X}", num >> 12)),
-            format!("0x{:X}", num & 0xFFF),
-        ))
+        Ok((Some(num >> 12), num & 0xFFF))
     } else {
-        Ok((None, format!("0x{:X}", num)))
+        Ok((None, num))
     }
 }
