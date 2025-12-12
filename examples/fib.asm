@@ -21,7 +21,7 @@ fib:
   push s0
   push s1
   push s2
-  subi s0 s0 1
+  sub s0 s0 1
   mv a0 s0
   call fib
   pop s2
@@ -33,7 +33,7 @@ fib:
   push s0
   push s1
   push s2
-  subi s0 s0 2
+  sub s0 s0 2
   mv a0 s0
   call fib
   pop s2

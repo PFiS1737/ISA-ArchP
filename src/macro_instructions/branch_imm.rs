@@ -10,8 +10,8 @@ macro_instruction! {
     expander: F,
 }
 
-const F: ExpandFn = |_, name, cond, ops| {
-    let inst = &name[..3]; // Remove the trailing 'i'
+const F: ExpandFn = |_, this, cond, ops| {
+    let inst = &this.name[..3]; // remove the trailing 'i'
 
     parse_reg_s(&ops[0])?;
 

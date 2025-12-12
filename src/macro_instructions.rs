@@ -1,4 +1,5 @@
 mod als_imm32;
+mod auto_imm;
 mod branch_imm;
 mod load_imm32;
 
@@ -10,14 +11,20 @@ use once_cell::sync::Lazy;
 use crate::operand::OperandValue;
 
 type ExpandRet<'a> = Result<Option<Vec<(&'static str, Option<&'a str>, Vec<OperandValue<'a>>)>>>;
-type ExpandFn =
-    for<'a> fn(&'static str, &'static str, Option<&'a str>, &[OperandValue<'a>]) -> ExpandRet<'a>;
+type ExpandFn = for<'a> fn(
+    &'static str,
+    &MacroInstruction,
+    Option<&'a str>,
+    &[OperandValue<'a>],
+) -> ExpandRet<'a>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct MacroInstruction {
     name: &'static str,
     operand_count: usize,
     expander: ExpandFn,
+
+    _may_be_name_with_i: &'static str,
 }
 
 inventory::collect!(MacroInstruction);
@@ -38,7 +45,7 @@ impl MacroInstruction {
     ) -> ExpandRet<'a> {
         self.assert_operand_count(operands)?;
 
-        let mut deq: VecDeque<_> = match (self.expander)(self.name, self.name, cond, operands)? {
+        let mut deq: VecDeque<_> = match (self.expander)(self.name, self, cond, operands)? {
             None => return Ok(None),
             Some(v) => v.into(),
         };
@@ -49,7 +56,7 @@ impl MacroInstruction {
             if let Some(mc) = MACRO_INSTRUCTIONS.get(name) {
                 mc.assert_operand_count(&ops)?;
 
-                match (mc.expander)(self.name, name, cond, &ops)? {
+                match (mc.expander)(self.name, mc, cond, &ops)? {
                     None => {
                         ret.push((name, cond, ops));
                     }
@@ -106,6 +113,8 @@ macro macro_instruction {
                 name: $name,
                 operand_count: $count,
                 expander: $expander,
+
+                _may_be_name_with_i: concat!($name, "i"),
             }
         }
     },
