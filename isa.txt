@@ -141,11 +141,6 @@ I-type (call/ret)
 1010 100 ret  __ ___ ____________
 1010 101 call __ ___ addr12=imm12
 
-I-type (random)
----------------
-
-1100 000 rnd rd ___ ___
-
 C-type (set color)
 ------------------
 
@@ -171,11 +166,11 @@ Registers
 11001 pc  - the program counter (read-only)
 11010 io  - the level input/output (only in level mode)
 11011 kb  - the keyboard input (only in sandbox mode)
-11100
+11100 rng - the random number generator (only in sandbox mode, read-only)
 11101
 11110
 
-11111 tmp  - used by the assembler for expanding pseudo instructions
+11111 tmp  - used by the assembler for expanding macro instructions
 
 Pseudo Commands
 ===============

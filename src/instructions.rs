@@ -5,7 +5,6 @@ mod compare;
 mod load_store;
 mod logic;
 mod pixel;
-mod random;
 mod shift;
 mod stack;
 
@@ -345,7 +344,7 @@ pub fn parse_reg_d(op: &OperandValue) -> Result<u32> {
         "io" => Ok(26),
         "tmp" => Ok(31),
 
-        "zero" | "pc" | "kb" => err_read_only_reg!(reg),
+        "zero" | "pc" | "kb" | "rng" => err_read_only_reg!(reg),
 
         r if let Some(n) = r.strip_prefix("r")
             && let Ok(n) = n.parse::<u32>() =>
@@ -378,6 +377,7 @@ pub fn parse_reg_s(op: &OperandValue) -> Result<u32> {
         "pc" => Ok(25),
         "io" => Ok(26),
         "kb" => Ok(27),
+        "rng" => Ok(28),
         "tmp" => Ok(31),
 
         r if let Some(n) = r.strip_prefix("r")
