@@ -159,7 +159,7 @@ R-type (set pixel)
 Registers
 =========
 
-00000 r0  - the zero register (always 0, read-only)
+00000 zero  - the zero register (always 0, read-only)
 
 00001 r1
 00010 r2

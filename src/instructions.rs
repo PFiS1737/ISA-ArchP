@@ -345,7 +345,7 @@ pub fn parse_reg_d(op: &OperandValue) -> Result<u32> {
         "io" => Ok(26),
         "tmp" => Ok(31),
 
-        "r0" | "pc" | "kb" => err_read_only_reg!(reg),
+        "zero" | "pc" | "kb" => err_read_only_reg!(reg),
 
         r if let Some(n) = r.strip_prefix("r")
             && let Ok(n) = n.parse::<u32>() =>
@@ -373,6 +373,8 @@ pub fn parse_reg_s(op: &OperandValue) -> Result<u32> {
     };
 
     match reg {
+        "zero" => Ok(0),
+
         "pc" => Ok(25),
         "io" => Ok(26),
         "kb" => Ok(27),
@@ -451,7 +453,7 @@ mod tests {
     #[test]
     fn parse_reg_d() {
         let f = test(super::parse_reg_d);
-        assert_snapshot!(f("r0"), @"Error: Register 'r0' is raed-only");
+        assert_snapshot!(f("zero"), @"Error: Register 'zero' is raed-only");
         assert_snapshot!(f("r9"), @"9");
         assert_snapshot!(f("r27"), @"Error: Register number out of range (1-24): r27");
         assert_snapshot!(f("kb"), @"Error: Register 'kb' is raed-only");
@@ -461,7 +463,7 @@ mod tests {
     #[test]
     fn parse_reg_s() {
         let f = test(super::parse_reg_s);
-        assert_snapshot!(f("r0"), @"0");
+        assert_snapshot!(f("zero"), @"0");
         assert_snapshot!(f("r15"), @"15");
         assert_snapshot!(f("r30"), @"Error: Register number out of range (0-24): r30");
         assert_snapshot!(f("pc"), @"25");
@@ -486,7 +488,7 @@ mod tests {
         assert_snapshot!(cmd("", &["r1", "r2", "r3", "r4"]), @"Error: Instruction 'add' requires 3 operands, got 4");
         assert_snapshot!(cmd("", &["r1", "r2", "rrr"]), @"Error: Invalid register: rrr");
         assert_snapshot!(cmd("", &["r1", "r2", "123"]), @"Error: Expected register, found immediate: 123");
-        assert_snapshot!(cmd("", &["r0", "r2", "r3"]), @"Error: Register 'r0' is raed-only");
+        assert_snapshot!(cmd("", &["zero", "r2", "r3"]), @"Error: Register 'zero' is raed-only");
         assert_snapshot!(cmd("invalid", &["r1", "r2", "r3"]), @"Error: Invalid condition: invalid");
         assert_snapshot!(cmd("lt", &["r1", "r2", "r3"]), @"0000 000 011 00001 00010 0000000 00011");
     }
@@ -498,7 +500,7 @@ mod tests {
         assert_snapshot!(cmd("", &["r1", "r2", "r3", "r4"]), @"Error: Instruction 'addi' requires 3 operands, got 4");
         assert_snapshot!(cmd("", &["r1", "rrr", "123"]), @"Error: Invalid register: rrr");
         assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Invalid immediate: r3");
-        assert_snapshot!(cmd("", &["r0", "r2", "123"]), @"Error: Register 'r0' is raed-only");
+        assert_snapshot!(cmd("", &["zero", "r2", "123"]), @"Error: Register 'zero' is raed-only");
         assert_snapshot!(cmd("", &["r1", "r2", "0xFFFF"]), @"Error: Immediate value '65535' out of range for I-type instruction 'addi', expected 0 ~ 0xFFF");
         assert_snapshot!(cmd("invalid", &["r1", "r2", "123"]), @"Error: Invalid condition: invalid");
         assert_snapshot!(cmd("ge", &["r4", "r5", "0b100"]), @"0100 000 100 00100 00101 0000000 00100");
@@ -512,7 +514,7 @@ mod tests {
     fn enocde_b() {
         let cmd = instr("beq");
         // Same to I-type, omitting ...
-        assert_snapshot!(cmd("ne", &["r1", "r0", "3456"]), @"1001 001 010 11011 00001 0000000 00000");
+        assert_snapshot!(cmd("ne", &["r1", "zero", "3456"]), @"1001 001 010 11011 00001 0000000 00000");
     }
 
     #[test]
@@ -521,7 +523,7 @@ mod tests {
         assert_snapshot!(cmd("", &["r1"]), @"Error: Instruction 'lui' requires 2 operands, got 1");
         assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Instruction 'lui' requires 2 operands, got 3");
         assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Invalid immediate: r2");
-        assert_snapshot!(cmd("", &["r0", "r2"]), @"Error: Register 'r0' is raed-only");
+        assert_snapshot!(cmd("", &["zero", "r2"]), @"Error: Register 'zero' is raed-only");
         assert_snapshot!(cmd("", &["r3", "0x200000"]), @"Error: Immediate value '2097152' out of range for U-type instruction 'lui', expected 0 ~ 0xFFFFF");
         assert_snapshot!(cmd("eq", &["r3", "0xABCDE"]), @"Error: Condition is not allowed for U-type instruction 'lui'");
         assert_snapshot!(cmd("", &["r3", "0xABCDE"]), @"1000 011 101 00011 01011 1100110 11110");

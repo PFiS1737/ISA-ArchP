@@ -58,7 +58,7 @@ mod tests {
 
         assert_snapshot!(addi("", &["r1", "r2"]), @"Error: Macro-instruction 'addi' requires 3 operands, got 2");
         assert_snapshot!(addi("", &["r1", "r2", "123", "r4"]), @"Error: Macro-instruction 'addi' requires 3 operands, got 4");
-        assert_snapshot!(addi("", &["r0", "r2", "123"]), @"Error: Register 'r0' is raed-only");
+        assert_snapshot!(addi("", &["zero", "r2", "123"]), @"Error: Register 'zero' is raed-only");
         assert_snapshot!(addi("", &["r1", "r2", "r3"]), @"Error: Invalid immediate: r3");
         assert_snapshot!(addi("", &["123", "r1", "456"]), @"Error: Expected register, found immediate: 123");
 

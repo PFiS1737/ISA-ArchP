@@ -38,7 +38,7 @@ const F: ExpandFn = |name, cond, ops| {
             (inst, None, op_values![ops[0], "tmp", ops[2]]),
         ]))
     } else if low12 == 0 {
-        Ok(Some(vec![(inst, cond, op_values![ops[0], "r0", ops[2]])]))
+        Ok(Some(vec![(inst, cond, op_values![ops[0], "zero", ops[2]])]))
     } else {
         Ok(Some(vec![
             ("li", cond, op_values!["tmp", ops[1]]),
@@ -62,7 +62,7 @@ mod tests {
         assert_snapshot!(beqi("", &["r1", "0x123", "0"]), @"li tmp 0x123; beq r1 tmp 0");
         assert_snapshot!(beqi("", &["r1", "0x1234", "0"]), @"lui tmp 1; ori tmp tmp 0x234; beq r1 tmp 0");
         assert_snapshot!(beqi("", &["r1", "0x12345678", "0"]), @"lui tmp 0x12345; ori tmp tmp 0x678; beq r1 tmp 0");
-        assert_snapshot!(beqi("", &["r1", "0", "0"]), @"beq r1 r0 0");
+        assert_snapshot!(beqi("", &["r1", "0", "0"]), @"beq r1 zero 0");
 
         assert_snapshot!(beqi("eq", &["r1", "0x123", "0"]), @"li.eq tmp 0x123; beq.eq r1 tmp 0");
         assert_snapshot!(beqi("eq", &["r1", "0x1234", "0"]), @"Error: Conditional 'beqi' is not supported for 32-bit immediates");
