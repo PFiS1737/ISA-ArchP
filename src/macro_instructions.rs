@@ -1,3 +1,4 @@
+mod als_imm32;
 mod branch_imm;
 mod load_imm32;
 
@@ -55,7 +56,7 @@ impl MacroInstruction {
 
 macro macro_instruction {
     (
-        name: [ $($name:literal),+ ],
+        name: [ $($name:literal),+ $(,)? ],
         operand_count: $count:literal,
         expander: $expander:expr,
     ) => {
@@ -90,4 +91,11 @@ fn load_imm(s: &OperandValue) -> Result<(Option<u32>, u32)> {
     } else {
         Ok((None, num))
     }
+}
+
+macro err_cond_not_supported($name:expr) {
+    anyhow::bail!(
+        "Conditional '{}' is not supported for 32-bit immediates",
+        $name
+    );
 }

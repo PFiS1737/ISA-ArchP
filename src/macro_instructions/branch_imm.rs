@@ -1,8 +1,6 @@
-use anyhow::bail;
-
 use crate::{
     instructions::parse_reg_s,
-    macro_instructions::{ExpandFn, load_imm, macro_instruction},
+    macro_instructions::{ExpandFn, err_cond_not_supported, load_imm, macro_instruction},
     operand::op_values,
 };
 
@@ -31,7 +29,7 @@ const F: ExpandFn = |name, cond, ops| {
 
     if let Some(up20) = up20 {
         if cond.is_some() {
-            bail!("Conditional '{name}' is not supported for 32-bit immediates");
+            err_cond_not_supported!(name);
         }
 
         Ok(Some(vec![
@@ -66,6 +64,7 @@ mod tests {
         assert_snapshot!(beqi("", &["r1", "0x12345678", "0"]), @"lui tmp 0x12345; ori tmp tmp 0x678; beq r1 tmp 0");
         assert_snapshot!(beqi("", &["r1", "0", "0"]), @"beq r1 r0 0");
 
+        assert_snapshot!(beqi("eq", &["r1", "0x123", "0"]), @"li.eq tmp 0x123; beq.eq r1 tmp 0");
         assert_snapshot!(beqi("eq", &["r1", "0x1234", "0"]), @"Error: Conditional 'beqi' is not supported for 32-bit immediates");
     }
 }
