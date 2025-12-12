@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use anyhow::{Result, anyhow};
+use bimap::BiHashMap;
 
 use crate::{
     instructions::INSTRUCTIONS, operand::OperandValue, pseudo_instructions::PSEUDO_INSTRUCTIONS,
@@ -13,12 +12,12 @@ use crate::{
 /// 2. Expand macro-instructions.
 /// 3. Encode assembly instructions into machine code.
 pub struct Pass2<'a> {
-    labels: HashMap<&'a str, usize>,
+    labels: BiHashMap<&'a str, usize>,
     addr_to_original: Vec<(usize, &'a str)>,
 }
 
 impl<'a> Pass2<'a> {
-    pub fn new(labels: HashMap<&'a str, usize>, addr_to_original: Vec<(usize, &'a str)>) -> Self {
+    pub fn new(labels: BiHashMap<&'a str, usize>, addr_to_original: Vec<(usize, &'a str)>) -> Self {
         Pass2 {
             labels,
             addr_to_original,
@@ -50,7 +49,7 @@ impl<'a> Pass2<'a> {
                 display += "\t";
             }
 
-            if let Some(label_name) = self.find_label_for(codes.len()) {
+            if let Some(label_name) = self.labels.get_by_right(&codes.len()) {
                 display = format!("{display}\t<label: {label_name}>");
             } else {
                 display += "\t";
@@ -63,15 +62,6 @@ impl<'a> Pass2<'a> {
         Ok((codes, displays))
     }
 
-    fn find_label_for(&self, pc: usize) -> Option<&'a str> {
-        for (name, addr) in &self.labels {
-            if addr == &pc {
-                return Some(name);
-            }
-        }
-        None
-    }
-
     fn line_handler(
         &self,
         line: (&'a str, Option<&'a str>, Vec<OperandValue<'a>>),
@@ -82,7 +72,7 @@ impl<'a> Pass2<'a> {
             .into_iter()
             .map(|e| {
                 if let Some(s) = e.as_str()
-                    && let Some(&label_addr) = self.labels.get(s)
+                    && let Some(&label_addr) = self.labels.get_by_left(s)
                 {
                     OperandValue::Unsigned(label_addr.try_into().unwrap()) // WARN: unsafe
                 } else {

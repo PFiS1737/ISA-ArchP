@@ -10,6 +10,7 @@ version = "0.1.0"
 
 [dependencies]
 anyhow = "1.0.100"
+bimap = "0.6.3"
 clap = { version = "4.5.53", features = ["derive"] }
 clap_complete = "4.5.61"
 env_logger = "0.11.8"

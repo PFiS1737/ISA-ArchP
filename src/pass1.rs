@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::{Result, anyhow, bail};
+use bimap::BiHashMap;
 
 use crate::{macro_instructions::MACRO_INSTRUCTIONS, operand::OperandValue};
 
@@ -13,7 +14,7 @@ use crate::{macro_instructions::MACRO_INSTRUCTIONS, operand::OperandValue};
 pub struct Pass1<'a> {
     disable_macro: bool,
     constants: HashMap<&'a str, &'a str>,
-    pub labels: HashMap<&'a str, usize>,
+    pub labels: BiHashMap<&'a str, usize>,
     pub addr_to_original: Vec<(usize, &'a str)>,
     pub processed: Vec<(&'a str, Option<&'a str>, Vec<OperandValue<'a>>)>,
 }
@@ -23,7 +24,7 @@ impl<'a> Pass1<'a> {
         Self {
             disable_macro,
             constants: HashMap::new(),
-            labels: HashMap::new(),
+            labels: BiHashMap::new(),
             addr_to_original: Vec::new(),
             processed: Vec::new(),
         }
