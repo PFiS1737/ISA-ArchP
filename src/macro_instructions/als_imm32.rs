@@ -15,26 +15,7 @@ macro_instruction! {
 }
 
 const F: ExpandFn = |_, name, cond, ops| {
-    let inst = match name {
-        "addi" => "add",
-        "subi" => "sub",
-        "mulhi" => "mulh",
-        "mulli" => "mul",
-        "modi" => "mod",
-        "divi" => "div",
-        "andi" => "and",
-        "nandi" => "nand",
-        "ori" => "or",
-        "nori" => "nor",
-        "xori" => "xor",
-        "xnori" => "xnor",
-        "shli" => "shl",
-        "shri" => "shr",
-        "roli" => "rol",
-        "rori" => "ror",
-        "ashri" => "ashr",
-        _ => unreachable!(),
-    };
+    let inst = &name[..name.len() - 1]; // Remove the trailing 'i'
 
     parse_reg_d(&ops[0])?;
     parse_reg_s(&ops[1])?;

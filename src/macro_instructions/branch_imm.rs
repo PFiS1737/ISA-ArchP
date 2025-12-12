@@ -11,15 +11,7 @@ macro_instruction! {
 }
 
 const F: ExpandFn = |_, name, cond, ops| {
-    let inst = match name {
-        "beqi" => "beq",
-        "bnei" => "bne",
-        "blti" => "blt",
-        "blei" => "ble",
-        "bgti" => "bgt",
-        "bgei" => "bge",
-        _ => unreachable!(),
-    };
+    let inst = &name[..3]; // Remove the trailing 'i'
 
     parse_reg_s(&ops[0])?;
 
