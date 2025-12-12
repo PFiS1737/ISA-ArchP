@@ -1,6 +1,6 @@
 use crate::{
-    instructions::{parse_reg_d, parse_reg_s},
-    macro_instructions::{ExpandFn, load_imm32, macro_instruction},
+    instructions::{parse_imm, parse_reg_d, parse_reg_s},
+    macro_instructions::{ExpandFn, macro_instruction},
     operand::op_values,
 };
 
@@ -14,7 +14,7 @@ macro_instruction! {
     expander: F,
 }
 
-const F: ExpandFn = |name, cond, ops| {
+const F: ExpandFn = |_, name, cond, ops| {
     let inst = match name {
         "addi" => "add",
         "subi" => "sub",
@@ -39,10 +39,13 @@ const F: ExpandFn = |name, cond, ops| {
     parse_reg_d(&ops[0])?;
     parse_reg_s(&ops[1])?;
 
-    #[allow(clippy::useless_vec)]
-    if let Some(mut ret) = load_imm32::F(name, cond, &op_values!("tmp", ops[2]))? {
-        ret.push((inst, None, op_values![ops[0], ops[1], "tmp"]));
-        Ok(Some(ret))
+    let imm = parse_imm(&ops[2])?;
+
+    if imm > 0xFFF {
+        Ok(Some(vec![
+            ("li", cond, op_values!["tmp", imm]),
+            (inst, cond, op_values![ops[0], ops[1], "tmp"]),
+        ]))
     } else {
         Ok(None)
     }

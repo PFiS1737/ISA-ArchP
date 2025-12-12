@@ -1,6 +1,6 @@
 use crate::{
-    instructions::parse_reg_s,
-    macro_instructions::{ExpandFn, err_cond_not_supported, load_imm, macro_instruction},
+    instructions::{parse_imm, parse_reg_s},
+    macro_instructions::{ExpandFn, macro_instruction},
     operand::op_values,
 };
 
@@ -10,7 +10,7 @@ macro_instruction! {
     expander: F,
 }
 
-const F: ExpandFn = |name, cond, ops| {
+const F: ExpandFn = |_, name, cond, ops| {
     let inst = match name {
         "beqi" => "beq",
         "bnei" => "bne",
@@ -23,25 +23,15 @@ const F: ExpandFn = |name, cond, ops| {
 
     parse_reg_s(&ops[0])?;
 
-    let (up20, low12) = load_imm(&ops[1])?;
+    let imm = parse_imm(&ops[1])?;
 
     // INFO: We don't check the branch target (ops[2]) here, as it can be a label.
 
-    if let Some(up20) = up20 {
-        if cond.is_some() {
-            err_cond_not_supported!(name);
-        }
-
-        Ok(Some(vec![
-            ("lui", None, op_values!["tmp", up20]),
-            ("ori", None, op_values!["tmp", "tmp", low12]),
-            (inst, None, op_values![ops[0], "tmp", ops[2]]),
-        ]))
-    } else if low12 == 0 {
+    if imm == 0 {
         Ok(Some(vec![(inst, cond, op_values![ops[0], "zero", ops[2]])]))
     } else {
         Ok(Some(vec![
-            ("li", cond, op_values!["tmp", ops[1]]),
+            ("li", cond, op_values!["tmp", imm]),
             (inst, cond, op_values![ops[0], "tmp", ops[2]]),
         ]))
     }

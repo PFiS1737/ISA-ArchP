@@ -2,15 +2,16 @@ mod als_imm32;
 mod branch_imm;
 mod load_imm32;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
 use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
-use crate::{instructions::parse_imm, operand::OperandValue};
+use crate::operand::OperandValue;
 
 type ExpandRet<'a> = Result<Option<Vec<(&'static str, Option<&'a str>, Vec<OperandValue<'a>>)>>>;
-type ExpandFn = for<'a> fn(&'static str, Option<&'a str>, &[OperandValue<'a>]) -> ExpandRet<'a>;
+type ExpandFn =
+    for<'a> fn(&'static str, &'static str, Option<&'a str>, &[OperandValue<'a>]) -> ExpandRet<'a>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct MacroInstruction {
@@ -37,7 +38,33 @@ impl MacroInstruction {
     ) -> ExpandRet<'a> {
         self.assert_operand_count(operands)?;
 
-        (self.expander)(self.name, cond, operands)
+        let mut deq: VecDeque<_> = match (self.expander)(self.name, self.name, cond, operands)? {
+            None => return Ok(None),
+            Some(v) => v.into(),
+        };
+
+        let mut ret = Vec::new();
+
+        while let Some((name, cond, ops)) = deq.pop_front() {
+            if let Some(mc) = MACRO_INSTRUCTIONS.get(name) {
+                mc.assert_operand_count(&ops)?;
+
+                match (mc.expander)(self.name, name, cond, &ops)? {
+                    None => {
+                        ret.push((name, cond, ops));
+                    }
+                    Some(v) => {
+                        let mut q: VecDeque<_> = v.into();
+                        q.append(&mut deq);
+                        deq = q;
+                    }
+                }
+            } else {
+                ret.push((name, cond, ops));
+            }
+        }
+
+        Ok(Some(ret))
     }
 
     fn assert_operand_count(&self, operands: &[OperandValue]) -> Result<()> {
@@ -82,20 +109,4 @@ macro macro_instruction {
             }
         }
     },
-}
-
-fn load_imm(s: &OperandValue) -> Result<(Option<u32>, u32)> {
-    let num = parse_imm(s)?;
-    if num > 0xFFF {
-        Ok((Some(num >> 12), num & 0xFFF))
-    } else {
-        Ok((None, num))
-    }
-}
-
-macro err_cond_not_supported($name:expr) {
-    anyhow::bail!(
-        "Conditional '{}' is not supported for 32-bit immediates",
-        $name
-    );
 }

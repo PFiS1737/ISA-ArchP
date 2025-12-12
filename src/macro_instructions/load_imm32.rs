@@ -1,6 +1,8 @@
+use anyhow::bail;
+
 use crate::{
-    instructions::parse_reg_d,
-    macro_instructions::{ExpandFn, err_cond_not_supported, load_imm, macro_instruction},
+    instructions::{parse_imm, parse_reg_d},
+    macro_instructions::{ExpandFn, macro_instruction},
     operand::op_values,
 };
 
@@ -11,19 +13,19 @@ macro_instruction! {
     expander: F,
 }
 
-pub(super) const F: ExpandFn = |name, cond, ops| {
+pub const F: ExpandFn = |name, _, cond, ops| {
     parse_reg_d(&ops[0])?;
 
-    let (up20, low12) = load_imm(&ops[1])?;
+    let imm = parse_imm(&ops[1])?;
 
-    if let Some(up20) = up20 {
+    if imm > 0xFFF {
         if cond.is_some() {
-            err_cond_not_supported!(name);
+            bail!("Conditional '{name}' is not supported for 32-bit immediates");
         }
 
         Ok(Some(vec![
-            ("lui", None, op_values![ops[0], up20]),
-            ("ori", None, op_values![ops[0], ops[0], low12]),
+            ("lui", None, op_values![ops[0], imm >> 12]),
+            ("ori", None, op_values![ops[0], ops[0], imm & 0xFFF]),
         ]))
     } else {
         Ok(None)
