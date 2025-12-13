@@ -2,9 +2,9 @@ mod arithmetic;
 mod branch;
 mod call_ret;
 mod compare;
+mod display;
 mod load_store;
 mod logic;
-mod pixel;
 mod shift;
 mod stack;
 

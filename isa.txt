@@ -141,15 +141,23 @@ I-type (call/ret)
 1010 100 ret  __ ___ ____________
 1010 101 call __ ___ addr12=imm12
 
-C-type (set color)
+C-type (set pixel color)
 ------------------
 
 1101 000 col imm24
 
-R-type (set pixel)
+R-type (set pixel display)
 ------------------
 
 1101 001 spx __ rs1 rs2
+
+R-type (set segment display)
+
+1101 010 seg __ ___ rs
+
+I-type  (set segment display immediate)
+
+1101 011 segi __ ___ imm8
 
 Registers
 =========
