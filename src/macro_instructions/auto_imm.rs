@@ -79,7 +79,7 @@ mod tests {
 
         assert_snapshot!(add("eq", &["r1", "r2", "r3"]), @"");
         assert_snapshot!(add("eq", &["r1", "r2", "0x123"]), @"addi.eq r1 r2 0x123");
-        assert_snapshot!(add("eq", &["r1", "r2", "0x1234"]), @"Error: Conditional 'add' is not supported for 32-bit immediates");
+        assert_snapshot!(add("eq", &["r1", "r2", "0x1234"]), @"lui tmp 1; ori tmp tmp 0x234; add.eq r1 r2 tmp");
     }
 
     #[test]
@@ -92,7 +92,7 @@ mod tests {
         assert_snapshot!(cmp("", &["r1", "0x12345678"]), @"lui tmp 0x12345; ori tmp tmp 0x678; cmp r1 tmp");
 
         assert_snapshot!(cmp("eq", &["r1", "0x123"]), @"cmpi.eq r1 0x123");
-        assert_snapshot!(cmp("eq", &["r1", "0x1234"]), @"Error: Conditional 'cmp' is not supported for 32-bit immediates");
+        assert_snapshot!(cmp("eq", &["r1", "0x1234"]), @"lui tmp 1; ori tmp tmp 0x234; cmp.eq r1 tmp");
     }
 
     #[test]
@@ -106,6 +106,6 @@ mod tests {
 
         assert_snapshot!(beq("eq", &["r1", "r2", "0"]), @"");
         assert_snapshot!(beq("eq", &["r1", "0x123", "0"]), @"li.eq tmp 0x123; beq.eq r1 tmp 0");
-        assert_snapshot!(beq("eq", &["r1", "0x1234", "0"]), @"Error: Conditional 'beq' is not supported for 32-bit immediates");
+        assert_snapshot!(beq("eq", &["r1", "0x1234", "0"]), @"lui tmp 1; ori tmp tmp 0x234; beq.eq r1 tmp 0");
     }
 }

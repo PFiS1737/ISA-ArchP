@@ -47,6 +47,6 @@ mod tests {
         assert_snapshot!(beqi("", &["r1", "0", "0"]), @"beq r1 zero 0");
 
         assert_snapshot!(beqi("eq", &["r1", "0x123", "0"]), @"li.eq tmp 0x123; beq.eq r1 tmp 0");
-        assert_snapshot!(beqi("eq", &["r1", "0x1234", "0"]), @"Error: Conditional 'beqi' is not supported for 32-bit immediates");
+        assert_snapshot!(beqi("eq", &["r1", "0x1234", "0"]), @"lui tmp 1; ori tmp tmp 0x234; beq.eq r1 tmp 0");
     }
 }

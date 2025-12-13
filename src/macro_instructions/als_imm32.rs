@@ -51,6 +51,6 @@ mod tests {
         assert_snapshot!(addi("", &["r1", "r2", "0x12345678"]), @"lui tmp 0x12345; ori tmp tmp 0x678; add r1 r2 tmp");
 
         assert_snapshot!(addi("eq", &["r1", "r2", "0x123"]), @"");
-        assert_snapshot!(addi("eq", &["r1", "r2", "0x1234"]), @"Error: Conditional 'addi' is not supported for 32-bit immediates");
+        assert_snapshot!(addi("eq", &["r1", "r2", "0x1234"]), @"lui tmp 1; ori tmp tmp 0x234; add.eq r1 r2 tmp");
     }
 }

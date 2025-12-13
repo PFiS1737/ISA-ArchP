@@ -45,6 +45,6 @@ mod tests {
         assert_snapshot!(cmpi("", &["r1", "0x12345678"]), @"lui tmp 0x12345; ori tmp tmp 0x678; cmp r1 tmp");
 
         assert_snapshot!(cmpi("eq", &["r1", "0x123"]), @"");
-        assert_snapshot!(cmpi("eq", &["r1", "0x1234"]), @"Error: Conditional 'cmpi' is not supported for 32-bit immediates");
+        assert_snapshot!(cmpi("eq", &["r1", "0x1234"]), @"lui tmp 1; ori tmp tmp 0x234; cmp.eq r1 tmp");
     }
 }
