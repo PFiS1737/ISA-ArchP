@@ -1,6 +1,7 @@
 mod als_imm32;
 mod auto_imm;
 mod branch_imm;
+mod cmp_imm32;
 mod load_imm32;
 
 use std::collections::{HashMap, VecDeque};

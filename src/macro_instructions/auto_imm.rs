@@ -28,12 +28,30 @@ const F1: ExpandFn = |_, this, cond, ops| {
 };
 
 macro_instruction! {
-    name: [ "beq", "bne", "blt", "ble", "bgt", "bge" ],
-    operand_count: 3,
+    name: "cmp",
+    operand_count: 2,
     expander: F2,
 }
 
 const F2: ExpandFn = |_, this, cond, ops| {
+    let inst = this._may_be_name_with_i;
+
+    parse_reg_s(&ops[0])?;
+
+    if let Ok(imm) = parse_imm(&ops[1]) {
+        Ok(Some(vec![(inst, cond, op_values![ops[0], imm])]))
+    } else {
+        Ok(None)
+    }
+};
+
+macro_instruction! {
+    name: [ "beq", "bne", "blt", "ble", "bgt", "bge" ],
+    operand_count: 3,
+    expander: F3,
+}
+
+const F3: ExpandFn = |_, this, cond, ops| {
     let inst = this._may_be_name_with_i;
 
     parse_reg_s(&ops[0])?;
@@ -62,6 +80,19 @@ mod tests {
         assert_snapshot!(add("eq", &["r1", "r2", "r3"]), @"");
         assert_snapshot!(add("eq", &["r1", "r2", "0x123"]), @"addi.eq r1 r2 0x123");
         assert_snapshot!(add("eq", &["r1", "r2", "0x1234"]), @"Error: Conditional 'add' is not supported for 32-bit immediates");
+    }
+
+    #[test]
+    fn auto_imm_cmp() {
+        let cmp = mc_instr("cmp");
+
+        assert_snapshot!(cmp("", &["r1", "r2"]), @"");
+        assert_snapshot!(cmp("", &["r1", "0x123"]), @"cmpi r1 0x123");
+        assert_snapshot!(cmp("", &["r1", "0x1234"]), @"lui tmp 1; ori tmp tmp 0x234; cmp r1 tmp");
+        assert_snapshot!(cmp("", &["r1", "0x12345678"]), @"lui tmp 0x12345; ori tmp tmp 0x678; cmp r1 tmp");
+
+        assert_snapshot!(cmp("eq", &["r1", "0x123"]), @"cmpi.eq r1 0x123");
+        assert_snapshot!(cmp("eq", &["r1", "0x1234"]), @"Error: Conditional 'cmp' is not supported for 32-bit immediates");
     }
 
     #[test]
