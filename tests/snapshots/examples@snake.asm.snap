@@ -1,0 +1,174 @@
+---
+source: tests/snaptest.rs
+input_file: examples/snake.asm
+---
+success: true
+exit_code: 0
+----- stdout -----
+0x90020380 # jmp 156            [jmp main]
+0x840A0000 # li r5 0            [clr x]                                       <label: init_screen>
+0x840C0000 # li r6 0            [clr y]
+0xD0000000 # col 0x000000       [col COLOR_BACK]
+0xD2005006 # spx r5 r6          [spx x y]                                     <label: draw_back>
+0x400A5001 # addi r5 r5 1       [inc x]
+0x843E0040 # li tmp 64          [blt x SCREEN_WIDTH draw_back]
+0x9600509F # blt r5 tmp 4       [blt x SCREEN_WIDTH draw_back]
+0x400C6001 # addi r6 r6 1       [inc y]
+0x840A0000 # li r5 0            [clr x]
+0x843E0024 # li tmp 36          [blt y SCREEN_HEIGHT draw_back]
+0x9600609F # blt r6 tmp 4       [blt y SCREEN_HEIGHT draw_back]
+0xA8000000 # ret
+0xD0FF0000 # col 0xFF0000       [col COLOR_HEAD]                              <label: init_snake>
+0x84020005 # li r1 5            [li head_x INIT_X]
+0x84040012 # li r2 18           [li head_y INIT_Y]
+0xD2001002 # spx r1 r2          [spx head_x head_y]
+0xD0FFFFFF # col 0xFFFFFF       [col COLOR_BODY]
+0x84180003 # li r12 3           [li i 3]
+0x020A100C # sub r5 r1 r12      [sub x head_x i]                              <label: init_body_loop>
+0x400C2000 # addi r6 r2 0       [mv y head_y]
+0xAA00005A # call 90            [call body_push]
+0xD2005006 # spx r5 r6          [spx x y]
+0x4218C001 # subi r12 r12 1     [dec i]
+0x843E0001 # li tmp 1           [bge i 1 init_body_loop]
+0x9C00C27F # bge r12 tmp 19     [bge i 1 init_body_loop]
+0xA8000000 # ret
+0x843E0046 # li tmp 70          [beq key_code KEY_UP move_snake_up]           <label: move_snake>
+0x9200949F # beq r9 tmp 36      [beq key_code KEY_UP move_snake_up]
+0x843E0048 # li tmp 72          [beq key_code KEY_DOWN move_snake_down]
+0x920094FF # beq r9 tmp 39      [beq key_code KEY_DOWN move_snake_down]
+0x843E0045 # li tmp 69          [beq key_code KEY_LEFT move_snake_left]
+0x9200955F # beq r9 tmp 42      [beq key_code KEY_LEFT move_snake_left]
+0x843E0047 # li tmp 71          [beq key_code KEY_RIGHT move_snake_right]
+0x920095BF # beq r9 tmp 45      [beq key_code KEY_RIGHT move_snake_right]
+0xA8000000 # ret
+0x400E1000 # addi r7 r1 0       [mv nx head_x]                                <label: move_snake_up>
+0x42102001 # subi r8 r2 1       [sub ny head_y 1]
+0x90000600 # jmp 48             [jmp move_snake_common]
+0x400E1000 # addi r7 r1 0       [mv nx head_x]                                <label: move_snake_down>
+0x40102001 # addi r8 r2 1       [add ny head_y 1]
+0x90000600 # jmp 48             [jmp move_snake_common]
+0x420E1001 # subi r7 r1 1       [sub nx head_x 1]                             <label: move_snake_left>
+0x40102000 # addi r8 r2 0       [mv ny head_y]
+0x90000600 # jmp 48             [jmp move_snake_common]
+0x400E1001 # addi r7 r1 1       [add nx head_x 1]                             <label: move_snake_right>
+0x40102000 # addi r8 r2 0       [mv ny head_y]
+0x90000600 # jmp 48             [jmp move_snake_common]
+0x400A1000 # addi r5 r1 0       [mv x head_x]                                 <label: move_snake_common>
+0x400C2000 # addi r6 r2 0       [mv y head_y]
+0xAA00005A # call 90            [call body_push]
+0xD0FFFFFF # col 0xFFFFFF       [col COLOR_BODY]
+0xD2005006 # spx r5 r6          [spx x y]
+0x70007000 # cmpi r7 0          [cmp nx 0]
+0x84CE003F # li.lt r7 63        [li.lt nx MAX_X]
+0x70007040 # cmpi r7 64         [cmp nx SCREEN_WIDTH]
+0x850E0000 # li.ge r7 0         [li.ge nx 0]
+0x70008000 # cmpi r8 0          [cmp ny 0]
+0x84D00023 # li.lt r8 35        [li.lt ny MAX_Y]
+0x70008024 # cmpi r8 36         [cmp ny SCREEN_HEIGHT]
+0x85100000 # li.ge r8 0         [li.ge ny 0]
+0x40027000 # addi r1 r7 0       [mv head_x nx]
+0x40048000 # addi r2 r8 0       [mv head_y ny]
+0xD0FF0000 # col 0xFF0000       [col COLOR_HEAD]
+0xD2001002 # spx r1 r2          [spx head_x head_y]
+0x400A1000 # addi r5 r1 0       [mv x head_x]
+0x400C2000 # addi r6 r2 0       [mv y head_y]
+0xAA000062 # call 98            [call body_contains]
+0x843E0001 # li tmp 1           [beq rt 1 lose_loop]
+0x9202D4BF # beq r13 tmp 165    [beq rt 1 lose_loop]
+0x94001943 # bne r1 r3 74       [bne head_x food_x move_snake_not_eat]
+0x94002944 # bne r2 r4 74       [bne head_y food_y move_snake_not_eat]
+0xAA00004E # call 78            [call gen_food]
+0xA8000000 # ret
+0xAA00005E # call 94            [call body_pop]                               <label: move_snake_not_eat>
+0xD0000000 # col 0x000000       [col COLOR_BACK]
+0xD2005006 # spx r5 r6          [spx x y]
+0xA8000000 # ret
+0x400BC000 # addi r5 rng 0      [mv x rng]                                    <label: gen_food>
+0x400DC000 # addi r6 rng 0      [mv y rng]
+0x480A5040 # modi r5 r5 64      [mod x x SCREEN_WIDTH]
+0x480C6024 # modi r6 r6 36      [mod y y SCREEN_HEIGHT]
+0xAA000062 # call 98            [call body_contains]
+0x843E0001 # li tmp 1           [beq rt 1 gen_food]
+0x9200D9DF # beq r13 tmp 78     [beq rt 1 gen_food]
+0x40065000 # addi r3 r5 0       [mv food_x x]
+0x40086000 # addi r4 r6 0       [mv food_y y]
+0xD0FFFF00 # col 0xFFFF00       [col COLOR_FOOD]
+0xD2003004 # spx r3 r4          [spx food_x food_y]
+0xA8000000 # ret
+0x60205008 # shli r16 r5 8      [shl que_val x 8]                             <label: body_push>
+0x14210006 # or r16 r16 r6      [or que_val que_val y]
+0xAA000066 # call 102           [call queue_push]
+0xA8000000 # ret
+0xAA000070 # call 112           [call queue_pop]                              <label: body_pop>
+0x620B0008 # shri r5 r16 8      [shr x que_val 8]
+0x500D00FF # andi r6 r16 255    [and y que_val 0xFF]
+0xA8000000 # ret
+0x60205008 # shli r16 r5 8      [shl que_val x 8]                             <label: body_contains>
+0x14210006 # or r16 r16 r6      [or que_val que_val y]
+0xAA00007A # call 122           [call queue_contains]
+0xA8000000 # ret
+0x843E0064 # li tmp 100         [beq que_len QUEUE_SIZE queue_push_full]      <label: queue_push>
+0x9200EDDF # beq r14 tmp 110    [beq que_len QUEUE_SIZE queue_push_full]
+0x8200F010 # sw r15 r16 0       [sw que_head que_val 0]
+0x401EF001 # addi r15 r15 1     [inc que_head]
+0x481EF064 # modi r15 r15 100   [mod que_head que_head QUEUE_SIZE]
+0x401CE001 # addi r14 r14 1     [inc que_len]
+0x841A0000 # li r13 0           [li rt 0]
+0xA8000000 # ret
+0x841A0001 # li r13 1           [li rt 1]                                     <label: queue_push_full>
+0xA8000000 # ret
+0x9200EF00 # beq r14 zero 120   [beq que_len 0 queue_pop_empty]               <label: queue_pop>
+0x0222F00E # sub r17 r15 r14    [sub que_tmp que_head que_len]
+0x40231064 # addi r17 r17 100   [add que_tmp que_tmp QUEUE_SIZE]
+0x48231064 # modi r17 r17 100   [mod que_tmp que_tmp QUEUE_SIZE]
+0x80211000 # lw r16 r17 0       [lw que_val que_tmp 0]
+0x421CE001 # subi r14 r14 1     [dec que_len]
+0x841A0000 # li r13 0           [li rt 0]
+0xA8000000 # ret
+0x841A0001 # li r13 1           [li rt 1]                                     <label: queue_pop_empty>
+0xA8000000 # ret
+0x9202E100 # beq r14 zero 136   [beq que_len 0 queue_contains_not_found]      <label: queue_contains>
+0x0222F00E # sub r17 r15 r14    [sub que_tmp que_head que_len]
+0x40231064 # addi r17 r17 100   [add que_tmp que_tmp QUEUE_SIZE]
+0x48231064 # modi r17 r17 100   [mod que_tmp que_tmp QUEUE_SIZE]
+0x84240000 # li r18 0           [clr que_i]
+0x9203210E # beq r18 r14 136    [beq que_i que_len queue_contains_not_found]  <label: queue_contains_loop>
+0x80271000 # lw r19 r17 0       [lw que_cur que_tmp 0]
+0x920330D0 # beq r19 r16 134    [beq que_cur que_val queue_contains_found]
+0x40231001 # addi r17 r17 1     [inc que_tmp]
+0x48231064 # modi r17 r17 100   [mod que_tmp que_tmp QUEUE_SIZE]
+0x40252001 # addi r18 r18 1     [inc que_i]
+0x90000FE0 # jmp 127            [jmp queue_contains_loop]
+0x841A0001 # li r13 1           [li rt 1]                                     <label: queue_contains_found>
+0xA8000000 # ret
+0x841A0000 # li r13 0           [li rt 0]                                     <label: queue_contains_not_found>
+0xA8000000 # ret
+0x4015B000 # addi r10 kb 0      [mv t0 kb]                                    <label: read_key>
+0x843E0046 # li tmp 70          [beq t0 KEY_UP read_key_ok]
+0x9202A29F # beq r10 tmp 148    [beq t0 KEY_UP read_key_ok]
+0x843E0048 # li tmp 72          [beq t0 KEY_DOWN read_key_ok]
+0x9202A29F # beq r10 tmp 148    [beq t0 KEY_DOWN read_key_ok]
+0x843E0045 # li tmp 69          [beq t0 KEY_LEFT read_key_ok]
+0x9202A29F # beq r10 tmp 148    [beq t0 KEY_LEFT read_key_ok]
+0x843E0047 # li tmp 71          [beq t0 KEY_RIGHT read_key_ok]
+0x9202A29F # beq r10 tmp 148    [beq t0 KEY_RIGHT read_key_ok]
+0xA8000000 # ret
+0x0216900A # sub r11 r9 r10     [sub t1 key_code t0]                          <label: read_key_ok>
+0x843E0002 # li tmp 2           [beq t1 2 read_key_ret]
+0x9202B37F # beq r11 tmp 155    [beq t1 2 read_key_ret]
+0x87FFFFFF # lui tmp 0xFFFFF    [beq t1 0xFFFFFFFE read_key_ret]
+0x543FFFFE # ori tmp tmp 0xFFE  [beq t1 0xFFFFFFFE read_key_ret]
+0x9202B37F # beq r11 tmp 155    [beq t1 0xFFFFFFFE read_key_ret]
+0x4012A000 # addi r9 r10 0      [mv key_code t0]
+0xA8000000 # ret                                                              <label: read_key_ret>
+0xAA000001 # call 1             [call init_screen]                            <label: main>
+0xAA00000D # call 13            [call init_snake]
+0xAA00004E # call 78            [call gen_food]
+0x84180064 # li r12 100         [li i 100]                                    <label: main_loop>
+0x4218C001 # subi r12 r12 1     [dec i]                                       <label: sleep>
+0x9A02C400 # bgt r12 zero 160   [bgt i 0 sleep]
+0xAA00008A # call 138           [call read_key]
+0xAA00001B # call 27            [call move_snake]
+0x900203E0 # jmp 159            [jmp main_loop]
+0x900204A0 # jmp 165            [jmp lose_loop]                               <label: lose_loop>
+----- stderr -----
