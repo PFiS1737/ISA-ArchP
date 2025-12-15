@@ -8,7 +8,7 @@ pseudo_instruction! {
         "li",
         op_values![
             ops[0],
-            "0",
+            0,
         ],
     ),
 }

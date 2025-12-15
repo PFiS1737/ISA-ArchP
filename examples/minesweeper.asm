@@ -170,9 +170,9 @@ count_around_mines:
 		add ny y ty
 
 		# 越界判断
-		blt nx 0 skip_this_neighbor
+		bltz nx skip_this_neighbor
 		bge nx GRID_COLS skip_this_neighbor
-		blt ny 0 skip_this_neighbor
+		bltz ny skip_this_neighbor
 		bge ny GRID_ROWS skip_this_neighbor
 
 		# 计算地址
@@ -276,11 +276,11 @@ reveal_tile:
 	lw t1 addr 0
 
 	and t2 t1 REVEAL_MASK
-	bne t2 0 reveal_tile_ret
+	bnez t2 reveal_tile_ret
 	and t2 t1 FLAG_MASK
-	bne t2 0 reveal_tile_ret
+	bnez t2 reveal_tile_ret
 	and t2 t1 MINE_MASK
-	bne t2 0 lose_loop
+	bnez t2 lose_loop
 	and t2 t1 AROUND_COUNT_MASK
 
 	mv arg_x cursor_x
@@ -317,9 +317,9 @@ reveal_around:
 
 	reveal_around_loop:
 		# 越界检查
-		blt nx 0 reveal_around_ret
+		bltz nx reveal_around_ret
 		bge nx GRID_COLS reveal_around_ret
-		blt ny 0 reveal_around_ret
+		bltz ny reveal_around_ret
 		bge ny GRID_ROWS reveal_around_ret
 
 		# 计算地址
@@ -331,9 +331,9 @@ reveal_around:
 
 		# 如果已揭示或有旗子，则返回
 		and t2 t1 REVEAL_MASK
-		bne t2 0 reveal_around_ret
+		bnez t2 reveal_around_ret
 		and t2 t1 FLAG_MASK
-		bne t2 0 reveal_around_ret
+		bnez t2 reveal_around_ret
 
 		# 设置为已揭示
 		or t1 t1 REVEAL_MASK
@@ -360,7 +360,7 @@ reveal_around:
 		call.eq draw_num5
 
 		# 如果不是空白格，不再递归
-		bne t2 0 reveal_around_ret
+		bnez t2 reveal_around_ret
 
 		# 递归
 		dec ny
@@ -641,7 +641,7 @@ draw_num5:
 
 read_key:
   mv key_code kb
-  beq key_code 0 read_key
+  beqz key_code read_key
   ret
 
 

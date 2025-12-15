@@ -17,7 +17,7 @@ pseudo_instruction! {
             op_values![
                 ops[0],
                 ops[0],
-                "1",
+                1,
             ],
         )
     },

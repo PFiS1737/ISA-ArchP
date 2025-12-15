@@ -20,7 +20,7 @@ main:
     sw t1 io 0
     inc t1
     dec t0
-    bgt t0 0 input
+    bgtz t0 input
 
   call solve
 

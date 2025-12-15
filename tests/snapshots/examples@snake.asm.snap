@@ -117,7 +117,7 @@ exit_code: 0
 0xA8000000 # ret
 0x841A0001 # li r13 1           [li rt 1]                                     <label: queue_push_full>
 0xA8000000 # ret
-0x9200EF00 # beq r14 zero 120   [beq que_len 0 queue_pop_empty]               <label: queue_pop>
+0x9200EF00 # beq r14 zero 120   [beqz que_len queue_pop_empty]                <label: queue_pop>
 0x0222F00E # sub r17 r15 r14    [sub que_tmp que_head que_len]
 0x40231064 # addi r17 r17 100   [add que_tmp que_tmp QUEUE_SIZE]
 0x48231064 # modi r17 r17 100   [mod que_tmp que_tmp QUEUE_SIZE]
@@ -127,7 +127,7 @@ exit_code: 0
 0xA8000000 # ret
 0x841A0001 # li r13 1           [li rt 1]                                     <label: queue_pop_empty>
 0xA8000000 # ret
-0x9202E100 # beq r14 zero 136   [beq que_len 0 queue_contains_not_found]      <label: queue_contains>
+0x9202E100 # beq r14 zero 136   [beqz que_len queue_contains_not_found]       <label: queue_contains>
 0x0222F00E # sub r17 r15 r14    [sub que_tmp que_head que_len]
 0x40231064 # addi r17 r17 100   [add que_tmp que_tmp QUEUE_SIZE]
 0x48231064 # modi r17 r17 100   [mod que_tmp que_tmp QUEUE_SIZE]
@@ -166,7 +166,7 @@ exit_code: 0
 0xAA00004E # call 78            [call gen_food]
 0x84180064 # li r12 100         [li i 100]                                    <label: main_loop>
 0x4218C001 # subi r12 r12 1     [dec i]                                       <label: sleep>
-0x9A02C400 # bgt r12 zero 160   [bgt i 0 sleep]
+0x9A02C400 # bgt r12 zero 160   [bgtz i sleep]
 0xAA00008A # call 138           [call read_key]
 0xAA00001B # call 27            [call move_snake]
 0x900203E0 # jmp 159            [jmp main_loop]

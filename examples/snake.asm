@@ -215,7 +215,7 @@ queue_push:
 # len--
 # return 0
 queue_pop:
-  beq que_len 0 queue_pop_empty
+  beqz que_len queue_pop_empty
 
   sub que_tmp que_head que_len
   add que_tmp que_tmp QUEUE_SIZE
@@ -238,7 +238,7 @@ queue_pop:
 #   if queue[idx] == val: return 1
 # return 0
 queue_contains:
-  beq que_len 0 queue_contains_not_found
+  beqz que_len queue_contains_not_found
 
   # que_tmp = (head - len + SIZE) % SIZE
   sub que_tmp que_head que_len
@@ -298,7 +298,7 @@ main:
     li i 100
     sleep:
       dec i
-      bgt i 0 sleep
+      bgtz i sleep
 
     call read_key
     call move_snake

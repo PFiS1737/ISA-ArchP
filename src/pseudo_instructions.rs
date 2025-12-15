@@ -1,3 +1,4 @@
+mod branch_zero;
 mod clear;
 mod inc_dec;
 mod mv;
@@ -8,7 +9,7 @@ use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
 use crate::{
-    instructions::{parse_reg_d, parse_reg_s},
+    instructions::{parse_imm, parse_reg_d, parse_reg_s},
     operand::{OperandType, OperandValue},
 };
 
@@ -51,9 +52,23 @@ impl PseudoInstruction {
 
         for (i, operand) in operands.iter().enumerate() {
             match &self.operand_types[i] {
-                OperandType::RegD => parse_reg_d(operand)?,
-                OperandType::RegS => parse_reg_s(operand)?,
-                OperandType::Imm(_) => unimplemented!(),
+                OperandType::RegD => {
+                    parse_reg_d(operand)?;
+                }
+                OperandType::RegS => {
+                    parse_reg_s(operand)?;
+                }
+                OperandType::Imm(range) => {
+                    let imm = parse_imm(operand)?;
+                    if !range.contains(&imm) {
+                        bail!(
+                            "Immediate value '{}' out of range for pseudo-instruction '{}', expected {}",
+                            imm,
+                            self.name,
+                            range
+                        );
+                    }
+                }
             };
         }
 

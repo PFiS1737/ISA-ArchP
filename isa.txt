@@ -173,15 +173,15 @@ Registers
 
 11001 pc  - the program counter (read-only)
 11010 io  - the level input/output (only in level mode)
-11011 kb  - the keyboard input (only in sandbox mode)
+11011 kb  - the keyboard input (only in sandbox mode, read-only)
 11100 rng - the random number generator (only in sandbox mode, read-only)
 11101
 11110
 
 11111 tmp  - used by the assembler for expanding macro instructions
 
-Pseudo Commands
-===============
+Pseudo Instructions
+===================
 
 mv rd rs  =>  addi rd rs 0
 
@@ -189,3 +189,10 @@ clr rd  =>  li rd 0
 
 inc rd  =>  addi rd rd 1
 dec rd  =>  subi rd rd 1
+
+beqz rs1 offset12  =>  beq rs1 zero offset12
+bnez rs1 offset12  =>  bne rs1 zero offset12
+bltz rs1 offset12  =>  blt rs1 zero offset12
+blez rs1 offset12  =>  ble rs1 zero offset12
+bgtz rs1 offset12  =>  bgt rs1 zero offset12
+bgez rs1 offset12  =>  bge rs1 zero offset12
