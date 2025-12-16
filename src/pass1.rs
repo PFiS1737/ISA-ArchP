@@ -1,9 +1,10 @@
-use std::collections::HashMap;
-
 use anyhow::{Result, anyhow, bail};
-use bimap::BiHashMap;
 
-use crate::{macro_instructions::MACRO_INSTRUCTIONS, operand::OperandValue};
+use crate::{
+    assembler::{Context, Line},
+    macro_instructions::MACRO_INSTRUCTIONS,
+    operand::OperandValue,
+};
 
 /// Pass 1
 ///
@@ -11,26 +12,18 @@ use crate::{macro_instructions::MACRO_INSTRUCTIONS, operand::OperandValue};
 /// 2. Expand macro-instructions.
 /// 3. Substitute constants.
 /// 4. Build a mapping between new lines and the original lines.
-pub struct Pass1<'a> {
-    disable_macro: bool,
-    constants: HashMap<&'a str, &'a str>,
-    pub labels: BiHashMap<&'a str, usize>,
-    pub addr_to_original: Vec<(usize, &'a str)>,
-    pub processed: Vec<(&'a str, Option<&'a str>, Vec<OperandValue<'a>>)>,
+pub struct Pass1<'ctx, 'src> {
+    context: &'ctx mut Context<'src>,
 }
 
-impl<'a> Pass1<'a> {
-    pub fn new(disable_macro: bool) -> Self {
-        Self {
-            disable_macro,
-            constants: HashMap::new(),
-            labels: BiHashMap::new(),
-            addr_to_original: Vec::new(),
-            processed: Vec::new(),
-        }
+impl<'ctx, 'src> Pass1<'ctx, 'src> {
+    pub fn new(context: &'ctx mut Context<'src>) -> Self {
+        Self { context }
     }
 
-    pub fn run(&mut self, source_lines: &'a [String]) -> Result<()> {
+    pub fn run(&mut self, source_lines: &'src [String]) -> Result<Vec<Line<'src>>> {
+        let mut processed = Vec::new();
+
         let mut in_const_zone = true;
 
         for (orig_idx, raw_line) in source_lines.iter().enumerate() {
@@ -57,7 +50,7 @@ impl<'a> Pass1<'a> {
                     let [name, value, ..] = tokens[1..] else {
                         unreachable!()
                     };
-                    self.constants.insert(name, value);
+                    self.context.constants.insert(name, value);
                     continue;
                 }
 
@@ -74,8 +67,8 @@ impl<'a> Pass1<'a> {
 
             let (raw_line, tokens) = match tokens[0].strip_suffix(':') {
                 Some(label) => {
-                    let pc = self.processed.len();
-                    self.labels.insert(label, pc);
+                    let pc = processed.len();
+                    self.context.labels.insert(label, pc);
 
                     if tokens.len() == 1 {
                         continue;
@@ -95,7 +88,7 @@ impl<'a> Pass1<'a> {
             let ops = tokens[1..]
                 .iter()
                 .map(|e| {
-                    OperandValue::from(if let Some(&value) = self.constants.get(e) {
+                    OperandValue::from(if let Some(&value) = self.context.constants.get(e) {
                         value
                     } else {
                         e
@@ -105,7 +98,7 @@ impl<'a> Pass1<'a> {
 
             let mut lines = Vec::new();
 
-            if !self.disable_macro
+            if !self.context.settings.disable_macro
                 && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
                 && let Some(expanded) = mc_instr.expand(cond, &ops).map_err(|e| {
                     anyhow!(
@@ -122,12 +115,14 @@ impl<'a> Pass1<'a> {
             }
 
             for line in lines {
-                self.addr_to_original.push((orig_idx, raw_line.trim()));
-                self.processed.push(line);
+                self.context
+                    .addr_to_original
+                    .push((orig_idx, raw_line.trim()));
+                processed.push(line);
             }
         }
 
-        Ok(())
+        Ok(processed)
     }
 }
 

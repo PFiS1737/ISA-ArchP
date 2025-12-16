@@ -9,9 +9,9 @@ use std::collections::{HashMap, VecDeque};
 use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
-use crate::operand::OperandValue;
+use crate::{assembler::Line, operand::OperandValue};
 
-type ExpandRet<'a> = Result<Option<Vec<(&'static str, Option<&'a str>, Vec<OperandValue<'a>>)>>>;
+type ExpandRet<'a> = Result<Option<Vec<Line<'a>>>>;
 type ExpandFn = for<'a> fn(
     &'static str,
     &MacroInstruction,
