@@ -14,7 +14,7 @@ use crate::{
     operand::OperandValue,
 };
 
-type ExpandRet<'a> = Result<Option<Vec<Line<'a>>>>;
+type ExpandRet<'a> = Option<Vec<Line<'a>>>;
 type ExpandFn = for<'a> fn(
     &Context<'a>,
     &MacroInstruction,
@@ -47,10 +47,10 @@ impl MacroInstruction {
         ctx: &Context<'a>,
         cond: Option<&'a str>,
         operands: &[OperandValue<'a>],
-    ) -> ExpandRet<'a> {
+    ) -> Result<ExpandRet<'a>> {
         self.assert_operand_count(operands)?;
 
-        let mut deq: VecDeque<_> = match (self.expander)(ctx, self, cond, operands)? {
+        let mut deq: VecDeque<_> = match (self.expander)(ctx, self, cond, operands) {
             None => return Ok(None),
             Some(v) => v.into(),
         };
@@ -61,7 +61,7 @@ impl MacroInstruction {
             if let Some(mc) = MACRO_INSTRUCTIONS.get(name) {
                 mc.assert_operand_count(&ops)?;
 
-                match (mc.expander)(ctx, mc, cond, &ops)? {
+                match (mc.expander)(ctx, mc, cond, &ops) {
                     None => {
                         ret.push((name, cond, ops));
                     }

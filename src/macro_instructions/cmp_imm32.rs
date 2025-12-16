@@ -1,5 +1,5 @@
 use crate::{
-    instructions::{parse_imm, parse_reg_s},
+    instructions::parse_imm,
     macro_instructions::{ExpandFn, macro_instruction},
     operand::op_values,
 };
@@ -13,17 +13,15 @@ macro_instruction! {
 const F: ExpandFn = |ctx, this, cond, ops| {
     let inst = &this.name[..3]; // remove the trailing 'i'
 
-    parse_reg_s(ctx, &ops[0])?;
-
-    let imm = parse_imm(ctx, &ops[1])?;
-
-    if imm > 0xFFF {
-        Ok(Some(vec![
+    if let Ok(imm) = parse_imm(ctx, &ops[1])
+        && imm > 0xFFF
+    {
+        Some(vec![
             ("li", cond, op_values!["tmp", imm]),
             (inst, cond, op_values![ops[0], "tmp"]),
-        ]))
+        ])
     } else {
-        Ok(None)
+        None
     }
 };
 
@@ -37,8 +35,8 @@ mod tests {
 
         assert_snapshot!(cmpi("", &["r1"]), @"Error: Macro-instruction 'cmpi' requires 2 operands, got 1");
         assert_snapshot!(cmpi("", &["r1", "r2", "r3"]), @"Error: Macro-instruction 'cmpi' requires 2 operands, got 3");
-        assert_snapshot!(cmpi("", &["123", "456"]), @"Error: Expected register, found immediate: 123");
-        assert_snapshot!(cmpi("", &["r1", "r2"]), @"Error: Invalid immediate: r2");
+        assert_snapshot!(cmpi("", &["123", "456"]), @"");
+        assert_snapshot!(cmpi("", &["r1", "r2"]), @"");
 
         assert_snapshot!(cmpi("", &["r1", "0x123"]), @"");
         assert_snapshot!(cmpi("", &["r1", "0x1234"]), @"lui tmp 1; ori tmp tmp 0x234; cmp r1 tmp");

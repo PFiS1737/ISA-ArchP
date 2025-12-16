@@ -1,5 +1,5 @@
 use crate::{
-    instructions::{parse_imm, parse_reg_d},
+    instructions::parse_imm,
     macro_instructions::{ExpandFn, macro_instruction},
     operand::op_values,
 };
@@ -11,16 +11,14 @@ macro_instruction! {
 }
 
 pub const F: ExpandFn = |ctx, _, cond, ops| {
-    parse_reg_d(ctx, &ops[0])?;
-
-    let imm = parse_imm(ctx, &ops[1])?;
-
-    if imm > 0xFFF {
+    if let Ok(imm) = parse_imm(ctx, &ops[1])
+        && imm > 0xFFF
+    {
         if ops[0] != "tmp".into() && cond.is_none() {
-            return Ok(Some(vec![
+            return Some(vec![
                 ("lui", None, op_values![ops[0], imm >> 12]),
                 ("ori", None, op_values![ops[0], ops[0], imm & 0xFFF]),
-            ]));
+            ]);
         }
 
         let mut ret = vec![
@@ -29,16 +27,16 @@ pub const F: ExpandFn = |ctx, _, cond, ops| {
         ];
 
         if ops[0] == "tmp".into() {
-            return Ok(Some(ret));
+            return Some(ret);
         }
 
         if cond.is_some() {
             ret.push(("mv", cond, op_values![ops[0], "tmp"]))
         }
 
-        Ok(Some(ret))
+        Some(ret)
     } else {
-        Ok(None)
+        None
     }
 };
 
@@ -51,9 +49,9 @@ mod tests {
         let li = mc_instr("li");
 
         assert_snapshot!(li("", &["r1"]), @"Error: Macro-instruction 'li' requires 2 operands, got 1");
-        assert_snapshot!(li("", &["r1", "r2"]), @"Error: Invalid immediate: r2");
-        assert_snapshot!(li("", &["123", "123"]), @"Error: Expected register, found immediate: 123");
-        assert_snapshot!(li("", &["kb", "123"]), @"Error: Register 'kb' is raed-only");
+        assert_snapshot!(li("", &["r1", "r2"]), @"");
+        assert_snapshot!(li("", &["123", "123"]), @"");
+        assert_snapshot!(li("", &["kb", "123"]), @"");
 
         assert_snapshot!(li("", &["r1", "0x123"]), @"");
         assert_snapshot!(li("", &["r1", "0x1234"]), @"lui r1 1; ori r1 r1 0x234");

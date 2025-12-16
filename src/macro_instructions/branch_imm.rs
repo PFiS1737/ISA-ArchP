@@ -1,5 +1,5 @@
 use crate::{
-    instructions::{parse_imm, parse_reg_s},
+    instructions::parse_imm,
     macro_instructions::{ExpandFn, macro_instruction},
     operand::op_values,
 };
@@ -13,19 +13,17 @@ macro_instruction! {
 const F: ExpandFn = |ctx, this, cond, ops| {
     let inst = &this.name[..3]; // remove the trailing 'i'
 
-    parse_reg_s(ctx, &ops[0])?;
-
-    let imm = parse_imm(ctx, &ops[1])?;
-
-    // INFO: We don't check the branch target (ops[2]) here, as it can be a label.
+    let Ok(imm) = parse_imm(ctx, &ops[1]) else {
+        return None;
+    };
 
     if imm == 0 {
-        Ok(Some(vec![(inst, cond, op_values![ops[0], "zero", ops[2]])]))
+        Some(vec![(inst, cond, op_values![ops[0], "zero", ops[2]])])
     } else {
-        Ok(Some(vec![
+        Some(vec![
             ("li", cond, op_values!["tmp", imm]),
             (inst, cond, op_values![ops[0], "tmp", ops[2]]),
-        ]))
+        ])
     }
 };
 
@@ -38,8 +36,8 @@ mod tests {
         let beqi = mc_instr("beqi");
 
         assert_snapshot!(beqi("", &["r1", "0x123"]), @"Error: Macro-instruction 'beqi' requires 3 operands, got 2");
-        assert_snapshot!(beqi("",&["r1", "r2", "0"]), @"Error: Invalid immediate: r2");
-        assert_snapshot!(beqi("", &["123", "123", "0"]), @"Error: Expected register, found immediate: 123");
+        assert_snapshot!(beqi("",&["r1", "r2", "0"]), @"");
+        assert_snapshot!(beqi("", &["123", "123", "0"]), @"li tmp 123; beq 123 tmp 0");
 
         assert_snapshot!(beqi("", &["r1", "0x123", "0"]), @"li tmp 0x123; beq r1 tmp 0");
         assert_snapshot!(beqi("", &["r1", "0x1234", "0"]), @"lui tmp 1; ori tmp tmp 0x234; beq r1 tmp 0");

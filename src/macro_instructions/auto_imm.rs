@@ -1,5 +1,5 @@
 use crate::{
-    instructions::{parse_imm, parse_reg_d, parse_reg_s},
+    instructions::parse_imm,
     macro_instructions::{ExpandFn, macro_instruction},
     operand::op_values,
 };
@@ -17,13 +17,10 @@ macro_instruction! {
 const F1: ExpandFn = |ctx, this, cond, ops| {
     let inst = this._may_be_name_with_i;
 
-    parse_reg_d(ctx, &ops[0])?;
-    parse_reg_s(ctx, &ops[1])?;
-
     if let Ok(imm) = parse_imm(ctx, &ops[2]) {
-        Ok(Some(vec![(inst, cond, op_values![ops[0], ops[1], imm])]))
+        Some(vec![(inst, cond, op_values![ops[0], ops[1], imm])])
     } else {
-        Ok(None)
+        None
     }
 };
 
@@ -36,12 +33,10 @@ macro_instruction! {
 const F2: ExpandFn = |ctx, this, cond, ops| {
     let inst = this._may_be_name_with_i;
 
-    parse_reg_s(ctx, &ops[0])?;
-
     if let Ok(imm) = parse_imm(ctx, &ops[1]) {
-        Ok(Some(vec![(inst, cond, op_values![ops[0], imm])]))
+        Some(vec![(inst, cond, op_values![ops[0], imm])])
     } else {
-        Ok(None)
+        None
     }
 };
 
@@ -54,14 +49,10 @@ macro_instruction! {
 const F3: ExpandFn = |ctx, this, cond, ops| {
     let inst = this._may_be_name_with_i;
 
-    parse_reg_s(ctx, &ops[0])?;
-
-    // INFO: 'ops[2]' is also not checked here, see [[./branch_imm.rs]].
-
     if let Ok(imm) = parse_imm(ctx, &ops[1]) {
-        Ok(Some(vec![(inst, cond, op_values![ops[0], imm, ops[2]])]))
+        Some(vec![(inst, cond, op_values![ops[0], imm, ops[2]])])
     } else {
-        Ok(None)
+        None
     }
 };
 
@@ -72,6 +63,7 @@ mod tests {
     #[test]
     fn auto_imm_als() {
         let add = mc_instr("add");
+
         assert_snapshot!(add("", &["r1", "r2", "r3"]), @"");
         assert_snapshot!(add("", &["r1", "r2", "0x123"]), @"addi r1 r2 0x123");
         assert_snapshot!(add("", &["r1", "r2", "0x1234"]), @"lui tmp 1; ori tmp tmp 0x234; add r1 r2 tmp");
