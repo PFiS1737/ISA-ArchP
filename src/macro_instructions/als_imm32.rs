@@ -14,13 +14,13 @@ macro_instruction! {
     expander: F,
 }
 
-const F: ExpandFn = |_, this, cond, ops| {
+const F: ExpandFn = |ctx, this, cond, ops| {
     let inst = &this.name[..this.name.len() - 1]; // remove the trailing 'i'
 
-    parse_reg_d(&ops[0])?;
-    parse_reg_s(&ops[1])?;
+    parse_reg_d(ctx, &ops[0])?;
+    parse_reg_s(ctx, &ops[1])?;
 
-    let imm = parse_imm(&ops[2])?;
+    let imm = parse_imm(ctx, &ops[2])?;
 
     if imm > 0xFFF {
         Ok(Some(vec![

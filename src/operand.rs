@@ -8,15 +8,6 @@ pub enum OperandValue<'a> {
     Unsigned(u32),
 }
 
-impl OperandValue<'_> {
-    pub fn as_str(&self) -> Option<&str> {
-        match self {
-            Self::StringSlice(s) => Some(s),
-            _ => None,
-        }
-    }
-}
-
 impl<'a> From<&'a str> for OperandValue<'a> {
     fn from(s: &'a str) -> Self {
         OperandValue::StringSlice(s)

@@ -3,15 +3,13 @@ use anyhow::{Result, anyhow, bail};
 use crate::{
     assembler::{Context, Line},
     macro_instructions::MACRO_INSTRUCTIONS,
-    operand::OperandValue,
 };
 
 /// Pass 1
 ///
 /// 1. Record constants and labels.
 /// 2. Expand macro-instructions.
-/// 3. Substitute constants.
-/// 4. Build a mapping between new lines and the original lines.
+/// 3. Build a mapping between new lines and the original lines.
 pub struct Pass1<'ctx, 'src> {
     context: &'ctx mut Context<'src>,
 }
@@ -85,22 +83,13 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                 (tokens[0], None)
             };
 
-            let ops = tokens[1..]
-                .iter()
-                .map(|e| {
-                    OperandValue::from(if let Some(&value) = self.context.constants.get(e) {
-                        value
-                    } else {
-                        e
-                    })
-                })
-                .collect::<Vec<_>>();
+            let ops = tokens[1..].iter().map(|e| (*e).into()).collect::<Vec<_>>();
 
             let mut lines = Vec::new();
 
             if !self.context.settings.disable_macro
                 && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
-                && let Some(expanded) = mc_instr.expand(cond, &ops).map_err(|e| {
+                && let Some(expanded) = mc_instr.expand(self.context, cond, &ops).map_err(|e| {
                     anyhow!(
                         "Error expanding macro-instruction at line {}: '{}' ({})",
                         orig_idx + 1,

@@ -10,10 +10,10 @@ macro_instruction! {
     expander: F,
 }
 
-pub const F: ExpandFn = |_, _, cond, ops| {
-    parse_reg_d(&ops[0])?;
+pub const F: ExpandFn = |ctx, _, cond, ops| {
+    parse_reg_d(ctx, &ops[0])?;
 
-    let imm = parse_imm(&ops[1])?;
+    let imm = parse_imm(ctx, &ops[1])?;
 
     if imm > 0xFFF {
         if ops[0] != "tmp".into() && cond.is_none() {

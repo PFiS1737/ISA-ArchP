@@ -3,16 +3,14 @@ use anyhow::{Result, anyhow};
 use crate::{
     assembler::{Context, Line},
     instructions::INSTRUCTIONS,
-    operand::OperandValue,
     pseudo_instructions::PSEUDO_INSTRUCTIONS,
     utils::fmt_line,
 };
 
 /// Pass 3
 ///
-/// 1. Substitute label addresses.
-/// 2. Expand macro-instructions.
-/// 3. Encode assembly instructions into machine code.
+/// 1. Expand macro-instructions.
+/// 2. Encode assembly instructions into machine code.
 pub struct Pass2<'ctx, 'src> {
     context: &'ctx mut Context<'src>,
 }
@@ -60,22 +58,9 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
     fn line_handler(&self, line: Line) -> Result<(u32, String)> {
         let (name, cond, operands) = line;
 
-        let operands = operands
-            .into_iter()
-            .map(|e| {
-                if let Some(s) = e.as_str()
-                    && let Some(&label_addr) = self.context.labels.get_by_left(s)
-                {
-                    OperandValue::Unsigned(label_addr.try_into().unwrap()) // WARN: unsafe
-                } else {
-                    e
-                }
-            })
-            .collect::<Vec<_>>();
-
         let (name, ops) = if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
             ps_instr
-                .expand(&operands)
+                .expand(self.context, &operands)
                 .map_err(|e| anyhow!("Error expanding pseudo-instruction '{}': {}", name, e))?
         } else {
             (name, operands)
@@ -84,7 +69,7 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
         let code = INSTRUCTIONS
             .get(name)
             .ok_or_else(|| anyhow!("Unknown instruction: '{}'", name))?
-            .encode(cond, &ops)?;
+            .encode(self.context, cond, &ops)?;
 
         Ok((code, fmt_line(name, cond, ops)))
     }

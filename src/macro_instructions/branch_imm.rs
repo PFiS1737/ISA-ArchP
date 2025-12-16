@@ -10,12 +10,12 @@ macro_instruction! {
     expander: F,
 }
 
-const F: ExpandFn = |_, this, cond, ops| {
+const F: ExpandFn = |ctx, this, cond, ops| {
     let inst = &this.name[..3]; // remove the trailing 'i'
 
-    parse_reg_s(&ops[0])?;
+    parse_reg_s(ctx, &ops[0])?;
 
-    let imm = parse_imm(&ops[1])?;
+    let imm = parse_imm(ctx, &ops[1])?;
 
     // INFO: We don't check the branch target (ops[2]) here, as it can be a label.
 

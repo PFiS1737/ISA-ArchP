@@ -14,13 +14,13 @@ macro_instruction! {
     expander: F1,
 }
 
-const F1: ExpandFn = |_, this, cond, ops| {
+const F1: ExpandFn = |ctx, this, cond, ops| {
     let inst = this._may_be_name_with_i;
 
-    parse_reg_d(&ops[0])?;
-    parse_reg_s(&ops[1])?;
+    parse_reg_d(ctx, &ops[0])?;
+    parse_reg_s(ctx, &ops[1])?;
 
-    if let Ok(imm) = parse_imm(&ops[2]) {
+    if let Ok(imm) = parse_imm(ctx, &ops[2]) {
         Ok(Some(vec![(inst, cond, op_values![ops[0], ops[1], imm])]))
     } else {
         Ok(None)
@@ -33,12 +33,12 @@ macro_instruction! {
     expander: F2,
 }
 
-const F2: ExpandFn = |_, this, cond, ops| {
+const F2: ExpandFn = |ctx, this, cond, ops| {
     let inst = this._may_be_name_with_i;
 
-    parse_reg_s(&ops[0])?;
+    parse_reg_s(ctx, &ops[0])?;
 
-    if let Ok(imm) = parse_imm(&ops[1]) {
+    if let Ok(imm) = parse_imm(ctx, &ops[1]) {
         Ok(Some(vec![(inst, cond, op_values![ops[0], imm])]))
     } else {
         Ok(None)
@@ -51,14 +51,14 @@ macro_instruction! {
     expander: F3,
 }
 
-const F3: ExpandFn = |_, this, cond, ops| {
+const F3: ExpandFn = |ctx, this, cond, ops| {
     let inst = this._may_be_name_with_i;
 
-    parse_reg_s(&ops[0])?;
+    parse_reg_s(ctx, &ops[0])?;
 
     // INFO: 'ops[2]' is also not checked here, see [[./branch_imm.rs]].
 
-    if let Ok(imm) = parse_imm(&ops[1]) {
+    if let Ok(imm) = parse_imm(ctx, &ops[1]) {
         Ok(Some(vec![(inst, cond, op_values![ops[0], imm, ops[2]])]))
     } else {
         Ok(None)

@@ -9,6 +9,7 @@ use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
 use crate::{
+    assembler::Context,
     instructions::{parse_imm, parse_reg_d, parse_reg_s},
     operand::{OperandType, OperandValue},
 };
@@ -34,13 +35,17 @@ pub static PSEUDO_INSTRUCTIONS: Lazy<HashMap<&'static str, PseudoInstruction>> =
 });
 
 impl PseudoInstruction {
-    pub fn expand<'a>(&self, operands: &[OperandValue<'a>]) -> Result<ExpandRet<'a>> {
-        self.assert_operand_format(operands)?;
+    pub fn expand<'a>(
+        &self,
+        ctx: &Context,
+        operands: &[OperandValue<'a>],
+    ) -> Result<ExpandRet<'a>> {
+        self.assert_operand_format(ctx, operands)?;
 
         Ok((self.expander)(self.name, operands))
     }
 
-    fn assert_operand_format(&self, operands: &[OperandValue]) -> Result<()> {
+    fn assert_operand_format(&self, ctx: &Context, operands: &[OperandValue]) -> Result<()> {
         if operands.len() != self.operand_types.len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",
@@ -53,13 +58,13 @@ impl PseudoInstruction {
         for (i, operand) in operands.iter().enumerate() {
             match &self.operand_types[i] {
                 OperandType::RegD => {
-                    parse_reg_d(operand)?;
+                    parse_reg_d(ctx, operand)?;
                 }
                 OperandType::RegS => {
-                    parse_reg_s(operand)?;
+                    parse_reg_s(ctx, operand)?;
                 }
                 OperandType::Imm(range) => {
-                    let imm = parse_imm(operand)?;
+                    let imm = parse_imm(ctx, operand)?;
                     if !range.contains(&imm) {
                         bail!(
                             "Immediate value '{}' out of range for pseudo-instruction '{}', expected {}",

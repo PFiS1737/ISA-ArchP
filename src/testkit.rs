@@ -1,10 +1,14 @@
 pub use insta::assert_snapshot;
 
-use crate::{instructions::*, macro_instructions::*, operand::OperandValue, utils::fmt_line};
+use crate::{
+    assembler::Context, instructions::*, macro_instructions::*, operand::OperandValue,
+    utils::fmt_line,
+};
 
 pub fn instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
     let instr = INSTRUCTIONS.get(cmd).unwrap();
-    |cond, ops| match instr.encode(
+    move |cond, ops| match instr.encode(
+        &Context::test(),
         if cond.is_empty() { None } else { Some(cond) },
         &ops.iter()
             .map(|e| OperandValue::from(*e))
@@ -18,6 +22,7 @@ pub fn instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
 pub fn mc_instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
     let ps_instr = MACRO_INSTRUCTIONS.get(cmd).unwrap();
     |cond, ops| match ps_instr.expand(
+        &Context::test(),
         if cond.is_empty() { None } else { Some(cond) },
         &ops.iter()
             .map(|e| OperandValue::from(*e))

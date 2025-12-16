@@ -9,11 +9,14 @@ use std::collections::{HashMap, VecDeque};
 use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
-use crate::{assembler::Line, operand::OperandValue};
+use crate::{
+    assembler::{Context, Line},
+    operand::OperandValue,
+};
 
 type ExpandRet<'a> = Result<Option<Vec<Line<'a>>>>;
 type ExpandFn = for<'a> fn(
-    &'static str,
+    &Context<'a>,
     &MacroInstruction,
     Option<&'a str>,
     &[OperandValue<'a>],
@@ -41,12 +44,13 @@ pub static MACRO_INSTRUCTIONS: Lazy<HashMap<&'static str, MacroInstruction>> = L
 impl MacroInstruction {
     pub fn expand<'a>(
         &self,
+        ctx: &Context<'a>,
         cond: Option<&'a str>,
         operands: &[OperandValue<'a>],
     ) -> ExpandRet<'a> {
         self.assert_operand_count(operands)?;
 
-        let mut deq: VecDeque<_> = match (self.expander)(self.name, self, cond, operands)? {
+        let mut deq: VecDeque<_> = match (self.expander)(ctx, self, cond, operands)? {
             None => return Ok(None),
             Some(v) => v.into(),
         };
@@ -57,7 +61,7 @@ impl MacroInstruction {
             if let Some(mc) = MACRO_INSTRUCTIONS.get(name) {
                 mc.assert_operand_count(&ops)?;
 
-                match (mc.expander)(self.name, mc, cond, &ops)? {
+                match (mc.expander)(ctx, mc, cond, &ops)? {
                     None => {
                         ret.push((name, cond, ops));
                     }
