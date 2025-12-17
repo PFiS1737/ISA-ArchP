@@ -156,9 +156,9 @@ exit_code: 0
 0x0216900A # sub t1 key_code t0                                                                     <label: read_key_ok>
 0x843E0002 # li tmp 2                                    [beq t1 2 read_key_ret]
 0x9202B37F # beq t1 tmp read_key_ret                     [beq t1 2 read_key_ret]
-0x87FFFFFF # lui tmp 0xFFFFF                             [beq t1 0xFFFFFFFE read_key_ret]
-0x543FFFFE # ori tmp tmp 0xFFE                           [beq t1 0xFFFFFFFE read_key_ret]
-0x9202B37F # beq t1 tmp read_key_ret                     [beq t1 0xFFFFFFFE read_key_ret]
+0x87FFFFFF # lui tmp 0xFFFFF                             [beq t1 -2 read_key_ret]
+0x543FFFFE # ori tmp tmp 0xFFE                           [beq t1 -2 read_key_ret]
+0x9202B37F # beq t1 tmp read_key_ret                     [beq t1 -2 read_key_ret]
 0x4012A000 # addi key_code t0 0                          [mv key_code t0]
 0xA8000000 # ret                                                                                    <label: read_key_ret>
 0xAA000001 # call init_screen                                                                       <label: main>

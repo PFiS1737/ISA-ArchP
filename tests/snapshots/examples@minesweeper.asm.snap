@@ -87,10 +87,10 @@ exit_code: 0
 0x9600289F # blt y tmp init_mine_counts_loop  [blt y GRID_ROWS init_mine_counts_loop]
 0xA8000000 # ret
 0x841C0000 # li cnt 0                         [clr cnt]                                <label: count_around_mines>
-0x87D7FFFF # lui ty 0xFFFFF                   [li ty 0xFFFFFFFF]
-0x5416BFFF # ori ty ty 0xFFF                  [li ty 0xFFFFFFFF]
-0x87D5FFFF # lui tx 0xFFFFF                   [li tx 0xFFFFFFFF]                       <label: dy_loop>
-0x5414AFFF # ori tx tx 0xFFF                  [li tx 0xFFFFFFFF]
+0x87D7FFFF # lui ty 0xFFFFF                   [li ty -1]
+0x5416BFFF # ori ty ty 0xFFF                  [li ty -1]
+0x87D5FFFF # lui tx 0xFFFFF                   [li tx -1]                               <label: dy_loop>
+0x5414AFFF # ori tx tx 0xFFF                  [li tx -1]
 0x0018100A # add nx x tx                                                               <label: dx_loop>
 0x001A200B # add ny y ty
 0x9600CC80 # blt nx zero skip_this_neighbor   [bltz nx skip_this_neighbor]

@@ -281,7 +281,7 @@ read_key:
   read_key_ok:
     sub t1 key_code t0
     beq t1 2 read_key_ret
-    beq t1 0xFFFFFFFE read_key_ret # -2
+    beq t1 -2 read_key_ret
 
     mv key_code t0
 

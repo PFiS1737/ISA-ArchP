@@ -409,9 +409,10 @@ pub fn parse_reg_s(ctx: &Context, op: &OperandValue) -> Result<u32> {
 
 pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<u32> {
     let parse_str = |s: &&str| match s {
+        // NOTE: The '0x' and '0b' formats are always unsigned
         s if let Some(hex) = s.strip_prefix("0x") => u32::from_str_radix(hex, 16),
         s if let Some(bin) = s.strip_prefix("0b") => u32::from_str_radix(bin, 2),
-        s => s.parse(),
+        s => s.parse::<i32>().map(|n| n as u32),
     };
 
     let parsed = match imm {
@@ -430,8 +431,14 @@ pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<u32> {
     };
 
     parsed.map_err(|err| {
-        if err.kind() == &IntErrorKind::PosOverflow {
-            anyhow!("Immediate out of range of 32-bits: {}", imm)
+        if matches!(
+            err.kind(),
+            IntErrorKind::PosOverflow | IntErrorKind::NegOverflow
+        ) {
+            anyhow!(
+                "Immediate '{}' out of range of 32-bits signed integer.",
+                imm
+            )
         } else {
             anyhow!("Invalid immediate: {}", imm)
         }
@@ -504,13 +511,22 @@ mod tests {
         assert_snapshot!(f("0b101010"), @"42");
         assert_snapshot!(f("r1"), @"Error: Invalid immediate: r1");
         assert_snapshot!(f("invalid"), @"Error: Invalid immediate: invalid");
-        assert_snapshot!(f("0x1FFFFFFFF"), @"Error: Immediate out of range of 32-bits: 0x1FFFFFFFF");
+        assert_snapshot!(f("0x1FFFFFFFF"), @"Error: Immediate '0x1FFFFFFFF' out of range of 32-bits signed integer.");
         assert_snapshot!(f("start"), @"0");
         assert_snapshot!(f("end"), @"16");
         assert_snapshot!(f("FOO"), @"42");
         assert_snapshot!(f("BAR"), @"Error: Invalid immediate: BAR");
         assert_snapshot!(f("R0"), @"Error: Invalid immediate: R0");
         assert_snapshot!(f("R1"), @"Error: Invalid immediate: R1");
+        assert_snapshot!(f("-1"), @"4294967295");
+        assert_snapshot!(f("-2"), @"4294967294");
+        assert_snapshot!(f("-5000"), @"4294962296");
+        assert_snapshot!(f("-2147483648"), @"2147483648");
+        assert_snapshot!(f("-2147483649"), @"Error: Immediate '-2147483649' out of range of 32-bits signed integer.");
+        assert_snapshot!(f("2147483647"), @"2147483647");
+        assert_snapshot!(f("2147483648"), @"Error: Immediate '2147483648' out of range of 32-bits signed integer.");
+        assert_snapshot!(f("4294967295"), @"Error: Immediate '4294967295' out of range of 32-bits signed integer.");
+        assert_snapshot!(f("4294967296"), @"Error: Immediate '4294967296' out of range of 32-bits signed integer.");
     }
 
     #[test]

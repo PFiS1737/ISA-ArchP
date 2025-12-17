@@ -160,10 +160,10 @@ init_mine_counts:
 
 count_around_mines:
 	clr cnt
-	li ty 0xFFFFFFFF # -1
+	li ty -1
 
 	dy_loop:
-		li tx 0xFFFFFFFF # -1
+		li tx -1
 
 	dx_loop:
 		add nx x tx
