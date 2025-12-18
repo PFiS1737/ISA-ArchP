@@ -308,12 +308,14 @@ mod tests {
     #[test]
     fn encode_r() {
         let cmd = instr("add");
+
         assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Instruction 'add' requires 3 operands, got 2");
         assert_snapshot!(cmd("", &["r1", "r2", "r3", "r4"]), @"Error: Instruction 'add' requires 3 operands, got 4");
         assert_snapshot!(cmd("", &["r1", "r2", "rrr"]), @"Error: Invalid register: rrr");
         assert_snapshot!(cmd("", &["r1", "r2", "123"]), @"Error: Expected register, found immediate: 123");
         assert_snapshot!(cmd("", &["zero", "r2", "r3"]), @"Error: Register 'zero' is raed-only");
         assert_snapshot!(cmd("invalid", &["r1", "r2", "r3"]), @"Error: Invalid condition: invalid");
+
         assert_snapshot!(cmd("lt", &["r1", "r2", "r3"]), @"0000 000 011 00001 00010 0000000 00011");
     }
 
@@ -327,40 +329,72 @@ mod tests {
         assert_snapshot!(cmd("", &["zero", "r2", "123"]), @"Error: Register 'zero' is raed-only");
         assert_snapshot!(cmd("", &["r1", "r2", "0xFFFF"]), @"Error: Immediate '65535' out of range for i12 (-2048 ..= 2047)");
         assert_snapshot!(cmd("invalid", &["r1", "r2", "123"]), @"Error: Invalid condition: invalid");
-        assert_snapshot!(cmd("ge", &["r4", "r5", "0b100"]), @"0100 000 100 00100 00101 0000000 00100");
+
+        assert_snapshot!(cmd("", &["r1", "r2", "3"]), @"0100 000 000 00001 00010 0000000 00011");
+        assert_snapshot!(cmd("", &["r1", "r2", "2047"]), @"0100 000 000 00001 00010 0111111 11111");
+        assert_snapshot!(cmd("", &["r1", "r2", "2048"]), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(cmd("", &["r1", "r2", "-3"]), @"0100 000 000 00001 00010 1111111 11101");
+        assert_snapshot!(cmd("", &["r1", "r2", "-2048"]), @"0100 000 000 00001 00010 1000000 00000");
+        assert_snapshot!(cmd("", &["r1", "r2", "-2049"]), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
 
         let cmd = instr("shri");
+
         assert_snapshot!(cmd("", &["r1", "r2", "32"]), @"Error: Immediate '32' out of range for u5 (0 ..= 31)");
         assert_snapshot!(cmd("", &["r1", "r2", "31"]), @"0110 001 000 00001 00010 0000000 11111");
+
+        let cmd = instr("li");
+
+        assert_snapshot!(cmd("", &["r1", "3"]), @"1000 010 000 00001 00000 0000000 00011");
+        assert_snapshot!(cmd("", &["r1", "2047"]), @"1000 010 000 00001 00000 0111111 11111");
+        assert_snapshot!(cmd("", &["r1", "2048"]), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(cmd("", &["r1", "-3"]), @"1000 010 000 00001 00000 1111111 11101");
+        assert_snapshot!(cmd("", &["r1", "-2048"]), @"1000 010 000 00001 00000 1000000 00000");
+        assert_snapshot!(cmd("", &["r1", "-2049"]), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
     }
 
     #[test]
     fn enocde_b() {
         let cmd = instr("beq");
         // Same to I-type, omitting ...
+        assert_snapshot!(cmd("ne", &["r1", "zero", "-1"]), @"Error: Immediate '-1' out of range for u12 (must be >= 0)");
         assert_snapshot!(cmd("ne", &["r1", "zero", "3456"]), @"1001 001 010 11011 00001 0000000 00000");
+
+        let cmd = instr("sw");
+
+        assert_snapshot!(cmd("", &["r1", "r2", "3"]), @"1000 001 000 00000 00001 0000011 00010");
+        assert_snapshot!(cmd("", &["r1", "r2", "2047"]), @"1000 001 000 01111 00001 1111111 00010");
+        assert_snapshot!(cmd("", &["r1", "r2", "2048"]), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(cmd("", &["r1", "r2", "-3"]), @"1000 001 000 11111 00001 1111101 00010");
+        assert_snapshot!(cmd("", &["r1", "r2", "-2048"]), @"1000 001 000 10000 00001 0000000 00010");
+        assert_snapshot!(cmd("", &["r1", "r2", "-2049"]), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
     }
 
     #[test]
     fn encode_u() {
         let cmd = instr("lui");
+
         assert_snapshot!(cmd("", &["r1"]), @"Error: Instruction 'lui' requires 2 operands, got 1");
         assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Instruction 'lui' requires 2 operands, got 3");
         assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Invalid immediate: r2");
         assert_snapshot!(cmd("", &["zero", "r2"]), @"Error: Register 'zero' is raed-only");
         assert_snapshot!(cmd("", &["r3", "0x200000"]), @"Error: Immediate '2097152' out of range for u20 (0 ..= 1048575)");
+        assert_snapshot!(cmd("", &["r3", "-123"]), @"Error: Immediate '-123' out of range for u20 (must be >= 0)");
         assert_snapshot!(cmd("eq", &["r3", "0xABCDE"]), @"Error: Condition is not allowed for U-type instruction 'lui'");
+
         assert_snapshot!(cmd("", &["r3", "0xABCDE"]), @"1000 011 101 00011 01011 1100110 11110");
     }
 
     #[test]
     fn encode_c() {
         let cmd = instr("col");
+
         assert_snapshot!(cmd("", &[]), @"Error: Instruction 'col' requires 1 operands, got 0");
         assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Instruction 'col' requires 1 operands, got 2");
         assert_snapshot!(cmd("", &["r1"]), @"Error: Invalid immediate: r1");
         assert_snapshot!(cmd("", &["0x1FFFFFF"]), @"Error: Immediate '33554431' out of range for u24 (0 ..= 16777215)");
+        assert_snapshot!(cmd("", &["-123"]), @"Error: Immediate '-123' out of range for u24 (must be >= 0)");
         assert_snapshot!(cmd("ne", &["0x123456"]), @"Error: Condition is not allowed for C-type instruction 'col'");
+
         assert_snapshot!(cmd("", &["0x123456"]), @"1101 000 000 01001 00011 0100010 10110");
     }
 }
