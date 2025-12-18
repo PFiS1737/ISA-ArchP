@@ -8,14 +8,15 @@ mod logic;
 mod shift;
 mod stack;
 
-use std::{collections::HashMap, fmt::Display, num::IntErrorKind};
+use std::{collections::HashMap, fmt::Display};
 
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
 use crate::{
     assembler::Context,
-    operand::{ImmRange, OperandType, OperandValue, op_types},
+    operand::{OperandType, OperandValue, op_types},
+    parser::{parse_cond, parse_imm, parse_reg_d, parse_reg_s},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -87,7 +88,7 @@ impl Instruction {
         self.assert_operand_count(operands.len(), operand_types.len())?;
 
         for (i, op) in operands.iter().enumerate() {
-            match &operand_types[i] {
+            match operand_types[i] {
                 OperandType::RegD => {
                     let reg = parse_reg_d(ctx, op)?;
                     parsed_operands.push(reg);
@@ -96,11 +97,8 @@ impl Instruction {
                     let reg = parse_reg_s(ctx, op)?;
                     parsed_operands.push(reg);
                 }
-                OperandType::Imm(range) => {
-                    let imm = parse_imm(ctx, op)?;
-
-                    self.assert_immediate_range(imm, range)?;
-
+                OperandType::Imm(bits, signed) => {
+                    let imm = parse_imm(ctx, op)?.as_field(bits, signed)?;
                     parsed_operands.push(imm);
                 }
             }
@@ -202,30 +200,16 @@ impl Instruction {
         Ok(())
     }
 
-    fn assert_immediate_range(&self, imm: u32, range: &ImmRange) -> Result<()> {
-        if !range.contains(&imm) {
-            bail!(
-                "Immediate value '{}' out of range for {}-type instruction '{}', expected {}",
-                imm,
-                self.itype,
-                self.name,
-                range
-            );
-        }
-
-        Ok(())
-    }
-
     fn get_operand_types(&self) -> &'static [OperandType] {
         if let Some(ops) = self.operand_types {
             ops
         } else {
             match self.itype {
                 InstrType::R => op_types![RegD, RegS, RegS],
-                InstrType::I => op_types![RegD, RegS, Imm(12)],
-                InstrType::B => op_types![RegS, RegS, Imm(12)],
-                InstrType::U => op_types![RegD, Imm(20)],
-                InstrType::C => op_types![Imm(24)],
+                InstrType::I => op_types![RegD, RegS, Imm(12, i)],
+                InstrType::B => op_types![RegS, RegS, Imm(12, u)],
+                InstrType::U => op_types![RegD, Imm(20, u)],
+                InstrType::C => op_types![Imm(24, u)],
             }
         }
     }
@@ -317,217 +301,9 @@ impl Display for InstrType {
     }
 }
 
-fn parse_cond(cond: &str) -> Result<u32> {
-    match cond {
-        "eq" => Ok(0b001),
-        "ne" => Ok(0b010),
-        "lt" => Ok(0b011),
-        "ge" => Ok(0b100),
-        "gt" => Ok(0b101),
-        "le" => Ok(0b110),
-        _ => bail!("Invalid condition: {}", cond),
-    }
-}
-
-macro err_expect_reg($e:expr) {
-    bail!("Expected register, found immediate: {}", $e)
-}
-macro err_inval_reg($e:expr) {
-    bail!("Invalid register: {}", $e)
-}
-macro err_reg_out_of_range($e:expr, $s:expr) {
-    bail!("Register number out of range ({}-24): {}", $s, $e)
-}
-macro err_read_only_reg($e:expr) {
-    bail!("Register '{}' is raed-only", $e)
-}
-
-pub fn parse_reg_d(ctx: &Context, op: &OperandValue) -> Result<u32> {
-    let reg = match op {
-        OperandValue::StringSlice(s) => ctx.constants.get(s).unwrap_or(s),
-        OperandValue::Unsigned(n) => err_expect_reg!(n),
-    };
-
-    match *reg {
-        "io" => Ok(26),
-        "tmp" => Ok(31),
-
-        "zero" | "pc" | "kb" | "rng" => err_read_only_reg!(reg),
-
-        r if let Some(n) = r.strip_prefix("r")
-            && let Ok(n) = n.parse::<u32>() =>
-        {
-            if n > 24 {
-                err_reg_out_of_range!(reg, "1");
-            }
-            Ok(n)
-        }
-
-        _ => {
-            if parse_imm(ctx, op).is_ok() {
-                err_expect_reg!(reg)
-            } else {
-                err_inval_reg!(reg)
-            }
-        }
-    }
-}
-
-pub fn parse_reg_s(ctx: &Context, op: &OperandValue) -> Result<u32> {
-    let reg = match op {
-        OperandValue::StringSlice(s) => ctx.constants.get(s).unwrap_or(s),
-        OperandValue::Unsigned(n) => err_expect_reg!(n),
-    };
-
-    match *reg {
-        "zero" => Ok(0),
-
-        "pc" => Ok(25),
-        "io" => Ok(26),
-        "kb" => Ok(27),
-        "rng" => Ok(28),
-        "tmp" => Ok(31),
-
-        r if let Some(n) = r.strip_prefix("r")
-            && let Ok(n) = n.parse::<u32>() =>
-        {
-            if n > 24 {
-                err_reg_out_of_range!(reg, "0");
-            }
-            Ok(n)
-        }
-
-        _ => {
-            if parse_imm(ctx, op).is_ok() {
-                err_expect_reg!(reg)
-            } else {
-                err_inval_reg!(reg)
-            }
-        }
-    }
-}
-
-pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<u32> {
-    let parse_str = |s: &&str| match s {
-        // NOTE: The '0x' and '0b' formats are always unsigned
-        s if let Some(hex) = s.strip_prefix("0x") => u32::from_str_radix(hex, 16),
-        s if let Some(bin) = s.strip_prefix("0b") => u32::from_str_radix(bin, 2),
-        s => s.parse::<i32>().map(|n| n as u32),
-    };
-
-    let parsed = match imm {
-        OperandValue::StringSlice(str) => {
-            if let Some(const_value) = ctx.constants.get(str) {
-                parse_str(const_value)
-            } else if let Some(&label_addr) = ctx.labels.get_by_left(str) {
-                Ok(label_addr
-                    .try_into()
-                    .expect("Label address out of u32 range"))
-            } else {
-                parse_str(str)
-            }
-        }
-        OperandValue::Unsigned(n) => Ok(*n),
-    };
-
-    parsed.map_err(|err| {
-        if matches!(
-            err.kind(),
-            IntErrorKind::PosOverflow | IntErrorKind::NegOverflow
-        ) {
-            anyhow!(
-                "Immediate '{}' out of range of 32-bits signed integer.",
-                imm
-            )
-        } else {
-            anyhow!("Invalid immediate: {}", imm)
-        }
-    })
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::{assembler::Context, operand::OperandValue, testkit::*};
-    use anyhow::Result;
-
-    // WARN: 也许这里不适合用快照测试?
-    // TODO: 以后如果有迁移到 thiserror 的打算，再回来改
-
-    #[test]
-    fn parse_cond() {
-        let f = |s| match super::parse_cond(s) {
-            Ok(n) => format!("{n}"),
-            Err(e) => format!("Error: {e}"),
-        };
-        assert_snapshot!(f("eq"), @"1");
-        assert_snapshot!(f("ne"), @"2");
-        assert_snapshot!(f("lt"), @"3");
-        assert_snapshot!(f("ge"), @"4");
-        assert_snapshot!(f("gt"), @"5");
-        assert_snapshot!(f("le"), @"6");
-        assert_snapshot!(f("invalid"), @"Error: Invalid condition: invalid");
-    }
-
-    fn test(func: fn(&Context, &OperandValue) -> Result<u32>) -> impl Fn(&str) -> String {
-        move |s| match func(&Context::test(), &OperandValue::from(s)) {
-            Ok(n) => format!("{n}"),
-            Err(e) => format!("Error: {e}"),
-        }
-    }
-
-    #[test]
-    fn parse_reg_d() {
-        let f = test(super::parse_reg_d);
-        assert_snapshot!(f("zero"), @"Error: Register 'zero' is raed-only");
-        assert_snapshot!(f("r9"), @"9");
-        assert_snapshot!(f("r27"), @"Error: Register number out of range (1-24): r27");
-        assert_snapshot!(f("kb"), @"Error: Register 'kb' is raed-only");
-        assert_snapshot!(f("invalid"), @"Error: Invalid register: invalid");
-        assert_snapshot!(f("FOO"), @"Error: Expected register, found immediate: 42");
-        assert_snapshot!(f("BAR"), @"Error: Invalid register: BAR");
-        assert_snapshot!(f("R0"), @"Error: Register 'zero' is raed-only");
-        assert_snapshot!(f("R1"), @"1");
-    }
-
-    #[test]
-    fn parse_reg_s() {
-        let f = test(super::parse_reg_s);
-        assert_snapshot!(f("zero"), @"0");
-        assert_snapshot!(f("r15"), @"15");
-        assert_snapshot!(f("r30"), @"Error: Register number out of range (0-24): r30");
-        assert_snapshot!(f("pc"), @"25");
-        assert_snapshot!(f("invalid"), @"Error: Invalid register: invalid");
-        assert_snapshot!(f("FOO"), @"Error: Expected register, found immediate: 42");
-        assert_snapshot!(f("BAR"), @"Error: Invalid register: BAR");
-        assert_snapshot!(f("R0"), @"0");
-        assert_snapshot!(f("R1"), @"1");
-    }
-
-    #[test]
-    fn parse_imm() {
-        let f = test(super::parse_imm);
-        assert_snapshot!(f("42"), @"42");
-        assert_snapshot!(f("0x2A"), @"42");
-        assert_snapshot!(f("0b101010"), @"42");
-        assert_snapshot!(f("r1"), @"Error: Invalid immediate: r1");
-        assert_snapshot!(f("invalid"), @"Error: Invalid immediate: invalid");
-        assert_snapshot!(f("0x1FFFFFFFF"), @"Error: Immediate '0x1FFFFFFFF' out of range of 32-bits signed integer.");
-        assert_snapshot!(f("start"), @"0");
-        assert_snapshot!(f("end"), @"16");
-        assert_snapshot!(f("FOO"), @"42");
-        assert_snapshot!(f("BAR"), @"Error: Invalid immediate: BAR");
-        assert_snapshot!(f("R0"), @"Error: Invalid immediate: R0");
-        assert_snapshot!(f("R1"), @"Error: Invalid immediate: R1");
-        assert_snapshot!(f("-1"), @"4294967295");
-        assert_snapshot!(f("-2"), @"4294967294");
-        assert_snapshot!(f("-5000"), @"4294962296");
-        assert_snapshot!(f("-2147483648"), @"2147483648");
-        assert_snapshot!(f("-2147483649"), @"Error: Immediate '-2147483649' out of range of 32-bits signed integer.");
-        assert_snapshot!(f("2147483647"), @"2147483647");
-        assert_snapshot!(f("2147483648"), @"Error: Immediate '2147483648' out of range of 32-bits signed integer.");
-        assert_snapshot!(f("4294967295"), @"Error: Immediate '4294967295' out of range of 32-bits signed integer.");
-        assert_snapshot!(f("4294967296"), @"Error: Immediate '4294967296' out of range of 32-bits signed integer.");
-    }
+    use crate::testkit::*;
 
     #[test]
     fn encode_r() {
@@ -549,12 +325,12 @@ mod tests {
         assert_snapshot!(cmd("", &["r1", "rrr", "123"]), @"Error: Invalid register: rrr");
         assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Invalid immediate: r3");
         assert_snapshot!(cmd("", &["zero", "r2", "123"]), @"Error: Register 'zero' is raed-only");
-        assert_snapshot!(cmd("", &["r1", "r2", "0xFFFF"]), @"Error: Immediate value '65535' out of range for I-type instruction 'addi', expected 0 ~ 0xFFF");
+        assert_snapshot!(cmd("", &["r1", "r2", "0xFFFF"]), @"Error: Immediate '65535' out of range for i12 (-2048 ..= 2047)");
         assert_snapshot!(cmd("invalid", &["r1", "r2", "123"]), @"Error: Invalid condition: invalid");
         assert_snapshot!(cmd("ge", &["r4", "r5", "0b100"]), @"0100 000 100 00100 00101 0000000 00100");
 
         let cmd = instr("shri");
-        assert_snapshot!(cmd("", &["r1", "r2", "32"]), @"Error: Immediate value '32' out of range for I-type instruction 'shri', expected 0 ~ 31");
+        assert_snapshot!(cmd("", &["r1", "r2", "32"]), @"Error: Immediate '32' out of range for u5 (0 ..= 31)");
         assert_snapshot!(cmd("", &["r1", "r2", "31"]), @"0110 001 000 00001 00010 0000000 11111");
     }
 
@@ -572,7 +348,7 @@ mod tests {
         assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Instruction 'lui' requires 2 operands, got 3");
         assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Invalid immediate: r2");
         assert_snapshot!(cmd("", &["zero", "r2"]), @"Error: Register 'zero' is raed-only");
-        assert_snapshot!(cmd("", &["r3", "0x200000"]), @"Error: Immediate value '2097152' out of range for U-type instruction 'lui', expected 0 ~ 0xFFFFF");
+        assert_snapshot!(cmd("", &["r3", "0x200000"]), @"Error: Immediate '2097152' out of range for u20 (0 ..= 1048575)");
         assert_snapshot!(cmd("eq", &["r3", "0xABCDE"]), @"Error: Condition is not allowed for U-type instruction 'lui'");
         assert_snapshot!(cmd("", &["r3", "0xABCDE"]), @"1000 011 101 00011 01011 1100110 11110");
     }
@@ -583,7 +359,7 @@ mod tests {
         assert_snapshot!(cmd("", &[]), @"Error: Instruction 'col' requires 1 operands, got 0");
         assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Instruction 'col' requires 1 operands, got 2");
         assert_snapshot!(cmd("", &["r1"]), @"Error: Invalid immediate: r1");
-        assert_snapshot!(cmd("", &["0x1FFFFFF"]), @"Error: Immediate value '33554431' out of range for C-type instruction 'col', expected 0 ~ 0xFFFFFF");
+        assert_snapshot!(cmd("", &["0x1FFFFFF"]), @"Error: Immediate '33554431' out of range for u24 (0 ..= 16777215)");
         assert_snapshot!(cmd("ne", &["0x123456"]), @"Error: Condition is not allowed for C-type instruction 'col'");
         assert_snapshot!(cmd("", &["0x123456"]), @"1101 000 000 01001 00011 0100010 10110");
     }

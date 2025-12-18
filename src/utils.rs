@@ -39,6 +39,7 @@ pub fn fmt_line(name: &str, cond: Option<&str>, ops: Vec<OperandValue>) -> Strin
         .map(|e| match e {
             OperandValue::StringSlice(s) => s.to_string(),
             OperandValue::Unsigned(n) => fmt_hex(n),
+            OperandValue::Signed(n) => fmt_hex(n as u32), // TODO:
         })
         .collect::<Vec<_>>();
 

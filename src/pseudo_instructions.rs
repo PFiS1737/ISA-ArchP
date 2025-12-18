@@ -10,8 +10,8 @@ use once_cell::sync::Lazy;
 
 use crate::{
     assembler::Context,
-    instructions::{parse_imm, parse_reg_d, parse_reg_s},
     operand::{OperandType, OperandValue},
+    parser::{parse_imm, parse_reg_d, parse_reg_s},
 };
 
 type ExpandRet<'a> = (&'static str, Vec<OperandValue<'a>>);
@@ -56,23 +56,15 @@ impl PseudoInstruction {
         }
 
         for (i, operand) in operands.iter().enumerate() {
-            match &self.operand_types[i] {
+            match self.operand_types[i] {
                 OperandType::RegD => {
                     parse_reg_d(ctx, operand)?;
                 }
                 OperandType::RegS => {
                     parse_reg_s(ctx, operand)?;
                 }
-                OperandType::Imm(range) => {
-                    let imm = parse_imm(ctx, operand)?;
-                    if !range.contains(&imm) {
-                        bail!(
-                            "Immediate value '{}' out of range for pseudo-instruction '{}', expected {}",
-                            imm,
-                            self.name,
-                            range
-                        );
-                    }
+                OperandType::Imm(bits, signed) => {
+                    parse_imm(ctx, operand)?.as_field(bits, signed)?;
                 }
             };
         }

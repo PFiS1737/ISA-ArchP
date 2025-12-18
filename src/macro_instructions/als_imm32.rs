@@ -1,7 +1,7 @@
 use crate::{
-    instructions::parse_imm,
     macro_instructions::{ExpandFn, macro_instruction},
     operand::op_values,
+    parser::parse_imm,
 };
 
 macro_instruction! {
@@ -18,10 +18,10 @@ const F: ExpandFn = |ctx, this, cond, ops| {
     let inst = &this.name[..this.name.len() - 1]; // remove the trailing 'i'
 
     if let Ok(imm) = parse_imm(ctx, &ops[2])
-        && imm > 0xFFF
+        && imm.as_i12().is_err()
     {
         Some(vec![
-            ("li", cond, op_values!["tmp", imm]),
+            ("li", cond, op_values!["tmp", ops[2]]),
             (inst, cond, op_values![ops[0], ops[1], "tmp"]),
         ])
     } else {
@@ -44,10 +44,15 @@ mod tests {
         assert_snapshot!(addi("", &["123", "r1", "456"]), @"");
 
         assert_snapshot!(addi("", &["r1", "r2", "0x123"]), @"");
-        assert_snapshot!(addi("", &["r1", "r2", "0x1234"]), @"lui tmp 1; ori tmp tmp 0x234; add r1 r2 tmp");
-        assert_snapshot!(addi("", &["r1", "r2", "0x12345678"]), @"lui tmp 0x12345; ori tmp tmp 0x678; add r1 r2 tmp");
+        assert_snapshot!(addi("", &["r1", "r2", "0x1234"]), @"lui tmp 1; addi tmp tmp 0x234; add r1 r2 tmp");
+        assert_snapshot!(addi("", &["r1", "r2", "0x12345678"]), @"lui tmp 0x12345; addi tmp tmp 0x678; add r1 r2 tmp");
+
+        assert_snapshot!(addi("", &["r1", "r2", "123"]), @"");
+        assert_snapshot!(addi("", &["r1", "r2", "3000"]), @"lui tmp 1; addi tmp tmp 0xFFFFFBB8; add r1 r2 tmp");
+        assert_snapshot!(addi("", &["r1", "r2", "-123"]), @"");
+        assert_snapshot!(addi("", &["r1", "r2", "-3000"]), @"lui tmp 0xFFFFF; addi tmp tmp 0x448; add r1 r2 tmp");
 
         assert_snapshot!(addi("eq", &["r1", "r2", "0x123"]), @"");
-        assert_snapshot!(addi("eq", &["r1", "r2", "0x1234"]), @"lui tmp 1; ori tmp tmp 0x234; add.eq r1 r2 tmp");
+        assert_snapshot!(addi("eq", &["r1", "r2", "0x1234"]), @"lui tmp 1; addi tmp tmp 0x234; add.eq r1 r2 tmp");
     }
 }

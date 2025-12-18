@@ -28,6 +28,6 @@ instruction! {
     name: "pushi",
     opcode: 0b_1010_011,
     itype: I,
-    operand_types: [ Imm(12) ],
+    operand_types: [ Imm(12, i) ],
     encode_format: [ None, None, Some ],
 }

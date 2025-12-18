@@ -5,7 +5,7 @@ input_file: examples/snake.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x90020380 # jmp main
+0x90020360 # jmp main
 0x840A0000 # li x 0                                      [clr x]                                    <label: init_screen>
 0x840C0000 # li y 0                                      [clr y]
 0xD0000000 # col COLOR_BACK
@@ -74,7 +74,7 @@ exit_code: 0
 0x400C2000 # addi y head_y 0                             [mv y head_y]
 0xAA000062 # call body_contains
 0x843E0001 # li tmp 1                                    [beq rt 1 lose_loop]
-0x9202D4BF # beq rt tmp lose_loop                        [beq rt 1 lose_loop]
+0x9202D49F # beq rt tmp lose_loop                        [beq rt 1 lose_loop]
 0x94001943 # bne head_x food_x move_snake_not_eat
 0x94002944 # bne head_y food_y move_snake_not_eat
 0xAA00004E # call gen_food
@@ -155,10 +155,9 @@ exit_code: 0
 0xA8000000 # ret
 0x0216900A # sub t1 key_code t0                                                                     <label: read_key_ok>
 0x843E0002 # li tmp 2                                    [beq t1 2 read_key_ret]
-0x9202B37F # beq t1 tmp read_key_ret                     [beq t1 2 read_key_ret]
-0x87FFFFFF # lui tmp 0xFFFFF                             [beq t1 -2 read_key_ret]
-0x543FFFFE # ori tmp tmp 0xFFE                           [beq t1 -2 read_key_ret]
-0x9202B37F # beq t1 tmp read_key_ret                     [beq t1 -2 read_key_ret]
+0x9202B35F # beq t1 tmp read_key_ret                     [beq t1 2 read_key_ret]
+0x843E0FFE # li tmp 0xFFFFFFFE                           [beq t1 -2 read_key_ret]
+0x9202B35F # beq t1 tmp read_key_ret                     [beq t1 -2 read_key_ret]
 0x4012A000 # addi key_code t0 0                          [mv key_code t0]
 0xA8000000 # ret                                                                                    <label: read_key_ret>
 0xAA000001 # call init_screen                                                                       <label: main>
@@ -166,9 +165,9 @@ exit_code: 0
 0xAA00004E # call gen_food
 0x84180064 # li i 100                                                                               <label: main_loop>
 0x4218C001 # subi i i 1                                  [dec i]                                    <label: sleep>
-0x9A02C400 # bgt i zero sleep                            [bgtz i sleep]
+0x9A02C3E0 # bgt i zero sleep                            [bgtz i sleep]
 0xAA00008A # call read_key
 0xAA00001B # call move_snake
-0x900203E0 # jmp main_loop
-0x900204A0 # jmp lose_loop                                                                          <label: lose_loop>
+0x900203C0 # jmp main_loop
+0x90020480 # jmp lose_loop                                                                          <label: lose_loop>
 ----- stderr -----

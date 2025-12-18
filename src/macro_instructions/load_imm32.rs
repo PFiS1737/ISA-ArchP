@@ -1,7 +1,7 @@
 use crate::{
-    instructions::parse_imm,
     macro_instructions::{ExpandFn, macro_instruction},
     operand::op_values,
+    parser::parse_imm,
 };
 
 macro_instruction! {
@@ -11,19 +11,19 @@ macro_instruction! {
 }
 
 pub const F: ExpandFn = |ctx, _, cond, ops| {
-    if let Ok(imm) = parse_imm(ctx, &ops[1])
-        && imm > 0xFFF
+    if let Ok((hi, lo)) = parse_imm(ctx, &ops[1]).and_then(|imm| imm.try_as_i12())
+        && hi != 0
     {
         if ops[0] != "tmp".into() && cond.is_none() {
             return Some(vec![
-                ("lui", None, op_values![ops[0], imm >> 12]),
-                ("ori", None, op_values![ops[0], ops[0], imm & 0xFFF]),
+                ("lui", None, op_values![ops[0], hi]),
+                ("addi", None, op_values![ops[0], ops[0], lo]),
             ]);
         }
 
         let mut ret = vec![
-            ("lui", None, op_values!["tmp", imm >> 12]),
-            ("ori", None, op_values!["tmp", "tmp", imm & 0xFFF]),
+            ("lui", None, op_values!["tmp", hi]),
+            ("addi", None, op_values!["tmp", "tmp", lo]),
         ];
 
         if ops[0] == "tmp".into() {
@@ -54,10 +54,15 @@ mod tests {
         assert_snapshot!(li("", &["kb", "123"]), @"");
 
         assert_snapshot!(li("", &["r1", "0x123"]), @"");
-        assert_snapshot!(li("", &["r1", "0x1234"]), @"lui r1 1; ori r1 r1 0x234");
-        assert_snapshot!(li("", &["r1", "0x12345678"]), @"lui r1 0x12345; ori r1 r1 0x678");
+        assert_snapshot!(li("", &["r1", "0x1234"]), @"lui r1 1; addi r1 r1 0x234");
+        assert_snapshot!(li("", &["r1", "0x12345678"]), @"lui r1 0x12345; addi r1 r1 0x678");
+
+        assert_snapshot!(li("", &["r1", "123"]), @"");
+        assert_snapshot!(li("", &["r1", "3000"]), @"lui r1 1; addi r1 r1 0xFFFFFBB8");
+        assert_snapshot!(li("", &["r1", "-123"]), @"");
+        assert_snapshot!(li("", &["r1", "-3000"]), @"lui r1 0xFFFFF; addi r1 r1 0x448");
 
         assert_snapshot!(li("eq", &["r1", "0x123"]), @"");
-        assert_snapshot!(li("eq", &["r1", "0x1234"]), @"lui tmp 1; ori tmp tmp 0x234; mv.eq r1 tmp");
+        assert_snapshot!(li("eq", &["r1", "0x1234"]), @"lui tmp 1; addi tmp tmp 0x234; mv.eq r1 tmp");
     }
 }

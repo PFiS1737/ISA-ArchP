@@ -4,7 +4,7 @@ instruction! {
     name: "jmp",
     opcode: 0b_1001_000,
     itype: B,
-    operand_types: [ Imm(12) ],
+    operand_types: [ Imm(12, u) ],
     encode_format: [ None, None, Some ],
 }
 

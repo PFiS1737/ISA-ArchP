@@ -26,6 +26,6 @@ instruction! {
     name: "segi",
     opcode: 0b_1101_011,
     itype: I,
-    operand_types: [ Imm(8) ],
+    operand_types: [ Imm(8, u) ],
     encode_format: [ None, None, Some ],
 }

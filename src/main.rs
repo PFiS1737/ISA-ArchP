@@ -8,6 +8,7 @@ mod cli;
 mod instructions;
 mod macro_instructions;
 mod operand;
+mod parser;
 mod pass1;
 mod pass2;
 mod pseudo_instructions;

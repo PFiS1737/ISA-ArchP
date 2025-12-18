@@ -12,6 +12,6 @@ instruction! {
     name: "cmpi",
     opcode: 0b_0111_000,
     itype: I,
-    operand_types: [ RegS, Imm(12) ],
+    operand_types: [ RegS, Imm(12, i) ],
     encode_format: [ None, Some, Some ],
 }
