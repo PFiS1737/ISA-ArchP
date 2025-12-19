@@ -256,7 +256,7 @@ exit_code: 0
 0xAA400117 # call.eq draw_flag
 0x40A52001 # addi.ne mine_num mine_num 1      [inc.ne mine_num]
 0x863F0000 # lui tmp 0x10000                  [li.ne t2 0xFFFFFDF]
-0x403FFFDF # addi tmp tmp 0xFFFFFFDF          [li.ne t2 0xFFFFFDF]
+0x403FFFDF # addi tmp tmp -33                 [li.ne t2 0xFFFFFDF]
 0x408DF000 # addi.ne t2 tmp 0                 [li.ne t2 0xFFFFFDF]
 0x108A5006 # and.ne t1 t1 t2
 0x40207000 # addi arg_x cursor_x 0            [mv arg_x cursor_x]

@@ -36,7 +36,7 @@ mod tests {
         let beqi = mc_instr("beqi");
 
         assert_snapshot!(beqi("", &["r1", "0x123"]), @"Error: Macro-instruction 'beqi' requires 3 operands, got 2");
-        assert_snapshot!(beqi("",&["r1", "r2", "0"]), @"");
+        assert_snapshot!(beqi("", &["r1", "r2", "0"]), @"");
         assert_snapshot!(beqi("", &["123", "123", "0"]), @"li tmp 123; beq 123 tmp 0");
 
         assert_snapshot!(beqi("", &["r1", "0x123", "0"]), @"li tmp 0x123; beq r1 tmp 0");
@@ -46,7 +46,7 @@ mod tests {
 
         assert_snapshot!(beqi("", &["r1", "123", "0"]), @"li tmp 123; beq r1 tmp 0");
         assert_snapshot!(beqi("", &["r1", "3000", "0"]), @"lui tmp 1; addi tmp tmp 0xFFFFFBB8; beq r1 tmp 0");
-        assert_snapshot!(beqi("", &["r1", "-123", "0"]), @"li tmp 0xFFFFFF85; beq r1 tmp 0");
+        assert_snapshot!(beqi("", &["r1", "-123", "0"]), @"li tmp -123; beq r1 tmp 0");
         assert_snapshot!(beqi("", &["r1", "-3000", "0"]), @"lui tmp 0xFFFFF; addi tmp tmp 0x448; beq r1 tmp 0");
 
         assert_snapshot!(beqi("eq", &["r1", "0x123", "0"]), @"li.eq tmp 0x123; beq.eq r1 tmp 0");

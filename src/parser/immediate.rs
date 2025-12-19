@@ -129,7 +129,7 @@ impl ParsedImm {
                     "Immediate '{}' out of range for i{} ({} ..= {})",
                     v,
                     bits,
-                    min, // TODO: fmt_hex
+                    min,
                     max
                 );
             }
@@ -142,7 +142,7 @@ impl ParsedImm {
                     if *v < 0 {
                         bail!(
                             "Immediate '{}' out of range for u{} (must be >= 0)",
-                            v,
+                            *v,
                             bits
                         );
                     }
@@ -187,7 +187,7 @@ mod tests {
 
     impl TestFormat for i32 {
         fn test_fmt(&self) -> String {
-            fmt_hex(*self as u32)
+            fmt_hex(*self)
         }
     }
 
@@ -199,7 +199,7 @@ mod tests {
 
     impl TestFormat for (u32, i32) {
         fn test_fmt(&self) -> String {
-            format!("({}, {})", fmt_hex(self.0), fmt_hex(self.1 as u32))
+            format!("({}, {})", fmt_hex(self.0), fmt_hex(self.1))
         }
     }
 
@@ -248,11 +248,11 @@ mod tests {
 
         assert_snapshot!(test(-123_i32), @r"
         Error: Immediate '-123' out of range for u32 (must be >= 0)
-        0xFFFFFF85
+        -123
         Error: Immediate '-123' out of range for u12 (must be >= 0)
         0xF85
         Error: Immediate '-123' out of range for u32 (must be >= 0)
-        (0, 0xFFFFFF85)
+        (0, -123)
         ");
 
         assert_snapshot!(test(2047_i32), @r"
@@ -315,7 +315,7 @@ mod tests {
         Error: Immediate '2147483647' out of range for u12 (0 ..= 4095)
         Error: Immediate '2147483647' out of range for i12 (-2048 ..= 2047)
         (0x7FFFF, 0xFFF)
-        (0x80000, 0xFFFFFFFF)
+        (0x80000, -1)
         ");
 
         assert_snapshot!(test(-2147483648_i32), @r"
@@ -381,7 +381,7 @@ mod tests {
         Error: Immediate '2147483647' out of range for u12 (0 ..= 4095)
         Error: Immediate '2147483647' out of range for i12 (-2048 ..= 2047)
         (0x7FFFF, 0xFFF)
-        (0x80000, 0xFFFFFFFF)
+        (0x80000, -1)
         ");
 
         assert_snapshot!(test(2147483648_u32), @r"
@@ -425,11 +425,11 @@ mod tests {
 
         assert_snapshot!(test("-123"), @r"
         Error: Immediate '-123' out of range for u32 (must be >= 0)
-        0xFFFFFF85
+        -123
         Error: Immediate '-123' out of range for u12 (must be >= 0)
         0xF85
         Error: Immediate '-123' out of range for u32 (must be >= 0)
-        (0, 0xFFFFFF85)
+        (0, -123)
         ");
 
         assert_snapshot!(test("2047"), @r"
@@ -492,7 +492,7 @@ mod tests {
         Error: Immediate '2147483647' out of range for u12 (0 ..= 4095)
         Error: Immediate '2147483647' out of range for i12 (-2048 ..= 2047)
         (0x7FFFF, 0xFFF)
-        (0x80000, 0xFFFFFFFF)
+        (0x80000, -1)
         ");
 
         assert_snapshot!(test("2147483648"), @r"

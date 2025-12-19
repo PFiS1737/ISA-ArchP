@@ -71,7 +71,7 @@ mod tests {
 
         assert_snapshot!(add("", &["r1", "r2", "123"]), @"addi r1 r2 123");
         assert_snapshot!(add("", &["r1", "r2", "3000"]), @"lui tmp 1; addi tmp tmp 0xFFFFFBB8; add r1 r2 tmp");
-        assert_snapshot!(add("", &["r1", "r2", "-123"]), @"addi r1 r2 0xFFFFFF85");
+        assert_snapshot!(add("", &["r1", "r2", "-123"]), @"addi r1 r2 -123");
         assert_snapshot!(add("", &["r1", "r2", "-3000"]), @"lui tmp 0xFFFFF; addi tmp tmp 0x448; add r1 r2 tmp");
 
         assert_snapshot!(add("eq", &["r1", "r2", "r3"]), @"");
@@ -90,7 +90,7 @@ mod tests {
 
         assert_snapshot!(cmp("", &["r1", "123"]), @"cmpi r1 123");
         assert_snapshot!(cmp("", &["r1", "3000"]), @"lui tmp 1; addi tmp tmp 0xFFFFFBB8; cmp r1 tmp");
-        assert_snapshot!(cmp("", &["r1", "-123"]), @"cmpi r1 0xFFFFFF85");
+        assert_snapshot!(cmp("", &["r1", "-123"]), @"cmpi r1 -123");
         assert_snapshot!(cmp("", &["r1", "-3000"]), @"lui tmp 0xFFFFF; addi tmp tmp 0x448; cmp r1 tmp");
 
         assert_snapshot!(cmp("eq", &["r1", "0x123"]), @"cmpi.eq r1 0x123");
@@ -108,7 +108,7 @@ mod tests {
 
         assert_snapshot!(beq("", &["r1", "123", "0"]), @"li tmp 123; beq r1 tmp 0");
         assert_snapshot!(beq("", &["r1", "3000", "0"]), @"lui tmp 1; addi tmp tmp 0xFFFFFBB8; beq r1 tmp 0");
-        assert_snapshot!(beq("", &["r1", "-123", "0"]), @"li tmp 0xFFFFFF85; beq r1 tmp 0");
+        assert_snapshot!(beq("", &["r1", "-123", "0"]), @"li tmp -123; beq r1 tmp 0");
         assert_snapshot!(beq("", &["r1", "-3000", "0"]), @"lui tmp 0xFFFFF; addi tmp tmp 0x448; beq r1 tmp 0");
 
         assert_snapshot!(beq("eq", &["r1", "r2", "0"]), @"");
