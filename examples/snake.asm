@@ -195,7 +195,7 @@ body_contains:
 queue_push:
   beq que_len QUEUE_SIZE queue_push_full
 
-  sw que_head que_val 0
+  sw que_val que_head
 
   inc que_head
   mod que_head que_head QUEUE_SIZE
@@ -221,7 +221,7 @@ queue_pop:
   add que_tmp que_tmp QUEUE_SIZE
   mod que_tmp que_tmp QUEUE_SIZE
 
-  lw que_val que_tmp 0
+  lw que_val que_tmp
 
   dec que_len
 
@@ -250,7 +250,7 @@ queue_contains:
   queue_contains_loop:
     beq que_i que_len queue_contains_not_found
 
-    lw que_cur que_tmp 0
+    lw que_cur que_tmp
     beq que_cur que_val queue_contains_found
 
     inc que_tmp

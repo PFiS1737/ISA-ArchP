@@ -3,6 +3,7 @@ mod auto_imm;
 mod branch_imm;
 mod cmp_imm32;
 mod load_imm32;
+mod riscv_lsw;
 
 use std::collections::{HashMap, VecDeque};
 
@@ -25,7 +26,7 @@ type ExpandFn = for<'a> fn(
 #[derive(Debug, Clone, Copy)]
 pub struct MacroInstruction {
     name: &'static str,
-    operand_count: usize,
+    operand_count: Option<usize>,
     expander: ExpandFn,
 
     _may_be_name_with_i: &'static str,
@@ -80,11 +81,13 @@ impl MacroInstruction {
     }
 
     fn assert_operand_count(&self, operands: &[OperandValue]) -> Result<()> {
-        if operands.len() != self.operand_count {
+        if let Some(count) = self.operand_count
+            && operands.len() != count
+        {
             bail!(
                 "Macro-instruction '{}' requires {} operands, got {}",
                 self.name,
-                self.operand_count,
+                count,
                 operands.len()
             );
         }
@@ -116,7 +119,22 @@ macro macro_instruction {
         inventory::submit! {
             $crate::macro_instructions::MacroInstruction {
                 name: $name,
-                operand_count: $count,
+                operand_count: Some($count),
+                expander: $expander,
+
+                _may_be_name_with_i: concat!($name, "i"),
+            }
+        }
+    },
+
+    (
+        name: $name:literal,
+        expander: $expander:expr,
+    ) => {
+        inventory::submit! {
+            $crate::macro_instructions::MacroInstruction {
+                name: $name,
+                operand_count: None,
                 expander: $expander,
 
                 _may_be_name_with_i: concat!($name, "i"),

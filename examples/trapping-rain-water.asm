@@ -17,7 +17,7 @@ const rt r10
 main:
   li t0 16
   input:
-    sw t1 io 0
+    sw io t1
     inc t1
     dec t0
     bgtz t0 input
@@ -32,9 +32,9 @@ solve:
   # r = len - 1 = 15
   li r 15
   # lmax = ht[l]
-  lw lmax l 0
+  lw lmax l
   # rmax = ht[r]
-  lw rmax r 0
+  lw rmax r
 
   # while l < r:
   while: bge l r endwhile
@@ -43,7 +43,7 @@ solve:
       # l++
       inc l
       # lmax = max(lmax, ht[l])
-      lw a0 l 0
+      lw a0 l
       mv a1 lmax
       call max
       mv lmax rt
@@ -57,7 +57,7 @@ solve:
       # r--
       dec r
       # rmax = max(rmax, ht[r])
-      lw a0 r 0
+      lw a0 r
       mv a1 rmax
       call max
       mv rmax rt

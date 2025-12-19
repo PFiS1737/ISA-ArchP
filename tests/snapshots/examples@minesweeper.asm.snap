@@ -62,11 +62,11 @@ exit_code: 0
 0x48046008 # modi y t2 8                      [mod y t2 GRID_ROWS]
 0x4612200F # mulli addr y 15                  [mull addr y GRID_COLS]
 0x00129001 # add addr addr x
-0x800A9000 # lw t1 addr 0
+0x800A9000 # lw t1 addr 0                     [lw t1 addr]
 0x843E0008 # li tmp 8                         [beq t1 MINE_MASK init_mines_loop]
 0x9200567F # beq t1 tmp init_mines_loop       [beq t1 MINE_MASK init_mines_loop]
 0x840A0008 # li t1 MINE_MASK
-0x82009005 # sw addr t1 0
+0x82009005 # sw addr t1 0                     [sw t1 addr]
 0x40063001 # addi i i 1                       [inc i]
 0x96003672 # blt i mine_num init_mines_loop
 0xA8000000 # ret
@@ -74,9 +74,9 @@ exit_code: 0
 0x84040000 # li y 0                           [clr y]
 0x84120000 # li addr 0                        [clr addr]
 0xAA000051 # call count_around_mines                                                   <label: init_mine_counts_loop>
-0x800A9000 # lw t1 addr 0
+0x800A9000 # lw t1 addr 0                     [lw t1 addr]
 0x000C500E # add t2 t1 cnt
-0x82009006 # sw addr t2 0
+0x82009006 # sw addr t2 0                     [sw t2 addr]
 0x40021001 # addi x x 1                       [inc x]
 0x40129001 # addi addr addr 1                 [inc addr]
 0x843E000F # li tmp 15                        [blt x GRID_COLS init_mine_counts_loop]
@@ -99,7 +99,7 @@ exit_code: 0
 0x9C00DC5F # bge ny tmp skip_this_neighbor    [bge ny GRID_ROWS skip_this_neighbor]
 0x460AD00F # mulli t1 ny 15                   [mull t1 ny GRID_COLS]
 0x000A500C # add t1 t1 nx
-0x800C5000 # lw t2 t1 0
+0x800C5000 # lw t2 t1 0                       [lw t2 t1]
 0x500C6008 # andi t2 t2 8                     [and t2 t2 MINE_MASK]
 0x70006008 # cmpi t2 8                        [cmp t2 MINE_MASK]
 0x405CE001 # addi.eq cnt cnt 1                [inc.eq cnt]
@@ -171,7 +171,7 @@ exit_code: 0
 0xA8000000 # ret
 0x4612800F # mulli addr cursor_y 15           [mull addr cursor_y GRID_COLS]           <label: reveal_tile>
 0x00129007 # add addr addr cursor_x
-0x800A9000 # lw t1 addr 0
+0x800A9000 # lw t1 addr 0                     [lw t1 addr]
 0x500C5010 # andi t2 t1 16                    [and t2 t1 REVEAL_MASK]
 0x940267C0 # bne t2 zero reveal_tile_ret      [bnez t2 reveal_tile_ret]
 0x500C5020 # andi t2 t1 32                    [and t2 t1 FLAG_MASK]
@@ -184,7 +184,7 @@ exit_code: 0
 0x70006000 # cmpi t2 0                        [cmp t2 0]
 0xAA4000BF # call.eq reveal_around
 0x540A5010 # ori t1 t1 16                     [or t1 t1 REVEAL_MASK]
-0x82009005 # sw addr t1 0
+0x82009005 # sw addr t1 0                     [sw t1 addr]
 0x70006001 # cmpi t2 1                        [cmp t2 1]
 0xAA400156 # call.eq draw_num1
 0x70006002 # cmpi t2 2                        [cmp t2 2]
@@ -206,13 +206,13 @@ exit_code: 0
 0x9C02DDBF # bge ny tmp reveal_around_ret     [bge ny GRID_ROWS reveal_around_ret]
 0x4612D00F # mulli addr ny 15                 [mull addr ny GRID_COLS]
 0x0012900C # add addr addr nx
-0x800A9000 # lw t1 addr 0
+0x800A9000 # lw t1 addr 0                     [lw t1 addr]
 0x500C5010 # andi t2 t1 16                    [and t2 t1 REVEAL_MASK]
 0x94026DA0 # bne t2 zero reveal_around_ret    [bnez t2 reveal_around_ret]
 0x500C5020 # andi t2 t1 32                    [and t2 t1 FLAG_MASK]
 0x94026DA0 # bne t2 zero reveal_around_ret    [bnez t2 reveal_around_ret]
 0x540A5010 # ori t1 t1 16                     [or t1 t1 REVEAL_MASK]
-0x82009005 # sw addr t1 0
+0x82009005 # sw addr t1 0                     [sw t1 addr]
 0x500C5007 # andi t2 t1 7                     [and t2 t1 AROUND_COUNT_MASK]
 0x4020C000 # addi arg_x nx 0                  [mv arg_x nx]
 0x4022D000 # addi arg_y ny 0                  [mv arg_y ny]
@@ -245,7 +245,7 @@ exit_code: 0
 0xA8000000 # ret                                                                       <label: reveal_around_ret>
 0x4612800F # mulli addr cursor_y 15           [mull addr cursor_y GRID_COLS]           <label: toggle_flag>
 0x00129007 # add addr addr cursor_x
-0x800A9000 # lw t1 addr 0
+0x800A9000 # lw t1 addr 0                     [lw t1 addr]
 0x500C5010 # andi t2 t1 16                    [and t2 t1 REVEAL_MASK]
 0x70006000 # cmpi t2 0                        [cmp t2 0]
 0xA8800000 # ret.ne
@@ -263,7 +263,7 @@ exit_code: 0
 0x40228000 # addi arg_y cursor_y 0            [mv arg_y cursor_y]
 0xD04C545C # col COLOR_HIDDEN
 0xAA800104 # call.ne draw_tile
-0x82009005 # sw addr t1 0
+0x82009005 # sw addr t1 0                     [sw t1 addr]
 0xA8000000 # ret
 0x84060000 # li i 0                           [clr i]                                  <label: draw_tile>
 0x84080000 # li j 0                           [clr j]
@@ -490,7 +490,7 @@ exit_code: 0
 0x9406CCA7 # bne nx cursor_x lose_loop_cont                                            <label: lose_col_loop>
 0x9406DCA8 # bne ny cursor_y lose_loop_cont
 0x90060DC0 # jmp skip_draw
-0x800A9000 # lw t1 addr 0                                                              <label: lose_loop_cont>
+0x800A9000 # lw t1 addr 0                     [lw t1 addr]                             <label: lose_loop_cont>
 0x500C5008 # andi t2 t1 8                     [and t2 t1 MINE_MASK]
 0x70006000 # cmpi t2 0                        [cmp t2 0]
 0x40A0C000 # addi.ne arg_x nx 0               [mv.ne arg_x nx]

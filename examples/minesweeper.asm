@@ -128,11 +128,11 @@ init_mines:
 		mod y t2 GRID_ROWS
 		mull addr y GRID_COLS
 		add addr addr x
-		lw t1 addr 0
+		lw t1 addr
 		beq t1 MINE_MASK init_mines_loop
 
     li t1 MINE_MASK
-		sw addr t1 0
+		sw t1 addr
 		inc i
 		blt i mine_num init_mines_loop
 
@@ -145,9 +145,9 @@ init_mine_counts:
 	clr addr
 	init_mine_counts_loop:
 		call count_around_mines
-		lw t1 addr 0
+		lw t1 addr
 		add t2 t1 cnt
-		sw addr t2 0
+		sw t2 addr
 		inc x
 		inc addr
 		blt x GRID_COLS init_mine_counts_loop
@@ -180,7 +180,7 @@ count_around_mines:
 		add t1 t1 nx
 
 		# 读取格子值
-		lw t2 t1 0
+		lw t2 t1
 		
 		# 判断是否为地雷
 		and t2 t2 MINE_MASK
@@ -273,7 +273,7 @@ update_cursor:
 reveal_tile:
 	mull addr cursor_y GRID_COLS
 	add addr addr cursor_x
-	lw t1 addr 0
+	lw t1 addr
 
 	and t2 t1 REVEAL_MASK
 	bnez t2 reveal_tile_ret
@@ -289,7 +289,7 @@ reveal_tile:
 	cmp t2 0
 	call.eq reveal_around
 	or t1 t1 REVEAL_MASK
-	sw addr t1 0
+	sw t1 addr
 
 	cmp t2 1
 	call.eq draw_num1
@@ -327,7 +327,7 @@ reveal_around:
 		add addr addr nx
 
 		# 读取格子值
-		lw t1 addr 0
+		lw t1 addr
 
 		# 如果已揭示或有旗子，则返回
 		and t2 t1 REVEAL_MASK
@@ -337,7 +337,7 @@ reveal_around:
 
 		# 设置为已揭示
 		or t1 t1 REVEAL_MASK
-		sw addr t1 0
+		sw t1 addr
 
 		# 获取周围雷数
 		and t2 t1 AROUND_COUNT_MASK
@@ -386,7 +386,7 @@ reveal_around:
 toggle_flag:
 	mull addr cursor_y GRID_COLS
 	add addr addr cursor_x
-	lw t1 addr 0
+	lw t1 addr
 
 	and t2 t1 REVEAL_MASK
 	cmp t2 0
@@ -407,7 +407,7 @@ toggle_flag:
 	col COLOR_HIDDEN
 	call.ne draw_tile
 
-	sw addr t1 0
+	sw t1 addr
 
 	ret
 
@@ -679,7 +679,7 @@ main:
 			bne ny cursor_y lose_loop_cont
 			jmp skip_draw
 		lose_loop_cont:
-			lw t1 addr 0
+			lw t1 addr
 			and t2 t1 MINE_MASK
 			cmp t2 0
 			mv.ne arg_x nx
