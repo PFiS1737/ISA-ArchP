@@ -162,7 +162,7 @@ I-type  (set segment display immediate)
 Registers
 =========
 
-00000 zero  - the zero register (always 0, read-only)
+00000 r0  - the zero register (always 0, read-only)
 
 00001 r1
 00010 r2
@@ -190,9 +190,9 @@ clr rd  =>  li rd 0
 inc rd  =>  addi rd rd 1
 dec rd  =>  subi rd rd 1
 
-beqz rs1 offset12  =>  beq rs1 zero offset12
-bnez rs1 offset12  =>  bne rs1 zero offset12
-bltz rs1 offset12  =>  blt rs1 zero offset12
-blez rs1 offset12  =>  ble rs1 zero offset12
-bgtz rs1 offset12  =>  bgt rs1 zero offset12
-bgez rs1 offset12  =>  bge rs1 zero offset12
+beqz rs1 offset12  =>  beq rs1 r0 offset12
+bnez rs1 offset12  =>  bne rs1 r0 offset12
+bltz rs1 offset12  =>  blt rs1 r0 offset12
+blez rs1 offset12  =>  ble rs1 r0 offset12
+bgtz rs1 offset12  =>  bgt rs1 r0 offset12
+bgez rs1 offset12  =>  bge rs1 r0 offset12

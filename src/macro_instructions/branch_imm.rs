@@ -18,7 +18,7 @@ const F: ExpandFn = |ctx, this, cond, ops| {
     };
 
     if imm == 0 {
-        Some(vec![(inst, cond, op_values![ops[0], "zero", ops[2]])])
+        Some(vec![(inst, cond, op_values![ops[0], "r0", ops[2]])])
     } else {
         Some(vec![
             ("li", cond, op_values!["tmp", imm]),
@@ -42,7 +42,7 @@ mod tests {
         assert_snapshot!(beqi("", &["r1", "0x123", "0"]), @"li tmp 0x123; beq r1 tmp 0");
         assert_snapshot!(beqi("", &["r1", "0x1234", "0"]), @"lui tmp 1; addi tmp tmp 0x234; beq r1 tmp 0");
         assert_snapshot!(beqi("", &["r1", "0x12345678", "0"]), @"lui tmp 0x12345; addi tmp tmp 0x678; beq r1 tmp 0");
-        assert_snapshot!(beqi("", &["r1", "0", "0"]), @"beq r1 zero 0");
+        assert_snapshot!(beqi("", &["r1", "0", "0"]), @"beq r1 r0 0");
 
         assert_snapshot!(beqi("", &["r1", "123", "0"]), @"li tmp 123; beq r1 tmp 0");
         assert_snapshot!(beqi("", &["r1", "3000", "0"]), @"lui tmp 1; addi tmp tmp 0xFFFFFBB8; beq r1 tmp 0");

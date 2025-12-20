@@ -37,7 +37,7 @@ impl<'a> Context<'a> {
     pub fn test() -> Self {
         Context {
             settings: AssemblerSettings::default(),
-            constants: HashMap::from([("FOO", "42"), ("R1", "r1"), ("R0", "zero")]),
+            constants: HashMap::from([("FOO", "42"), ("R1", "r1"), ("R0", "r0")]),
             labels: BiHashMap::from_iter([("start", 0), ("loop", 4), ("end", 16)]),
             addr_to_original: Vec::new(),
         }

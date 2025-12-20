@@ -117,7 +117,7 @@ exit_code: 0
 0xA8000000 # ret
 0x841A0001 # li rt 1                                                                                <label: queue_push_full>
 0xA8000000 # ret
-0x9200EF00 # beq que_len zero queue_pop_empty            [beqz que_len queue_pop_empty]             <label: queue_pop>
+0x9200EF00 # beq que_len r0 queue_pop_empty              [beqz que_len queue_pop_empty]             <label: queue_pop>
 0x0222F00E # sub que_tmp que_head que_len
 0x40231064 # addi que_tmp que_tmp 100                    [add que_tmp que_tmp QUEUE_SIZE]
 0x48231064 # modi que_tmp que_tmp 100                    [mod que_tmp que_tmp QUEUE_SIZE]
@@ -127,7 +127,7 @@ exit_code: 0
 0xA8000000 # ret
 0x841A0001 # li rt 1                                                                                <label: queue_pop_empty>
 0xA8000000 # ret
-0x9202E100 # beq que_len zero queue_contains_not_found   [beqz que_len queue_contains_not_found]    <label: queue_contains>
+0x9202E100 # beq que_len r0 queue_contains_not_found     [beqz que_len queue_contains_not_found]    <label: queue_contains>
 0x0222F00E # sub que_tmp que_head que_len
 0x40231064 # addi que_tmp que_tmp 100                    [add que_tmp que_tmp QUEUE_SIZE]
 0x48231064 # modi que_tmp que_tmp 100                    [mod que_tmp que_tmp QUEUE_SIZE]
@@ -165,7 +165,7 @@ exit_code: 0
 0xAA00004E # call gen_food
 0x84180064 # li i 100                                                                               <label: main_loop>
 0x4218C001 # subi i i 1                                  [dec i]                                    <label: sleep>
-0x9A02C3E0 # bgt i zero sleep                            [bgtz i sleep]
+0x9A02C3E0 # bgt i r0 sleep                              [bgtz i sleep]
 0xAA00008A # call read_key
 0xAA00001B # call move_snake
 0x900203C0 # jmp main_loop

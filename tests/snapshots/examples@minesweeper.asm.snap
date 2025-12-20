@@ -91,10 +91,10 @@ exit_code: 0
 0x84140FFF # li tx -1                                                                  <label: dy_loop>
 0x0018100A # add nx x tx                                                               <label: dx_loop>
 0x001A200B # add ny y ty
-0x9600CC40 # blt nx zero skip_this_neighbor   [bltz nx skip_this_neighbor]
+0x9600CC40 # blt nx r0 skip_this_neighbor     [bltz nx skip_this_neighbor]
 0x843E000F # li tmp 15                        [bge nx GRID_COLS skip_this_neighbor]
 0x9C00CC5F # bge nx tmp skip_this_neighbor    [bge nx GRID_COLS skip_this_neighbor]
-0x9600DC40 # blt ny zero skip_this_neighbor   [bltz ny skip_this_neighbor]
+0x9600DC40 # blt ny r0 skip_this_neighbor     [bltz ny skip_this_neighbor]
 0x843E0008 # li tmp 8                         [bge ny GRID_ROWS skip_this_neighbor]
 0x9C00DC5F # bge ny tmp skip_this_neighbor    [bge ny GRID_ROWS skip_this_neighbor]
 0x460AD00F # mulli t1 ny 15                   [mull t1 ny GRID_COLS]
@@ -173,11 +173,11 @@ exit_code: 0
 0x00129007 # add addr addr cursor_x
 0x800A9000 # lw t1 addr 0                     [lw t1 addr]
 0x500C5010 # andi t2 t1 16                    [and t2 t1 REVEAL_MASK]
-0x940267C0 # bne t2 zero reveal_tile_ret      [bnez t2 reveal_tile_ret]
+0x940267C0 # bne t2 r0 reveal_tile_ret        [bnez t2 reveal_tile_ret]
 0x500C5020 # andi t2 t1 32                    [and t2 t1 FLAG_MASK]
-0x940267C0 # bne t2 zero reveal_tile_ret      [bnez t2 reveal_tile_ret]
+0x940267C0 # bne t2 r0 reveal_tile_ret        [bnez t2 reveal_tile_ret]
 0x500C5008 # andi t2 t1 8                     [and t2 t1 MINE_MASK]
-0x94066B40 # bne t2 zero lose_loop            [bnez t2 lose_loop]
+0x94066B40 # bne t2 r0 lose_loop              [bnez t2 lose_loop]
 0x500C5007 # andi t2 t1 7                     [and t2 t1 AROUND_COUNT_MASK]
 0x40207000 # addi arg_x cursor_x 0            [mv arg_x cursor_x]
 0x40228000 # addi arg_y cursor_y 0            [mv arg_y cursor_y]
@@ -198,19 +198,19 @@ exit_code: 0
 0xA8000000 # ret                                                                       <label: reveal_tile_ret>
 0x40187000 # addi nx cursor_x 0               [mv nx cursor_x]                         <label: reveal_around>
 0x401A8000 # addi ny cursor_y 0               [mv ny cursor_y]
-0x9602CDA0 # blt nx zero reveal_around_ret    [bltz nx reveal_around_ret]              <label: reveal_around_loop>
+0x9602CDA0 # blt nx r0 reveal_around_ret      [bltz nx reveal_around_ret]              <label: reveal_around_loop>
 0x843E000F # li tmp 15                        [bge nx GRID_COLS reveal_around_ret]
 0x9C02CDBF # bge nx tmp reveal_around_ret     [bge nx GRID_COLS reveal_around_ret]
-0x9602DDA0 # blt ny zero reveal_around_ret    [bltz ny reveal_around_ret]
+0x9602DDA0 # blt ny r0 reveal_around_ret      [bltz ny reveal_around_ret]
 0x843E0008 # li tmp 8                         [bge ny GRID_ROWS reveal_around_ret]
 0x9C02DDBF # bge ny tmp reveal_around_ret     [bge ny GRID_ROWS reveal_around_ret]
 0x4612D00F # mulli addr ny 15                 [mull addr ny GRID_COLS]
 0x0012900C # add addr addr nx
 0x800A9000 # lw t1 addr 0                     [lw t1 addr]
 0x500C5010 # andi t2 t1 16                    [and t2 t1 REVEAL_MASK]
-0x94026DA0 # bne t2 zero reveal_around_ret    [bnez t2 reveal_around_ret]
+0x94026DA0 # bne t2 r0 reveal_around_ret      [bnez t2 reveal_around_ret]
 0x500C5020 # andi t2 t1 32                    [and t2 t1 FLAG_MASK]
-0x94026DA0 # bne t2 zero reveal_around_ret    [bnez t2 reveal_around_ret]
+0x94026DA0 # bne t2 r0 reveal_around_ret      [bnez t2 reveal_around_ret]
 0x540A5010 # ori t1 t1 16                     [or t1 t1 REVEAL_MASK]
 0x82009005 # sw addr t1 0                     [sw t1 addr]
 0x500C5007 # andi t2 t1 7                     [and t2 t1 AROUND_COUNT_MASK]
@@ -229,7 +229,7 @@ exit_code: 0
 0xAA400199 # call.eq draw_num4
 0x70006005 # cmpi t2 5                        [cmp t2 5]
 0xAA4001B1 # call.eq draw_num5
-0x94026DA0 # bne t2 zero reveal_around_ret    [bnez t2 reveal_around_ret]
+0x94026DA0 # bne t2 r0 reveal_around_ret      [bnez t2 reveal_around_ret]
 0x421AD001 # subi ny ny 1                     [dec ny]
 0xAA0000C1 # call reveal_around_loop
 0x401AD001 # addi ny ny 1                     [inc ny]
@@ -465,7 +465,7 @@ exit_code: 0
 0xD2001002 # spx x y
 0xA8000000 # ret
 0x401FB000 # addi key_code kb 0               [mv key_code kb]                         <label: read_key>
-0x9206F960 # beq key_code zero read_key       [beqz key_code read_key]
+0x9206F960 # beq key_code r0 read_key         [beqz key_code read_key]
 0xA8000000 # ret
 0xAA000001 # call init_screen                                                          <label: main>
 0xAA000031 # call init_mines

@@ -13,7 +13,7 @@ pub fn parse_reg_d(ctx: &Context, op: &OperandValue) -> Result<u32> {
         "io" => Ok(26),
         "tmp" => Ok(31),
 
-        "zero" | "pc" | "kb" | "rng" => err_read_only_reg!(reg),
+        "r0" | "pc" | "kb" | "rng" => err_read_only_reg!(reg),
 
         r if let Some(n) = r.strip_prefix("r")
             && let Ok(n) = n.parse::<u32>() =>
@@ -42,7 +42,7 @@ pub fn parse_reg_s(ctx: &Context, op: &OperandValue) -> Result<u32> {
     };
 
     match *reg {
-        "zero" => Ok(0),
+        "r0" => Ok(0),
 
         "pc" => Ok(25),
         "io" => Ok(26),
@@ -97,21 +97,21 @@ mod tests {
     #[test]
     fn parse_reg_d() {
         let f = test(super::parse_reg_d);
-        assert_snapshot!(f("zero"), @"Error: Register 'zero' is raed-only");
+        assert_snapshot!(f("r0"), @"Error: Register 'r0' is raed-only");
         assert_snapshot!(f("r9"), @"9");
         assert_snapshot!(f("r27"), @"Error: Register number out of range (1-24): r27");
         assert_snapshot!(f("kb"), @"Error: Register 'kb' is raed-only");
         assert_snapshot!(f("invalid"), @"Error: Invalid register: invalid");
         assert_snapshot!(f("FOO"), @"Error: Expected register, found immediate: 42");
         assert_snapshot!(f("BAR"), @"Error: Invalid register: BAR");
-        assert_snapshot!(f("R0"), @"Error: Register 'zero' is raed-only");
+        assert_snapshot!(f("R0"), @"Error: Register 'r0' is raed-only");
         assert_snapshot!(f("R1"), @"1");
     }
 
     #[test]
     fn parse_reg_s() {
         let f = test(super::parse_reg_s);
-        assert_snapshot!(f("zero"), @"0");
+        assert_snapshot!(f("r0"), @"0");
         assert_snapshot!(f("r15"), @"15");
         assert_snapshot!(f("r30"), @"Error: Register number out of range (0-24): r30");
         assert_snapshot!(f("pc"), @"25");
