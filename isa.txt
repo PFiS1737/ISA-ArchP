@@ -31,17 +31,6 @@ C-type
 1101 000   0   xxxxxxxx xxxxxxxx xxxxxxxx
    col   | - |           color24
 
-Conditions
-==========
-
-000 always
-001 eq
-010 ne
-011 lt
-100 ge
-101 gt
-110 le
-
 Instructions
 ============
 
@@ -156,41 +145,3 @@ R-type (set segment display)
 I-type  (set segment display immediate)
 
 1101 011 segi __ ___ imm8
-
-Registers
-=========
-
-00000 r0  - the zero register (always 0, writes are ignored)
-
-00001 r1
-00010 r2
-00011 r3
-00100 r4
-  ~
-11000 r24 - total 24 general purpose registers
-
-11001 pc  - the program counter (read-only)
-11010 io  - the level input/output (only in level mode)
-11011 kb  - the keyboard input (only in sandbox mode, read-only)
-11100 rng - the random number generator (only in sandbox mode, read-only)
-11101
-11110
-
-11111 tmp  - used by the assembler for expanding macro instructions
-
-Pseudo Instructions
-===================
-
-mv rd rs  =>  addi rd rs 0
-
-clr rd  =>  li rd 0
-
-inc rd  =>  addi rd rd 1
-dec rd  =>  subi rd rd 1
-
-beqz rs1 offset12  =>  beq rs1 r0 offset12
-bnez rs1 offset12  =>  bne rs1 r0 offset12
-bltz rs1 offset12  =>  blt rs1 r0 offset12
-blez rs1 offset12  =>  ble rs1 r0 offset12
-bgtz rs1 offset12  =>  bgt rs1 r0 offset12
-bgez rs1 offset12  =>  bge rs1 r0 offset12
