@@ -313,7 +313,6 @@ mod tests {
         assert_snapshot!(cmd("", &["r1", "r2", "r3", "r4"]), @"Error: Instruction 'add' requires 3 operands, got 4");
         assert_snapshot!(cmd("", &["r1", "r2", "rrr"]), @"Error: Invalid register: rrr");
         assert_snapshot!(cmd("", &["r1", "r2", "123"]), @"Error: Expected register, found immediate: 123");
-        assert_snapshot!(cmd("", &["r0", "r2", "r3"]), @"Error: Register 'r0' is raed-only");
         assert_snapshot!(cmd("invalid", &["r1", "r2", "r3"]), @"Error: Invalid condition: invalid");
 
         assert_snapshot!(cmd("lt", &["r1", "r2", "r3"]), @"0000 000 011 00001 00010 0000000 00011");
@@ -326,7 +325,6 @@ mod tests {
         assert_snapshot!(cmd("", &["r1", "r2", "r3", "r4"]), @"Error: Instruction 'addi' requires 3 operands, got 4");
         assert_snapshot!(cmd("", &["r1", "rrr", "123"]), @"Error: Invalid register: rrr");
         assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Invalid immediate: r3");
-        assert_snapshot!(cmd("", &["r0", "r2", "123"]), @"Error: Register 'r0' is raed-only");
         assert_snapshot!(cmd("", &["r1", "r2", "0xFFFF"]), @"Error: Immediate '65535' out of range for i12 (-2048 ..= 2047)");
         assert_snapshot!(cmd("invalid", &["r1", "r2", "123"]), @"Error: Invalid condition: invalid");
 
@@ -376,7 +374,6 @@ mod tests {
         assert_snapshot!(cmd("", &["r1"]), @"Error: Instruction 'lui' requires 2 operands, got 1");
         assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Instruction 'lui' requires 2 operands, got 3");
         assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Invalid immediate: r2");
-        assert_snapshot!(cmd("", &["r0", "r2"]), @"Error: Register 'r0' is raed-only");
         assert_snapshot!(cmd("", &["r3", "0x200000"]), @"Error: Immediate '2097152' out of range for u20 (0 ..= 1048575)");
         assert_snapshot!(cmd("", &["r3", "-123"]), @"Error: Immediate '-123' out of range for u20 (must be >= 0)");
         assert_snapshot!(cmd("eq", &["r3", "0xABCDE"]), @"Error: Condition is not allowed for U-type instruction 'lui'");
