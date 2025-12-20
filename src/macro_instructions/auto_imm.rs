@@ -56,6 +56,22 @@ const F3: ExpandFn = |ctx, this, cond, ops| {
     }
 };
 
+macro_instruction! {
+    name: "push",
+    operand_count: 1,
+    expander: F4,
+}
+
+const F4: ExpandFn = |ctx, this, cond, ops| {
+    let inst = this._may_be_name_with_i;
+
+    if let Ok(imm) = parse_imm(ctx, &ops[0]).and_then(|imm| imm.as_i32()) {
+        Some(vec![(inst, cond, op_values![imm])])
+    } else {
+        None
+    }
+};
+
 #[cfg(test)]
 mod tests {
     use crate::testkit::*;
@@ -114,5 +130,23 @@ mod tests {
         assert_snapshot!(beq("eq", &["r1", "r2", "0"]), @"");
         assert_snapshot!(beq("eq", &["r1", "0x123", "0"]), @"li.eq tmp 0x123; beq.eq r1 tmp 0");
         assert_snapshot!(beq("eq", &["r1", "0x1234", "0"]), @"lui tmp 1; addi tmp tmp 0x234; beq.eq r1 tmp 0");
+    }
+
+    #[test]
+    fn auto_imm_push() {
+        let push = mc_instr("push");
+
+        assert_snapshot!(push("", &["r2"]), @"");
+        assert_snapshot!(push("", &["0x123"]), @"pushi 0x123");
+        assert_snapshot!(push("", &["0x1234"]), @"lui tmp 1; addi tmp tmp 0x234; push tmp");
+        assert_snapshot!(push("", &["0x12345678"]), @"lui tmp 0x12345; addi tmp tmp 0x678; push tmp");
+
+        assert_snapshot!(push("", &["123"]), @"pushi 123");
+        assert_snapshot!(push("", &["3000"]), @"lui tmp 1; addi tmp tmp 0xFFFFFBB8; push tmp");
+        assert_snapshot!(push("", &["-123"]), @"pushi -123");
+        assert_snapshot!(push("", &["-3000"]), @"lui tmp 0xFFFFF; addi tmp tmp 0x448; push tmp");
+
+        assert_snapshot!(push("eq", &["0x123"]), @"pushi.eq 0x123");
+        assert_snapshot!(push("eq", &["0x1234"]), @"lui tmp 1; addi tmp tmp 0x234; push.eq tmp");
     }
 }
