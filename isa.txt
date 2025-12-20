@@ -50,10 +50,9 @@ R-type (register compute)
 
 0000 000 add
 0000 001 sub
-0000 010 mulh
-0000 011 mull
-0000 100 mod
-0000 101 div
+0000 010 mul
+0000 011 mod
+0000 100 div
 
 0001 000 and
 0001 001 nand
@@ -76,10 +75,9 @@ I-type (immediate compute)
 
 0100 000 addi
 0100 001 subi
-0100 010 mulhi
-0100 011 mulli
-0100 100 modi
-0100 101 divi
+0100 010 muli
+0100 011 modi
+0100 100 divi
 
 0101 000 andi
 0101 001 nandi

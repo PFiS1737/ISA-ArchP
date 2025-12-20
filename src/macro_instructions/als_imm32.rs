@@ -6,7 +6,7 @@ use crate::{
 
 macro_instruction! {
     name: [
-        "addi", "subi", "mulhi", "mulli", "modi", "divi",
+        "addi", "subi", "muli", "modi", "divi",
         "andi", "nandi", "ori", "nori", "xori", "xnori",
         "shli", "shri", "roli", "rori", "ashri",
     ],

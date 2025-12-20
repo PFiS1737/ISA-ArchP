@@ -13,26 +13,20 @@ instruction! {
 }
 
 instruction! {
-    name: "mulh",
+    name: "mul",
     opcode: 0b_0000_010,
     itype: R,
 }
 
 instruction! {
-    name: "mull",
+    name: "mod",
     opcode: 0b_0000_011,
     itype: R,
 }
 
 instruction! {
-    name: "mod",
-    opcode: 0b_0000_100,
-    itype: R,
-}
-
-instruction! {
     name: "div",
-    opcode: 0b_0000_101,
+    opcode: 0b_0000_100,
     itype: R,
 }
 
@@ -49,25 +43,19 @@ instruction! {
 }
 
 instruction! {
-    name: "mulhi",
+    name: "muli",
     opcode: 0b_0100_010,
     itype: I,
 }
 
 instruction! {
-    name: "mulli",
+    name: "modi",
     opcode: 0b_0100_011,
     itype: I,
 }
 
 instruction! {
-    name: "modi",
-    opcode: 0b_0100_100,
-    itype: I,
-}
-
-instruction! {
     name: "divi",
-    opcode: 0b_0100_101,
+    opcode: 0b_0100_100,
     itype: I,
 }

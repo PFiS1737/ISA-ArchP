@@ -126,7 +126,7 @@ init_mines:
 		mv t2 rng
 		mod x t1 GRID_COLS
 		mod y t2 GRID_ROWS
-		mull addr y GRID_COLS
+		mul addr y GRID_COLS
 		add addr addr x
 		lw t1 addr
 		beq t1 MINE_MASK init_mines_loop
@@ -176,7 +176,7 @@ count_around_mines:
 		bge ny GRID_ROWS skip_this_neighbor
 
 		# 计算地址
-		mull t1 ny GRID_COLS
+		mul t1 ny GRID_COLS
 		add t1 t1 nx
 
 		# 读取格子值
@@ -239,29 +239,29 @@ update_cursor:
 	clr i
 	clr j
 
-	mull x cursor_x TILE_SIZE
-	mull y cursor_y TILE_SIZE
+	mul x cursor_x TILE_SIZE
+	mul y cursor_y TILE_SIZE
 
 	update_cursor_loop1:
 		spx x y
 		inc x
 		inc i
 		ble i TILE_SIZE update_cursor_loop1
-		mull x cursor_x TILE_SIZE
+		mul x cursor_x TILE_SIZE
 		clr i
 		add y y TILE_SIZE
 		inc j
 		beq j 1 update_cursor_loop1
 
-	mull x cursor_x TILE_SIZE
-	mull y cursor_y TILE_SIZE
+	mul x cursor_x TILE_SIZE
+	mul y cursor_y TILE_SIZE
 
 	update_cursor_loop2:
 		spx x y
 		inc y
 		inc i
 		ble i TILE_SIZE update_cursor_loop2
-		mull y cursor_y TILE_SIZE
+		mul y cursor_y TILE_SIZE
 		clr i
 		add x x TILE_SIZE
 		inc j
@@ -271,7 +271,7 @@ update_cursor:
 
 
 reveal_tile:
-	mull addr cursor_y GRID_COLS
+	mul addr cursor_y GRID_COLS
 	add addr addr cursor_x
 	lw t1 addr
 
@@ -323,7 +323,7 @@ reveal_around:
 		bge ny GRID_ROWS reveal_around_ret
 
 		# 计算地址
-		mull addr ny GRID_COLS
+		mul addr ny GRID_COLS
 		add addr addr nx
 
 		# 读取格子值
@@ -384,7 +384,7 @@ reveal_around:
 
 
 toggle_flag:
-	mull addr cursor_y GRID_COLS
+	mul addr cursor_y GRID_COLS
 	add addr addr cursor_x
 	lw t1 addr
 
@@ -415,8 +415,8 @@ toggle_flag:
 draw_tile:
 	clr i
 	clr j
-	mull x arg_x TILE_SIZE
-	mull y arg_y TILE_SIZE
+	mul x arg_x TILE_SIZE
+	mul y arg_y TILE_SIZE
 	inc x
 	inc y
 	draw_tile_loop:
@@ -424,7 +424,7 @@ draw_tile:
 		inc x
 		inc i
 		blt i 7 draw_tile_loop
-		mull x arg_x TILE_SIZE
+		mul x arg_x TILE_SIZE
 		inc x
 		inc y
 		clr i
@@ -435,8 +435,8 @@ draw_tile:
 
 
 draw_flag:
-	mull x cursor_x TILE_SIZE
-	mull y cursor_y TILE_SIZE
+	mul x cursor_x TILE_SIZE
+	mul y cursor_y TILE_SIZE
 	col COLOR_FLAG
 	add x x 4
 	add y y 2
@@ -469,8 +469,8 @@ draw_flag:
 
 
 draw_mine:
-	mull x arg_x TILE_SIZE
-	mull y arg_y TILE_SIZE
+	mul x arg_x TILE_SIZE
+	mul y arg_y TILE_SIZE
 	add x x 4
 	add y y 2
 	col COLOR_MINE
@@ -510,8 +510,8 @@ draw_num1:
 	call draw_tile
 	clr i
 	clr j
-	mull x arg_x TILE_SIZE
-	mull y arg_y TILE_SIZE
+	mul x arg_x TILE_SIZE
+	mul y arg_y TILE_SIZE
 	add x x 4
 	add y y 2
 	col COLOR_NUM1
@@ -529,8 +529,8 @@ draw_num2:
 	call draw_tile
 	clr i
 	clr j
-	mull x arg_x TILE_SIZE
-	mull y arg_y TILE_SIZE
+	mul x arg_x TILE_SIZE
+	mul y arg_y TILE_SIZE
 	add x x 3
 	add y y 2
 	col COLOR_NUM2
@@ -558,8 +558,8 @@ draw_num3:
 	call draw_tile
 	clr i
 	clr j
-	mull x arg_x TILE_SIZE
-	mull y arg_y TILE_SIZE
+	mul x arg_x TILE_SIZE
+	mul y arg_y TILE_SIZE
 	add x x 3
 	add y y 2
 	col COLOR_NUM3
@@ -586,8 +586,8 @@ draw_num4:
 	col COLOR_REVEALED
 	call draw_tile
 	clr i
-	mull x arg_x TILE_SIZE
-	mull y arg_y TILE_SIZE
+	mul x arg_x TILE_SIZE
+	mul y arg_y TILE_SIZE
 	add x x 3
 	add y y 2
 	col COLOR_NUM4
@@ -615,8 +615,8 @@ draw_num5:
 	call draw_tile
 	clr i
 	clr j
-	mull x arg_x TILE_SIZE
-	mull y arg_y TILE_SIZE
+	mul x arg_x TILE_SIZE
+	mul y arg_y TILE_SIZE
 	add x x 3
 	add y y 2
 	col COLOR_NUM5

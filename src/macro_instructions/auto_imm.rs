@@ -6,7 +6,7 @@ use crate::{
 
 macro_instruction! {
     name: [
-        "add", "sub", "mulh", "mull", "mod", "div",
+        "add", "sub", "mul", "mod", "div",
         "and", "nand", "or", "nor", "xor", "xnor",
         "shl", "shr", "rol", "ror", "ashr",
     ],
