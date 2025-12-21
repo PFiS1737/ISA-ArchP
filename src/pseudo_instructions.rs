@@ -11,7 +11,7 @@ use once_cell::sync::Lazy;
 use crate::{
     assembler::Context,
     operand::{OperandType, OperandValue},
-    parser::{parse_imm, parse_reg_d, parse_reg_s},
+    parser::{parse_address, parse_imm, parse_reg_d, parse_reg_s},
 };
 
 type ExpandRet<'a> = (&'static str, Vec<OperandValue<'a>>);
@@ -65,6 +65,9 @@ impl PseudoInstruction {
                 }
                 OperandType::Imm(bits, signed) => {
                     parse_imm(ctx, operand)?.as_field(bits, signed)?;
+                }
+                OperandType::Addr => {
+                    parse_address(ctx, operand)?;
                 }
             };
         }

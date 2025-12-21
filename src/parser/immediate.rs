@@ -22,15 +22,7 @@ pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<ParsedImm> {
     };
 
     let parsed = match imm {
-        OperandValue::StringSlice(s) => {
-            if let Some(const_value) = ctx.constants.get(s) {
-                parse_str(const_value)
-            } else if let Some(&label_addr) = ctx.labels.get_by_left(s) {
-                Ok(ParsedImm::Unsigned(label_addr as u64))
-            } else {
-                parse_str(s)
-            }
-        }
+        OperandValue::StringSlice(s) => parse_str(ctx.constants.get(s).unwrap_or(s)),
         OperandValue::Unsigned(n) => Ok(ParsedImm::Unsigned(*n as u64)),
         OperandValue::Signed(n) => Ok(ParsedImm::Signed(*n as i64)),
     };
@@ -214,7 +206,7 @@ mod tests {
     where
         OperandValue<'a>: From<T>,
     {
-        let imm = parse_imm(&Context::test(), &OperandValue::from(s)).unwrap();
+        let imm = parse_imm(&Context::default(), &OperandValue::from(s)).unwrap();
         format!(
             "{}\n{}\n{}\n{}\n{}\n{}",
             unwrap(imm.as_u32()),

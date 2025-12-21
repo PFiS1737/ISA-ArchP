@@ -16,7 +16,7 @@ use once_cell::sync::Lazy;
 use crate::{
     assembler::Context,
     operand::{OperandType, OperandValue, op_types},
-    parser::{parse_cond, parse_imm, parse_reg_d, parse_reg_s},
+    parser::{parse_address, parse_cond, parse_imm, parse_reg_d, parse_reg_s},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -100,6 +100,10 @@ impl Instruction {
                 OperandType::Imm(bits, signed) => {
                     let imm = parse_imm(ctx, op)?.as_field(bits, signed)?;
                     parsed_operands.push(imm);
+                }
+                OperandType::Addr => {
+                    let addr = parse_address(ctx, op)?;
+                    parsed_operands.push(addr);
                 }
             }
         }
@@ -207,7 +211,7 @@ impl Instruction {
             match self.itype {
                 InstrType::R => op_types![RegD, RegS, RegS],
                 InstrType::I => op_types![RegD, RegS, Imm(12, i)],
-                InstrType::B => op_types![RegS, RegS, Imm(12, u)],
+                InstrType::B => op_types![RegS, RegS, Addr],
                 InstrType::U => op_types![RegD, Imm(20, u)],
                 InstrType::C => op_types![Imm(24, u)],
             }
@@ -354,8 +358,8 @@ mod tests {
     fn enocde_b() {
         let cmd = instr("beq");
         // Same to I-type, omitting ...
-        assert_snapshot!(cmd("ne", &["r1", "r0", "-1"]), @"Error: Immediate '-1' out of range for u12 (must be >= 0)");
-        assert_snapshot!(cmd("ne", &["r1", "r0", "3456"]), @"1001 001 010 11011 00001 0000000 00000");
+        assert_snapshot!(cmd("ne", &["r1", "r0", "over"]), @"Error: Address out of range for label: 'over' ( = 4096 )");
+        assert_snapshot!(cmd("ne", &["r1", "r0", "loop"]), @"1001 001 010 00000 00001 0000100 00000");
 
         let cmd = instr("sw");
 

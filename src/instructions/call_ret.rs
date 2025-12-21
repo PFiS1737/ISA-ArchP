@@ -12,6 +12,6 @@ instruction! {
     name: "call",
     opcode: 0b_1010_101,
     itype: I,
-    operand_types: [ Imm(12, u) ],
+    operand_types: [ Addr ],
     encode_format: [ None, None, Some ],
 }

@@ -50,6 +50,7 @@ pub enum OperandType {
     RegD,
     RegS,
     Imm(u8, bool),
+    Addr,
 }
 
 pub macro op_types {

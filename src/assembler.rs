@@ -38,7 +38,7 @@ impl<'a> Context<'a> {
         Context {
             settings: AssemblerSettings::default(),
             constants: HashMap::from([("FOO", "42"), ("R1", "r1"), ("R0", "r0")]),
-            labels: BiHashMap::from_iter([("start", 0), ("loop", 4), ("end", 16)]),
+            labels: BiHashMap::from_iter([("start", 0), ("loop", 4), ("end", 16), ("over", 4096)]),
             addr_to_original: Vec::new(),
         }
     }
