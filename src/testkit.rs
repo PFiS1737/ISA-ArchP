@@ -23,6 +23,7 @@ pub fn mc_instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
     let ps_instr = MACRO_INSTRUCTIONS.get(cmd).unwrap();
     |cond, ops| match ps_instr.expand(
         &Context::test(),
+        cmd,
         if cond.is_empty() { None } else { Some(cond) },
         &ops.iter()
             .map(|e| OperandValue::from(*e))

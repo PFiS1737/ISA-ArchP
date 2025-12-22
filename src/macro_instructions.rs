@@ -17,42 +17,37 @@ use crate::{
 };
 
 type ExpandRet<'a> = Option<Vec<Line<'a>>>;
-type ExpandFn = for<'a> fn(
-    &Context<'a>,
-    &MacroInstruction,
-    Option<&'a str>,
-    &[OperandValue<'a>],
-) -> ExpandRet<'a>;
+type ExpandFn =
+    for<'a> fn(&Context<'a>, &'a str, Option<&'a str>, &[OperandValue<'a>]) -> ExpandRet<'a>;
 
-#[derive(Debug, Clone, Copy)]
-pub struct MacroInstruction {
-    name: &'static str,
-    operand_count: Option<usize>,
-    expander: ExpandFn,
+inventory::collect!(&'static dyn MacroInstruction);
 
-    _may_be_name_with_i: &'static str,
-}
+pub static MACRO_INSTRUCTIONS: Lazy<HashMap<&'static str, &'static dyn MacroInstruction>> =
+    Lazy::new(|| {
+        let mut map = HashMap::new();
+        for entry in inventory::iter::<&'static dyn MacroInstruction> {
+            for name in entry.names() {
+                map.insert(*name, *entry);
+            }
+        }
+        map
+    });
 
-inventory::collect!(MacroInstruction);
+pub trait MacroInstruction: Send + Sync {
+    fn names(&self) -> &'static [&'static str];
+    fn operand_count(&self) -> Option<usize>;
+    fn expander(&self) -> ExpandFn;
 
-pub static MACRO_INSTRUCTIONS: Lazy<HashMap<&'static str, MacroInstruction>> = Lazy::new(|| {
-    let mut map = HashMap::new();
-    for entry in inventory::iter::<MacroInstruction> {
-        map.insert(entry.name, *entry);
-    }
-    map
-});
-
-impl MacroInstruction {
-    pub fn expand<'a>(
+    fn expand<'a>(
         &self,
         ctx: &Context<'a>,
+        name: &'a str,
         cond: Option<&'a str>,
         operands: &[OperandValue<'a>],
     ) -> Result<ExpandRet<'a>> {
-        self.assert_operand_count(operands)?;
+        self.assert_operand_count(name, operands)?;
 
-        let mut deq: VecDeque<_> = match (self.expander)(ctx, self, cond, operands) {
+        let mut deq: VecDeque<_> = match (self.expander())(ctx, name, cond, operands) {
             None => return Ok(None),
             Some(v) => v.into(),
         };
@@ -61,9 +56,9 @@ impl MacroInstruction {
 
         while let Some((name, cond, ops)) = deq.pop_front() {
             if let Some(mc) = MACRO_INSTRUCTIONS.get(name) {
-                mc.assert_operand_count(&ops)?;
+                mc.assert_operand_count(name, &ops)?;
 
-                match (mc.expander)(ctx, mc, cond, &ops) {
+                match (mc.expander())(ctx, name, cond, &ops) {
                     None => {
                         ret.push((name, cond, ops));
                     }
@@ -81,13 +76,13 @@ impl MacroInstruction {
         Ok(Some(ret))
     }
 
-    fn assert_operand_count(&self, operands: &[OperandValue]) -> Result<()> {
-        if let Some(count) = self.operand_count
+    fn assert_operand_count(&self, name: &str, operands: &[OperandValue]) -> Result<()> {
+        if let Some(count) = self.operand_count()
             && operands.len() != count
         {
             bail!(
                 "Macro-instruction '{}' requires {} operands, got {}",
-                self.name,
+                name,
                 count,
                 operands.len()
             );
@@ -97,48 +92,103 @@ impl MacroInstruction {
     }
 }
 
+macro impl_macro_instruction {
+    (
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $names:tt,
+            operand_count: $count:ident $( ($value:literal) )? ,
+            expander: $expander:expr,
+        }
+    ) => {
+        $( #[doc = $doc] )*
+        $vis struct $id;
+
+        impl $crate::macro_instructions::MacroInstruction for $id {
+            fn names(&self) -> &'static [&'static str] {
+                &$names
+            }
+            fn operand_count(&self) -> Option<usize> {
+                $count $( ( $value ) )?
+            }
+            fn expander(&self) -> $crate::macro_instructions::ExpandFn {
+                $expander
+            }
+        }
+
+        inventory::submit! {
+            &$id as &'static dyn $crate::macro_instructions::MacroInstruction
+        }
+    },
+}
+
 macro macro_instruction {
     (
-        name: [ $($name:literal),+ $(,)? ],
-        operand_count: $count:literal,
-        expander: $expander:expr,
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $names:literal,
+            operand_count: $count:literal,
+            expander: $expander:expr,
+        }
     ) => {
-        $(
-            $crate::macro_instructions::macro_instruction! {
-                name: $name,
-                operand_count: $count,
-                expander: $expander,
-            }
-        )+
-    },
-
-    (
-        name: $name:literal,
-        operand_count: $count:literal,
-        expander: $expander:expr,
-    ) => {
-        inventory::submit! {
-            $crate::macro_instructions::MacroInstruction {
-                name: $name,
+        $crate::macro_instructions::impl_macro_instruction! {
+            $( #[doc = $doc] )*
+            $vis $id {
+                name: [ $names ],
                 operand_count: Some($count),
                 expander: $expander,
-
-                _may_be_name_with_i: concat!($name, "i"),
             }
         }
     },
 
     (
-        name: $name:literal,
-        expander: $expander:expr,
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $names:literal,
+            expander: $expander:expr,
+        }
     ) => {
-        inventory::submit! {
-            $crate::macro_instructions::MacroInstruction {
-                name: $name,
+        $crate::macro_instructions::impl_macro_instruction! {
+            $( #[doc = $doc] )*
+            $vis $id {
+                name: [ $names ],
                 operand_count: None,
                 expander: $expander,
+            }
+        }
+    },
 
-                _may_be_name_with_i: concat!($name, "i"),
+    (
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $names:tt,
+            operand_count: $count:literal,
+            expander: $expander:expr,
+        }
+    ) => {
+        $crate::macro_instructions::impl_macro_instruction! {
+            $( #[doc = $doc] )*
+            $vis $id {
+                name: $names,
+                operand_count: Some($count),
+                expander: $expander,
+            }
+        }
+    },
+
+    (
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $names:tt,
+            expander: $expander:expr,
+        }
+    ) => {
+        $crate::macro_instructions::impl_macro_instruction! {
+            $( #[doc = $doc] )*
+            $vis $id {
+                name: $names,
+                operand_count: None,
+                expander: $expander,
             }
         }
     },

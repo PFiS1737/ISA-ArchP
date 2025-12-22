@@ -5,9 +5,11 @@ use crate::{
 };
 
 macro_instruction! {
-    name: "li",
-    operand_count: 2,
-    expander: F,
+    pub LoadImm32 {
+        name: "li",
+        operand_count: 2,
+        expander: F,
+    }
 }
 
 pub const F: ExpandFn = |ctx, _, cond, ops| {
@@ -45,7 +47,7 @@ mod tests {
     use crate::testkit::*;
 
     #[test]
-    fn li_imm32() {
+    fn load_imm32() {
         let li = mc_instr("li");
 
         assert_snapshot!(li("", &["r1"]), @"Error: Macro-instruction 'li' requires 2 operands, got 1");

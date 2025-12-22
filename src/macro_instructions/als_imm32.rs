@@ -5,17 +5,19 @@ use crate::{
 };
 
 macro_instruction! {
-    name: [
-        "addi", "subi", "muli", "modi", "divi",
-        "andi", "nandi", "ori", "nori", "xori", "xnori",
-        "shli", "shri", "roli", "rori", "ashri",
-    ],
-    operand_count: 3,
-    expander: F,
+    pub AlsImm32 {
+        name: [
+            "addi", "subi", "muli", "modi", "divi",
+            "andi", "nandi", "ori", "nori", "xori", "xnori",
+            "shli", "shri", "roli", "rori", "ashri",
+        ],
+        operand_count: 3,
+        expander: F,
+    }
 }
 
-const F: ExpandFn = |ctx, this, cond, ops| {
-    let inst = &this.name[..this.name.len() - 1]; // remove the trailing 'i'
+const F: ExpandFn = |ctx, name, cond, ops| {
+    let inst = &name[..name.len() - 1]; // remove the trailing 'i'
 
     if let Ok(imm) = parse_imm(ctx, &ops[2])
         && imm.as_i12().is_err()

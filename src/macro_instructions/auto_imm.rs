@@ -5,17 +5,37 @@ use crate::{
 };
 
 macro_instruction! {
-    name: [
-        "add", "sub", "mul", "mod", "div",
-        "and", "nand", "or", "nor", "xor", "xnor",
-        "shl", "shr", "rol", "ror", "ashr",
-    ],
-    operand_count: 3,
-    expander: F1,
+    pub AutoImmAls {
+        name: [
+            "add", "sub", "mul", "mod", "div",
+            "and", "nand", "or", "nor", "xor", "xnor",
+            "shl", "shr", "rol", "ror", "ashr",
+        ],
+        operand_count: 3,
+        expander: F1,
+    }
 }
 
-const F1: ExpandFn = |ctx, this, cond, ops| {
-    let inst = this._may_be_name_with_i;
+const F1: ExpandFn = |ctx, name, cond, ops| {
+    let inst = match name {
+        "add" => "addi",
+        "sub" => "subi",
+        "mul" => "muli",
+        "mod" => "modi",
+        "div" => "divi",
+        "and" => "andi",
+        "nand" => "nandi",
+        "or" => "ori",
+        "nor" => "nori",
+        "xor" => "xori",
+        "xnor" => "xnori",
+        "shl" => "shli",
+        "shr" => "shri",
+        "rol" => "roli",
+        "ror" => "rori",
+        "ashr" => "ashri",
+        _ => unreachable!(),
+    };
 
     if let Ok(imm) = parse_imm(ctx, &ops[2]).and_then(|imm| imm.as_i32()) {
         Some(vec![(inst, cond, op_values![ops[0], ops[1], imm])])
@@ -25,29 +45,39 @@ const F1: ExpandFn = |ctx, this, cond, ops| {
 };
 
 macro_instruction! {
-    name: "cmp",
-    operand_count: 2,
-    expander: F2,
+    pub AutoImmCmp {
+        name: "cmp",
+        operand_count: 2,
+        expander: F2,
+    }
 }
 
-const F2: ExpandFn = |ctx, this, cond, ops| {
-    let inst = this._may_be_name_with_i;
-
+const F2: ExpandFn = |ctx, _, cond, ops| {
     if let Ok(imm) = parse_imm(ctx, &ops[1]).and_then(|imm| imm.as_i32()) {
-        Some(vec![(inst, cond, op_values![ops[0], imm])])
+        Some(vec![("cmpi", cond, op_values![ops[0], imm])])
     } else {
         None
     }
 };
 
 macro_instruction! {
-    name: [ "beq", "bne", "blt", "ble", "bgt", "bge" ],
-    operand_count: 3,
-    expander: F3,
+    pub AutoImmBranch {
+        name: [ "beq", "bne", "blt", "ble", "bgt", "bge" ],
+        operand_count: 3,
+        expander: F3,
+    }
 }
 
-const F3: ExpandFn = |ctx, this, cond, ops| {
-    let inst = this._may_be_name_with_i;
+const F3: ExpandFn = |ctx, name, cond, ops| {
+    let inst = match name {
+        "beq" => "beqi",
+        "bne" => "bnei",
+        "blt" => "blti",
+        "ble" => "blei",
+        "bgt" => "bgti",
+        "bge" => "bgei",
+        _ => unreachable!(),
+    };
 
     if let Ok(imm) = parse_imm(ctx, &ops[1]).and_then(|imm| imm.as_i32()) {
         Some(vec![(inst, cond, op_values![ops[0], imm, ops[2]])])
@@ -57,16 +87,16 @@ const F3: ExpandFn = |ctx, this, cond, ops| {
 };
 
 macro_instruction! {
-    name: "push",
-    operand_count: 1,
-    expander: F4,
+    pub AutoImmPush {
+        name: "push",
+        operand_count: 1,
+        expander: F4,
+    }
 }
 
-const F4: ExpandFn = |ctx, this, cond, ops| {
-    let inst = this._may_be_name_with_i;
-
+const F4: ExpandFn = |ctx, _, cond, ops| {
     if let Ok(imm) = parse_imm(ctx, &ops[0]).and_then(|imm| imm.as_i32()) {
-        Some(vec![(inst, cond, op_values![imm])])
+        Some(vec![("pushi", cond, op_values![imm])])
     } else {
         None
     }

@@ -6,10 +6,12 @@ use crate::{
 // INFO: We only do replacement here, the validity of the operands will
 //       be checked during encoding.
 
-// lw rd imm(rs)  =>  lw rd rs imm12  (base=rs, offset=imm12)
 macro_instruction! {
-    name: "lw",
-    expander: F1,
+    /// lw rd imm(rs)  =>  lw rd rs imm12  (base=rs, offset=imm12)
+    pub RiscvLw {
+        name: "lw",
+        expander: F1,
+    }
 }
 
 const F1: ExpandFn = |_, _, cond, ops| {
@@ -22,10 +24,12 @@ const F1: ExpandFn = |_, _, cond, ops| {
     Some(vec![("lw", cond, op_values!(ops[0], base, imm))])
 };
 
-// sw rs2 imm(rs1)  =>  sw rs1 rs2 imm12  (base=rs1, offset=imm12)
 macro_instruction! {
-    name: "sw",
-    expander: F2,
+    /// sw rs2 imm(rs1)  =>  sw rs1 rs2 imm12  (base=rs1, offset=imm12)
+    pub RiscvSw {
+        name: "sw",
+        expander: F2,
+    }
 }
 
 const F2: ExpandFn = |_, _, cond, ops| {

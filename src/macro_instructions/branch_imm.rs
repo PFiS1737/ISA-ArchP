@@ -5,13 +5,15 @@ use crate::{
 };
 
 macro_instruction! {
-    name: [ "beqi", "bnei", "blti", "blei", "bgti", "bgei" ],
-    operand_count: 3,
-    expander: F,
+    pub BranchImm {
+        name: [ "beqi", "bnei", "blti", "blei", "bgti", "bgei" ],
+        operand_count: 3,
+        expander: F,
+    }
 }
 
-const F: ExpandFn = |ctx, this, cond, ops| {
-    let inst = &this.name[..3]; // remove the trailing 'i'
+const F: ExpandFn = |ctx, name, cond, ops| {
+    let inst = &name[..3]; // remove the trailing 'i'
 
     let Ok(imm) = parse_imm(ctx, &ops[1]).and_then(|imm| imm.as_i32()) else {
         return None;

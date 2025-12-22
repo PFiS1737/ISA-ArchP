@@ -5,13 +5,15 @@ use crate::{
 };
 
 macro_instruction! {
-    name: "pushi",
-    operand_count: 1,
-    expander: F,
+    pub PushImm32 {
+        name: "pushi",
+        operand_count: 1,
+        expander: F,
+    }
 }
 
-const F: ExpandFn = |ctx, this, cond, ops| {
-    let inst = &this.name[..4]; // remove the trailing 'i'
+const F: ExpandFn = |ctx, name, cond, ops| {
+    let inst = &name[..4]; // remove the trailing 'i'
 
     if let Ok(imm) = parse_imm(ctx, &ops[0])
         && imm.as_i12().is_err()
