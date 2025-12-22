@@ -7,7 +7,7 @@ pub fn parse_address(ctx: &Context, op: &OperandValue) -> Result<u32> {
         OperandValue::StringSlice(s) => {
             let label = ctx.constants.get(s).unwrap_or(s);
             if let Some(&addr) = ctx.labels.get_by_left(label) {
-                if addr < 0b111111111111 {
+                if addr < (1 << 12) {
                     Ok(addr as u32)
                 } else {
                     bail!("Address out of range for label: '{}' ( = {} )", label, addr)
@@ -39,7 +39,7 @@ mod tests {
         let f = test(super::parse_address);
         assert_snapshot!(f("start"), @"0");
         assert_snapshot!(f("loop"), @"4");
-        assert_snapshot!(f("end"), @"16");
+        assert_snapshot!(f("end"), @"4095");
         assert_snapshot!(f("over"), @"Error: Address out of range for label: 'over' ( = 4096 )");
         assert_snapshot!(f("123"), @"Error: Undefined label: 123");
     }
