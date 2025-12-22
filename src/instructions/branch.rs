@@ -1,45 +1,59 @@
 use crate::instructions::instruction;
 
 instruction! {
-    name: "jmp",
-    opcode: 0b_1001_000,
-    itype: B,
-    operand_types: [ Addr ],
-    encode_format: [ None, None, Some ],
+    pub Jmp {
+        name: "jmp",
+        opcode: 0b_1001_000,
+        itype: B,
+        operand_types: [ Addr ],
+        encode_format: [ None, None, Some ],
+    }
 }
 
 instruction! {
-    name: "beq",
-    opcode: 0b_1001_001,
-    itype: B,
+    pub Beq {
+        name: "beq",
+        opcode: 0b_1001_001,
+        itype: B,
+    }
 }
 
 instruction! {
-    name: "bne",
-    opcode: 0b_1001_010,
-    itype: B,
+    pub Bne {
+        name: "bne",
+        opcode: 0b_1001_010,
+        itype: B,
+    }
 }
 
 instruction! {
-    name: "blt",
-    opcode: 0b_1001_011,
-    itype: B,
+    pub Blt {
+        name: "blt",
+        opcode: 0b_1001_011,
+        itype: B,
+    }
 }
 
 instruction! {
-    name: "ble",
-    opcode: 0b_1001_100,
-    itype: B,
+    pub Ble {
+        name: "ble",
+        opcode: 0b_1001_100,
+        itype: B,
+    }
 }
 
 instruction! {
-    name: "bgt",
-    opcode: 0b_1001_101,
-    itype: B,
+    pub Bgt {
+        name: "bgt",
+        opcode: 0b_1001_101,
+        itype: B,
+    }
 }
 
 instruction! {
-    name: "bge",
-    opcode: 0b_1001_110,
-    itype: B,
+    pub Bge {
+        name: "bge",
+        opcode: 0b_1001_110,
+        itype: B,
+    }
 }

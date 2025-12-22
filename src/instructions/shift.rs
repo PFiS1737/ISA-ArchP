@@ -1,66 +1,86 @@
 use crate::instructions::instruction;
 
 instruction! {
-    name: "shl",
-    opcode: 0b_0010_000,
-    itype: R,
+    pub Shl {
+        name: "shl",
+        opcode: 0b_0010_000,
+        itype: R,
+    }
 }
 
 instruction! {
-    name: "shr",
-    opcode: 0b_0010_001,
-    itype: R,
+    pub Shr {
+        name: "shr",
+        opcode: 0b_0010_001,
+        itype: R,
+    }
 }
 
 instruction! {
-    name: "rol",
-    opcode: 0b_0010_010,
-    itype: R,
+    pub Rol {
+        name: "rol",
+        opcode: 0b_0010_010,
+        itype: R,
+    }
 }
 
 instruction! {
-    name: "ror",
-    opcode: 0b_0010_011,
-    itype: R,
+    pub Ror {
+        name: "ror",
+        opcode: 0b_0010_011,
+        itype: R,
+    }
 }
 
 instruction! {
-    name: "ashr",
-    opcode: 0b_0010_100,
-    itype: R,
+    pub Ashr {
+        name: "ashr",
+        opcode: 0b_0010_100,
+        itype: R,
+    }
 }
 
 instruction! {
-    name: "shli",
-    opcode: 0b_0110_000,
-    itype: I,
-    operand_types: [ RegD, RegS, Imm(5, u) ],
+    pub Shli {
+        name: "shli",
+        opcode: 0b_0110_000,
+        itype: I,
+        operand_types: [ RegD, RegS, Imm(5, u) ],
+    }
 }
 
 instruction! {
-    name: "shri",
-    opcode: 0b_0110_001,
-    itype: I,
-    operand_types: [ RegD, RegS, Imm(5, u) ],
+    pub Shri {
+        name: "shri",
+        opcode: 0b_0110_001,
+        itype: I,
+        operand_types: [ RegD, RegS, Imm(5, u) ],
+    }
 }
 
 instruction! {
-    name: "roli",
-    opcode: 0b_0110_010,
-    itype: I,
-    operand_types: [ RegD, RegS, Imm(5, u) ],
+    pub Roli {
+        name: "roli",
+        opcode: 0b_0110_010,
+        itype: I,
+        operand_types: [ RegD, RegS, Imm(5, u) ],
+    }
 }
 
 instruction! {
-    name: "rori",
-    opcode: 0b_0110_011,
-    itype: I,
-    operand_types: [ RegD, RegS, Imm(5, u) ],
+    pub Rori {
+        name: "rori",
+        opcode: 0b_0110_011,
+        itype: I,
+        operand_types: [ RegD, RegS, Imm(5, u) ],
+    }
 }
 
 instruction! {
-    name: "ashri",
-    opcode: 0b_0110_100,
-    itype: I,
-    operand_types: [ RegD, RegS, Imm(5, u) ],
+    pub Ashri {
+        name: "ashri",
+        opcode: 0b_0110_100,
+        itype: I,
+        operand_types: [ RegD, RegS, Imm(5, u) ],
+    }
 }

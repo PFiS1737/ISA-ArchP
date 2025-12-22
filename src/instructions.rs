@@ -20,7 +20,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-enum InstrType {
+pub enum InstrType {
     R,
     I,
     B,
@@ -29,50 +29,42 @@ enum InstrType {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-enum FormatPlaceholder {
+pub enum FormatPlaceholder {
     None,
     Some,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct Instruction {
-    name: &'static str,
-    opcode: u32,
-    itype: InstrType,
-    operand_types: Option<&'static [OperandType]>,
-    encode_format: Option<[FormatPlaceholder; 3]>,
-}
+inventory::collect!(&'static dyn Instruction);
 
-inventory::collect!(Instruction);
-
-pub static INSTRUCTIONS: Lazy<HashMap<&'static str, Instruction>> = Lazy::new(|| {
+pub static INSTRUCTIONS: Lazy<HashMap<&'static str, &'static dyn Instruction>> = Lazy::new(|| {
     let mut map = HashMap::new();
-    for entry in inventory::iter::<Instruction> {
-        map.insert(entry.name, *entry);
+    for entry in inventory::iter::<&'static dyn Instruction> {
+        map.insert(entry.name(), *entry);
     }
     map
 });
 
-impl Instruction {
-    pub fn encode(
-        &self,
-        ctx: &Context,
-        cond: Option<&str>,
-        operands: &[OperandValue],
-    ) -> Result<u32> {
+pub trait Instruction: Send + Sync {
+    fn name(&self) -> &'static str;
+    fn opcode(&self) -> u32;
+    fn itype(&self) -> InstrType;
+    fn operand_types(&self) -> Option<&'static [OperandType]>;
+    fn encode_format(&self) -> Option<[FormatPlaceholder; 3]>;
+
+    fn encode(&self, ctx: &Context, cond: Option<&str>, operands: &[OperandValue]) -> Result<u32> {
         let cond = cond.map(parse_cond).transpose()?.unwrap_or(0);
 
-        if matches!(self.itype, InstrType::U | InstrType::C) && cond != 0 {
+        if matches!(self.itype(), InstrType::U | InstrType::C) && cond != 0 {
             bail!(
                 "Condition is not allowed for {}-type instruction '{}'",
-                self.itype,
-                self.name
+                self.itype(),
+                self.name()
             );
         }
 
         let operands = self.parse(ctx, operands)?;
 
-        match self.itype {
+        match self.itype() {
             InstrType::R => self.encode_r(cond, &operands),
             InstrType::I => self.encode_i(cond, &operands),
             InstrType::B => self.encode_b(cond, &operands),
@@ -108,11 +100,11 @@ impl Instruction {
             }
         }
 
-        if let Some(format) = self.encode_format {
-            if !matches!(self.itype, InstrType::R | InstrType::I | InstrType::B) {
+        if let Some(format) = self.encode_format() {
+            if !matches!(self.itype(), InstrType::R | InstrType::I | InstrType::B) {
                 panic!(
                     "Internal Error: 'encode_format' is only supported for R/I/B-type instructions, foundinstruction '{}'",
-                    self.name
+                    self.name()
                 );
             }
 
@@ -144,7 +136,7 @@ impl Instruction {
         let rs1 = operands[1];
         let rs2 = operands[2];
 
-        code!(self.opcode, cond, rd, rs1, rs2)
+        code!(self.opcode(), cond, rd, rs1, rs2)
     }
 
     // xxxx xxx   xxx   xxxxx   xxxxx   xxxxxxxxxxxx
@@ -154,7 +146,7 @@ impl Instruction {
         let rs1 = operands[1];
         let imm12 = operands[2];
 
-        code!(self.opcode, cond, rd, rs1, imm12)
+        code!(self.opcode(), cond, rd, rs1, imm12)
     }
 
     // 1001 xxx   xxx   xxxxx   xxxxx   xxxxxxx   xxxxx
@@ -165,7 +157,7 @@ impl Instruction {
         let offset12 = operands[2];
 
         code!(
-            self.opcode,
+            self.opcode(),
             cond,
             (offset12 >> 7),
             rs1,
@@ -180,7 +172,7 @@ impl Instruction {
         let rd = operands[0];
         let imm20 = operands[1];
 
-        code!(self.opcode, (imm20 >> 17), rd, (imm20 & 0x1FFFF))
+        code!(self.opcode(), (imm20 >> 17), rd, (imm20 & 0x1FFFF))
     }
 
     // 1101 000   0   xxxxxxxx xxxxxxxx xxxxxxxx
@@ -188,14 +180,14 @@ impl Instruction {
     fn encode_c(&self, _: u32, operands: &[u32]) -> Result<u32> {
         let color24 = operands[0];
 
-        code!(self.opcode, 0, 0, color24)
+        code!(self.opcode(), 0, 0, color24)
     }
 
     fn assert_operand_count(&self, count: usize, expected: usize) -> Result<()> {
         if count != expected {
             bail!(
                 "Instruction '{}' requires {} operands, got {}",
-                self.name,
+                self.name(),
                 expected,
                 count
             );
@@ -205,10 +197,10 @@ impl Instruction {
     }
 
     fn get_operand_types(&self) -> &'static [OperandType] {
-        if let Some(ops) = self.operand_types {
+        if let Some(ops) = self.operand_types() {
             ops
         } else {
-            match self.itype {
+            match self.itype() {
                 InstrType::R => op_types![RegD, RegS, RegS],
                 InstrType::I => op_types![RegD, RegS, Imm(12, i)],
                 InstrType::B => op_types![RegS, RegS, Addr],
@@ -236,17 +228,59 @@ macro code {
     },
 }
 
+macro impl_instruction {
+    (
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $name:literal,
+            opcode: $opcode:literal,
+            itype: $itype:ident,
+            operand_types: $types:ident $( ($type_values:tt) )? ,
+            encode_format: $format:ident $( ($format_values:tt) )? ,
+        }
+    ) => {
+        $( #[doc = $doc] )*
+        $vis struct $id;
+
+        impl $crate::instructions::Instruction for $id {
+            fn name(&self) -> &'static str {
+                $name
+            }
+            fn opcode(&self) -> u32 {
+                $opcode
+            }
+            fn itype(&self) -> $crate::instructions::InstrType {
+                $crate::instructions::InstrType::$itype
+            }
+            fn operand_types(&self) -> Option<&'static [ $crate::operand::OperandType ]> {
+                $types $( ( $crate::operand::op_types! $type_values ) )?
+            }
+            fn encode_format(&self) -> Option<[ $crate::instructions::FormatPlaceholder; 3 ]> {
+                $format $( ($format_values) )?
+            }
+        }
+
+        inventory::submit! {
+            &$id as &'static dyn $crate::instructions::Instruction
+        }
+    },
+}
+
 macro instruction {
     (
-        name: $name:literal,
-        opcode: $opcode:literal,
-        itype: $itype:ident,
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $name:literal,
+            opcode: $opcode:literal,
+            itype: $itype:ident,
+        }
     ) => {
-        inventory::submit! {
-            $crate::instructions::Instruction {
+        $crate::instructions::impl_instruction!{
+            $( #[doc = $doc] )*
+            $vis $id {
                 name: $name,
                 opcode: $opcode,
-                itype: $crate::instructions::InstrType::$itype,
+                itype: $itype,
                 operand_types: None,
                 encode_format: None,
             }
@@ -254,39 +288,47 @@ macro instruction {
     },
 
     (
-        name: $name:literal,
-        opcode: $opcode:literal,
-        itype: $itype:ident,
-        operand_types: $types:tt,
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $name:literal,
+            opcode: $opcode:literal,
+            itype: $itype:ident,
+            operand_types: $types:tt,
+        }
     ) => {
-        inventory::submit! {
-            $crate::instructions::Instruction {
+        $crate::instructions::impl_instruction!{
+            $( #[doc = $doc] )*
+            $vis $id {
                 name: $name,
                 opcode: $opcode,
-                itype: $crate::instructions::InstrType::$itype,
-                operand_types: Some($crate::operand::op_types! $types),
+                itype: $itype,
+                operand_types: Some($types),
                 encode_format: None,
             }
         }
     },
 
     (
-        name: $name:literal,
-        opcode: $opcode:literal,
-        itype: $itype:ident,
-        operand_types: $types:tt,
-        encode_format: [ $rd:ident, $rs1:ident, $rs2:ident ],
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $name:literal,
+            opcode: $opcode:literal,
+            itype: $itype:ident,
+            operand_types: $types:tt,
+            encode_format: [ $rd:ident, $rs1:ident, $rs2:ident ],
+        }
     ) => {
-        inventory::submit! {
-            $crate::instructions::Instruction {
+        $crate::instructions::impl_instruction!{
+            $( #[doc = $doc] )*
+            $vis $id {
                 name: $name,
                 opcode: $opcode,
-                itype: $crate::instructions::InstrType::$itype,
-                operand_types: Some($crate::operand::op_types! $types),
-                encode_format: Some([
+                itype: $itype,
+                operand_types: Some($types),
+                encode_format:  Some([
                     $crate::instructions::FormatPlaceholder::$rd,
                     $crate::instructions::FormatPlaceholder::$rs1,
-                    $crate::instructions::FormatPlaceholder::$rs2
+                    $crate::instructions::FormatPlaceholder::$rs2,
                 ]),
             }
         }
