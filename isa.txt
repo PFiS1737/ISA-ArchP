@@ -117,10 +117,8 @@ B-type (branch)
 I-type (stack)
 --------------
 
-1010 000 peek  rd ___ _____
-1010 001 pop   rd ___ _____
-1010 010 push  __ rs1 _____
-1010 011 pushi __ ___ imm12
+1010 000 pop   rd ___ _____
+1010 001 push  __ rs1 _____
 
 I-type (call/ret)
 -----------------

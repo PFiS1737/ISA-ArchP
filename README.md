@@ -96,10 +96,6 @@ In this section:
 
 - `push[.cond] rs1`: push the value of `rs1` onto the stack.
 - `pop[.cond] rd`: pop the top value from the stack into `rd`.
-- `peek[.cond] rd`: read the top value of the stack into `rd` without removing it.
-- `pushi[.cond] imm12`: push the immediate value `imm12` onto the stack.
-- macros:
-  - The `push` and `pushi` instructions similarly support the automatic immediate and 32-bit immediate macros (see [Arithmetic](#arithmetic)).
 
 #### Call and Return
 

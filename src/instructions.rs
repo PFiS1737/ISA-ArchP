@@ -1,12 +1,11 @@
 mod arithmetic;
 mod branch;
-mod call_ret;
 mod compare;
 mod display;
 mod load_store;
 mod logic;
 mod shift;
-mod stack;
+mod stack_call_ret;
 
 use std::{collections::HashMap, fmt::Display};
 

@@ -3,7 +3,6 @@ mod auto_imm;
 mod branch_imm;
 mod cmp_imm32;
 mod load_imm32;
-mod push_imm32;
 mod riscv_lsw;
 
 use std::collections::{HashMap, VecDeque};

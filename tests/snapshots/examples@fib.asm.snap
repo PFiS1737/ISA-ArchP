@@ -12,25 +12,25 @@ exit_code: 0
 0x70001002 # cmpi s0 2
 0x858A0001 # li.le rt 1
 0xA9800000 # ret.le
-0xA4001000 # push s0
-0xA4002000 # push s1
-0xA4003000 # push s2
+0xA2001000 # push s0
+0xA2002000 # push s1
+0xA2003000 # push s2
 0x42021001 # subi s0 s0 1  [sub s0 s0 1]
 0x40081000 # addi a0 s0 0  [mv a0 s0]
 0xAA000003 # call fib
-0xA2060000 # pop s2
-0xA2040000 # pop s1
-0xA2020000 # pop s0
+0xA0060000 # pop s2
+0xA0040000 # pop s1
+0xA0020000 # pop s0
 0x40045000 # addi s1 rt 0  [mv s1 rt]
-0xA4001000 # push s0
-0xA4002000 # push s1
-0xA4003000 # push s2
+0xA2001000 # push s0
+0xA2002000 # push s1
+0xA2003000 # push s2
 0x42021002 # subi s0 s0 2  [sub s0 s0 2]
 0x40081000 # addi a0 s0 0  [mv a0 s0]
 0xAA000003 # call fib
-0xA2060000 # pop s2
-0xA2040000 # pop s1
-0xA2020000 # pop s0
+0xA0060000 # pop s2
+0xA0040000 # pop s1
+0xA0020000 # pop s0
 0x40065000 # addi s2 rt 0  [mv s2 rt]
 0x000A2003 # add rt s1 s2
 0xA8000000 # ret
