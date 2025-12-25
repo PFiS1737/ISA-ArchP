@@ -123,8 +123,9 @@ I-type (stack)
 I-type (call/ret)
 -----------------
 
-1010 100 ret  __ ___ ____________
-1010 101 call __ ___ addr12=imm12
+1010 100 ret   __ ___ ____________
+1010 101 call  __ ___ addr12=imm12
+1010 110 callr __ rs1 ____________
 
 C-type (set pixel color)
 ------------------

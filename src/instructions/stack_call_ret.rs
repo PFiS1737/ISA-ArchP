@@ -38,3 +38,13 @@ instruction! {
         encode_format: [ None, None, Some ],
     }
 }
+
+instruction! {
+    pub Callr {
+        name: "callr",
+        opcode: 0b_1010_110,
+        itype: I,
+        operand_types: [ RegS ],
+        encode_format: [ None, Some, None ],
+    }
+}

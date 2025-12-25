@@ -91,6 +91,8 @@ In this section:
   - If the `rs2` operand is a numeric literal, it will be automatically expanded to use a temporary register.
   - A 32-bit immediate literal is also supported.
   - e.g. `beq r1 0x1234 10` => `lui tmp 0x1; addi tmp tmp 0x234; beq r1 tmp 10`
+- note:
+  - You can not write `imm12u` directly as a numeric literal, you must use a label.
 
 #### Stack Operations
 
@@ -99,9 +101,12 @@ In this section:
 
 #### Call and Return
 
-- `call[.cond] imm12u`: call a subroutine at the instruction offset `imm12u`.
+- `call[.cond] imm12u`: call a subroutine at the address `imm12u` (absolute address in number of instructions).
+- `callr[.cond] rs1`: call a subroutine at the address contained in `rs1` (low 16-bit is valid).
 - `ret[.cond]`: return from the current subroutine.
-- note: The return address is automatically managed by the hardware stack.
+- note:
+  - The return address is automatically managed by the hardware stack.
+  - You can not write `imm12u` directly as a numeric literal, you must use a label.
 
 #### Display (only in sandbox mode)
 
