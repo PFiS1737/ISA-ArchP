@@ -81,6 +81,13 @@ In this section:
   - When using `lw` or `sw`, it allows you to use a RISCV-style offset syntax.
   - e.g. `lw r1 4(r2)` => `lw r1 r2 4`
 
+> [!IMPORTANT]
+> The unit of `imm12` in `lw` and `sw` is words (32-bit), not bytes.
+
+> [!NOTE]
+> If you are simulating the hardware stack using a stack pointer register (e.g. `const sp r10`),  
+> remember to initialize it to point to the top of the stack memory region. (e.g. `li sp 4096`)  
+> Example: [fib.asm](./examples/fib.asm)
 
 #### Branching
 

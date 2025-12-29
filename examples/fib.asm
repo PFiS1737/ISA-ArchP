@@ -3,44 +3,35 @@ const s1 r2
 const s2 r3
 
 const a0 r4
-const rt r5
+const ra r5
+
+const sp r6
+
+li sp 4096
 
 main:
-  li a0 10
-  call fib
-  mv io rt
+    li a0 10
+    jal ra fib
+    mv io a0
 
 fib:
-  mv s0 a0
-
-  cmpi s0 2
-  li.le rt 1
-  ret.le
-
-  # fib(n - 1)
-  push s0
-  push s1
-  push s2
-  sub s0 s0 1
-  mv a0 s0
-  call fib
-  pop s2
-  pop s1
-  pop s0
-  mv s1 rt
-
-  # fib(n - 2)
-  push s0
-  push s1
-  push s2
-  sub s0 s0 2
-  mv a0 s0
-  call fib
-  pop s2
-  pop s1
-  pop s0
-  mv s2 rt
-
-  add rt s1 s2
-
-  ret
+    bgt a0 2 .L8
+    li a0 1
+    jmpr ra
+.L8:
+    sub sp sp 3
+    sw ra 2(sp)
+    sw s0 1(sp)
+    sw s1 0(sp)
+    mv s0 a0
+    add a0 a0 -1
+    jal ra fib
+    mv s1 a0
+    add a0 s0 -2
+    jal ra fib
+    add a0 s1 a0
+    lw ra 2(sp)
+    lw s0 1(sp)
+    lw s1 0(sp)
+    add sp sp 3
+    jmpr ra
