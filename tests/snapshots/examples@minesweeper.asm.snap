@@ -5,7 +5,7 @@ input_file: examples/minesweeper.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x900609C0 # jmp main
+0x900001CE # jal r0 main                      [jmp main]
 0x84020000 # li x 0                           [clr x]                                  <label: init_screen>
 0x84040000 # li y 0                           [clr y]
 0xD0181A1B # col COLOR_BACK
@@ -111,13 +111,13 @@ exit_code: 0
 0x9800BA7F # ble ty tmp dy_loop               [ble ty 1 dy_loop]
 0xA8000000 # ret
 0x7000F046 # cmpi key_code 70                 [cmp key_code KEY_UP]                    <label: move_cursor>
-0x90400E40 # jmp.eq handle_cursor_move
+0x90400072 # jal.eq r0 handle_cursor_move     [jmp.eq handle_cursor_move]
 0x7000F048 # cmpi key_code 72                 [cmp key_code KEY_DOWN]
-0x90400E40 # jmp.eq handle_cursor_move
+0x90400072 # jal.eq r0 handle_cursor_move     [jmp.eq handle_cursor_move]
 0x7000F045 # cmpi key_code 69                 [cmp key_code KEY_LEFT]
-0x90400E40 # jmp.eq handle_cursor_move
+0x90400072 # jal.eq r0 handle_cursor_move     [jmp.eq handle_cursor_move]
 0x7000F047 # cmpi key_code 71                 [cmp key_code KEY_RIGHT]
-0x90400E40 # jmp.eq handle_cursor_move
+0x90400072 # jal.eq r0 handle_cursor_move     [jmp.eq handle_cursor_move]
 0xA8000000 # ret
 0xD022262E # col COLOR_GRID_LINE                                                       <label: handle_cursor_move>
 0xAA000087 # call update_cursor
@@ -477,8 +477,8 @@ exit_code: 0
 0x7000F038 # cmpi key_code 56                 [cmp key_code KEY_FLAG]
 0xAA4000EE # call.eq toggle_flag
 0xD4000012 # seg mine_num
-0x90060A20 # jmp main_loop
-0x90060B20 # jmp win_loop                                                              <label: win_loop>
+0x900001D1 # jal r0 main_loop                 [jmp main_loop]
+0x900001D9 # jal r0 win_loop                  [jmp win_loop]                           <label: win_loop>
 0x40207000 # addi arg_x cursor_x 0            [mv arg_x cursor_x]                      <label: lose_loop>
 0x40228000 # addi arg_y cursor_y 0            [mv arg_y cursor_y]
 0xD0EE6666 # col COLOR_MINE_BACK
@@ -489,7 +489,7 @@ exit_code: 0
 0x84180000 # li nx 0                          [clr nx]                                 <label: lose_row_loop>
 0x9406CCA7 # bne nx cursor_x lose_loop_cont                                            <label: lose_col_loop>
 0x9406DCA8 # bne ny cursor_y lose_loop_cont
-0x90060DC0 # jmp skip_draw
+0x900001EE # jal r0 skip_draw                 [jmp skip_draw]
 0x800A9000 # lw t1 addr 0                     [lw t1 addr]                             <label: lose_loop_cont>
 0x500C5008 # andi t2 t1 8                     [and t2 t1 MINE_MASK]
 0x70006000 # cmpi t2 0                        [cmp t2 0]
@@ -506,5 +506,5 @@ exit_code: 0
 0x401AD001 # addi ny ny 1                     [inc ny]
 0x843E0008 # li tmp 8                         [blt ny GRID_ROWS lose_row_loop]
 0x9606DC3F # blt ny tmp lose_row_loop         [blt ny GRID_ROWS lose_row_loop]
-0x90060EA0 # jmp halt                                                                  <label: halt>
+0x900001F5 # jal r0 halt                      [jmp halt]                               <label: halt>
 ----- stderr -----

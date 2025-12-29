@@ -81,9 +81,10 @@ In this section:
   - When using `lw` or `sw`, it allows you to use a RISCV-style offset syntax.
   - e.g. `lw r1 4(r2)` => `lw r1 r2 4`
 
-#### Branching and Jumping
 
-- instructions: `jmp`, `beq`, `bne`, `blt`, `ble`, `bgt`, `bge`
+#### Branching
+
+- instructions: `beq`, `bne`, `blt`, `ble`, `bgt`, `bge`
 - format: `instr[.cond] rs1 rs2 imm12u`, `jmp[.cond] imm12u`
   - `rs1` and `rs2` are the registers to compare.
   - `imm12u` is a 12-bit unsigned immediate value representing the offset in number of instructions (not bytes) to jump to.
@@ -91,8 +92,9 @@ In this section:
   - If the `rs2` operand is a numeric literal, it will be automatically expanded to use a temporary register.
   - A 32-bit immediate literal is also supported.
   - e.g. `beq r1 0x1234 10` => `lui tmp 0x1; addi tmp tmp 0x234; beq r1 tmp 10`
-- note:
-  - You can not write `imm12u` directly as a numeric literal, you must use a label.
+
+> [!IMPORTANT]
+> You can not write `imm12u` directly as a numeric literal, you must use a label.
 
 #### Stack Operations
 
@@ -106,7 +108,13 @@ In this section:
 - `ret[.cond]`: return from the current subroutine.
 - note:
   - The return address is automatically managed by the hardware stack.
-  - You can not write `imm12u` directly as a numeric literal, you must use a label.
+
+#### Jump and Link
+
+- `jal[.cond] ra imm12u`: jump to the address `imm12u` (absolute address in number of instructions) and write the return address into `ra`.
+- `jalr[.cond] ra rs1`: jump to the address contained in `rs1` (low 16-bit is valid) and write the return address into `ra`.
+- note:
+  - You may know how to use this instruction if you are familiar with the RISC-V architecture.
 
 #### Display (only in sandbox mode)
 

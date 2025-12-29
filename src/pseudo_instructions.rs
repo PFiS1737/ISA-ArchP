@@ -1,6 +1,7 @@
 mod branch_zero;
 mod clear;
 mod inc_dec;
+mod jump;
 mod mv;
 
 use std::collections::HashMap;

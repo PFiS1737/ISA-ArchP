@@ -5,7 +5,7 @@ input_file: examples/snake.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x90020360 # jmp main
+0x9000009B # jal r0 main                                 [jmp main]
 0x840A0000 # li x 0                                      [clr x]                                    <label: init_screen>
 0x840C0000 # li y 0                                      [clr y]
 0xD0000000 # col COLOR_BACK
@@ -43,16 +43,16 @@ exit_code: 0
 0xA8000000 # ret
 0x400E1000 # addi nx head_x 0                            [mv nx head_x]                             <label: move_snake_up>
 0x42102001 # subi ny head_y 1                            [sub ny head_y 1]
-0x90000600 # jmp move_snake_common
+0x90000030 # jal r0 move_snake_common                    [jmp move_snake_common]
 0x400E1000 # addi nx head_x 0                            [mv nx head_x]                             <label: move_snake_down>
 0x40102001 # addi ny head_y 1                            [add ny head_y 1]
-0x90000600 # jmp move_snake_common
+0x90000030 # jal r0 move_snake_common                    [jmp move_snake_common]
 0x420E1001 # subi nx head_x 1                            [sub nx head_x 1]                          <label: move_snake_left>
 0x40102000 # addi ny head_y 0                            [mv ny head_y]
-0x90000600 # jmp move_snake_common
+0x90000030 # jal r0 move_snake_common                    [jmp move_snake_common]
 0x400E1001 # addi nx head_x 1                            [add nx head_x 1]                          <label: move_snake_right>
 0x40102000 # addi ny head_y 0                            [mv ny head_y]
-0x90000600 # jmp move_snake_common
+0x90000030 # jal r0 move_snake_common                    [jmp move_snake_common]
 0x400A1000 # addi x head_x 0                             [mv x head_x]                              <label: move_snake_common>
 0x400C2000 # addi y head_y 0                             [mv y head_y]
 0xAA00005A # call body_push
@@ -138,7 +138,7 @@ exit_code: 0
 0x40231001 # addi que_tmp que_tmp 1                      [inc que_tmp]
 0x46231064 # modi que_tmp que_tmp 100                    [mod que_tmp que_tmp QUEUE_SIZE]
 0x40252001 # addi que_i que_i 1                          [inc que_i]
-0x90000FE0 # jmp queue_contains_loop
+0x9000007F # jal r0 queue_contains_loop                  [jmp queue_contains_loop]
 0x841A0001 # li rt 1                                                                                <label: queue_contains_found>
 0xA8000000 # ret
 0x841A0000 # li rt 0                                                                                <label: queue_contains_not_found>
@@ -168,6 +168,6 @@ exit_code: 0
 0x9A02C3E0 # bgt i r0 sleep                              [bgtz i sleep]
 0xAA00008A # call read_key
 0xAA00001B # call move_snake
-0x900203C0 # jmp main_loop
-0x90020480 # jmp lose_loop                                                                          <label: lose_loop>
+0x9000009E # jal r0 main_loop                            [jmp main_loop]
+0x900000A4 # jal r0 lose_loop                            [jmp lose_loop]                            <label: lose_loop>
 ----- stderr -----

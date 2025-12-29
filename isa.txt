@@ -104,15 +104,20 @@ U-type (load upper immediate)
 1000 011 lui rd uimm20
 
 B-type (branch)
--------------
+---------------
 
-1001 000 jmp addru ___ addrl ___
 1001 001 beq
 1001 010 bne
 1001 011 blt
 1001 100 ble
 1001 101 bgt
 1001 110 bge
+
+I-type jump and link
+--------------------
+
+1001 000 jal  rd ___ addr12
+1001 111 jalr rd rs1 ______
 
 I-type (stack)
 --------------

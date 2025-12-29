@@ -2,6 +2,7 @@ mod arithmetic;
 mod branch;
 mod compare;
 mod display;
+mod jump_and_link;
 mod load_store;
 mod logic;
 mod shift;

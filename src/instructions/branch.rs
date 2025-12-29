@@ -1,16 +1,6 @@
 use crate::instructions::instruction;
 
 instruction! {
-    pub Jmp {
-        name: "jmp",
-        opcode: 0b_1001_000,
-        itype: B,
-        operand_types: [ Addr ],
-        encode_format: [ None, None, Some ],
-    }
-}
-
-instruction! {
     pub Beq {
         name: "beq",
         opcode: 0b_1001_001,
