@@ -94,7 +94,7 @@ In this section:
 - instructions: `beq`, `bne`, `blt`, `ble`, `bgt`, `bge`
 - format: `instr[.cond] rs1 rs2 imm12u`, `jmp[.cond] imm12u`
   - `rs1` and `rs2` are the registers to compare.
-  - `imm12u` is a 12-bit unsigned immediate value representing the offset in number of instructions (not bytes) to jump to.
+  - `imm12u` is a 12-bit unsigned immediate value representing the absolute address in number of instructions (not bytes) to jump to.
 - macros:
   - If the `rs2` operand is a numeric literal, it will be automatically expanded to use a temporary register.
   - A 32-bit immediate literal is also supported.
@@ -102,6 +102,7 @@ In this section:
 
 > [!IMPORTANT]
 > You can not write `imm12u` directly as a numeric literal, you must use a label.
+> The `imm12u`'s below are the same.
 
 #### Stack Operations
 
