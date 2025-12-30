@@ -53,8 +53,7 @@ instruction! {
         name: "not",
         opcode: 0b_0001_110,
         itype: R,
-        operand_types: [ RegD, RegS ],
-        encode_format: [ Some, Some, None ],
+        operands_format: [ RegD, RegS, _ ],
     }
 }
 
@@ -63,7 +62,7 @@ instruction! {
         name: "andi",
         opcode: 0b_0101_000,
         itype: I,
-        operand_types: [ RegD, RegS, Imm(12, u) ],
+        operands_format: [ RegD, RegS, Imm(12, u) ],
     }
 }
 
@@ -72,7 +71,7 @@ instruction! {
         name: "nandi",
         opcode: 0b_0101_001,
         itype: I,
-        operand_types: [ RegD, RegS, Imm(12, u) ],
+        operands_format: [ RegD, RegS, Imm(12, u) ],
     }
 }
 
@@ -81,7 +80,7 @@ instruction! {
         name: "ori",
         opcode: 0b_0101_010,
         itype: I,
-        operand_types: [ RegD, RegS, Imm(12, u) ],
+        operands_format: [ RegD, RegS, Imm(12, u) ],
     }
 }
 
@@ -90,7 +89,7 @@ instruction! {
         name: "nori",
         opcode: 0b_0101_011,
         itype: I,
-        operand_types: [ RegD, RegS, Imm(12, u) ],
+        operands_format: [ RegD, RegS, Imm(12, u) ],
     }
 }
 
@@ -99,7 +98,7 @@ instruction! {
         name: "xori",
         opcode: 0b_0101_100,
         itype: I,
-        operand_types: [ RegD, RegS, Imm(12, u) ],
+        operands_format: [ RegD, RegS, Imm(12, u) ],
     }
 }
 
@@ -108,6 +107,6 @@ instruction! {
         name: "xnori",
         opcode: 0b_0101_101,
         itype: I,
-        operand_types: [ RegD, RegS, Imm(12, u) ],
+        operands_format: [ RegD, RegS, Imm(12, u) ],
     }
 }

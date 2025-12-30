@@ -53,6 +53,24 @@ pub enum OperandType {
     Addr,
 }
 
+pub macro op_fmt {
+    ( $( $type:tt $(($v:literal, $s:tt))? ),* ) => {
+        &[
+            $(
+                $crate::operand::op_fmt!(@one $type $(($v, $s))?)
+            ),*
+        ]
+    },
+
+    (@one _) => { None },
+
+    (@one $type:tt $(($v:literal, $s:tt))?) => {
+        Some(
+            $crate::operand::OperandType::$type $(($v, $crate::operand::_sig!($s)))?
+        )
+    },
+}
+
 pub macro op_types {
     ( $( $type:ident $(($v:literal, $s:tt))? ),* ) => {
         &[

@@ -45,7 +45,7 @@ instruction! {
         name: "shli",
         opcode: 0b_0110_000,
         itype: I,
-        operand_types: [ RegD, RegS, Imm(5, u) ],
+        operands_format: [ RegD, RegS, Imm(5, u) ],
     }
 }
 
@@ -54,7 +54,7 @@ instruction! {
         name: "shri",
         opcode: 0b_0110_001,
         itype: I,
-        operand_types: [ RegD, RegS, Imm(5, u) ],
+        operands_format: [ RegD, RegS, Imm(5, u) ],
     }
 }
 
@@ -63,7 +63,7 @@ instruction! {
         name: "roli",
         opcode: 0b_0110_010,
         itype: I,
-        operand_types: [ RegD, RegS, Imm(5, u) ],
+        operands_format: [ RegD, RegS, Imm(5, u) ],
     }
 }
 
@@ -72,7 +72,7 @@ instruction! {
         name: "rori",
         opcode: 0b_0110_011,
         itype: I,
-        operand_types: [ RegD, RegS, Imm(5, u) ],
+        operands_format: [ RegD, RegS, Imm(5, u) ],
     }
 }
 
@@ -81,6 +81,6 @@ instruction! {
         name: "ashri",
         opcode: 0b_0110_100,
         itype: I,
-        operand_types: [ RegD, RegS, Imm(5, u) ],
+        operands_format: [ RegD, RegS, Imm(5, u) ],
     }
 }

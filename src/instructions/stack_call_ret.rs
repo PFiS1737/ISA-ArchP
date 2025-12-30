@@ -5,8 +5,7 @@ instruction! {
         name: "pop",
         opcode: 0b_1010_000,
         itype: I,
-        operand_types: [ RegD ],
-        encode_format: [ Some, None, None ],
+        operands_format: [ RegD, _, _ ],
     }
 }
 
@@ -15,8 +14,7 @@ instruction! {
         name: "push",
         opcode: 0b_1010_001,
         itype: I,
-        operand_types: [ RegS ],
-        encode_format: [ None, Some, None ],
+        operands_format: [ _, RegS, _ ],
     }
 }
 instruction! {
@@ -24,8 +22,7 @@ instruction! {
         name: "ret",
         opcode: 0b_1010_100,
         itype: I,
-        operand_types: [],
-        encode_format: [ None, None, None ],
+        operands_format: [ _, _, _ ],
     }
 }
 
@@ -34,8 +31,7 @@ instruction! {
         name: "call",
         opcode: 0b_1010_101,
         itype: I,
-        operand_types: [ Addr ],
-        encode_format: [ None, None, Some ],
+        operands_format: [ _, _, Addr ],
     }
 }
 
@@ -44,7 +40,6 @@ instruction! {
         name: "callr",
         opcode: 0b_1010_110,
         itype: I,
-        operand_types: [ RegS ],
-        encode_format: [ None, Some, None ],
+        operands_format: [ _, RegS, _ ],
     }
 }

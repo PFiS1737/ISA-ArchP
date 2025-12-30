@@ -5,8 +5,7 @@ instruction! {
         name: "jal",
         opcode: 0b_1001_000,
         itype: I,
-        operand_types: [ RegD, Addr ],
-        encode_format: [ Some, None, Some ],
+        operands_format: [ RegD, _, Addr ],
     }
 }
 
@@ -15,7 +14,6 @@ instruction! {
         name: "jalr",
         opcode: 0b_1001_111,
         itype: I,
-        operand_types: [ RegD, RegS ],
-        encode_format: [ Some, Some, None ],
+        operands_format: [ RegD, RegS, _ ],
     }
 }

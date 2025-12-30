@@ -15,7 +15,7 @@ use once_cell::sync::Lazy;
 
 use crate::{
     assembler::Context,
-    operand::{OperandType, OperandValue, op_types},
+    operand::{OperandType, OperandValue, op_fmt},
     parser::{parse_address, parse_cond, parse_imm, parse_reg_d, parse_reg_s},
 };
 
@@ -26,12 +26,6 @@ pub enum InstrType {
     B,
     U,
     C,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum FormatPlaceholder {
-    None,
-    Some,
 }
 
 inventory::collect!(&'static dyn Instruction);
@@ -48,8 +42,7 @@ pub trait Instruction: Send + Sync {
     fn name(&self) -> &'static str;
     fn opcode(&self) -> u32;
     fn itype(&self) -> InstrType;
-    fn operand_types(&self) -> Option<&'static [OperandType]>;
-    fn encode_format(&self) -> Option<[FormatPlaceholder; 3]>;
+    fn operands_format(&self) -> Option<&'static [Option<OperandType>]>;
 
     fn encode(&self, ctx: &Context, cond: Option<&str>, operands: &[OperandValue]) -> Result<u32> {
         let cond = cond.map(parse_cond).transpose()?.unwrap_or(0);
@@ -74,59 +67,38 @@ pub trait Instruction: Send + Sync {
     }
 
     fn parse(&self, ctx: &Context, operands: &[OperandValue]) -> Result<Vec<u32>> {
-        let mut parsed_operands = Vec::new();
-        let operand_types = self.get_operand_types();
+        let format = self.get_operands_format();
 
-        self.assert_operand_count(operands.len(), operand_types.len())?;
+        let expected = format.iter().filter(|x| x.is_some()).count();
+        self.assert_operand_count(operands.len(), expected)?;
 
-        for (i, op) in operands.iter().enumerate() {
-            match operand_types[i] {
-                OperandType::RegD => {
-                    let reg = parse_reg_d(ctx, op)?;
-                    parsed_operands.push(reg);
+        let mut ret = Vec::with_capacity(format.len());
+        let mut op_idx = 0;
+
+        for slot in format {
+            match slot {
+                Some(op_ty) => {
+                    let op = &operands[op_idx];
+                    op_idx += 1;
+
+                    let val = match *op_ty {
+                        OperandType::RegD => parse_reg_d(ctx, op)?,
+                        OperandType::RegS => parse_reg_s(ctx, op)?,
+                        OperandType::Imm(bits, signed) => {
+                            parse_imm(ctx, op)?.as_field(bits, signed)?
+                        }
+                        OperandType::Addr => parse_address(ctx, op)?,
+                    };
+
+                    ret.push(val);
                 }
-                OperandType::RegS => {
-                    let reg = parse_reg_s(ctx, op)?;
-                    parsed_operands.push(reg);
-                }
-                OperandType::Imm(bits, signed) => {
-                    let imm = parse_imm(ctx, op)?.as_field(bits, signed)?;
-                    parsed_operands.push(imm);
-                }
-                OperandType::Addr => {
-                    let addr = parse_address(ctx, op)?;
-                    parsed_operands.push(addr);
+                None => {
+                    ret.push(0);
                 }
             }
         }
 
-        if let Some(format) = self.encode_format() {
-            if !matches!(self.itype(), InstrType::R | InstrType::I | InstrType::B) {
-                panic!(
-                    "Internal Error: 'encode_format' is only supported for R/I/B-type instructions, foundinstruction '{}'",
-                    self.name()
-                );
-            }
-
-            let mut formatted_operands = Vec::new();
-            let mut operand_index = 0;
-
-            for placeholder in format.iter() {
-                match placeholder {
-                    FormatPlaceholder::Some => {
-                        formatted_operands.push(parsed_operands[operand_index]);
-                        operand_index += 1;
-                    }
-                    FormatPlaceholder::None => {
-                        formatted_operands.push(0);
-                    }
-                }
-            }
-
-            Ok(formatted_operands)
-        } else {
-            Ok(parsed_operands)
-        }
+        Ok(ret)
     }
 
     // xxxx xxx   xxx   xxxxx   xxxxx   0000000   xxxxx
@@ -196,16 +168,16 @@ pub trait Instruction: Send + Sync {
         Ok(())
     }
 
-    fn get_operand_types(&self) -> &'static [OperandType] {
-        if let Some(ops) = self.operand_types() {
+    fn get_operands_format(&self) -> &'static [Option<OperandType>] {
+        if let Some(ops) = self.operands_format() {
             ops
         } else {
             match self.itype() {
-                InstrType::R => op_types![RegD, RegS, RegS],
-                InstrType::I => op_types![RegD, RegS, Imm(12, i)],
-                InstrType::B => op_types![RegS, RegS, Addr],
-                InstrType::U => op_types![RegD, Imm(20, u)],
-                InstrType::C => op_types![Imm(24, u)],
+                InstrType::R => op_fmt![RegD, RegS, RegS],
+                InstrType::I => op_fmt![RegD, RegS, Imm(12, i)],
+                InstrType::B => op_fmt![RegS, RegS, Addr],
+                InstrType::U => op_fmt![RegD, Imm(20, u)],
+                InstrType::C => op_fmt![Imm(24, u)],
             }
         }
     }
@@ -235,8 +207,7 @@ macro impl_instruction {
             name: $name:literal,
             opcode: $opcode:literal,
             itype: $itype:ident,
-            operand_types: $types:ident $( ($type_values:tt) )? ,
-            encode_format: $format:ident $( ($format_values:tt) )? ,
+            operands_format: $opt:ident $( ($format:tt) )? ,
         }
     ) => {
         $( #[doc = $doc] )*
@@ -252,11 +223,8 @@ macro impl_instruction {
             fn itype(&self) -> $crate::instructions::InstrType {
                 $crate::instructions::InstrType::$itype
             }
-            fn operand_types(&self) -> Option<&'static [ $crate::operand::OperandType ]> {
-                $types $( ( $crate::operand::op_types! $type_values ) )?
-            }
-            fn encode_format(&self) -> Option<[ $crate::instructions::FormatPlaceholder; 3 ]> {
-                $format $( ($format_values) )?
+            fn operands_format(&self) -> Option<&'static [ Option<$crate::operand::OperandType> ]> {
+                $opt $( ( $crate::operand::op_fmt! $format ) )?
             }
         }
 
@@ -281,8 +249,7 @@ macro instruction {
                 name: $name,
                 opcode: $opcode,
                 itype: $itype,
-                operand_types: None,
-                encode_format: None,
+                operands_format: None,
             }
         }
     },
@@ -293,7 +260,7 @@ macro instruction {
             name: $name:literal,
             opcode: $opcode:literal,
             itype: $itype:ident,
-            operand_types: $types:tt,
+            operands_format: $format:tt,
         }
     ) => {
         $crate::instructions::impl_instruction!{
@@ -302,34 +269,7 @@ macro instruction {
                 name: $name,
                 opcode: $opcode,
                 itype: $itype,
-                operand_types: Some($types),
-                encode_format: None,
-            }
-        }
-    },
-
-    (
-        $( #[doc = $doc:literal] )*
-        $vis:vis $id:ident {
-            name: $name:literal,
-            opcode: $opcode:literal,
-            itype: $itype:ident,
-            operand_types: $types:tt,
-            encode_format: [ $rd:ident, $rs1:ident, $rs2:ident ],
-        }
-    ) => {
-        $crate::instructions::impl_instruction!{
-            $( #[doc = $doc] )*
-            $vis $id {
-                name: $name,
-                opcode: $opcode,
-                itype: $itype,
-                operand_types: Some($types),
-                encode_format:  Some([
-                    $crate::instructions::FormatPlaceholder::$rd,
-                    $crate::instructions::FormatPlaceholder::$rs1,
-                    $crate::instructions::FormatPlaceholder::$rs2,
-                ]),
+                operands_format: Some($format),
             }
         }
     },
