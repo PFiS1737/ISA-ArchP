@@ -38,6 +38,14 @@ Options:
 - Only one instruction or label definition is allowed per line (label and instruction can be on the same line).
 - See [examples](./examples) for more details.
 
+## Schematics
+
+> [!NOTE]
+> The schematic may not be the latest version; please check the commit list to locate the most up-to-date implementation.  
+> Alternatively, you may just get a fixed version from the git tags.
+
+See [assets/schematics](./assets/schematics).
+
 ## ISA
 
 This section is intended for users.
