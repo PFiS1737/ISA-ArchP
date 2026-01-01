@@ -4,6 +4,15 @@ A simple instruction set architecture (ISA) that operates within the game [Turin
 
 This repository contains its corresponding assembler.
 
+## Pictures
+
+[![Mine Sweeper](./assets/p1.png)](./examples/minesweeper.asm)
+[![Snake Game](./assets/p2.png)](./examples/snake.asm)
+
+## References
+
+- [ESnake37/Turing-Complete-Minesweeper](https://github.com/ESnake37/Turing-Complete-Minesweeper)
+
 ## ISA
 
 This section is intended for users.
