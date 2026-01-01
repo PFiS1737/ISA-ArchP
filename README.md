@@ -9,9 +9,34 @@ This repository contains its corresponding assembler.
 [![Mine Sweeper](./assets/p1.png)](./examples/minesweeper.asm)
 [![Snake Game](./assets/p2.png)](./examples/snake.asm)
 
-## References
+## CLI Usage
 
-- [ESnake37/Turing-Complete-Minesweeper](https://github.com/ESnake37/Turing-Complete-Minesweeper)
+```
+Assembly implementation of the ArchP ISA
+
+Usage: archp_asmc [OPTIONS] [SRC_FILE]
+
+Arguments:
+  [SRC_FILE]  File path to the source assembly file
+
+Options:
+      --complete <COMPLETE>  Print shell auto completions for the specified shell [possible values: bash, elvish, fish, powershell, zsh]
+  -o, --output <OUTPUT>      The output file path [default: <stdout>]
+      --bin                  Output binary machine code instead of formatted hex
+      --disable-macro        Disable the macro-instructions
+  -h, --help                 Print help
+  -V, --version              Print version
+```
+
+## Assembly Syntax
+
+- Comments start with `#` or `;` and continue to the end of the line.
+- Definite constants using `const` directive: `const NAME VALUE` (only allowed at the beginning of the file).
+- Labels are defined by writing the label name followed by a colon (`:`) at the beginning of a line.
+- Operands are separated by spaces or tabs (not `,`).
+- Instructions and labels are case-insensitive.
+- Only one instruction or label definition is allowed per line (label and instruction can be on the same line).
+- See [examples](./examples) for more details.
 
 ## ISA
 
@@ -160,3 +185,7 @@ The result of the comparison is stored internally and can be used by conditional
 - `inc rd` => `addi rd rd 1`
 - `dec rd` => `subi rd rd 1`
 - `b**z rs1 imm12` => `b** rs1 r0 imm12` (e.g. `beqz`, `bnez`, `bltz`, etc.)
+
+## References
+
+- [ESnake37/Turing-Complete-Minesweeper](https://github.com/ESnake37/Turing-Complete-Minesweeper)
