@@ -52,7 +52,6 @@ R-type (register compute)
 0001 011 nor
 0001 100 xor
 0001 101 xnor
-0001 110 not rd rs1 ___
 
 0010 000 shl
 0010 001 shr

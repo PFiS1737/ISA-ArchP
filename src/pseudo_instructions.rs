@@ -3,6 +3,7 @@ mod clear;
 mod inc_dec;
 mod jump;
 mod mv;
+mod not;
 
 use std::collections::HashMap;
 

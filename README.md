@@ -89,6 +89,10 @@ In this section:
   - `add`, `sub`, `mul`, `mulh`, `mulhu`, `mulhsu`, `div`, `mod`
   - `addi`, `subi`, `muli`, `mulhi`, `mulhui`, `mulhsui`, `divi`, `modi`
 - format: `instr[.cond] rd rs1 rs2/imm12`
+- pseudo:
+  - `mv rd rs1` => `addi rd rs1 0`
+  - `inc rd` => `addi rd rd 1`
+  - `dec rd` => `subi rd rd 1`
 - macros:
   - When using register series instructions, if the third operand is a numeric literal, it will be automatically replaced with an immediate series instruction.
   - When using immediate series instructions, if the immediate is larger the 12-bit, it will be automatically expanded into multiple instructions to load the immediate into a temporary register first.
@@ -97,9 +101,11 @@ In this section:
 #### Logical
 
 - instructions:
-  - `and`, `or`, `xor`, `nand`, `nor`, `xnor`, `not`
+  - `and`, `or`, `xor`, `nand`, `nor`, `xnor`
   - `andi`, `ori`, `xori`, `nandi`, `nori` `xnori`
-- format: `instr[.cond] rd rs1 rs2/imm12` or `not[.cond] rd rs1`
+- format: `instr[.cond] rd rs1 rs2/imm12`
+- pseudo:
+  - `not rd rs1` => `xori rd rs1 -1`
 - macros: Same as [Arithmetic](#arithmetic) instructions.
 
 #### Shift and Rotate
@@ -120,6 +126,8 @@ In this section:
 - `sw[.cond] rs1 rs2 imm12`: store word from `rs2` into memory address `rs1 + imm12`.
 - `li[.cond] rd imm12`: load immediate value `imm12` into `rd`.
 - `lui rd imm20`: load upper immediate value `imm20` (20-bit unsigned) into the upper 20 bits of `rd`, setting the lower 12 bits to 0.
+- pseudo:
+  - `clr rd` => `li rd 0`
 - macros:
   - When using `li`, if the immediate is larger the 12-bit, it will be automatically expanded into multiple instructions to load the immediate into the destination register.
   - e.g. `li r1 0x123456` => `lui r1 0x123; addi r1 r1 0x456`
@@ -140,6 +148,8 @@ In this section:
 - format: `instr[.cond] rs1 rs2 imm12u`, `jmp[.cond] imm12u`
   - `rs1` and `rs2` are the registers to compare.
   - `imm12u` is a 12-bit unsigned immediate value representing the absolute address in number of instructions (not bytes) to jump to.
+- pseudo:
+  - `b**z rs1 imm12` => `b** rs1 r0 imm12` (e.g. `beqz`, `bnez`, `bltz`, etc.)
 - macros:
   - If the `rs2` operand is a numeric literal, it will be automatically expanded to use a temporary register.
   - A 32-bit immediate literal is also supported.
@@ -188,14 +198,6 @@ The result of the comparison is stored internally and can be used by conditional
 - `ge`: execute if last comparison was greater than or equal
 - `gt`: execute if last comparison was greater than
 - `le`: execute if last comparison was less than or equal
-
-### Pseudo Instructions
-
-- `mv rd rs1` => `addi rd rs1 0`
-- `clr rd` => `li rd 0`
-- `inc rd` => `addi rd rd 1`
-- `dec rd` => `subi rd rd 1`
-- `b**z rs1 imm12` => `b** rs1 r0 imm12` (e.g. `beqz`, `bnez`, `bltz`, etc.)
 
 ## References
 

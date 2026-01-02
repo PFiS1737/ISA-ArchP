@@ -49,15 +49,6 @@ instruction! {
 }
 
 instruction! {
-    pub Not {
-        name: "not",
-        opcode: 0b_0001_110,
-        itype: R,
-        operands_format: [ RegD, RegS, _ ],
-    }
-}
-
-instruction! {
     pub Andi {
         name: "andi",
         opcode: 0b_0101_000,
