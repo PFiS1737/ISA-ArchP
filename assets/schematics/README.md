@@ -5,7 +5,7 @@
 1. Unzip the [ArchP.tar.gz](./ArchP.tar.gz) file, and check the file structure:
 
 ```
-.
+schematics
 ├─ architecture
 │  └─ ArchP
 │     ├─ ...

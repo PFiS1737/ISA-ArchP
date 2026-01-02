@@ -1,0 +1,20 @@
+#!/usr/bin/env fish
+
+set base $argv[1]
+
+if test -z "$base"
+    echo "Usage: update_schematics <path_to_loacl_game_schematics>"
+    return 1
+end
+
+rm -rf ./schematics
+
+mkdir -p ./schematics/architecture
+mkdir -p ./schematics/component_factory
+
+cp -r $base/architecture/ArchP ./schematics/architecture/
+cp -r $base/component_factory/ArchP ./schematics/component_factory/
+
+tar -czf ./assets/schematics/ArchP.tar.gz ./schematics
+
+return 0
