@@ -72,12 +72,16 @@ In this section:
 - `rs1`: the first source register.
 - `rs2`: the second source register.
 - `imm12`: 12-bit signed immediate value, from `-2048` to `2047`.
+- `addr12`: 12-bit unsigned absolute address in number of instructions.
 - `immX`: will be specified in the instruction description.
 - numeric literal: `42`, `-7`, `0b010101`, `0xFE42`, etc.
 
 > [!NOTE]
 > The 'signed' and 'unsigned' are merely formal distinctions,
 > you can always use `0xFFFFFFFE` (or `0xFFE` in 12 bits) to represent `-2`.
+
+> [!NOTE]
+> You can not write `addr12` directly as a numeric literal, you must use a label.
 
 > [!NOTE]
 > The `macro` features are enabled by default.
@@ -145,19 +149,13 @@ In this section:
 #### Branching
 
 - instructions: `beq`, `bne`, `blt`, `ble`, `bgt`, `bge`
-- format: `instr[.cond] rs1 rs2 imm12u`
-  - `rs1` and `rs2` are the registers to compare.
-  - `imm12u` is a 12-bit unsigned immediate value representing the absolute address in number of instructions (not bytes) to jump to.
+- format: `instr[.cond] rs1 rs2 addr12`
 - pseudo:
   - `b**z rs1 imm12` => `b** rs1 r0 imm12` (e.g. `beqz`, `bnez`, `bltz`, etc.)
 - macros:
   - If the `rs2` operand is a numeric literal, it will be automatically expanded to use a temporary register.
   - A 32-bit immediate literal is also supported.
   - e.g. `beq r1 0x1234 10` => `lui tmp 0x1; addi tmp tmp 0x234; beq r1 tmp 10`
-
-> [!IMPORTANT]
-> You can not write `imm12u` directly as a numeric literal, you must use a label.
-> The `imm12u`'s below are the same.
 
 #### Stack Operations
 
@@ -166,7 +164,7 @@ In this section:
 
 #### Call and Return
 
-- `call[.cond] imm12u`: call a subroutine at the address `imm12u` (absolute address in number of instructions).
+- `call[.cond] addr12`: call a subroutine at the address `addr12`.
 - `callr[.cond] rs1`: call a subroutine at the address contained in `rs1` (low 16-bit is valid).
 - `ret[.cond]`: return from the current subroutine.
 - note:
@@ -174,10 +172,10 @@ In this section:
 
 #### Jump and Link
 
-- `jal[.cond] ra imm12u`: jump to the address `imm12u` (absolute address in number of instructions) and write the return address into `ra`.
-- `jalr[.cond] ra rs1`: jump to the address contained in `rs1` (low 16-bit is valid) and write the return address into `ra`.
+- `jal[.cond] rd addr12`: jump to the address `addr12` and write the return address into `rd`.
+- `jalr[.cond] rd rs1`: jump to the address contained in `rs1` (low **16-bit** is valid) and write the return address into `rd`.
 - pseudo:
-  - `j imm12u` => `jal r0 imm12u`
+  - `j addr12` => `jal r0 addr12`
   - `jr rs1` => `jalr r0 rs1`
 - note:
   - You may know how to use this instruction if you are familiar with the RISC-V architecture.
