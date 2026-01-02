@@ -114,7 +114,7 @@ In this section:
 
 #### Shift and Rotate
 
-- instructions: `shl`, `shr`, `rol`, `ror`, `ashr`, `shli`, `shri`, `roli`, `rori`, `ashri`
+- instructions: `sll`, `srl`, `rol`, `ror`, `sra`, `slli`, `srli`, `roli`, `rori`, `srai`
 - format: `instr[.cond] rd rs1 rs2/imm5`, where `imm5` is a 5-bit unsigned immediate value from `0` to `31`.
 - macros: Same as [Arithmetic](#arithmetic) instructions.
 

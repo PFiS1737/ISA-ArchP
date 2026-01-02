@@ -9,7 +9,7 @@ macro_instruction! {
         name: [
             "addi", "subi", "muli", "mulhi", "mulhui", "mulhsui", "modi", "divi",
             "andi", "nandi", "ori", "nori", "xori", "xnori",
-            "shli", "shri", "roli", "rori", "ashri",
+            "slli", "srli", "roli", "rori", "srai",
         ],
         operand_count: 3,
         expander: F,

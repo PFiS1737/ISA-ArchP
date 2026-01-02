@@ -9,7 +9,7 @@ macro_instruction! {
         name: [
             "add", "sub", "mul", "mulh", "mulhu", "mulhsu", "mod", "div",
             "and", "nand", "or", "nor", "xor", "xnor",
-            "shl", "shr", "rol", "ror", "ashr",
+            "sll", "srl", "rol", "ror", "sra",
         ],
         operand_count: 3,
         expander: F1,
@@ -32,11 +32,11 @@ const F1: ExpandFn = |ctx, name, cond, ops| {
         "nor" => "nori",
         "xor" => "xori",
         "xnor" => "xnori",
-        "shl" => "shli",
-        "shr" => "shri",
+        "sll" => "slli",
+        "srl" => "srli",
         "rol" => "roli",
         "ror" => "rori",
-        "ashr" => "ashri",
+        "sra" => "srai",
         _ => unreachable!(),
     };
 

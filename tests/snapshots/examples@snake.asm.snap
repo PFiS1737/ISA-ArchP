@@ -95,15 +95,15 @@ exit_code: 0
 0xD0FFFF00 # col COLOR_FOOD
 0xD2003004 # spx food_x food_y
 0xA8000000 # ret
-0x60205008 # shli que_val x 8                            [shl que_val x 8]                          <label: body_push>
+0x60205008 # slli que_val x 8                            [sll que_val x 8]                          <label: body_push>
 0x14210006 # or que_val que_val y
 0xAA000066 # call queue_push
 0xA8000000 # ret
 0xAA000070 # call queue_pop                                                                         <label: body_pop>
-0x620B0008 # shri x que_val 8                            [shr x que_val 8]
+0x620B0008 # srli x que_val 8                            [srl x que_val 8]
 0x500D00FF # andi y que_val 255                          [and y que_val 0xFF]
 0xA8000000 # ret
-0x60205008 # shli que_val x 8                            [shl que_val x 8]                          <label: body_contains>
+0x60205008 # slli que_val x 8                            [sll que_val x 8]                          <label: body_contains>
 0x14210006 # or que_val que_val y
 0xAA00007A # call queue_contains
 0xA8000000 # ret

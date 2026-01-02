@@ -321,7 +321,7 @@ mod tests {
         assert_snapshot!(cmd("", &["r1", "r2", "-2048"]), @"0100 000 000 00001 00010 1000000 00000");
         assert_snapshot!(cmd("", &["r1", "r2", "-2049"]), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
 
-        let cmd = instr("shri");
+        let cmd = instr("srli");
 
         assert_snapshot!(cmd("", &["r1", "r2", "32"]), @"Error: Immediate '32' out of range for u5 (0 ..= 31)");
         assert_snapshot!(cmd("", &["r1", "r2", "31"]), @"0110 001 000 00001 00010 0000000 11111");

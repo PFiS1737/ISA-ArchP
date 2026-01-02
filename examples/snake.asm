@@ -169,19 +169,19 @@ gen_food:
 
 
 body_push:
-  shl que_val x 8
+  sll que_val x 8
   or que_val que_val y
   call queue_push
   ret
 
 body_pop:
   call queue_pop
-  shr x que_val 8
+  srl x que_val 8
   and y que_val 0xFF
   ret
 
 body_contains:
-  shl que_val x 8
+  sll que_val x 8
   or que_val que_val y
   call queue_contains
   ret

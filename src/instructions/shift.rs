@@ -1,16 +1,16 @@
 use crate::instructions::instruction;
 
 instruction! {
-    pub Shl {
-        name: "shl",
+    pub Sll {
+        name: "sll",
         opcode: 0b_0010_000,
         itype: R,
     }
 }
 
 instruction! {
-    pub Shr {
-        name: "shr",
+    pub Srl {
+        name: "srl",
         opcode: 0b_0010_001,
         itype: R,
     }
@@ -33,16 +33,16 @@ instruction! {
 }
 
 instruction! {
-    pub Ashr {
-        name: "ashr",
+    pub Sra {
+        name: "sra",
         opcode: 0b_0010_100,
         itype: R,
     }
 }
 
 instruction! {
-    pub Shli {
-        name: "shli",
+    pub Slli {
+        name: "slli",
         opcode: 0b_0110_000,
         itype: I,
         operands_format: [ RegD, RegS, Imm(5, u) ],
@@ -50,8 +50,8 @@ instruction! {
 }
 
 instruction! {
-    pub Shri {
-        name: "shri",
+    pub Srli {
+        name: "srli",
         opcode: 0b_0110_001,
         itype: I,
         operands_format: [ RegD, RegS, Imm(5, u) ],
@@ -77,8 +77,8 @@ instruction! {
 }
 
 instruction! {
-    pub Ashri {
-        name: "ashri",
+    pub Srai {
+        name: "srai",
         opcode: 0b_0110_100,
         itype: I,
         operands_format: [ RegD, RegS, Imm(5, u) ],

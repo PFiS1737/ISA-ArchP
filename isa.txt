@@ -53,11 +53,11 @@ R-type (register compute)
 0001 100 xor
 0001 101 xnor
 
-0010 000 shl
-0010 001 shr
+0010 000 sll
+0010 001 srl
 0010 010 rol
 0010 011 ror
-0010 100 ashr
+0010 100 sra
 
 0011 000 cmp __ rs1 rs2
 
@@ -80,11 +80,11 @@ I-type (immediate compute)
 0101 100 xori
 0101 101 xnori
 
-0110 000 shli
-0110 001 shri
+0110 000 slli
+0110 001 srli
 0110 010 roli
 0110 011 rori
-0110 100 ashri
+0110 100 srai
 
 0111 000 cmpi __ rs1 imm12
 
