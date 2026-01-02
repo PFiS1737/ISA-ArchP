@@ -59,7 +59,7 @@ const KEY_REVEAL 55 # 'z'
 const KEY_FLAG 56 # 'x'
 
 
-jmp main
+j main
 
 
 init_screen:
@@ -198,13 +198,13 @@ count_around_mines:
 
 move_cursor:
 	cmp key_code KEY_UP
-	jmp.eq handle_cursor_move
+	j.eq handle_cursor_move
 	cmp key_code KEY_DOWN
-	jmp.eq handle_cursor_move
+	j.eq handle_cursor_move
 	cmp key_code KEY_LEFT
-	jmp.eq handle_cursor_move
+	j.eq handle_cursor_move
 	cmp key_code KEY_RIGHT
-	jmp.eq handle_cursor_move
+	j.eq handle_cursor_move
 
 	ret
 
@@ -658,10 +658,10 @@ main:
 		cmp key_code KEY_FLAG
 		call.eq toggle_flag
 		seg mine_num
-		jmp main_loop
+		j main_loop
 
 	win_loop:
-		jmp win_loop
+		j win_loop
 
 	lose_loop:
 		mv arg_x cursor_x
@@ -677,7 +677,7 @@ main:
 		lose_col_loop:
 			bne nx cursor_x lose_loop_cont
 			bne ny cursor_y lose_loop_cont
-			jmp skip_draw
+			j skip_draw
 		lose_loop_cont:
 			lw t1 addr
 			and t2 t1 MINE_MASK
@@ -696,4 +696,4 @@ main:
 			blt ny GRID_ROWS lose_row_loop
 
 halt:
-	jmp halt
+	j halt

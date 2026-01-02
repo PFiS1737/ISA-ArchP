@@ -51,7 +51,7 @@ solve:
       sub t1 lmax a0
       add water water t1
 
-      jmp endif
+      j endif
 
     else:
       # r--
@@ -66,7 +66,7 @@ solve:
       add water water t1
 
     endif:
-      jmp while
+      j while
 
   endwhile:
     mv rt water

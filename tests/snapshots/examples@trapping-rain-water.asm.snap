@@ -25,7 +25,7 @@ exit_code: 0
 0x4006A000 # addi lmax rt 0      [mv lmax rt]
 0x020E3008 # sub t1 lmax a0
 0x000A5007 # add water water t1
-0x9000001C # jal r0 endif        [jmp endif]
+0x9000001C # jal r0 endif        [j endif]
 0x42042001 # subi r r 1          [dec r]          <label: else>
 0x80102000 # lw a0 r 0           [lw a0 r]
 0x40124000 # addi a1 rmax 0      [mv a1 rmax]
@@ -33,7 +33,7 @@ exit_code: 0
 0x4008A000 # addi rmax rt 0      [mv rmax rt]
 0x020E4008 # sub t1 rmax a0
 0x000A5007 # add water water t1
-0x9000000B # jal r0 while        [jmp while]      <label: endif>
+0x9000000B # jal r0 while        [j while]        <label: endif>
 0x40145000 # addi rt water 0     [mv rt water]    <label: endwhile>
 0xA8000000 # ret
 0x30008009 # cmp a0 a1                            <label: max>

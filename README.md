@@ -145,7 +145,7 @@ In this section:
 #### Branching
 
 - instructions: `beq`, `bne`, `blt`, `ble`, `bgt`, `bge`
-- format: `instr[.cond] rs1 rs2 imm12u`, `jmp[.cond] imm12u`
+- format: `instr[.cond] rs1 rs2 imm12u`
   - `rs1` and `rs2` are the registers to compare.
   - `imm12u` is a 12-bit unsigned immediate value representing the absolute address in number of instructions (not bytes) to jump to.
 - pseudo:
@@ -176,6 +176,9 @@ In this section:
 
 - `jal[.cond] ra imm12u`: jump to the address `imm12u` (absolute address in number of instructions) and write the return address into `ra`.
 - `jalr[.cond] ra rs1`: jump to the address contained in `rs1` (low 16-bit is valid) and write the return address into `ra`.
+- pseudo:
+  - `j imm12u` => `jal r0 imm12u`
+  - `jr rs1` => `jalr r0 rs1`
 - note:
   - You may know how to use this instruction if you are familiar with the RISC-V architecture.
 

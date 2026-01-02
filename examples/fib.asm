@@ -17,7 +17,7 @@ main:
 fib:
     bgt a0 2 .L8
     li a0 1
-    jmpr ra
+    jr ra
 .L8:
     sub sp sp 3
     sw ra 2(sp)
@@ -34,4 +34,4 @@ fib:
     lw s0 1(sp)
     lw s1 0(sp)
     add sp sp 3
-    jmpr ra
+    jr ra

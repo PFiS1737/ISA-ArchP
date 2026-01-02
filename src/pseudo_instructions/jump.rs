@@ -1,8 +1,8 @@
 use crate::{operand::op_values, pseudo_instructions::pseudo_instruction};
 
-// jmp addr12  =>  jal r0 addr12
+// j addr12  =>  jal r0 addr12
 pseudo_instruction! {
-    name: "jmp",
+    name: "j",
     operand_types: [ Addr ],
     expander: |_, ops| {
         (
@@ -15,9 +15,9 @@ pseudo_instruction! {
     },
 }
 
-// jmpr rs1  =>  jalr r0 rs1
+// jr rs1  =>  jalr r0 rs1
 pseudo_instruction! {
-    name: "jmpr",
+    name: "jr",
     operand_types: [ RegS ],
     expander: |_, ops| {
         (

@@ -42,7 +42,7 @@ const INIT_Y 18
 const QUEUE_SIZE 100
 
 
-jmp main
+j main
 
 
 init_screen:
@@ -90,22 +90,22 @@ move_snake:
   move_snake_up:
     mv nx head_x
     sub ny head_y 1
-    jmp move_snake_common
+    j move_snake_common
 
   move_snake_down:
     mv nx head_x
     add ny head_y 1
-    jmp move_snake_common
+    j move_snake_common
 
   move_snake_left:
     sub nx head_x 1
     mv ny head_y
-    jmp move_snake_common
+    j move_snake_common
 
   move_snake_right:
     add nx head_x 1
     mv ny head_y
-    jmp move_snake_common
+    j move_snake_common
 
   move_snake_common:
     # 旧头变成身体
@@ -257,7 +257,7 @@ queue_contains:
     mod que_tmp que_tmp QUEUE_SIZE
 
     inc que_i
-    jmp queue_contains_loop
+    j queue_contains_loop
 
   queue_contains_found:
     li rt 1
@@ -302,8 +302,8 @@ main:
 
     call read_key
     call move_snake
-    jmp main_loop
+    j main_loop
 
 
 lose_loop:
-  jmp lose_loop
+  j lose_loop
