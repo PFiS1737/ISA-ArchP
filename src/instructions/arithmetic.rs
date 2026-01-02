@@ -25,9 +25,33 @@ instruction! {
 }
 
 instruction! {
+    pub Mulh {
+        name: "mulh",
+        opcode: 0b_0000_011,
+        itype: R,
+    }
+}
+
+instruction! {
+    pub Mulhu {
+        name: "mulhu",
+        opcode: 0b_0000_100,
+        itype: R,
+    }
+}
+
+instruction! {
+    pub Mulhsu {
+        name: "mulhsu",
+        opcode: 0b_0000_101,
+        itype: R,
+    }
+}
+
+instruction! {
     pub Mod {
         name: "mod",
-        opcode: 0b_0000_011,
+        opcode: 0b_0000_110,
         itype: R,
     }
 }
@@ -35,7 +59,7 @@ instruction! {
 instruction! {
     pub Div {
         name: "div",
-        opcode: 0b_0000_100,
+        opcode: 0b_0000_111,
         itype: R,
     }
 }
@@ -65,9 +89,33 @@ instruction! {
 }
 
 instruction! {
+    pub Mulhi {
+        name: "mulhi",
+        opcode: 0b_0100_011,
+        itype: I,
+    }
+}
+
+instruction! {
+    pub Mulhui {
+        name: "mulhui",
+        opcode: 0b_0100_100,
+        itype: I,
+    }
+}
+
+instruction! {
+    pub Mulhsui {
+        name: "mulhsui",
+        opcode: 0b_0100_101,
+        itype: I,
+    }
+}
+
+instruction! {
     pub Modi {
         name: "modi",
-        opcode: 0b_0100_011,
+        opcode: 0b_0100_110,
         itype: I,
     }
 }
@@ -75,7 +123,7 @@ instruction! {
 instruction! {
     pub Divi {
         name: "divi",
-        opcode: 0b_0100_100,
+        opcode: 0b_0100_111,
         itype: I,
     }
 }

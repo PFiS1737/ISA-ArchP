@@ -85,7 +85,9 @@ In this section:
 
 #### Arithmetic
 
-- instructions: `add`, `sub`, `mul`, `div`, `mod`, `addi`, `subi`, `muli`, `divi`, `modi`
+- instructions:
+  - `add`, `sub`, `mul`, `mulh`, `mulhu`, `mulhsu`, `div`, `mod`
+  - `addi`, `subi`, `muli`, `mulhi`, `mulhui`, `mulhsui`, `divi`, `modi`
 - format: `instr[.cond] rd rs1 rs2/imm12`
 - macros:
   - When using register series instructions, if the third operand is a numeric literal, it will be automatically replaced with an immediate series instruction.
@@ -94,10 +96,11 @@ In this section:
 
 #### Logical
 
-- instructions: `and`, `or`, `xor`, `not`, `andi`, `ori`, `xori`
+- instructions:
+  - `and`, `or`, `xor`, `nand`, `nor`, `xnor`, `not`
+  - `andi`, `ori`, `xori`, `nandi`, `nori` `xnori`
 - format: `instr[.cond] rd rs1 rs2/imm12u` and `not[.cond] rd rs1`, where `imm12u` is a 12-bit unsigned immediate value.
 - macros: Same as [Arithmetic](#arithmetic) instructions.
-- note: We also provide `nand`, `nor`, `xnor`, `nandi`, `nori` and `xnori`, they are implemented at the hardware level.
 
 #### Shift and Rotate
 

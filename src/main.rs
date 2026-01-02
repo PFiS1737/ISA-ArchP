@@ -5,6 +5,8 @@
 
 mod assembler;
 mod cli;
+#[cfg(test)]
+mod diff_testing;
 mod instructions;
 mod macro_instructions;
 mod operand;
