@@ -62,7 +62,6 @@ instruction! {
         name: "andi",
         opcode: 0b_0101_000,
         itype: I,
-        operands_format: [ RegD, RegS, Imm(12, u) ],
     }
 }
 
@@ -71,7 +70,6 @@ instruction! {
         name: "nandi",
         opcode: 0b_0101_001,
         itype: I,
-        operands_format: [ RegD, RegS, Imm(12, u) ],
     }
 }
 
@@ -80,7 +78,6 @@ instruction! {
         name: "ori",
         opcode: 0b_0101_010,
         itype: I,
-        operands_format: [ RegD, RegS, Imm(12, u) ],
     }
 }
 
@@ -89,7 +86,6 @@ instruction! {
         name: "nori",
         opcode: 0b_0101_011,
         itype: I,
-        operands_format: [ RegD, RegS, Imm(12, u) ],
     }
 }
 
@@ -98,7 +94,6 @@ instruction! {
         name: "xori",
         opcode: 0b_0101_100,
         itype: I,
-        operands_format: [ RegD, RegS, Imm(12, u) ],
     }
 }
 
@@ -107,6 +102,5 @@ instruction! {
         name: "xnori",
         opcode: 0b_0101_101,
         itype: I,
-        operands_format: [ RegD, RegS, Imm(12, u) ],
     }
 }

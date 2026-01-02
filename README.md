@@ -99,7 +99,7 @@ In this section:
 - instructions:
   - `and`, `or`, `xor`, `nand`, `nor`, `xnor`, `not`
   - `andi`, `ori`, `xori`, `nandi`, `nori` `xnori`
-- format: `instr[.cond] rd rs1 rs2/imm12u` and `not[.cond] rd rs1`, where `imm12u` is a 12-bit unsigned immediate value.
+- format: `instr[.cond] rd rs1 rs2/imm12` or `not[.cond] rd rs1`
 - macros: Same as [Arithmetic](#arithmetic) instructions.
 
 #### Shift and Rotate
