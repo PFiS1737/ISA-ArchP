@@ -4,6 +4,7 @@ mod compare;
 mod display;
 mod jump_and_link;
 mod load_store;
+mod load_upper;
 mod logic;
 mod shift;
 mod stack_call_ret;
@@ -325,15 +326,6 @@ mod tests {
 
         assert_snapshot!(cmd("", &["r1", "r2", "32"]), @"Error: Immediate '32' out of range for u5 (0 ..= 31)");
         assert_snapshot!(cmd("", &["r1", "r2", "31"]), @"0110 001 000 00001 00010 0000000 11111");
-
-        let cmd = instr("li");
-
-        assert_snapshot!(cmd("", &["r1", "3"]), @"1000 010 000 00001 00000 0000000 00011");
-        assert_snapshot!(cmd("", &["r1", "2047"]), @"1000 010 000 00001 00000 0111111 11111");
-        assert_snapshot!(cmd("", &["r1", "2048"]), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(cmd("", &["r1", "-3"]), @"1000 010 000 00001 00000 1111111 11101");
-        assert_snapshot!(cmd("", &["r1", "-2048"]), @"1000 010 000 00001 00000 1000000 00000");
-        assert_snapshot!(cmd("", &["r1", "-2049"]), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
     }
 
     #[test]
@@ -364,7 +356,7 @@ mod tests {
         assert_snapshot!(cmd("", &["r3", "-123"]), @"Error: Immediate '-123' out of range for u20 (must be >= 0)");
         assert_snapshot!(cmd("eq", &["r3", "0xABCDE"]), @"Error: Condition is not allowed for U-type instruction 'lui'");
 
-        assert_snapshot!(cmd("", &["r3", "0xABCDE"]), @"1000 011 101 00011 01011 1100110 11110");
+        assert_snapshot!(cmd("", &["r3", "0xABCDE"]), @"1011 000 101 00011 01011 1100110 11110");
     }
 
     #[test]

@@ -5,15 +5,15 @@ input_file: examples/trapping-rain-water.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x840C0010 # li t0 16                             <label: main>
+0x400C0010 # addi t0 r0 16       [li t0 16]       <label: main>
 0x8200701A # sw t1 io 0          [sw io t1]       <label: input>
 0x400E7001 # addi t1 t1 1        [inc t1]
 0x420C6001 # subi t0 t0 1        [dec t0]
 0x9A006020 # bgt t0 r0 input     [bgtz t0 input]
 0xAA000007 # call solve
 0x4034A000 # addi io rt 0        [mv io rt]
-0x84020000 # li l 0                               <label: solve>
-0x8404000F # li r 15
+0x40020000 # addi l r0 0         [li l 0]         <label: solve>
+0x4004000F # addi r r0 15        [li r 15]
 0x80061000 # lw lmax l 0         [lw lmax l]
 0x80082000 # lw rmax r 0         [lw rmax r]
 0x9C0013A2 # bge l r endwhile                     <label: while>

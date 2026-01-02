@@ -98,16 +98,6 @@ B-type (store)
 
 1000 001 sw offsetu base=(rs1) offsetl rs2
 
-I-type (load immediate)
------------------------
-
-1000 010 li rd ___ imm12
-
-U-type (load upper immediate)
------------------------------
-
-1000 011 lui rd uimm20
-
 B-type (branch)
 ---------------
 
@@ -118,7 +108,7 @@ B-type (branch)
 1001 101 bgt
 1001 110 bge
 
-I-type jump and link
+I-type (jump and link)
 --------------------
 
 1001 000 jal  rd ___ addr12
@@ -136,6 +126,11 @@ I-type (call/ret)
 1010 100 ret   __ ___ ____________
 1010 101 call  __ ___ addr12=imm12
 1010 110 callr __ rs1 ____________
+
+U-type (load upper immediate)
+-----------------------------
+
+1011 000 lui rd uimm20
 
 C-type (set pixel color)
 ------------------

@@ -5,14 +5,14 @@ input_file: examples/fib.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x860C0001 # lui sp 1        [li sp 4096]
+0xB00C0001 # lui sp 1        [li sp 4096]
 0x400C6000 # addi sp sp 0    [li sp 4096]
-0x8408000A # li a0 10                        <label: main>
+0x4008000A # addi a0 r0 10   [li a0 10]      <label: main>
 0x900A0005 # jal ra fib
 0x40344000 # addi io a0 0    [mv io a0]
-0x843E0002 # li tmp 2        [bgt a0 2 .L8]  <label: fib>
+0x403E0002 # addi tmp r0 2   [bgt a0 2 .L8]  <label: fib>
 0x9A00413F # bgt a0 tmp .L8  [bgt a0 2 .L8]
-0x84080001 # li a0 1
+0x40080001 # addi a0 r0 1    [li a0 1]
 0x9E005000 # jalr r0 ra      [jr ra]
 0x420C6003 # subi sp sp 3    [sub sp sp 3]   <label: .L8>
 0x82006045 # sw sp ra 2      [sw ra 2(sp)]

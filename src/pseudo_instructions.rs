@@ -2,6 +2,7 @@ mod branch_zero;
 mod clear;
 mod inc_dec;
 mod jump;
+mod load_imm;
 mod mv;
 mod not;
 

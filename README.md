@@ -94,9 +94,11 @@ In this section:
   - `addi`, `subi`, `muli`, `mulhi`, `mulhui`, `mulhsui`, `divi`, `modi`
 - format: `instr[.cond] rd rs1 rs2/imm12`
 - pseudo:
+  - `li rd imm12` => `addi rd r0 imm12`
   - `mv rd rs1` => `addi rd rs1 0`
   - `inc rd` => `addi rd rd 1`
   - `dec rd` => `subi rd rd 1`
+  - `clr rd` => `addi rd r0 0`
 - macros:
   - When using register series instructions, if the third operand is a numeric literal, it will be automatically replaced with an immediate series instruction.
   - When using immediate series instructions, if the immediate is larger the 12-bit, it will be automatically expanded into multiple instructions to load the immediate into a temporary register first.
@@ -128,14 +130,8 @@ In this section:
 
 - `lw[.cond] rd rs1 imm12`: load word from memory address `rs1 + imm12` into `rd`.
 - `sw[.cond] rs1 rs2 imm12`: store word from `rs2` into memory address `rs1 + imm12`.
-- `li[.cond] rd imm12`: load immediate value `imm12` into `rd`.
-- `lui rd imm20`: load upper immediate value `imm20` (20-bit unsigned) into the upper 20 bits of `rd`, setting the lower 12 bits to 0.
-- pseudo:
-  - `clr rd` => `li rd 0`
 - macros:
-  - When using `li`, if the immediate is larger the 12-bit, it will be automatically expanded into multiple instructions to load the immediate into the destination register.
-  - e.g. `li r1 0x123456` => `lui r1 0x123; addi r1 r1 0x456`
-  - When using `lw` or `sw`, it allows you to use a RISCV-style offset syntax.
+  - It allows you to use a RISC-V-style offset syntax.
   - e.g. `lw r1 4(r2)` => `lw r1 r2 4`
 
 > [!IMPORTANT]
@@ -145,6 +141,10 @@ In this section:
 > If you are simulating the hardware stack using a stack pointer register (e.g. `const sp r10`),  
 > remember to initialize it to point to the top of the stack memory region. (e.g. `li sp 4096`)  
 > Example: [fib.asm](./examples/fib.asm)
+
+#### Load Upper
+
+- `lui rd imm20`: load upper immediate value `imm20` (20-bit unsigned) into the upper 20 bits of `rd`, setting the lower 12 bits to 0.
 
 #### Branching
 

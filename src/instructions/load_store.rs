@@ -16,20 +16,3 @@ instruction! {
         operands_format: [RegS, RegS, Imm(12, i)],
     }
 }
-
-instruction! {
-    pub Li {
-        name: "li",
-        opcode: 0b_1000_010,
-        itype: I,
-        operands_format: [ RegD, _, Imm(12, i) ],
-    }
-}
-
-instruction! {
-    pub Lui {
-        name: "lui",
-        opcode: 0b_1000_011,
-        itype: U,
-    }
-}
