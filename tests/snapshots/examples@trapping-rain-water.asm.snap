@@ -6,7 +6,7 @@ success: true
 exit_code: 0
 ----- stdout -----
 0x400C0010 # addi t0 r0 16       [li t0 16]       <label: main>
-0x8200701A # sw t1 io 0          [sw io t1]       <label: input>
+0x8E00701A # sb t1 io 0          [sb io t1]       <label: input>
 0x400E7001 # addi t1 t1 1        [inc t1]
 0x420C6001 # subi t0 t0 1        [dec t0]
 0x9A006020 # bgt t0 r0 input     [bgtz t0 input]
@@ -14,12 +14,12 @@ exit_code: 0
 0x4034A000 # addi io rt 0        [mv io rt]
 0x40020000 # addi l r0 0         [li l 0]         <label: solve>
 0x4004000F # addi r r0 15        [li r 15]
-0x80061000 # lw lmax l 0         [lw lmax l]
-0x80082000 # lw rmax r 0         [lw rmax r]
+0x88061000 # lbu lmax l 0        [lbu lmax l]
+0x88082000 # lbu rmax r 0        [lbu rmax r]
 0x9C0013A2 # bge l r endwhile                     <label: while>
 0x9C0032A4 # bge lmax rmax else
 0x40021001 # addi l l 1          [inc l]
-0x80101000 # lw a0 l 0           [lw a0 l]
+0x88101000 # lbu a0 l 0          [lbu a0 l]
 0x40123000 # addi a1 lmax 0      [mv a1 lmax]
 0xAA00001F # call max
 0x4006A000 # addi lmax rt 0      [mv lmax rt]
@@ -27,7 +27,7 @@ exit_code: 0
 0x000A5007 # add water water t1
 0x9000001C # jal r0 endif        [j endif]
 0x42042001 # subi r r 1          [dec r]          <label: else>
-0x80102000 # lw a0 r 0           [lw a0 r]
+0x88102000 # lbu a0 r 0          [lbu a0 r]
 0x40124000 # addi a1 rmax 0      [mv a1 rmax]
 0xAA00001F # call max
 0x4008A000 # addi rmax rt 0      [mv rmax rt]

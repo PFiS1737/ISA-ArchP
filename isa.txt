@@ -5,7 +5,7 @@ R-type
 ------
 
 xxxx xxx   xxx   xxxxx   xxxxx   0000000   xxxxx
- opcode  | cond|   rd  |  rs1  |    --   |  rs2
+ opcode  | cond|   rd  |  rs1  |   ---   |  rs2
 
 I-type
 ------
@@ -16,20 +16,20 @@ xxxx xxx   xxx   xxxxx   xxxxx   xxxxxxxxxxxx
 B-type
 ------
 
-1001 xxx   xxx   xxxxx   xxxxx   xxxxxxx   xxxxx
- opcode  | cond|  up5  |  rs1  |   low7  |  rs2  (offset12 = up5 << 7 | low7)
+xxxx xxx   xxx   xxxxx   xxxxx   xxxxxxx   xxxxx
+ opcode  | cond|  hi5  |  rs1  |   lo7   |  rs2  (offset12 = hi5 << 7 | lo7)
 
 U-type
 ------
 
-1000 100   xxx   xxxxx   xxxxxxxxxxxxxxxxx
-   lui  |uimm20u|  rd  |      uimm20l      (uimm20 = uimm20u << 17 | uimm20l)
+1011 000   xxx   xxxxx   xxxxxxxxxxxxxxxxx
+   lui   | hi3 |  rd  |        low17       (uimm20 = hi3 << 17 | lo17)
 
 C-type
 ------
 
 1101 000   0   xxxxxxxx xxxxxxxx xxxxxxxx
-   col   | - |           color24
+   col   | - |          color24
 
 Instructions
 ============
@@ -91,12 +91,18 @@ I-type (immediate compute)
 I-type (load)
 -------------
 
-1000 000 lw rd base=(rs1) offset12
+1000 000 lw
+1000 001 lh
+1000 010 lhu
+1000 011 lb
+1000 100 lbu
 
 B-type (store)
 --------------
 
-1000 001 sw offsetu base=(rs1) offsetl rs2
+1000 101 sw
+1000 110 sh
+1000 111 sb
 
 B-type (branch)
 ---------------
@@ -117,8 +123,8 @@ I-type (jump and link)
 I-type (stack)
 --------------
 
-1010 000 pop   rd ___ _____
-1010 001 push  __ rs1 _____
+1010 000 pop  rd ___ _____
+1010 001 push __ rs1 _____
 
 I-type (call/ret)
 -----------------

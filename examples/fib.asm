@@ -19,9 +19,9 @@ fib:
     li a0 1
     jr ra
 .L8:
-    sub sp sp 3
-    sw ra 2(sp)
-    sw s0 1(sp)
+    sub sp sp 12
+    sw ra 8(sp)
+    sw s0 4(sp)
     sw s1 0(sp)
     mv s0 a0
     add a0 a0 -1
@@ -30,8 +30,8 @@ fib:
     add a0 s0 -2
     jal ra fib
     add a0 s1 a0
-    lw ra 2(sp)
-    lw s0 1(sp)
+    lw ra 8(sp)
+    lw s0 4(sp)
     lw s1 0(sp)
-    add sp sp 3
+    add sp sp 12
     jr ra

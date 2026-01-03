@@ -130,13 +130,25 @@ In this section:
 #### Load and Store
 
 - `lw[.cond] rd rs1 imm12`: load word from memory address `rs1 + imm12` into `rd`.
+- `lh[.cond] rd rs1 imm12`: load half-word from memory address `rs1 + imm12` into the lower 16 bits of `rd`, sign-extended.
+- `lhu[.cond] rd rs1 imm12`: load half-word from memory address `rs1 + imm12` into the lower 16 bits of `rd`, zero-extended.
+- `lb[.cond] rd rs1 imm12`: load byte from memory address `rs1 + imm12` into the lower 8 bits of `rd`, sign-extended.
+- `lbu[.cond] rd rs1 imm12`: load byte from memory address `rs1 + imm12` into the lower 8 bits of `rd`, zero-extended.
 - `sw[.cond] rs1 rs2 imm12`: store word from `rs2` into memory address `rs1 + imm12`.
+- `sh[.cond] rs1 rs2 imm12`: store the lower 16 bits of `rs2` into memory address `rs1 + imm12`.
+- `sb[.cond] rs1 rs2 imm12`: store the lower 8 bits of `rs2` into memory address `rs1 + imm12`.
+- note:
+  - The unit of memory address is in bytes.
 - macros:
   - It allows you to use a RISC-V-style offset syntax.
-  - e.g. `lw r1 4(r2)` => `lw r1 r2 4`
+  - e.g. `lw rd rs1 4` => `lw rd 4(rs1)`; `sw rs1 rs2 -8` => `sw rs2 -8(rs1)`
 
-> [!IMPORTANT]
-> The unit of `imm12` in `lw` and `sw` is words (32-bit), not bytes.
+> [!CAUTION]
+> Please ensure that the memory addresses accessed by load and store instructions are properly aligned:
+> - `lw`, `sw`: 4-byte
+> - `lh`, `lhu`, `sh`: 2-byte
+> - `lb`, `lbu`, `sb`: 1-byte (no alignment needed)
+> Unaligned memory accesses is an undefined behavior at the hardware level and may lead to unexpected results.
 
 > [!NOTE]
 > If you are simulating the hardware stack using a stack pointer register (e.g. `const sp r10`),  

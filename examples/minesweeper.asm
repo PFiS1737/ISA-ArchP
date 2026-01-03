@@ -126,8 +126,11 @@ init_mines:
 		mv t2 rng
 		mod x t1 GRID_COLS
 		mod y t2 GRID_ROWS
+
 		mul addr y GRID_COLS
 		add addr addr x
+    mul addr addr 4
+
 		lw t1 addr
 		beq t1 MINE_MASK init_mines_loop
 
@@ -149,7 +152,7 @@ init_mine_counts:
 		add t2 t1 cnt
 		sw t2 addr
 		inc x
-		inc addr
+		add addr addr 4
 		blt x GRID_COLS init_mine_counts_loop
 		clr x
 		inc y
@@ -178,6 +181,7 @@ count_around_mines:
 		# 计算地址
 		mul t1 ny GRID_COLS
 		add t1 t1 nx
+    mul t1 t1 4
 
 		# 读取格子值
 		lw t2 t1
@@ -273,6 +277,7 @@ update_cursor:
 reveal_tile:
 	mul addr cursor_y GRID_COLS
 	add addr addr cursor_x
+  mul addr addr 4
 	lw t1 addr
 
 	and t2 t1 REVEAL_MASK
@@ -325,6 +330,7 @@ reveal_around:
 		# 计算地址
 		mul addr ny GRID_COLS
 		add addr addr nx
+    mul addr addr 4
 
 		# 读取格子值
 		lw t1 addr
@@ -386,6 +392,7 @@ reveal_around:
 toggle_flag:
 	mul addr cursor_y GRID_COLS
 	add addr addr cursor_x
+  mul addr addr 4
 	lw t1 addr
 
 	and t2 t1 REVEAL_MASK
@@ -690,7 +697,7 @@ main:
 			call.ne draw_mine
 		skip_draw:
 			inc nx
-			inc addr
+			add addr addr 4
 			blt nx GRID_COLS lose_col_loop
 			inc ny
 			blt ny GRID_ROWS lose_row_loop

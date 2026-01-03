@@ -7,39 +7,39 @@ use crate::{
 //       be checked during encoding.
 
 macro_instruction! {
-    /// lw rd imm(rs)  =>  lw rd rs imm12  (base=rs, offset=imm12)
+    /// lw rd imm(rs)  =>  lw rd rs imm12
     pub RiscvLw {
-        name: "lw",
+        name: [ "lw", "lh", "lhu", "lb", "lbu" ],
         expander: F1,
     }
 }
 
-const F1: ExpandFn = |_, _, cond, ops| {
+const F1: ExpandFn = |_, name, cond, ops| {
     if ops.len() != 2 {
         return None;
     }
 
     let (imm, base) = parse_offset(&ops[1])?;
 
-    Some(vec![("lw", cond, op_values!(ops[0], base, imm))])
+    Some(vec![(name, cond, op_values!(ops[0], base, imm))])
 };
 
 macro_instruction! {
-    /// sw rs2 imm(rs1)  =>  sw rs1 rs2 imm12  (base=rs1, offset=imm12)
+    /// sw rs2 imm(rs1)  =>  sw rs1 rs2 imm12
     pub RiscvSw {
-        name: "sw",
+        name: [ "sw", "sh", "sb" ],
         expander: F2,
     }
 }
 
-const F2: ExpandFn = |_, _, cond, ops| {
+const F2: ExpandFn = |_, name, cond, ops| {
     if ops.len() != 2 {
         return None;
     }
 
     let (imm, base) = parse_offset(&ops[1])?;
 
-    Some(vec![("sw", cond, op_values!(base, ops[0], imm))])
+    Some(vec![(name, cond, op_values!(base, ops[0], imm))])
 };
 
 fn parse_offset<'a>(op: &OperandValue<'a>) -> Option<(&'a str, &'a str)> {
