@@ -99,6 +99,7 @@ In this section:
   - `inc rd` => `addi rd rd 1`
   - `dec rd` => `subi rd rd 1`
   - `clr rd` => `addi rd r0 0`
+  - `neg rd rs1` => `sub rd r0 rs1`
 - macros:
   - When using register series instructions, if the third operand is a numeric literal, it will be automatically replaced with an immediate series instruction.
   - When using immediate series instructions, if the immediate is larger the 12-bit, it will be automatically expanded into multiple instructions to load the immediate into a temporary register first.

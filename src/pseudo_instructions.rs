@@ -4,6 +4,7 @@ mod inc_dec;
 mod jump;
 mod load_imm;
 mod mv;
+mod negate;
 mod not;
 
 use std::collections::HashMap;
