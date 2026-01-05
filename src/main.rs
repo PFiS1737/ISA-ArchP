@@ -72,7 +72,7 @@ fn main() -> Result<()> {
 
     for (code, display) in codes.iter().zip(align_tabbed_lines(&displays)) {
         if cli.bin {
-            out.write_all(&code.to_be_bytes())?;
+            out.write_all(&code.to_le_bytes())?;
         } else {
             writeln!(out, "0x{:08X} # {}", code, display)?;
         }
