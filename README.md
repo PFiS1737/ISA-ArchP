@@ -72,7 +72,8 @@ In this section:
 - `rs1`: the first source register.
 - `rs2`: the second source register.
 - `imm12`: 12-bit signed immediate value, from `-2048` to `2047`.
-- `addr12`: 12-bit unsigned absolute address in number of instructions.
+- `addr12`: 12-bit signed relative address offset in the unit of 2-byte.
+  - This usually indicates: `pc = pc + sign_extend(addr12 << 1)`.
 - `immX`: will be specified in the instruction description.
 - numeric literal: `42`, `-7`, `0b010101`, `0xFE42`, etc.
 
@@ -164,7 +165,7 @@ In this section:
 - instructions: `beq`, `bne`, `blt`, `ble`, `bgt`, `bge`
 - format: `instr[.cond] rs1 rs2 addr12`
 - pseudo:
-  - `b**z rs1 imm12` => `b** rs1 r0 imm12` (e.g. `beqz`, `bnez`, `bltz`, etc.)
+  - `b**z rs1 addr12` => `b** rs1 r0 addr12` (e.g. `beqz`, `bnez`, `bltz`, etc.)
 - macros:
   - If the `rs2` operand is a numeric literal, it will be automatically expanded to use a temporary register.
   - A 32-bit immediate literal is also supported.
@@ -177,16 +178,16 @@ In this section:
 
 #### Call and Return
 
-- `call[.cond] addr12`: call a subroutine at the address `addr12`.
-- `callr[.cond] rs1`: call a subroutine at the address contained in `rs1` (low 16-bit is valid).
+- `call[.cond] addr12`: call a subroutine at an address.
+- `callr[.cond] rs1`: call a subroutine at the address contained in `rs1`.
 - `ret[.cond]`: return from the current subroutine.
 - note:
   - The return address is automatically managed by the hardware stack.
 
 #### Jump and Link
 
-- `jal[.cond] rd addr12`: jump to the address `addr12` and write the return address into `rd`.
-- `jalr[.cond] rd rs1`: jump to the address contained in `rs1` (low **16-bit** is valid) and write the return address into `rd`.
+- `jal[.cond] rd addr12`: jump to an address and write the return address (`pc + 4`) into `rd`.
+- `jalr[.cond] rd rs1`: jump to the address contained in `rs1` and write the return address (`pc + 4`) into `rd`.
 - pseudo:
   - `j addr12` => `jal r0 addr12`
   - `jr rs1` => `jalr r0 rs1`

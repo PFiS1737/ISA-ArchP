@@ -8,10 +8,10 @@ exit_code: 0
 0xB00C0001 # lui sp 1        [li sp 4096]
 0x400C6000 # addi sp sp 0    [li sp 4096]
 0x4008000A # addi a0 r0 10   [li a0 10]      <label: main>
-0x900A0005 # jal ra fib
+0x900A0004 # jal ra fib
 0x40344000 # addi io a0 0    [mv io a0]
 0x403E0002 # addi tmp r0 2   [bgt a0 2 .L8]  <label: fib>
-0x9A00413F # bgt a0 tmp .L8  [bgt a0 2 .L8]
+0x9A0040DF # bgt a0 tmp .L8  [bgt a0 2 .L8]
 0x40080001 # addi a0 r0 1    [li a0 1]
 0x9E005000 # jalr r0 ra      [jr ra]
 0x420C600C # subi sp sp 12   [sub sp sp 12]  <label: .L8>
@@ -20,10 +20,10 @@ exit_code: 0
 0x8A006002 # sw sp s1 0      [sw s1 0(sp)]
 0x40024000 # addi s0 a0 0    [mv s0 a0]
 0x40084FFF # addi a0 a0 -1   [add a0 a0 -1]
-0x900A0005 # jal ra fib
+0x900A0FEC # jal ra fib
 0x40044000 # addi s1 a0 0    [mv s1 a0]
 0x40081FFE # addi a0 s0 -2   [add a0 s0 -2]
-0x900A0005 # jal ra fib
+0x900A0FE6 # jal ra fib
 0x00082004 # add a0 s1 a0
 0x800A6008 # lw ra sp 8      [lw ra 8(sp)]
 0x80026004 # lw s0 sp 4      [lw s0 4(sp)]

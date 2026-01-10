@@ -45,7 +45,13 @@ pub trait Instruction: Send + Sync {
     fn itype(&self) -> InstrType;
     fn operands_format(&self) -> Option<&'static [Option<OperandType>]>;
 
-    fn encode(&self, ctx: &Context, cond: Option<&str>, operands: &[OperandValue]) -> Result<u32> {
+    fn encode(
+        &self,
+        ctx: &Context,
+        pc: u32,
+        cond: Option<&str>,
+        operands: &[OperandValue],
+    ) -> Result<u32> {
         let cond = cond.map(parse_cond).transpose()?.unwrap_or(0);
 
         if matches!(self.itype(), InstrType::U | InstrType::C) && cond != 0 {
@@ -56,7 +62,7 @@ pub trait Instruction: Send + Sync {
             );
         }
 
-        let operands = self.parse(ctx, operands)?;
+        let operands = self.parse(ctx, pc, operands)?;
 
         match self.itype() {
             InstrType::R => self.encode_r(cond, &operands),
@@ -67,7 +73,7 @@ pub trait Instruction: Send + Sync {
         }
     }
 
-    fn parse(&self, ctx: &Context, operands: &[OperandValue]) -> Result<Vec<u32>> {
+    fn parse(&self, ctx: &Context, pc: u32, operands: &[OperandValue]) -> Result<Vec<u32>> {
         let format = self.get_operands_format();
 
         let expected = format.iter().filter(|x| x.is_some()).count();
@@ -88,7 +94,7 @@ pub trait Instruction: Send + Sync {
                         OperandType::Imm(bits, signed) => {
                             parse_imm(ctx, op)?.as_field(bits, signed)?
                         }
-                        OperandType::Addr => parse_address(ctx, op)?,
+                        OperandType::Addr => parse_address(ctx, op)?.as_i12(pc)?,
                     };
 
                     ret.push(val);
@@ -332,8 +338,8 @@ mod tests {
     fn enocde_b() {
         let cmd = instr("beq");
         // Same to I-type, omitting ...
-        assert_snapshot!(cmd("ne", &["r1", "r0", "over"]), @"Error: Address out of range for label: 'over' ( = 4096 )");
-        assert_snapshot!(cmd("ne", &["r1", "r0", "loop"]), @"1001 001 010 00000 00001 0000100 00000");
+        assert_snapshot!(cmd("ne", &["r1", "r0", "over"]), @"Error: Address offset out of range for i12: 596523");
+        assert_snapshot!(cmd("ne", &["r1", "r0", "loop"]), @"1001 001 010 00000 00001 0000010 00000");
 
         let cmd = instr("sw");
 

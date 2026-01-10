@@ -5,54 +5,54 @@ input_file: examples/minesweeper.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x900001D3 # jal r0 main                      [j main]
+0x900003A6 # jal r0 main                      [j main]
 0x40020000 # addi x r0 0                      [clr x]                                  <label: init_screen>
 0x40040000 # addi y r0 0                      [clr y]
 0xD0181A1B # col COLOR_BACK
 0xD2001002 # spx x y                                                                   <label: draw_back>
 0x40021001 # addi x x 1                       [inc x]
 0x403E0080 # addi tmp r0 128                  [blt x SCREEN_WIDTH draw_back]
-0x9600109F # blt x tmp draw_back              [blt x SCREEN_WIDTH draw_back]
+0x963E1F5F # blt x tmp draw_back              [blt x SCREEN_WIDTH draw_back]
 0x40042001 # addi y y 1                       [inc y]
 0x40020000 # addi x r0 0                      [clr x]
 0x403E0048 # addi tmp r0 72                   [blt y SCREEN_HEIGHT draw_back]
-0x9600209F # blt y tmp draw_back              [blt y SCREEN_HEIGHT draw_back]
+0x963E2E5F # blt y tmp draw_back              [blt y SCREEN_HEIGHT draw_back]
 0x40020000 # addi x r0 0                      [clr x]
 0x40040000 # addi y r0 0                      [clr y]
 0xD04C545C # col COLOR_HIDDEN
 0xD2001002 # spx x y                                                                   <label: draw_grid>
 0x40021001 # addi x x 1                       [inc x]
 0x403E0079 # addi tmp r0 121                  [blt x GRID_WIDTH draw_grid]
-0x960011FF # blt x tmp draw_grid              [blt x GRID_WIDTH draw_grid]
+0x963E1F5F # blt x tmp draw_grid              [blt x GRID_WIDTH draw_grid]
 0x40042001 # addi y y 1                       [inc y]
 0x40020000 # addi x r0 0                      [clr x]
 0x403E0041 # addi tmp r0 65                   [blt y GRID_HEIGHT draw_grid]
-0x960021FF # blt y tmp draw_grid              [blt y GRID_HEIGHT draw_grid]
+0x963E2E5F # blt y tmp draw_grid              [blt y GRID_HEIGHT draw_grid]
 0x40020000 # addi x r0 0                      [clr x]
 0x40040000 # addi y r0 0                      [clr y]
 0xD022262E # col COLOR_GRID_LINE
 0xD2001002 # spx x y                                                                   <label: draw_grid_line_row>
 0x40021001 # addi x x 1                       [inc x]
 0x403E0079 # addi tmp r0 121                  [blt x GRID_WIDTH draw_grid_line_row]
-0x9600135F # blt x tmp draw_grid_line_row     [blt x GRID_WIDTH draw_grid_line_row]
+0x963E1F5F # blt x tmp draw_grid_line_row     [blt x GRID_WIDTH draw_grid_line_row]
 0x40042008 # addi y y 8                       [add y y TILE_SIZE]
 0x40020000 # addi x r0 0                      [clr x]
 0x403E0041 # addi tmp r0 65                   [blt y GRID_HEIGHT draw_grid_line_row]
-0x9600235F # blt y tmp draw_grid_line_row     [blt y GRID_HEIGHT draw_grid_line_row]
+0x963E2E5F # blt y tmp draw_grid_line_row     [blt y GRID_HEIGHT draw_grid_line_row]
 0x40020000 # addi x r0 0                      [clr x]
 0x40040000 # addi y r0 0                      [clr y]
 0xD2001002 # spx x y                                                                   <label: draw_grid_line_col>
 0x40042001 # addi y y 1                       [inc y]
 0x403E0041 # addi tmp r0 65                   [blt y GRID_HEIGHT draw_grid_line_col]
-0x9600249F # blt y tmp draw_grid_line_col     [blt y GRID_HEIGHT draw_grid_line_col]
+0x963E2F5F # blt y tmp draw_grid_line_col     [blt y GRID_HEIGHT draw_grid_line_col]
 0x40021008 # addi x x 8                       [add x x TILE_SIZE]
 0x40040000 # addi y r0 0                      [clr y]
 0x403E0079 # addi tmp r0 121                  [blt x GRID_WIDTH draw_grid_line_col]
-0x9600149F # blt x tmp draw_grid_line_col     [blt x GRID_WIDTH draw_grid_line_col]
+0x963E1E5F # blt x tmp draw_grid_line_col     [blt x GRID_WIDTH draw_grid_line_col]
 0x400E0000 # addi cursor_x r0 0               [clr cursor_x]
 0x40100000 # addi cursor_y r0 0               [clr cursor_y]
 0xD0D6BB15 # col COLOR_CURSOR
-0xAA000089 # call update_cursor
+0xAA0000B4 # call update_cursor
 0xA8000000 # ret
 0x40240010 # addi mine_num r0 MINE_NUM_MAX    [li mine_num MINE_NUM_MAX]               <label: init_mines>
 0x40060000 # addi i r0 0                      [clr i]
@@ -65,39 +65,39 @@ exit_code: 0
 0x44129004 # muli addr addr 4                 [mul addr addr 4]
 0x800A9000 # lw t1 addr 0                     [lw t1 addr]
 0x403E0008 # addi tmp r0 8                    [beq t1 MINE_MASK init_mines_loop]
-0x9200567F # beq t1 tmp init_mines_loop       [beq t1 MINE_MASK init_mines_loop]
+0x923E5DDF # beq t1 tmp init_mines_loop       [beq t1 MINE_MASK init_mines_loop]
 0x400A0008 # addi t1 r0 MINE_MASK             [li t1 MINE_MASK]
 0x8A009005 # sw addr t1 0                     [sw t1 addr]
 0x40063001 # addi i i 1                       [inc i]
-0x96003672 # blt i mine_num init_mines_loop
+0x963E3CD2 # blt i mine_num init_mines_loop
 0xA8000000 # ret
 0x40020000 # addi x r0 0                      [clr x]                                  <label: init_mine_counts>
 0x40040000 # addi y r0 0                      [clr y]
 0x40120000 # addi addr r0 0                   [clr addr]
-0xAA000052 # call count_around_mines                                                   <label: init_mine_counts_loop>
+0xAA00001A # call count_around_mines                                                   <label: init_mine_counts_loop>
 0x800A9000 # lw t1 addr 0                     [lw t1 addr]
 0x000C500E # add t2 t1 cnt
 0x8A009006 # sw addr t2 0                     [sw t2 addr]
 0x40021001 # addi x x 1                       [inc x]
 0x40129004 # addi addr addr 4                 [add addr addr 4]
 0x403E000F # addi tmp r0 15                   [blt x GRID_COLS init_mine_counts_loop]
-0x960018BF # blt x tmp init_mine_counts_loop  [blt x GRID_COLS init_mine_counts_loop]
+0x963E1E5F # blt x tmp init_mine_counts_loop  [blt x GRID_COLS init_mine_counts_loop]
 0x40020000 # addi x r0 0                      [clr x]
 0x40042001 # addi y y 1                       [inc y]
 0x403E0008 # addi tmp r0 8                    [blt y GRID_ROWS init_mine_counts_loop]
-0x960028BF # blt y tmp init_mine_counts_loop  [blt y GRID_ROWS init_mine_counts_loop]
+0x963E2D5F # blt y tmp init_mine_counts_loop  [blt y GRID_ROWS init_mine_counts_loop]
 0xA8000000 # ret
 0x401C0000 # addi cnt r0 0                    [clr cnt]                                <label: count_around_mines>
 0x40160FFF # addi ty r0 -1                    [li ty -1]
 0x40140FFF # addi tx r0 -1                    [li tx -1]                               <label: dy_loop>
 0x0018100A # add nx x tx                                                               <label: dx_loop>
 0x001A200B # add ny y ty
-0x9600CC80 # blt nx r0 skip_this_neighbor     [bltz nx skip_this_neighbor]
+0x9600C340 # blt nx r0 skip_this_neighbor     [bltz nx skip_this_neighbor]
 0x403E000F # addi tmp r0 15                   [bge nx GRID_COLS skip_this_neighbor]
-0x9C00CC9F # bge nx tmp skip_this_neighbor    [bge nx GRID_COLS skip_this_neighbor]
-0x9600DC80 # blt ny r0 skip_this_neighbor     [bltz ny skip_this_neighbor]
+0x9C00C2DF # bge nx tmp skip_this_neighbor    [bge nx GRID_COLS skip_this_neighbor]
+0x9600D280 # blt ny r0 skip_this_neighbor     [bltz ny skip_this_neighbor]
 0x403E0008 # addi tmp r0 8                    [bge ny GRID_ROWS skip_this_neighbor]
-0x9C00DC9F # bge ny tmp skip_this_neighbor    [bge ny GRID_ROWS skip_this_neighbor]
+0x9C00D21F # bge ny tmp skip_this_neighbor    [bge ny GRID_ROWS skip_this_neighbor]
 0x440AD00F # muli t1 ny 15                    [mul t1 ny GRID_COLS]
 0x000A500C # add t1 t1 nx
 0x440A5004 # muli t1 t1 4                     [mul t1 t1 4]
@@ -107,22 +107,22 @@ exit_code: 0
 0x405CE001 # addi.eq cnt cnt 1                [inc.eq cnt]
 0x4014A001 # addi tx tx 1                     [inc tx]                                 <label: skip_this_neighbor>
 0x403E0001 # addi tmp r0 1                    [ble tx 1 dx_loop]
-0x9800AABF # ble tx tmp dx_loop               [ble tx 1 dx_loop]
+0x983EABDF # ble tx tmp dx_loop               [ble tx 1 dx_loop]
 0x4016B001 # addi ty ty 1                     [inc ty]
 0x403E0001 # addi tmp r0 1                    [ble ty 1 dy_loop]
-0x9800BA9F # ble ty tmp dy_loop               [ble ty 1 dy_loop]
+0x983EBADF # ble ty tmp dy_loop               [ble ty 1 dy_loop]
 0xA8000000 # ret
 0x7000F046 # cmpi key_code 70                 [cmp key_code KEY_UP]                    <label: move_cursor>
-0x90400074 # jal.eq r0 handle_cursor_move     [j.eq handle_cursor_move]
+0x90400010 # jal.eq r0 handle_cursor_move     [j.eq handle_cursor_move]
 0x7000F048 # cmpi key_code 72                 [cmp key_code KEY_DOWN]
-0x90400074 # jal.eq r0 handle_cursor_move     [j.eq handle_cursor_move]
+0x9040000C # jal.eq r0 handle_cursor_move     [j.eq handle_cursor_move]
 0x7000F045 # cmpi key_code 69                 [cmp key_code KEY_LEFT]
-0x90400074 # jal.eq r0 handle_cursor_move     [j.eq handle_cursor_move]
+0x90400008 # jal.eq r0 handle_cursor_move     [j.eq handle_cursor_move]
 0x7000F047 # cmpi key_code 71                 [cmp key_code KEY_RIGHT]
-0x90400074 # jal.eq r0 handle_cursor_move     [j.eq handle_cursor_move]
+0x90400004 # jal.eq r0 handle_cursor_move     [j.eq handle_cursor_move]
 0xA8000000 # ret
 0xD022262E # col COLOR_GRID_LINE                                                       <label: handle_cursor_move>
-0xAA000089 # call update_cursor
+0xAA000028 # call update_cursor
 0x7000F046 # cmpi key_code 70                 [cmp key_code KEY_UP]
 0x42508001 # subi.eq cursor_y cursor_y 1      [dec.eq cursor_y]
 0x7000F048 # cmpi key_code 72                 [cmp key_code KEY_DOWN]
@@ -140,7 +140,7 @@ exit_code: 0
 0x70008008 # cmpi cursor_y 8                  [cmp cursor_y GRID_ROWS]
 0x41100000 # addi.ge cursor_y r0 0            [li.ge cursor_y 0]
 0xD0D6BB15 # col COLOR_CURSOR
-0xAA000089 # call update_cursor
+0xAA000004 # call update_cursor
 0xA8000000 # ret
 0x40060000 # addi i r0 0                      [clr i]                                  <label: update_cursor>
 0x40080000 # addi j r0 0                      [clr j]
@@ -150,71 +150,71 @@ exit_code: 0
 0x40021001 # addi x x 1                       [inc x]
 0x40063001 # addi i i 1                       [inc i]
 0x403E0008 # addi tmp r0 8                    [ble i TILE_SIZE update_cursor_loop1]
-0x980231BF # ble i tmp update_cursor_loop1    [ble i TILE_SIZE update_cursor_loop1]
+0x983E3F1F # ble i tmp update_cursor_loop1    [ble i TILE_SIZE update_cursor_loop1]
 0x44027008 # muli x cursor_x 8                [mul x cursor_x TILE_SIZE]
 0x40060000 # addi i r0 0                      [clr i]
 0x40042008 # addi y y 8                       [add y y TILE_SIZE]
 0x40084001 # addi j j 1                       [inc j]
 0x403E0001 # addi tmp r0 1                    [beq j 1 update_cursor_loop1]
-0x920241BF # beq j tmp update_cursor_loop1    [beq j 1 update_cursor_loop1]
+0x923E4D9F # beq j tmp update_cursor_loop1    [beq j 1 update_cursor_loop1]
 0x44027008 # muli x cursor_x 8                [mul x cursor_x TILE_SIZE]
 0x44048008 # muli y cursor_y 8                [mul y cursor_y TILE_SIZE]
 0xD2001002 # spx x y                                                                   <label: update_cursor_loop2>
 0x40042001 # addi y y 1                       [inc y]
 0x40063001 # addi i i 1                       [inc i]
 0x403E0008 # addi tmp r0 8                    [ble i TILE_SIZE update_cursor_loop2]
-0x9802335F # ble i tmp update_cursor_loop2    [ble i TILE_SIZE update_cursor_loop2]
+0x983E3F1F # ble i tmp update_cursor_loop2    [ble i TILE_SIZE update_cursor_loop2]
 0x44048008 # muli y cursor_y 8                [mul y cursor_y TILE_SIZE]
 0x40060000 # addi i r0 0                      [clr i]
 0x40021008 # addi x x 8                       [add x x TILE_SIZE]
 0x40084001 # addi j j 1                       [inc j]
 0x403E0003 # addi tmp r0 3                    [beq j 3 update_cursor_loop2]
-0x9202435F # beq j tmp update_cursor_loop2    [beq j 3 update_cursor_loop2]
+0x923E4D9F # beq j tmp update_cursor_loop2    [beq j 3 update_cursor_loop2]
 0xA8000000 # ret
 0x4412800F # muli addr cursor_y 15            [mul addr cursor_y GRID_COLS]            <label: reveal_tile>
 0x00129007 # add addr addr cursor_x
 0x44129004 # muli addr addr 4                 [mul addr addr 4]
 0x800A9000 # lw t1 addr 0                     [lw t1 addr]
 0x500C5010 # andi t2 t1 16                    [and t2 t1 REVEAL_MASK]
-0x94026820 # bne t2 r0 reveal_tile_ret        [bnez t2 reveal_tile_ret]
+0x94006580 # bne t2 r0 reveal_tile_ret        [bnez t2 reveal_tile_ret]
 0x500C5020 # andi t2 t1 32                    [and t2 t1 FLAG_MASK]
-0x94026820 # bne t2 r0 reveal_tile_ret        [bnez t2 reveal_tile_ret]
+0x94006500 # bne t2 r0 reveal_tile_ret        [bnez t2 reveal_tile_ret]
 0x500C5008 # andi t2 t1 8                     [and t2 t1 MINE_MASK]
-0x94066BE0 # bne t2 r0 lose_loop              [bnez t2 lose_loop]
+0x94086C00 # bne t2 r0 lose_loop              [bnez t2 lose_loop]
 0x500C5007 # andi t2 t1 7                     [and t2 t1 AROUND_COUNT_MASK]
 0x40207000 # addi arg_x cursor_x 0            [mv arg_x cursor_x]
 0x40228000 # addi arg_y cursor_y 0            [mv arg_y cursor_y]
 0x70006000 # cmpi t2 0                        [cmp t2 0]
-0xAA4000C2 # call.eq reveal_around
+0xAA40001C # call.eq reveal_around
 0x540A5010 # ori t1 t1 16                     [or t1 t1 REVEAL_MASK]
 0x8A009005 # sw addr t1 0                     [sw t1 addr]
 0x70006001 # cmpi t2 1                        [cmp t2 1]
-0xAA40015B # call.eq draw_num1
+0xAA400146 # call.eq draw_num1
 0x70006002 # cmpi t2 2                        [cmp t2 2]
-0xAA40016A # call.eq draw_num2
+0xAA400160 # call.eq draw_num2
 0x70006003 # cmpi t2 3                        [cmp t2 3]
-0xAA400184 # call.eq draw_num3
+0xAA400190 # call.eq draw_num3
 0x70006004 # cmpi t2 4                        [cmp t2 4]
-0xAA40019E # call.eq draw_num4
+0xAA4001C0 # call.eq draw_num4
 0x70006005 # cmpi t2 5                        [cmp t2 5]
-0xAA4001B6 # call.eq draw_num5
+0xAA4001EC # call.eq draw_num5
 0xA8000000 # ret                                                                       <label: reveal_tile_ret>
 0x40187000 # addi nx cursor_x 0               [mv nx cursor_x]                         <label: reveal_around>
 0x401A8000 # addi ny cursor_y 0               [mv ny cursor_y]
-0x9602CE20 # blt nx r0 reveal_around_ret      [bltz nx reveal_around_ret]              <label: reveal_around_loop>
+0x9600CB40 # blt nx r0 reveal_around_ret      [bltz nx reveal_around_ret]              <label: reveal_around_loop>
 0x403E000F # addi tmp r0 15                   [bge nx GRID_COLS reveal_around_ret]
-0x9C02CE3F # bge nx tmp reveal_around_ret     [bge nx GRID_COLS reveal_around_ret]
-0x9602DE20 # blt ny r0 reveal_around_ret      [bltz ny reveal_around_ret]
+0x9C00CADF # bge nx tmp reveal_around_ret     [bge nx GRID_COLS reveal_around_ret]
+0x9600DA80 # blt ny r0 reveal_around_ret      [bltz ny reveal_around_ret]
 0x403E0008 # addi tmp r0 8                    [bge ny GRID_ROWS reveal_around_ret]
-0x9C02DE3F # bge ny tmp reveal_around_ret     [bge ny GRID_ROWS reveal_around_ret]
+0x9C00DA1F # bge ny tmp reveal_around_ret     [bge ny GRID_ROWS reveal_around_ret]
 0x4412D00F # muli addr ny 15                  [mul addr ny GRID_COLS]
 0x0012900C # add addr addr nx
 0x44129004 # muli addr addr 4                 [mul addr addr 4]
 0x800A9000 # lw t1 addr 0                     [lw t1 addr]
 0x500C5010 # andi t2 t1 16                    [and t2 t1 REVEAL_MASK]
-0x94026E20 # bne t2 r0 reveal_around_ret      [bnez t2 reveal_around_ret]
+0x94006880 # bne t2 r0 reveal_around_ret      [bnez t2 reveal_around_ret]
 0x500C5020 # andi t2 t1 32                    [and t2 t1 FLAG_MASK]
-0x94026E20 # bne t2 r0 reveal_around_ret      [bnez t2 reveal_around_ret]
+0x94006800 # bne t2 r0 reveal_around_ret      [bnez t2 reveal_around_ret]
 0x540A5010 # ori t1 t1 16                     [or t1 t1 REVEAL_MASK]
 0x8A009005 # sw addr t1 0                     [sw t1 addr]
 0x500C5007 # andi t2 t1 7                     [and t2 t1 AROUND_COUNT_MASK]
@@ -222,29 +222,29 @@ exit_code: 0
 0x4022D000 # addi arg_y ny 0                  [mv arg_y ny]
 0x70006000 # cmpi t2 0                        [cmp t2 0]
 0xD0384048 # col COLOR_REVEALED
-0xAA400109 # call.eq draw_tile
+0xAA400060 # call.eq draw_tile
 0x70006001 # cmpi t2 1                        [cmp t2 1]
-0xAA40015B # call.eq draw_num1
+0xAA400100 # call.eq draw_num1
 0x70006002 # cmpi t2 2                        [cmp t2 2]
-0xAA40016A # call.eq draw_num2
+0xAA40011A # call.eq draw_num2
 0x70006003 # cmpi t2 3                        [cmp t2 3]
-0xAA400184 # call.eq draw_num3
+0xAA40014A # call.eq draw_num3
 0x70006004 # cmpi t2 4                        [cmp t2 4]
-0xAA40019E # call.eq draw_num4
+0xAA40017A # call.eq draw_num4
 0x70006005 # cmpi t2 5                        [cmp t2 5]
-0xAA4001B6 # call.eq draw_num5
-0x94026E20 # bne t2 r0 reveal_around_ret      [bnez t2 reveal_around_ret]
+0xAA4001A6 # call.eq draw_num5
+0x94006340 # bne t2 r0 reveal_around_ret      [bnez t2 reveal_around_ret]
 0x421AD001 # subi ny ny 1                     [dec ny]
-0xAA0000C4 # call reveal_around_loop
+0xAA000FBC # call reveal_around_loop
 0x401AD001 # addi ny ny 1                     [inc ny]
 0x401AD001 # addi ny ny 1                     [inc ny]
-0xAA0000C4 # call reveal_around_loop
+0xAA000FB6 # call reveal_around_loop
 0x421AD001 # subi ny ny 1                     [dec ny]
 0x4218C001 # subi nx nx 1                     [dec nx]
-0xAA0000C4 # call reveal_around_loop
+0xAA000FB0 # call reveal_around_loop
 0x4018C001 # addi nx nx 1                     [inc nx]
 0x4018C001 # addi nx nx 1                     [inc nx]
-0xAA0000C4 # call reveal_around_loop
+0xAA000FAA # call reveal_around_loop
 0x4218C001 # subi nx nx 1                     [dec nx]
 0xA8000000 # ret                                                                       <label: reveal_around_ret>
 0x4412800F # muli addr cursor_y 15            [mul addr cursor_y GRID_COLS]            <label: toggle_flag>
@@ -258,7 +258,7 @@ exit_code: 0
 0x70006000 # cmpi t2 0                        [cmp t2 0]
 0x42652001 # subi.eq mine_num mine_num 1      [dec.eq mine_num]
 0x544A5020 # ori.eq t1 t1 32                  [or.eq t1 t1 FLAG_MASK]
-0xAA40011C # call.eq draw_flag
+0xAA40003E # call.eq draw_flag
 0x40A52001 # addi.ne mine_num mine_num 1      [inc.ne mine_num]
 0xB03F0000 # lui tmp 0x10000                  [li.ne t2 0xFFFFFDF]
 0x403FFFDF # addi tmp tmp -33                 [li.ne t2 0xFFFFFDF]
@@ -267,7 +267,7 @@ exit_code: 0
 0x40207000 # addi arg_x cursor_x 0            [mv arg_x cursor_x]
 0x40228000 # addi arg_y cursor_y 0            [mv arg_y cursor_y]
 0xD04C545C # col COLOR_HIDDEN
-0xAA800109 # call.ne draw_tile
+0xAA800006 # call.ne draw_tile
 0x8A009005 # sw addr t1 0                     [sw t1 addr]
 0xA8000000 # ret
 0x40060000 # addi i r0 0                      [clr i]                                  <label: draw_tile>
@@ -280,14 +280,14 @@ exit_code: 0
 0x40021001 # addi x x 1                       [inc x]
 0x40063001 # addi i i 1                       [inc i]
 0x403E0007 # addi tmp r0 7                    [blt i 7 draw_tile_loop]
-0x960431FF # blt i tmp draw_tile_loop         [blt i 7 draw_tile_loop]
+0x963E3F1F # blt i tmp draw_tile_loop         [blt i 7 draw_tile_loop]
 0x44030008 # muli x arg_x 8                   [mul x arg_x TILE_SIZE]
 0x40021001 # addi x x 1                       [inc x]
 0x40042001 # addi y y 1                       [inc y]
 0x40060000 # addi i r0 0                      [clr i]
 0x40084001 # addi j j 1                       [inc j]
 0x403E0007 # addi tmp r0 7                    [blt j 7 draw_tile_loop]
-0x960441FF # blt j tmp draw_tile_loop         [blt j 7 draw_tile_loop]
+0x963E4D5F # blt j tmp draw_tile_loop         [blt j 7 draw_tile_loop]
 0xA8000000 # ret
 0x44027008 # muli x cursor_x 8                [mul x cursor_x TILE_SIZE]               <label: draw_flag>
 0x44048008 # muli y cursor_y 8                [mul y cursor_y TILE_SIZE]
@@ -317,7 +317,7 @@ exit_code: 0
 0x40021001 # addi x x 1                       [inc x]
 0x40063001 # addi i i 1                       [inc i]
 0x403E0005 # addi tmp r0 5                    [blt i 5 draw_pole]
-0x9604369F # blt i tmp draw_pole              [blt i 5 draw_pole]
+0x963E3F1F # blt i tmp draw_pole              [blt i 5 draw_pole]
 0xA8000000 # ret
 0x44030008 # muli x arg_x 8                   [mul x arg_x TILE_SIZE]                  <label: draw_mine>
 0x44051008 # muli y arg_y 8                   [mul y arg_y TILE_SIZE]
@@ -353,7 +353,7 @@ exit_code: 0
 0xD2001002 # spx x y
 0xA8000000 # ret
 0xD0384048 # col COLOR_REVEALED                                                        <label: draw_num1>
-0xAA000109 # call draw_tile
+0xAA000F5A # call draw_tile
 0x40060000 # addi i r0 0                      [clr i]
 0x40080000 # addi j r0 0                      [clr j]
 0x44030008 # muli x arg_x 8                   [mul x arg_x TILE_SIZE]
@@ -365,10 +365,10 @@ exit_code: 0
 0x40042001 # addi y y 1                       [inc y]
 0x40063001 # addi i i 1                       [inc i]
 0x403E0005 # addi tmp r0 5                    [blt i 5 draw_num1_loop]
-0x96043C9F # blt i tmp draw_num1_loop         [blt i 5 draw_num1_loop]
+0x963E3F1F # blt i tmp draw_num1_loop         [blt i 5 draw_num1_loop]
 0xA8000000 # ret
 0xD0384048 # col COLOR_REVEALED                                                        <label: draw_num2>
-0xAA000109 # call draw_tile
+0xAA000F3C # call draw_tile
 0x40060000 # addi i r0 0                      [clr i]
 0x40080000 # addi j r0 0                      [clr j]
 0x44030008 # muli x arg_x 8                   [mul x arg_x TILE_SIZE]
@@ -380,13 +380,13 @@ exit_code: 0
 0x40021001 # addi x x 1                       [inc x]
 0x40063001 # addi i i 1                       [inc i]
 0x403E0003 # addi tmp r0 3                    [blt i 3 draw_num2_loop]
-0x96043E7F # blt i tmp draw_num2_loop         [blt i 3 draw_num2_loop]
+0x963E3F1F # blt i tmp draw_num2_loop         [blt i 3 draw_num2_loop]
 0x42021003 # subi x x 3                       [sub x x 3]
 0x40042002 # addi y y 2                       [add y y 2]
 0x40060000 # addi i r0 0                      [clr i]
 0x40084001 # addi j j 1                       [inc j]
 0x403E0003 # addi tmp r0 3                    [blt j 3 draw_num2_loop]
-0x96044E7F # blt j tmp draw_num2_loop         [blt j 3 draw_num2_loop]
+0x963E4D9F # blt j tmp draw_num2_loop         [blt j 3 draw_num2_loop]
 0x42042003 # subi y y 3                       [sub y y 3]
 0xD2001002 # spx x y
 0x40021002 # addi x x 2                       [add x x 2]
@@ -394,7 +394,7 @@ exit_code: 0
 0xD2001002 # spx x y
 0xA8000000 # ret
 0xD0384048 # col COLOR_REVEALED                                                        <label: draw_num3>
-0xAA000109 # call draw_tile
+0xAA000F08 # call draw_tile
 0x40060000 # addi i r0 0                      [clr i]
 0x40080000 # addi j r0 0                      [clr j]
 0x44030008 # muli x arg_x 8                   [mul x arg_x TILE_SIZE]
@@ -406,13 +406,13 @@ exit_code: 0
 0x40021001 # addi x x 1                       [inc x]
 0x40063001 # addi i i 1                       [inc i]
 0x403E0003 # addi tmp r0 3                    [blt i 3 draw_num3_loop]
-0x960631BF # blt i tmp draw_num3_loop         [blt i 3 draw_num3_loop]
+0x963E3F1F # blt i tmp draw_num3_loop         [blt i 3 draw_num3_loop]
 0x42021003 # subi x x 3                       [sub x x 3]
 0x40042002 # addi y y 2                       [add y y 2]
 0x40060000 # addi i r0 0                      [clr i]
 0x40084001 # addi j j 1                       [inc j]
 0x403E0003 # addi tmp r0 3                    [blt j 3 draw_num3_loop]
-0x960641BF # blt j tmp draw_num3_loop         [blt j 3 draw_num3_loop]
+0x963E4D9F # blt j tmp draw_num3_loop         [blt j 3 draw_num3_loop]
 0x40021002 # addi x x 2                       [add x x 2]
 0x42042003 # subi y y 3                       [sub y y 3]
 0xD2001002 # spx x y
@@ -420,7 +420,7 @@ exit_code: 0
 0xD2001002 # spx x y
 0xA8000000 # ret
 0xD0384048 # col COLOR_REVEALED                                                        <label: draw_num4>
-0xAA000109 # call draw_tile
+0xAA000ED4 # call draw_tile
 0x40060000 # addi i r0 0                      [clr i]
 0x44030008 # muli x arg_x 8                   [mul x arg_x TILE_SIZE]
 0x44051008 # muli y arg_y 8                   [mul y arg_y TILE_SIZE]
@@ -431,7 +431,7 @@ exit_code: 0
 0x40042001 # addi y y 1                       [inc y]
 0x40063001 # addi i i 1                       [inc i]
 0x403E0003 # addi tmp r0 3                    [blt i 3 draw_num4_loop1]
-0x960634DF # blt i tmp draw_num4_loop1        [blt i 3 draw_num4_loop1]
+0x963E3F1F # blt i tmp draw_num4_loop1        [blt i 3 draw_num4_loop1]
 0x40021001 # addi x x 1                       [inc x]
 0x42042001 # subi y y 1                       [dec y]
 0xD2001002 # spx x y
@@ -441,10 +441,10 @@ exit_code: 0
 0x40042001 # addi y y 1                       [inc y]
 0x40063001 # addi i i 1                       [inc i]
 0x403E0008 # addi tmp r0 8                    [blt i 8 draw_num4_loop2]
-0x9606361F # blt i tmp draw_num4_loop2        [blt i 8 draw_num4_loop2]
+0x963E3F1F # blt i tmp draw_num4_loop2        [blt i 8 draw_num4_loop2]
 0xA8000000 # ret
 0xD0384048 # col COLOR_REVEALED                                                        <label: draw_num5>
-0xAA000109 # call draw_tile
+0xAA000EA4 # call draw_tile
 0x40060000 # addi i r0 0                      [clr i]
 0x40080000 # addi j r0 0                      [clr j]
 0x44030008 # muli x arg_x 8                   [mul x arg_x TILE_SIZE]
@@ -456,13 +456,13 @@ exit_code: 0
 0x40021001 # addi x x 1                       [inc x]
 0x40063001 # addi i i 1                       [inc i]
 0x403E0003 # addi tmp r0 3                    [blt i 3 draw_num5_loop]
-0x960637FF # blt i tmp draw_num5_loop         [blt i 3 draw_num5_loop]
+0x963E3F1F # blt i tmp draw_num5_loop         [blt i 3 draw_num5_loop]
 0x42021003 # subi x x 3                       [sub x x 3]
 0x40042002 # addi y y 2                       [add y y 2]
 0x40060000 # addi i r0 0                      [clr i]
 0x40084001 # addi j j 1                       [inc j]
 0x403E0003 # addi tmp r0 3                    [blt j 3 draw_num5_loop]
-0x960647FF # blt j tmp draw_num5_loop         [blt j 3 draw_num5_loop]
+0x963E4D9F # blt j tmp draw_num5_loop         [blt j 3 draw_num5_loop]
 0x42042005 # subi y y 5                       [sub y y 5]
 0xD2001002 # spx x y
 0x40021002 # addi x x 2                       [add x x 2]
@@ -470,46 +470,46 @@ exit_code: 0
 0xD2001002 # spx x y
 0xA8000000 # ret
 0x401FB000 # addi key_code kb 0               [mv key_code kb]                         <label: read_key>
-0x9206FA00 # beq key_code r0 read_key         [beqz key_code read_key]
+0x923EFFC0 # beq key_code r0 read_key         [beqz key_code read_key]
 0xA8000000 # ret
-0xAA000001 # call init_screen                                                          <label: main>
-0xAA000031 # call init_mines
-0xAA000042 # call init_mine_counts
-0xAA0001D0 # call read_key                                                             <label: main_loop>
-0xAA00006B # call move_cursor
+0xAA000C5C # call init_screen                                                          <label: main>
+0xAA000CBA # call init_mines
+0xAA000CDA # call init_mine_counts
+0xAA000FF4 # call read_key                                                             <label: main_loop>
+0xAA000D28 # call move_cursor
 0x7000F037 # cmpi key_code 55                 [cmp key_code KEY_REVEAL]
-0xAA4000A6 # call.eq reveal_tile
+0xAA400D9A # call.eq reveal_tile
 0x7000F038 # cmpi key_code 56                 [cmp key_code KEY_FLAG]
-0xAA4000F2 # call.eq toggle_flag
+0xAA400E2E # call.eq toggle_flag
 0xD4000012 # seg mine_num
-0x900001D6 # jal r0 main_loop                 [j main_loop]
-0x900001DE # jal r0 win_loop                  [j win_loop]                             <label: win_loop>
+0x90000FF2 # jal r0 main_loop                 [j main_loop]
+0x90000000 # jal r0 win_loop                  [j win_loop]                             <label: win_loop>
 0x40207000 # addi arg_x cursor_x 0            [mv arg_x cursor_x]                      <label: lose_loop>
 0x40228000 # addi arg_y cursor_y 0            [mv arg_y cursor_y]
 0xD0EE6666 # col COLOR_MINE_BACK
-0xAA000109 # call draw_tile
-0xAA00013A # call draw_mine
+0xAA000E4E # call draw_tile
+0xAA000EAE # call draw_mine
 0x401A0000 # addi ny r0 0                     [clr ny]
 0x40120000 # addi addr r0 0                   [clr addr]
 0x40180000 # addi nx r0 0                     [clr nx]                                 <label: lose_row_loop>
-0x9406CD47 # bne nx cursor_x lose_loop_cont                                            <label: lose_col_loop>
-0x9406DD48 # bne ny cursor_y lose_loop_cont
-0x900001F3 # jal r0 skip_draw                 [j skip_draw]
+0x9400C0C7 # bne nx cursor_x lose_loop_cont                                            <label: lose_col_loop>
+0x9400D088 # bne ny cursor_y lose_loop_cont
+0x90000014 # jal r0 skip_draw                 [j skip_draw]
 0x800A9000 # lw t1 addr 0                     [lw t1 addr]                             <label: lose_loop_cont>
 0x500C5008 # andi t2 t1 8                     [and t2 t1 MINE_MASK]
 0x70006000 # cmpi t2 0                        [cmp t2 0]
 0x40A0C000 # addi.ne arg_x nx 0               [mv.ne arg_x nx]
 0x40A2D000 # addi.ne arg_y ny 0               [mv.ne arg_y ny]
 0xD0384048 # col COLOR_REVEALED
-0xAA800109 # call.ne draw_tile
+0xAA800E32 # call.ne draw_tile
 0x70006000 # cmpi t2 0                        [cmp t2 0]
-0xAA80013A # call.ne draw_mine
+0xAA800E90 # call.ne draw_mine
 0x4018C001 # addi nx nx 1                     [inc nx]                                 <label: skip_draw>
 0x40129004 # addi addr addr 4                 [add addr addr 4]
 0x403E000F # addi tmp r0 15                   [blt nx GRID_COLS lose_col_loop]
-0x9606CCFF # blt nx tmp lose_col_loop         [blt nx GRID_COLS lose_col_loop]
+0x963ECC5F # blt nx tmp lose_col_loop         [blt nx GRID_COLS lose_col_loop]
 0x401AD001 # addi ny ny 1                     [inc ny]
 0x403E0008 # addi tmp r0 8                    [blt ny GRID_ROWS lose_row_loop]
-0x9606DCDF # blt ny tmp lose_row_loop         [blt ny GRID_ROWS lose_row_loop]
-0x900001FA # jal r0 halt                      [j halt]                                 <label: halt>
+0x963EDB5F # blt ny tmp lose_row_loop         [blt ny GRID_ROWS lose_row_loop]
+0x90000000 # jal r0 halt                      [j halt]                                 <label: halt>
 ----- stderr -----

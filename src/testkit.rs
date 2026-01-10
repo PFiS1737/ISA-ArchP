@@ -9,6 +9,7 @@ pub fn instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
     let instr = INSTRUCTIONS.get(cmd).unwrap();
     move |cond, ops| match instr.encode(
         &Context::test(),
+        0,
         if cond.is_empty() { None } else { Some(cond) },
         &ops.iter()
             .map(|e| OperandValue::from(*e))

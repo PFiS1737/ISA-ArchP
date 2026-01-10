@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
-use bimap::BiHashMap;
 
 use crate::{operand::OperandValue, pass1::Pass1, pass2::Pass2};
 
@@ -18,9 +17,17 @@ pub struct AssemblerSettings {
 #[derive(Debug, Clone, Default)]
 pub struct Context<'a> {
     pub settings: AssemblerSettings,
+
     pub constants: HashMap<&'a str, &'a str>,
-    pub labels: BiHashMap<&'a str, usize>,
-    pub addr_to_original: Vec<(usize, &'a str)>,
+    pub labels: HashMap<&'a str, usize>,
+
+    pub instr_info: Vec<InstrInfo<'a>>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct InstrInfo<'a> {
+    pub original_line: (usize, &'a str),
+    pub label_name: Option<&'a str>,
 }
 
 impl<'a> Context<'a> {
@@ -28,8 +35,8 @@ impl<'a> Context<'a> {
         Context {
             settings,
             constants: HashMap::new(),
-            labels: BiHashMap::new(),
-            addr_to_original: Vec::new(),
+            labels: HashMap::new(),
+            instr_info: Vec::new(),
         }
     }
 
@@ -38,13 +45,13 @@ impl<'a> Context<'a> {
         Context {
             settings: AssemblerSettings::default(),
             constants: HashMap::from([("FOO", "42"), ("R1", "r1"), ("R0", "r0")]),
-            labels: BiHashMap::from_iter([
+            labels: HashMap::from_iter([
                 ("start", 0),
                 ("loop", 4),
-                ("end", 4095),
-                ("over", 4096),
+                ("end", 4094),
+                ("over", 0x123456),
             ]),
-            addr_to_original: Vec::new(),
+            instr_info: Vec::new(),
         }
     }
 }

@@ -2,7 +2,7 @@ use std::num::IntErrorKind;
 
 use anyhow::{Result, anyhow, bail};
 
-use crate::{assembler::Context, operand::OperandValue};
+use crate::{assembler::Context, operand::OperandValue, utils::sig_ext_12_to_32};
 
 #[derive(Debug, Clone, Copy)]
 pub enum ParsedImm {
@@ -84,14 +84,6 @@ impl ParsedImm {
                 Ok((hi, sig_ext_12_to_32(lo) as i32))
             }
         }
-    }
-}
-
-fn sig_ext_12_to_32(val: u32) -> u32 {
-    if (val & 0x800) != 0 {
-        val | 0xFFFFF000
-    } else {
-        val & 0x00000FFF
     }
 }
 

@@ -1,7 +1,7 @@
 use anyhow::{Result, anyhow, bail};
 
 use crate::{
-    assembler::{Context, Line},
+    assembler::{Context, InstrInfo, Line},
     macro_instructions::MACRO_INSTRUCTIONS,
 };
 
@@ -23,6 +23,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
         let mut processed = Vec::new();
 
         let mut in_const_zone = true;
+        let mut current_label = None;
 
         for (orig_idx, raw_line) in source_lines.iter().enumerate() {
             let raw_line = raw_line.trim();
@@ -66,13 +67,15 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
             let (raw_line, tokens) = match tokens[0].strip_suffix(':') {
                 Some(label) => {
                     let pc = processed.len();
-                    self.context.labels.insert(label, pc);
+                    self.context.labels.insert(label, pc * 4);
+
+                    current_label = Some(label);
 
                     if tokens.len() == 1 {
                         continue;
                     }
 
-                    (&raw_line[label.len() + 1..], &tokens[1..])
+                    (raw_line[label.len() + 1..].trim(), &tokens[1..])
                 }
                 None => (raw_line, tokens.as_ref()),
             };
@@ -107,10 +110,14 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
             }
 
             for line in lines {
-                self.context
-                    .addr_to_original
-                    .push((orig_idx, raw_line.trim()));
+                self.context.instr_info.push(InstrInfo {
+                    original_line: (orig_idx, raw_line),
+                    label_name: current_label,
+                });
+
                 processed.push(line);
+
+                current_label = None;
             }
         }
 

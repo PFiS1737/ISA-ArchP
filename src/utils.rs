@@ -1,6 +1,8 @@
 mod fmt_hex;
+mod sig_ext;
 
 pub use fmt_hex::fmt_hex;
+pub use sig_ext::sig_ext_12_to_32;
 
 use std::iter::repeat_n;
 
