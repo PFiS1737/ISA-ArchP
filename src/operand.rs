@@ -50,32 +50,32 @@ pub enum OperandType {
     RegD,
     RegS,
     Imm(u8, bool),
-    Addr,
+    Addr(u8),
 }
 
 pub macro op_fmt {
-    ( $( $type:tt $(($v:literal, $s:tt))? ),* ) => {
+    ( $( $type:tt $(( $v:literal $( , $s:tt )? ))? ),* ) => {
         &[
             $(
-                $crate::operand::op_fmt!(@one $type $(($v, $s))?)
+                $crate::operand::op_fmt!(@one $type $(( $v $( , $s )? ))?)
             ),*
         ]
     },
 
     (@one _) => { None },
 
-    (@one $type:tt $(($v:literal, $s:tt))?) => {
+    (@one $type:tt $(( $v:literal $( , $s:tt )? ))?) => {
         Some(
-            $crate::operand::OperandType::$type $(($v, $crate::operand::_sig!($s)))?
+            $crate::operand::OperandType::$type $(( $v $( , $crate::operand::_sig!($s) )? ))?
         )
     },
 }
 
 pub macro op_types {
-    ( $( $type:ident $(($v:literal, $s:tt))? ),* ) => {
+    ( $( $type:ident $(( $v:literal $( , $s:tt )? ))? ),* ) => {
         &[
             $(
-                $crate::operand::OperandType::$type $(($v, $crate::operand::_sig!($s)))?
+                $crate::operand::OperandType::$type $(( $v $( , $crate::operand::_sig!($s) )? ))?
             ),*
         ]
     },

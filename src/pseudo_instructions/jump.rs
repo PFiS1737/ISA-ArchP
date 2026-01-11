@@ -3,7 +3,7 @@ use crate::{operand::op_values, pseudo_instructions::pseudo_instruction};
 // j addr12  =>  jal r0 addr12
 pseudo_instruction! {
     name: "j",
-    operand_types: [ Addr ],
+    operand_types: [ Addr(20) ],
     expander: |_, ops| {
         (
             "jal",

@@ -4,8 +4,7 @@ instruction! {
     pub Jal {
         name: "jal",
         opcode: 0b_1001_000,
-        itype: I,
-        operands_format: [ RegD, _, Addr ],
+        itype: J,
     }
 }
 

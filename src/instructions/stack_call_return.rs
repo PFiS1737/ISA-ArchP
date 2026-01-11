@@ -17,6 +17,7 @@ instruction! {
         operands_format: [ _, RegS, _ ],
     }
 }
+
 instruction! {
     pub Ret {
         name: "ret",
@@ -30,8 +31,8 @@ instruction! {
     pub Call {
         name: "call",
         opcode: 0b_1010_101,
-        itype: I,
-        operands_format: [ _, _, Addr ],
+        itype: J,
+        operands_format: [ _, Addr(20) ],
     }
 }
 

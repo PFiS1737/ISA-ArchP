@@ -20,10 +20,10 @@ exit_code: 0
 0x8A006002 # sw sp s1 0      [sw s1 0(sp)]
 0x40024000 # addi s0 a0 0    [mv s0 a0]
 0x40084FFF # addi a0 a0 -1   [add a0 a0 -1]
-0x900A0FEC # jal ra fib
+0x91CBFFEC # jal ra fib
 0x40044000 # addi s1 a0 0    [mv s1 a0]
 0x40081FFE # addi a0 s0 -2   [add a0 s0 -2]
-0x900A0FE6 # jal ra fib
+0x91CBFFE6 # jal ra fib
 0x00082004 # add a0 s1 a0
 0x800A6008 # lw ra sp 8      [lw ra 8(sp)]
 0x80026004 # lw s0 sp 4      [lw s0 4(sp)]

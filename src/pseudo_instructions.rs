@@ -42,14 +42,20 @@ impl PseudoInstruction {
     pub fn expand<'a>(
         &self,
         ctx: &Context,
+        pc: u32,
         operands: &[OperandValue<'a>],
     ) -> Result<ExpandRet<'a>> {
-        self.assert_operand_format(ctx, operands)?;
+        self.assert_operand_format(ctx, pc, operands)?;
 
         Ok((self.expander)(self.name, operands))
     }
 
-    fn assert_operand_format(&self, ctx: &Context, operands: &[OperandValue]) -> Result<()> {
+    fn assert_operand_format(
+        &self,
+        ctx: &Context,
+        pc: u32,
+        operands: &[OperandValue],
+    ) -> Result<()> {
         if operands.len() != self.operand_types.len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",
@@ -70,8 +76,8 @@ impl PseudoInstruction {
                 OperandType::Imm(bits, signed) => {
                     parse_imm(ctx, operand)?.as_field(bits, signed)?;
                 }
-                OperandType::Addr => {
-                    parse_address(ctx, operand)?;
+                OperandType::Addr(bits) => {
+                    parse_address(ctx, operand)?.as_field(bits, pc)?;
                 }
             };
         }

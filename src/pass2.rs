@@ -58,11 +58,13 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
     }
 
     fn line_handler(&self, idx: usize, line: Line) -> Result<(u32, String)> {
+        let pc = (idx * 4) as u32;
+
         let (name, cond, operands) = line;
 
         let (name, ops) = if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
             ps_instr
-                .expand(self.context, &operands)
+                .expand(self.context, pc, &operands)
                 .map_err(|e| anyhow!("Error expanding pseudo-instruction '{}': {}", name, e))?
         } else {
             (name, operands)
@@ -71,7 +73,7 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
         let code = INSTRUCTIONS
             .get(name)
             .ok_or_else(|| anyhow!("Unknown instruction: '{}'", name))?
-            .encode(self.context, (idx * 4) as u32, cond, &ops)?;
+            .encode(self.context, pc, cond, &ops)?;
 
         Ok((code, fmt_line(name, cond, ops)))
     }

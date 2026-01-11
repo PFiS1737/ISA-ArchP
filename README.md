@@ -72,8 +72,8 @@ In this section:
 - `rs1`: the first source register.
 - `rs2`: the second source register.
 - `imm12`: 12-bit signed immediate value, from `-2048` to `2047`.
-- `addr12`: 12-bit signed relative address offset in the unit of 2-byte.
-  - This usually indicates: `pc = pc + sign_extend(addr12 << 1)`.
+- `addr12`, `addr20`: 12/20-bit signed relative address offset in the unit of 2-byte.
+  - This usually indicates: `pc = pc + sign_extend(addr << 1)`.
 - `immX`: will be specified in the instruction description.
 - numeric literal: `42`, `-7`, `0b010101`, `0xFE42`, etc.
 
@@ -178,7 +178,7 @@ In this section:
 
 #### Call and Return
 
-- `call[.cond] addr12`: call a subroutine at an address.
+- `call[.cond] addr20`: call a subroutine at an address.
 - `callr[.cond] rs1`: call a subroutine at the address contained in `rs1`.
 - `ret[.cond]`: return from the current subroutine.
 - note:
@@ -186,7 +186,7 @@ In this section:
 
 #### Jump and Link
 
-- `jal[.cond] rd addr12`: jump to an address and write the return address (`pc + 4`) into `rd`.
+- `jal[.cond] rd addr20`: jump to an address and write the return address (`pc + 4`) into `rd`.
 - `jalr[.cond] rd rs1`: jump to the address contained in `rs1` and write the return address (`pc + 4`) into `rd`.
 - pseudo:
   - `j addr12` => `jal r0 addr12`

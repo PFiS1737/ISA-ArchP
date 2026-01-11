@@ -188,8 +188,8 @@ count_around_mines:
 		
 		# 判断是否为地雷
 		and t2 t2 MINE_MASK
-		cmp t2 MINE_MASK
-		inc.eq cnt
+		bne t2 MINE_MASK skip_this_neighbor
+		inc cnt
 	
 	skip_this_neighbor:
 		inc tx
@@ -201,42 +201,31 @@ count_around_mines:
 
 
 move_cursor:
-	cmp key_code KEY_UP
-	j.eq handle_cursor_move
-	cmp key_code KEY_DOWN
-	j.eq handle_cursor_move
-	cmp key_code KEY_LEFT
-	j.eq handle_cursor_move
-	cmp key_code KEY_RIGHT
-	j.eq handle_cursor_move
+  col COLOR_GRID_LINE
+  call update_cursor
 
-	ret
+  cmp key_code KEY_UP
+  dec.eq cursor_y
+  cmp key_code KEY_DOWN
+  inc.eq cursor_y
+  cmp key_code KEY_LEFT
+  dec.eq cursor_x
+  cmp key_code KEY_RIGHT
+  inc.eq cursor_x
 
-handle_cursor_move:
-	col COLOR_GRID_LINE
-	call update_cursor
-	cmp key_code KEY_UP
-	dec.eq cursor_y
-	cmp key_code KEY_DOWN
-	inc.eq cursor_y
-	cmp key_code KEY_LEFT
-	dec.eq cursor_x
-	cmp key_code KEY_RIGHT
-	inc.eq cursor_x
+  # 回绕
+  cmp cursor_x 0
+  li.lt cursor_x 14
+  cmp cursor_x GRID_COLS
+  li.ge cursor_x 0
+  cmp cursor_y 0
+  li.lt cursor_y 7
+  cmp cursor_y GRID_ROWS
+  li.ge cursor_y 0
+  col COLOR_CURSOR
+  call update_cursor
 
-	# 回绕
-	cmp cursor_x 0
-	li.lt cursor_x 14
-	cmp cursor_x GRID_COLS
-	li.ge cursor_x 0
-	cmp cursor_y 0
-	li.lt cursor_y 7
-	cmp cursor_y GRID_ROWS
-	li.ge cursor_y 0
-	col COLOR_CURSOR
-	call update_cursor
-
-	ret
+  ret
 
 
 update_cursor:
@@ -291,25 +280,14 @@ reveal_tile:
 	mv arg_x cursor_x
 	mv arg_y cursor_y
 
-	cmp t2 0
-	call.eq reveal_around
+	bne t2 0 .Lreveal_tile_skip_reveal_around
+	call reveal_around
+  .Lreveal_tile_skip_reveal_around:
+
 	or t1 t1 REVEAL_MASK
 	sw t1 addr
 
-	cmp t2 1
-	call.eq draw_num1
-
-	cmp t2 2
-	call.eq draw_num2
-
-	cmp t2 3
-	call.eq draw_num3
-
-	cmp t2 4
-	call.eq draw_num4
-
-	cmp t2 5
-	call.eq draw_num5
+  call draw_num
 
   reveal_tile_ret:
     ret
@@ -351,19 +329,13 @@ reveal_around:
 		# 根据雷数绘图
 		mv arg_x nx
 		mv arg_y ny
-		cmp t2 0
+
+		bne t2 0 .Lreveal_around_skip_draw_tile
 		col COLOR_REVEALED
-		call.eq draw_tile
-		cmp t2 1
-		call.eq draw_num1
-		cmp t2 2
-		call.eq draw_num2
-		cmp t2 3
-		call.eq draw_num3
-		cmp t2 4
-		call.eq draw_num4
-		cmp t2 5
-		call.eq draw_num5
+		call draw_tile
+    .Lreveal_around_skip_draw_tile:
+
+    call draw_num
 
 		# 如果不是空白格，不再递归
 		bnez t2 reveal_around_ret
@@ -396,27 +368,31 @@ toggle_flag:
 	lw t1 addr
 
 	and t2 t1 REVEAL_MASK
-	cmp t2 0
-	ret.ne
+	bnez t2 toggle_flag_ret
 
-	and t2 t1 FLAG_MASK
-	cmp t2 0
-
-	dec.eq mine_num
-	or.eq t1 t1 FLAG_MASK
-	call.eq draw_flag
-
-	inc.ne mine_num
-  li.ne t2 0xFFFFFDF ; not.ne t2 FLAG_MASK
-	and.ne t1 t1 t2
 	mv arg_x cursor_x
 	mv arg_y cursor_y
-	col COLOR_HIDDEN
-	call.ne draw_tile
 
-	sw t1 addr
+	and t2 t1 FLAG_MASK
+	bnez t2 toggle_flag_already_set
 
-	ret
+	dec mine_num
+	or t1 t1 FLAG_MASK
+	call draw_flag
+  j toggle_flag_store
+
+  toggle_flag_already_set:
+    inc mine_num
+    li t2 0xFFFFFDF ; not.ne t2 FLAG_MASK
+    and t1 t1 t2
+    col COLOR_HIDDEN
+    call draw_tile
+
+  toggle_flag_store:
+    sw t1 addr
+
+  toggle_flag_ret:
+    ret
 
 
 draw_tile:
@@ -442,8 +418,8 @@ draw_tile:
 
 
 draw_flag:
-	mul x cursor_x TILE_SIZE
-	mul y cursor_y TILE_SIZE
+	mul x arg_x TILE_SIZE
+	mul y arg_y TILE_SIZE
 	col COLOR_FLAG
 	add x x 4
 	add y y 2
@@ -511,6 +487,30 @@ draw_mine:
 
 	ret
 
+draw_num:
+  # @t2: number to draw (1-5)
+
+  bne t2 1 .Lskip_draw1
+  call draw_num1
+  .Lskip_draw1:
+
+  bne t2 2 .Lskip_draw2
+  call draw_num2
+  .Lskip_draw2:
+
+  bne t2 3 .Lskip_draw3
+  call draw_num3
+  .Lskip_draw3:
+
+  bne t2 4 .Lskip_draw4
+  call draw_num4
+  .Lskip_draw4:
+
+  bne t2 5 .Lskip_draw5
+  call draw_num5
+  .Lskip_draw5:
+
+  ret
 
 draw_num1:
 	col COLOR_REVEALED
@@ -659,12 +659,27 @@ main:
 
 	main_loop:
     call read_key
-		call move_cursor
-		cmp key_code KEY_REVEAL
-		call.eq reveal_tile
-		cmp key_code KEY_FLAG
-		call.eq toggle_flag
-		seg mine_num
+
+    beq key_code KEY_UP .Lmove_cursor
+    beq key_code KEY_DOWN .Lmove_cursor
+    beq key_code KEY_LEFT .Lmove_cursor
+    beq key_code KEY_RIGHT .Lmove_cursor
+    beq key_code KEY_REVEAL .Lreveal_tile
+    beq key_code KEY_FLAG .Ltoggle_flag
+
+    .Lmove_cursor:
+      call move_cursor
+      j .Lupdate_seg
+    .Lreveal_tile:
+      call reveal_tile
+      j .Lupdate_seg
+    .Ltoggle_flag:
+      call toggle_flag
+      j .Lupdate_seg
+
+		.Lupdate_seg:
+      seg mine_num
+
 		j main_loop
 
 	win_loop:
@@ -684,18 +699,17 @@ main:
 		lose_col_loop:
 			bne nx cursor_x lose_loop_cont
 			bne ny cursor_y lose_loop_cont
-			j skip_draw
+			j lose_loop_skip_draw
 		lose_loop_cont:
 			lw t1 addr
 			and t2 t1 MINE_MASK
-			cmp t2 0
-			mv.ne arg_x nx
-			mv.ne arg_y ny
+      beqz t2 lose_loop_skip_draw
+			mv arg_x nx
+			mv arg_y ny
 			col COLOR_REVEALED
-			call.ne draw_tile
-			cmp t2 0
-			call.ne draw_mine
-		skip_draw:
+			call draw_tile
+			call draw_mine
+		lose_loop_skip_draw:
 			inc nx
 			add addr addr 4
 			blt nx GRID_COLS lose_col_loop

@@ -7,7 +7,7 @@ mod load_store;
 mod load_upper;
 mod logic;
 mod shift;
-mod stack_call_ret;
+mod stack_call_return;
 
 use std::{collections::HashMap, fmt::Display};
 
@@ -25,7 +25,9 @@ pub enum InstrType {
     R,
     I,
     B,
+    S,
     U,
+    J,
     C,
 }
 
@@ -68,7 +70,9 @@ pub trait Instruction: Send + Sync {
             InstrType::R => self.encode_r(cond, &operands),
             InstrType::I => self.encode_i(cond, &operands),
             InstrType::B => self.encode_b(cond, &operands),
+            InstrType::S => self.encode_s(cond, &operands),
             InstrType::U => self.encode_u(cond, &operands),
+            InstrType::J => self.encode_j(cond, &operands),
             InstrType::C => self.encode_c(cond, &operands),
         }
     }
@@ -94,7 +98,7 @@ pub trait Instruction: Send + Sync {
                         OperandType::Imm(bits, signed) => {
                             parse_imm(ctx, op)?.as_field(bits, signed)?
                         }
-                        OperandType::Addr => parse_address(ctx, op)?.as_i12(pc)?,
+                        OperandType::Addr(bits) => parse_address(ctx, op)?.as_field(bits, pc)?,
                     };
 
                     ret.push(val);
@@ -144,6 +148,9 @@ pub trait Instruction: Send + Sync {
             rs2
         )
     }
+    fn encode_s(&self, cond: u32, operands: &[u32]) -> Result<u32> {
+        self.encode_b(cond, operands)
+    }
 
     // 1000 100   xxx   xxxxx   xxxxxxxxxxxxxxxxx
     //    lui  |uimm20u|  rd  |      uimm20l      (uimm20 = uimm20u << 17 | uimm20l)
@@ -152,6 +159,9 @@ pub trait Instruction: Send + Sync {
         let imm20 = operands[1];
 
         code!(self.opcode(), (imm20 >> 17), rd, (imm20 & 0x1FFFF))
+    }
+    fn encode_j(&self, _: u32, operands: &[u32]) -> Result<u32> {
+        self.encode_u(0, operands)
     }
 
     // 1101 000   0   xxxxxxxx xxxxxxxx xxxxxxxx
@@ -182,8 +192,10 @@ pub trait Instruction: Send + Sync {
             match self.itype() {
                 InstrType::R => op_fmt![RegD, RegS, RegS],
                 InstrType::I => op_fmt![RegD, RegS, Imm(12, i)],
-                InstrType::B => op_fmt![RegS, RegS, Addr],
+                InstrType::B => op_fmt![RegS, RegS, Addr(12)],
+                InstrType::S => op_fmt![RegS, RegS, Imm(12, i)],
                 InstrType::U => op_fmt![RegD, Imm(20, u)],
+                InstrType::J => op_fmt![RegD, Addr(20)],
                 InstrType::C => op_fmt![Imm(24, u)],
             }
         }
@@ -288,7 +300,9 @@ impl Display for InstrType {
             InstrType::R => write!(f, "R"),
             InstrType::I => write!(f, "I"),
             InstrType::B => write!(f, "B"),
+            InstrType::S => write!(f, "S"),
             InstrType::U => write!(f, "U"),
+            InstrType::J => write!(f, "J"),
             InstrType::C => write!(f, "C"),
         }
     }
@@ -338,7 +352,7 @@ mod tests {
     fn enocde_b() {
         let cmd = instr("beq");
         // Same to I-type, omitting ...
-        assert_snapshot!(cmd("ne", &["r1", "r0", "over"]), @"Error: Address offset out of range for i12: 596523");
+        assert_snapshot!(cmd("ne", &["r1", "r0", "over"]), @"Error: Address offset 596523 out of range for i12 ( -2048..=2047 )");
         assert_snapshot!(cmd("ne", &["r1", "r0", "loop"]), @"1001 001 010 00000 00001 0000010 00000");
 
         let cmd = instr("sw");

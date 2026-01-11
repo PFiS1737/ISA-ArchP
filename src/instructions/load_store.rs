@@ -44,8 +44,7 @@ instruction! {
     pub Sw {
         name: "sw",
         opcode: 0b_1000_101,
-        itype: B,
-        operands_format: [RegS, RegS, Imm(12, i)],
+        itype: S,
     }
 }
 
@@ -53,8 +52,7 @@ instruction! {
     pub Sh {
         name: "sh",
         opcode: 0b_1000_110,
-        itype: B,
-        operands_format: [RegS, RegS, Imm(12, i)],
+        itype: S,
     }
 }
 
@@ -62,7 +60,6 @@ instruction! {
     pub Sb {
         name: "sb",
         opcode: 0b_1000_111,
-        itype: B,
-        operands_format: [RegS, RegS, Imm(12, i)],
+        itype: S,
     }
 }

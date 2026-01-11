@@ -142,7 +142,7 @@ exit_code: 0
 0x40231001 # addi que_tmp que_tmp 1                      [inc que_tmp]
 0x4C231064 # modi que_tmp que_tmp 100                    [mod que_tmp que_tmp QUEUE_SIZE]
 0x40252001 # addi que_i que_i 1                          [inc que_i]
-0x90000FF0 # jal r0 queue_contains_loop                  [j queue_contains_loop]
+0x91C1FFF0 # jal r0 queue_contains_loop                  [j queue_contains_loop]
 0x401A0001 # addi rt r0 1                                [li rt 1]                                  <label: queue_contains_found>
 0xA8000000 # ret
 0x401A0000 # addi rt r0 0                                [li rt 0]                                  <label: queue_contains_not_found>
@@ -164,14 +164,14 @@ exit_code: 0
 0x9200B09F # beq t1 tmp read_key_ret                     [beq t1 -2 read_key_ret]
 0x4012A000 # addi key_code t0 0                          [mv key_code t0]
 0xA8000000 # ret                                                                                    <label: read_key_ret>
-0xAA000EC4 # call init_screen                                                                       <label: main>
-0xAA000EDA # call init_snake
-0xAA000F5A # call gen_food
+0xABC1FEC4 # call init_screen                                                                       <label: main>
+0xABC1FEDA # call init_snake
+0xABC1FF5A # call gen_food
 0x40180064 # addi i r0 100                               [li i 100]                                 <label: main_loop>
 0x4218C001 # subi i i 1                                  [dec i]                                    <label: sleep>
 0x9A3ECFC0 # bgt i r0 sleep                              [bgtz i sleep]
-0xAA000FD2 # call read_key
-0xAA000EEA # call move_snake
-0x90000FF6 # jal r0 main_loop                            [j main_loop]
+0xABC1FFD2 # call read_key
+0xABC1FEEA # call move_snake
+0x91C1FFF6 # jal r0 main_loop                            [j main_loop]
 0x90000000 # jal r0 lose_loop                            [j lose_loop]                              <label: lose_loop>
 ----- stderr -----

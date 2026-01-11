@@ -13,13 +13,13 @@ I-type
 xxxx xxx   xxx   xxxxx   xxxxx   xxxxxxxxxxxx
  opcode  | cond|   rd  |  rs1  |    imm12
 
-B-type
+B/S-type
 ------
 
 xxxx xxx   xxx   xxxxx   xxxxx   xxxxxxx   xxxxx
  opcode  | cond|  hi5  |  rs1  |   lo7   |  rs2  (offset12 = hi5 << 7 | lo7)
 
-U-type
+U/J-type
 ------
 
 1011 000   xxx   xxxxx   xxxxxxxxxxxxxxxxx
@@ -97,12 +97,17 @@ I-type (load)
 1000 011 lb
 1000 100 lbu
 
-B-type (store)
+S-type (store)
 --------------
 
 1000 101 sw
 1000 110 sh
 1000 111 sb
+
+J-type (jump and link)
+----------------------
+
+1001 000 jal rd addr20
 
 B-type (branch)
 ---------------
@@ -114,11 +119,10 @@ B-type (branch)
 1001 101 bgt
 1001 110 bge
 
-I-type (jump and link)
---------------------
+I-type (jump and link register)
+-------------------------------
 
-1001 000 jal  rd ___ addr12
-1001 111 jalr rd rs1 ______
+1001 111 jalr rd rs1 ___
 
 I-type (stack)
 --------------
@@ -126,12 +130,20 @@ I-type (stack)
 1010 000 pop  rd ___ _____
 1010 001 push __ rs1 _____
 
-I-type (call/ret)
------------------
+I-type (return)
+---------------
 
-1010 100 ret   __ ___ ____________
-1010 101 call  __ ___ addr12=imm12
-1010 110 callr __ rs1 ____________
+1010 100 ret __ ___ ___
+
+J-type (call)
+-------------
+
+1010 101 call __ addr20
+
+I-type (call register)
+----------------------
+
+1010 110 callr __ rs1 ___
 
 U-type (load upper immediate)
 -----------------------------
@@ -139,19 +151,21 @@ U-type (load upper immediate)
 1011 000 lui rd uimm20
 
 C-type (set pixel color)
-------------------
+------------------------
 
 1101 000 col imm24
 
 R-type (set pixel display)
-------------------
+--------------------------
 
 1101 001 spx __ rs1 rs2
 
 R-type (set segment display)
+----------------------------
 
 1101 010 seg __ ___ rs
 
 I-type  (set segment display immediate)
+---------------------------------------
 
 1101 011 segi __ ___ imm8
