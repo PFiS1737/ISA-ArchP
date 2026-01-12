@@ -1,76 +1,52 @@
-use std::num::IntErrorKind;
+use std::num::{IntErrorKind, ParseIntError};
 
 use anyhow::{Result, anyhow, bail};
 
 use crate::{assembler::Context, operand::OperandValue, utils::sig_ext_12_to_32};
 
-#[derive(Debug, Clone, Copy)]
-pub enum ParsedImm {
-    Unsigned(u64),
-    Signed(i64),
-}
+pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<Immediate> {
+    match imm {
+        OperandValue::StringSlice(s) => {
+            let imm = ctx.constants.get(s).unwrap_or(s);
 
-pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<ParsedImm> {
-    let parse_str = |s: &&str| -> Result<ParsedImm> {
-        if let Some(hex) = s.strip_prefix("0x") {
-            Ok(ParsedImm::Unsigned(u64::from_str_radix(hex, 16)?))
-        } else if let Some(bin) = s.strip_prefix("0b") {
-            Ok(ParsedImm::Unsigned(u64::from_str_radix(bin, 2)?))
-        } else {
-            Ok(ParsedImm::Signed(s.parse::<i64>()?))
+            (|| {
+                if let Some(hex) = imm.strip_prefix("0x") {
+                    Ok(Immediate(u64::from_str_radix(hex, 16)?))
+                } else if let Some(bin) = imm.strip_prefix("0b") {
+                    Ok(Immediate(u64::from_str_radix(bin, 2)?))
+                } else {
+                    Ok(Immediate(imm.parse::<i64>()? as u64))
+                }
+            })()
+            .map_err(|err: ParseIntError| {
+                if matches!(
+                    err.kind(),
+                    IntErrorKind::PosOverflow | IntErrorKind::NegOverflow
+                ) {
+                    anyhow!("Immediate '{}' out of range of 64-bit integer.", imm)
+                } else {
+                    anyhow!("Invalid immediate: {}", imm)
+                }
+            })
         }
-    };
-
-    let parsed = match imm {
-        OperandValue::StringSlice(s) => parse_str(ctx.constants.get(s).unwrap_or(s)),
-        OperandValue::Unsigned(n) => Ok(ParsedImm::Unsigned(*n as u64)),
-        OperandValue::Signed(n) => Ok(ParsedImm::Signed(*n as i64)),
-    };
-
-    parsed.map_err(|err| {
-        if let Some(int_err) = err.downcast_ref::<std::num::ParseIntError>() {
-            if matches!(
-                int_err.kind(),
-                IntErrorKind::PosOverflow | IntErrorKind::NegOverflow
-            ) {
-                anyhow!("Immediate '{}' out of range of 64-bit integer.", imm)
-            } else {
-                anyhow!("Invalid immediate: {}", imm)
-            }
-        } else {
-            err
-        }
-    })
-}
-
-impl ParsedImm {
-    #[cfg(test)]
-    pub fn as_u12(&self) -> Result<u32> {
-        self.as_field(12, false)
+        OperandValue::Unsigned(n) => Ok(Immediate(*n as u64)),
+        OperandValue::Signed(n) => Ok(Immediate(*n as u64)),
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Immediate(pub u64);
+
+impl Immediate {
     pub fn as_i12(&self) -> Result<u32> {
         self.as_field(12, true)
     }
-    #[cfg(test)]
-    pub fn as_u32(&self) -> Result<u32> {
-        self.as_field(32, false)
-    }
     pub fn as_i32(&self) -> Result<i32> {
-        Ok(self.as_field(32, true)? as i32)
-    }
-    #[cfg(test)]
-    pub fn try_as_u12(&self) -> Result<(u32, u32)> {
-        match self.as_u12() {
-            Ok(v) => Ok((0, v)),
-            Err(_) => {
-                let v = self.as_u32()?;
-                Ok((v >> 12, v & 0xFFF))
-            }
-        }
+        self.as_field(32, true).map(|n| n as i32)
     }
     pub fn try_as_i12(&self) -> Result<(u32, i32)> {
         match self.as_i12() {
-            Ok(v) => Ok((0, sig_ext_12_to_32(v) as i32)),
+            Ok(v) => Ok((0, sig_ext_12_to_32(v))),
             Err(_) => {
                 let v = self.as_i32()? as u32;
 
@@ -81,13 +57,13 @@ impl ParsedImm {
                     hi += 1;
                 }
 
-                Ok((hi, sig_ext_12_to_32(lo) as i32))
+                Ok((hi, sig_ext_12_to_32(lo)))
             }
         }
     }
 }
 
-impl ParsedImm {
+impl Immediate {
     pub fn as_field(&self, bits: u8, signed: bool) -> Result<u32> {
         if bits == 0 || bits > 32 {
             bail!("Invalid immediate field width: {}", bits);
@@ -100,10 +76,7 @@ impl ParsedImm {
         };
 
         if signed {
-            let v = match self {
-                ParsedImm::Unsigned(v) => *v as i64,
-                ParsedImm::Signed(v) => *v,
-            };
+            let v = self.0 as i64;
 
             let min = -(1i64 << (bits - 1));
             let max = (1i64 << (bits - 1)) - 1;
@@ -120,25 +93,9 @@ impl ParsedImm {
 
             Ok((v as u32) & mask)
         } else {
-            let v = match self {
-                ParsedImm::Unsigned(v) => *v,
-                ParsedImm::Signed(v) => {
-                    if *v < 0 {
-                        bail!(
-                            "Immediate '{}' out of range for u{} (must be >= 0)",
-                            *v,
-                            bits
-                        );
-                    }
-                    *v as u64
-                }
-            };
+            let v = self.0;
 
-            let max = if bits == 32 {
-                u32::MAX as u64
-            } else {
-                (1u64 << bits) - 1
-            };
+            let max = (1u64 << bits) - 1;
 
             if v > max {
                 bail!(
@@ -200,12 +157,9 @@ mod tests {
     {
         let imm = parse_imm(&Context::default(), &OperandValue::from(s)).unwrap();
         format!(
-            "{}\n{}\n{}\n{}\n{}\n{}",
-            unwrap(imm.as_u32()),
+            "{}\n{}\n{}",
             unwrap(imm.as_i32()),
-            unwrap(imm.as_u12()),
             unwrap(imm.as_i12()),
-            unwrap(imm.try_as_u12()),
             unwrap(imm.try_as_i12())
         )
     }
@@ -215,99 +169,66 @@ mod tests {
         assert_snapshot!(test(0_i32), @r"
         0
         0
-        0
-        0
-        (0, 0)
         (0, 0)
         ");
 
         assert_snapshot!(test(123_i32), @r"
         123
         123
-        123
-        123
-        (0, 123)
         (0, 123)
         ");
 
         assert_snapshot!(test(-123_i32), @r"
-        Error: Immediate '-123' out of range for u32 (must be >= 0)
         -123
-        Error: Immediate '-123' out of range for u12 (must be >= 0)
         0xF85
-        Error: Immediate '-123' out of range for u32 (must be >= 0)
         (0, -123)
         ");
 
         assert_snapshot!(test(2047_i32), @r"
         0x7FF
         0x7FF
-        0x7FF
-        0x7FF
-        (0, 0x7FF)
         (0, 0x7FF)
         ");
 
         assert_snapshot!(test(2048_i32), @r"
         0x800
-        0x800
-        0x800
         Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)
-        (0, 0x800)
         (1, 0xFFFFF800)
         ");
 
         assert_snapshot!(test(-2048_i32), @r"
-        Error: Immediate '-2048' out of range for u32 (must be >= 0)
         0xFFFFF800
-        Error: Immediate '-2048' out of range for u12 (must be >= 0)
         0x800
-        Error: Immediate '-2048' out of range for u32 (must be >= 0)
         (0, 0xFFFFF800)
         ");
 
         assert_snapshot!(test(-2049_i32), @r"
-        Error: Immediate '-2049' out of range for u32 (must be >= 0)
         0xFFFFF7FF
-        Error: Immediate '-2049' out of range for u12 (must be >= 0)
         Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)
-        Error: Immediate '-2049' out of range for u32 (must be >= 0)
         (0xFFFFF, 0x7FF)
         ");
 
         assert_snapshot!(test(123456_i32), @r"
         0x1E240
-        0x1E240
-        Error: Immediate '123456' out of range for u12 (0 ..= 4095)
         Error: Immediate '123456' out of range for i12 (-2048 ..= 2047)
-        (30, 0x240)
         (30, 0x240)
         ");
 
         assert_snapshot!(test(-123456_i32), @r"
-        Error: Immediate '-123456' out of range for u32 (must be >= 0)
         0xFFFE1DC0
-        Error: Immediate '-123456' out of range for u12 (must be >= 0)
         Error: Immediate '-123456' out of range for i12 (-2048 ..= 2047)
-        Error: Immediate '-123456' out of range for u32 (must be >= 0)
         (0xFFFE2, 0xFFFFFDC0)
         ");
 
         assert_snapshot!(test(2147483647_i32), @r"
         0x7FFFFFFF
-        0x7FFFFFFF
-        Error: Immediate '2147483647' out of range for u12 (0 ..= 4095)
         Error: Immediate '2147483647' out of range for i12 (-2048 ..= 2047)
-        (0x7FFFF, 0xFFF)
         (0x80000, -1)
         ");
 
         assert_snapshot!(test(-2147483648_i32), @r"
-        Error: Immediate '-2147483648' out of range for u32 (must be >= 0)
         0x80000000
-        Error: Immediate '-2147483648' out of range for u12 (must be >= 0)
         Error: Immediate '-2147483648' out of range for i12 (-2048 ..= 2047)
-        Error: Immediate '-2147483648' out of range for u32 (must be >= 0)
         (0x80000, 0)
         ");
     }
@@ -317,72 +238,48 @@ mod tests {
         assert_snapshot!(test(0_u32), @r"
         0
         0
-        0
-        0
-        (0, 0)
         (0, 0)
         ");
 
         assert_snapshot!(test(123_u32), @r"
         123
         123
-        123
-        123
-        (0, 123)
         (0, 123)
         ");
 
         assert_snapshot!(test(2047_u32), @r"
         0x7FF
         0x7FF
-        0x7FF
-        0x7FF
-        (0, 0x7FF)
         (0, 0x7FF)
         ");
 
         assert_snapshot!(test(2048_u32), @r"
         0x800
-        0x800
-        0x800
         Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)
-        (0, 0x800)
         (1, 0xFFFFF800)
         ");
 
         assert_snapshot!(test(123456_u32), @r"
         0x1E240
-        0x1E240
-        Error: Immediate '123456' out of range for u12 (0 ..= 4095)
         Error: Immediate '123456' out of range for i12 (-2048 ..= 2047)
-        (30, 0x240)
         (30, 0x240)
         ");
 
         assert_snapshot!(test(2147483647_u32), @r"
         0x7FFFFFFF
-        0x7FFFFFFF
-        Error: Immediate '2147483647' out of range for u12 (0 ..= 4095)
         Error: Immediate '2147483647' out of range for i12 (-2048 ..= 2047)
-        (0x7FFFF, 0xFFF)
         (0x80000, -1)
         ");
 
         assert_snapshot!(test(2147483648_u32), @r"
-        0x80000000
         Error: Immediate '2147483648' out of range for i32 (-2147483648 ..= 2147483647)
-        Error: Immediate '2147483648' out of range for u12 (0 ..= 4095)
         Error: Immediate '2147483648' out of range for i12 (-2048 ..= 2047)
-        (0x80000, 0)
         Error: Immediate '2147483648' out of range for i32 (-2147483648 ..= 2147483647)
         ");
 
         assert_snapshot!(test(4294967295_u32), @r"
-        0xFFFFFFFF
         Error: Immediate '4294967295' out of range for i32 (-2147483648 ..= 2147483647)
-        Error: Immediate '4294967295' out of range for u12 (0 ..= 4095)
         Error: Immediate '4294967295' out of range for i12 (-2048 ..= 2047)
-        (0xFFFFF, 0xFFF)
         Error: Immediate '4294967295' out of range for i32 (-2147483648 ..= 2147483647)
         ");
     }
@@ -392,135 +289,90 @@ mod tests {
         assert_snapshot!(test("0"), @r"
         0
         0
-        0
-        0
-        (0, 0)
         (0, 0)
         ");
 
         assert_snapshot!(test("123"), @r"
         123
         123
-        123
-        123
-        (0, 123)
         (0, 123)
         ");
 
         assert_snapshot!(test("-123"), @r"
-        Error: Immediate '-123' out of range for u32 (must be >= 0)
         -123
-        Error: Immediate '-123' out of range for u12 (must be >= 0)
         0xF85
-        Error: Immediate '-123' out of range for u32 (must be >= 0)
         (0, -123)
         ");
 
         assert_snapshot!(test("2047"), @r"
         0x7FF
         0x7FF
-        0x7FF
-        0x7FF
-        (0, 0x7FF)
         (0, 0x7FF)
         ");
 
         assert_snapshot!(test("2048"), @r"
         0x800
-        0x800
-        0x800
         Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)
-        (0, 0x800)
         (1, 0xFFFFF800)
         ");
 
         assert_snapshot!(test("-2048"), @r"
-        Error: Immediate '-2048' out of range for u32 (must be >= 0)
         0xFFFFF800
-        Error: Immediate '-2048' out of range for u12 (must be >= 0)
         0x800
-        Error: Immediate '-2048' out of range for u32 (must be >= 0)
         (0, 0xFFFFF800)
         ");
 
         assert_snapshot!(test("-2049"), @r"
-        Error: Immediate '-2049' out of range for u32 (must be >= 0)
         0xFFFFF7FF
-        Error: Immediate '-2049' out of range for u12 (must be >= 0)
         Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)
-        Error: Immediate '-2049' out of range for u32 (must be >= 0)
         (0xFFFFF, 0x7FF)
         ");
 
         assert_snapshot!(test("123456"), @r"
         0x1E240
-        0x1E240
-        Error: Immediate '123456' out of range for u12 (0 ..= 4095)
         Error: Immediate '123456' out of range for i12 (-2048 ..= 2047)
-        (30, 0x240)
         (30, 0x240)
         ");
 
         assert_snapshot!(test("-123456"), @r"
-        Error: Immediate '-123456' out of range for u32 (must be >= 0)
         0xFFFE1DC0
-        Error: Immediate '-123456' out of range for u12 (must be >= 0)
         Error: Immediate '-123456' out of range for i12 (-2048 ..= 2047)
-        Error: Immediate '-123456' out of range for u32 (must be >= 0)
         (0xFFFE2, 0xFFFFFDC0)
         ");
 
         assert_snapshot!(test("2147483647"), @r"
         0x7FFFFFFF
-        0x7FFFFFFF
-        Error: Immediate '2147483647' out of range for u12 (0 ..= 4095)
         Error: Immediate '2147483647' out of range for i12 (-2048 ..= 2047)
-        (0x7FFFF, 0xFFF)
         (0x80000, -1)
         ");
 
         assert_snapshot!(test("2147483648"), @r"
-        0x80000000
         Error: Immediate '2147483648' out of range for i32 (-2147483648 ..= 2147483647)
-        Error: Immediate '2147483648' out of range for u12 (0 ..= 4095)
         Error: Immediate '2147483648' out of range for i12 (-2048 ..= 2047)
-        (0x80000, 0)
         Error: Immediate '2147483648' out of range for i32 (-2147483648 ..= 2147483647)
         ");
 
         assert_snapshot!(test("-2147483648"), @r"
-        Error: Immediate '-2147483648' out of range for u32 (must be >= 0)
         0x80000000
-        Error: Immediate '-2147483648' out of range for u12 (must be >= 0)
         Error: Immediate '-2147483648' out of range for i12 (-2048 ..= 2047)
-        Error: Immediate '-2147483648' out of range for u32 (must be >= 0)
         (0x80000, 0)
         ");
 
         assert_snapshot!(test("-2147483649"), @r"
-        Error: Immediate '-2147483649' out of range for u32 (must be >= 0)
         Error: Immediate '-2147483649' out of range for i32 (-2147483648 ..= 2147483647)
-        Error: Immediate '-2147483649' out of range for u12 (must be >= 0)
         Error: Immediate '-2147483649' out of range for i12 (-2048 ..= 2047)
-        Error: Immediate '-2147483649' out of range for u32 (must be >= 0)
         Error: Immediate '-2147483649' out of range for i32 (-2147483648 ..= 2147483647)
         ");
 
         assert_snapshot!(test("4294967295"), @r"
-        0xFFFFFFFF
         Error: Immediate '4294967295' out of range for i32 (-2147483648 ..= 2147483647)
-        Error: Immediate '4294967295' out of range for u12 (0 ..= 4095)
         Error: Immediate '4294967295' out of range for i12 (-2048 ..= 2047)
-        (0xFFFFF, 0xFFF)
         Error: Immediate '4294967295' out of range for i32 (-2147483648 ..= 2147483647)
         ");
 
         assert_snapshot!(test("4294967296"), @r"
-        Error: Immediate '4294967296' out of range for u32 (0 ..= 4294967295)
         Error: Immediate '4294967296' out of range for i32 (-2147483648 ..= 2147483647)
-        Error: Immediate '4294967296' out of range for u12 (0 ..= 4095)
         Error: Immediate '4294967296' out of range for i12 (-2048 ..= 2047)
-        Error: Immediate '4294967296' out of range for u32 (0 ..= 4294967295)
         Error: Immediate '4294967296' out of range for i32 (-2147483648 ..= 2147483647)
         ");
     }

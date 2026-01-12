@@ -352,7 +352,7 @@ mod tests {
     fn enocde_b() {
         let cmd = instr("beq");
         // Same to I-type, omitting ...
-        assert_snapshot!(cmd("ne", &["r1", "r0", "over"]), @"Error: Address offset 596523 out of range for i12 ( -2048..=2047 )");
+        assert_snapshot!(cmd("ne", &["r1", "r0", "over"]), @"Error: Address offset '596523' out of range for i12 (-2048 ..= 2047)");
         assert_snapshot!(cmd("ne", &["r1", "r0", "loop"]), @"1001 001 010 00000 00001 0000010 00000");
 
         let cmd = instr("sw");
@@ -373,7 +373,7 @@ mod tests {
         assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Instruction 'lui' requires 2 operands, got 3");
         assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Invalid immediate: r2");
         assert_snapshot!(cmd("", &["r3", "0x200000"]), @"Error: Immediate '2097152' out of range for u20 (0 ..= 1048575)");
-        assert_snapshot!(cmd("", &["r3", "-123"]), @"Error: Immediate '-123' out of range for u20 (must be >= 0)");
+        assert_snapshot!(cmd("", &["r3", "-123"]), @"Error: Immediate '18446744073709551493' out of range for u20 (0 ..= 1048575)");
         assert_snapshot!(cmd("eq", &["r3", "0xABCDE"]), @"Error: Condition is not allowed for U-type instruction 'lui'");
 
         assert_snapshot!(cmd("", &["r3", "0xABCDE"]), @"1011 000 101 00011 01011 1100110 11110");
@@ -387,7 +387,7 @@ mod tests {
         assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Instruction 'col' requires 1 operands, got 2");
         assert_snapshot!(cmd("", &["r1"]), @"Error: Invalid immediate: r1");
         assert_snapshot!(cmd("", &["0x1FFFFFF"]), @"Error: Immediate '33554431' out of range for u24 (0 ..= 16777215)");
-        assert_snapshot!(cmd("", &["-123"]), @"Error: Immediate '-123' out of range for u24 (must be >= 0)");
+        assert_snapshot!(cmd("", &["-123"]), @"Error: Immediate '18446744073709551493' out of range for u24 (0 ..= 16777215)");
         assert_snapshot!(cmd("ne", &["0x123456"]), @"Error: Condition is not allowed for C-type instruction 'col'");
 
         assert_snapshot!(cmd("", &["0x123456"]), @"1101 000 000 01001 00011 0100010 10110");
