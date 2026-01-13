@@ -1,3 +1,4 @@
+mod branch;
 mod branch_zero;
 mod clear;
 mod inc_dec;
@@ -7,7 +8,7 @@ mod mv;
 mod negate;
 mod not;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, iter::successors};
 
 use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
@@ -47,7 +48,17 @@ impl PseudoInstruction {
     ) -> Result<ExpandRet<'a>> {
         self.assert_operand_format(ctx, pc, operands)?;
 
-        Ok((self.expander)(self.name, operands))
+        Ok(
+            successors(Some((self.expander)(self.name, operands)), |(name, ops)| {
+                let ps_instr = PSEUDO_INSTRUCTIONS.get(*name)?;
+
+                ps_instr.assert_operand_format(ctx, pc, ops).ok()?;
+
+                Some((ps_instr.expander)(name, ops))
+            })
+            .last()
+            .unwrap(), // INFO: Safe because at least the first expansion exists
+        )
     }
 
     fn assert_operand_format(

@@ -115,9 +115,9 @@ B-type (branch)
 1001 001 beq
 1001 010 bne
 1001 011 blt
-1001 100 ble
-1001 101 bgt
-1001 110 bge
+1001 100 bge
+1001 101 bltu
+1001 110 bgeu
 
 I-type (jump and link register)
 -------------------------------

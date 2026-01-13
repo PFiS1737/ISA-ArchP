@@ -11,7 +11,7 @@ exit_code: 0
 0x900A0004 # jal ra fib
 0x40344000 # addi io a0 0    [mv io a0]
 0x403E0002 # addi tmp r0 2   [bgt a0 2 .L8]  <label: fib>
-0x9A0040DF # bgt a0 tmp .L8  [bgt a0 2 .L8]
+0x9601F0C4 # blt tmp a0 .L8  [bgt a0 2 .L8]
 0x40080001 # addi a0 r0 1    [li a0 1]
 0x9E005000 # jalr r0 ra 0    [jr ra]
 0x420C600C # subi sp sp 12   [sub sp sp 12]  <label: .L8>

@@ -94,10 +94,10 @@ exit_code: 0
 0x001A200B # add ny y ty
 0x9600C380 # blt nx r0 skip_this_neighbor                [bltz nx skip_this_neighbor]
 0x403E000F # addi tmp r0 15                              [bge nx GRID_COLS skip_this_neighbor]
-0x9C00C31F # bge nx tmp skip_this_neighbor               [bge nx GRID_COLS skip_this_neighbor]
+0x9800C31F # bge nx tmp skip_this_neighbor               [bge nx GRID_COLS skip_this_neighbor]
 0x9600D2C0 # blt ny r0 skip_this_neighbor                [bltz ny skip_this_neighbor]
 0x403E0008 # addi tmp r0 8                               [bge ny GRID_ROWS skip_this_neighbor]
-0x9C00D25F # bge ny tmp skip_this_neighbor               [bge ny GRID_ROWS skip_this_neighbor]
+0x9800D25F # bge ny tmp skip_this_neighbor               [bge ny GRID_ROWS skip_this_neighbor]
 0x440AD00F # muli t1 ny 15                               [mul t1 ny GRID_COLS]
 0x000A500C # add t1 t1 nx
 0x440A5004 # muli t1 t1 4                                [mul t1 t1 4]
@@ -108,10 +108,10 @@ exit_code: 0
 0x401CE001 # addi cnt cnt 1                              [inc cnt]
 0x4014A001 # addi tx tx 1                                [inc tx]                                     <label: skip_this_neighbor>
 0x403E0001 # addi tmp r0 1                               [ble tx 1 dx_loop]
-0x983EAB9F # ble tx tmp dx_loop                          [ble tx 1 dx_loop]
+0x983FFB8A # bge tmp tx dx_loop                          [ble tx 1 dx_loop]
 0x4016B001 # addi ty ty 1                                [inc ty]
 0x403E0001 # addi tmp r0 1                               [ble ty 1 dy_loop]
-0x983EBA9F # ble ty tmp dy_loop                          [ble ty 1 dy_loop]
+0x983FFA8B # bge tmp ty dy_loop                          [ble ty 1 dy_loop]
 0xA8000000 # ret
 0xD022262E # col COLOR_GRID_LINE                                                                      <label: move_cursor>
 0xAA000028 # call update_cursor
@@ -142,7 +142,7 @@ exit_code: 0
 0x40021001 # addi x x 1                                  [inc x]
 0x40063001 # addi i i 1                                  [inc i]
 0x403E0008 # addi tmp r0 8                               [ble i TILE_SIZE update_cursor_loop1]
-0x983E3F1F # ble i tmp update_cursor_loop1               [ble i TILE_SIZE update_cursor_loop1]
+0x983FFF03 # bge tmp i update_cursor_loop1               [ble i TILE_SIZE update_cursor_loop1]
 0x44027008 # muli x cursor_x 8                           [mul x cursor_x TILE_SIZE]
 0x40060000 # addi i r0 0                                 [clr i]
 0x40042008 # addi y y 8                                  [add y y TILE_SIZE]
@@ -155,7 +155,7 @@ exit_code: 0
 0x40042001 # addi y y 1                                  [inc y]
 0x40063001 # addi i i 1                                  [inc i]
 0x403E0008 # addi tmp r0 8                               [ble i TILE_SIZE update_cursor_loop2]
-0x983E3F1F # ble i tmp update_cursor_loop2               [ble i TILE_SIZE update_cursor_loop2]
+0x983FFF03 # bge tmp i update_cursor_loop2               [ble i TILE_SIZE update_cursor_loop2]
 0x44048008 # muli y cursor_y 8                           [mul y cursor_y TILE_SIZE]
 0x40060000 # addi i r0 0                                 [clr i]
 0x40021008 # addi x x 8                                  [add x x TILE_SIZE]
@@ -186,10 +186,10 @@ exit_code: 0
 0x401A8000 # addi ny cursor_y 0                          [mv ny cursor_y]
 0x9600C900 # blt nx r0 reveal_around_ret                 [bltz nx reveal_around_ret]                  <label: reveal_around_loop>
 0x403E000F # addi tmp r0 15                              [bge nx GRID_COLS reveal_around_ret]
-0x9C00C89F # bge nx tmp reveal_around_ret                [bge nx GRID_COLS reveal_around_ret]
+0x9800C89F # bge nx tmp reveal_around_ret                [bge nx GRID_COLS reveal_around_ret]
 0x9600D840 # blt ny r0 reveal_around_ret                 [bltz ny reveal_around_ret]
 0x403E0008 # addi tmp r0 8                               [bge ny GRID_ROWS reveal_around_ret]
-0x9C00D7DF # bge ny tmp reveal_around_ret                [bge ny GRID_ROWS reveal_around_ret]
+0x9800D7DF # bge ny tmp reveal_around_ret                [bge ny GRID_ROWS reveal_around_ret]
 0x4412D00F # muli addr ny 15                             [mul addr ny GRID_COLS]
 0x0012900C # add addr addr nx
 0x44129004 # muli addr addr 4                            [mul addr addr 4]

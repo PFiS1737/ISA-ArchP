@@ -163,10 +163,14 @@ In this section:
 
 #### Branching
 
-- instructions: `beq`, `bne`, `blt`, `ble`, `bgt`, `bge`
+- instructions: `beq`, `bne`, `blt`, `bge`, `bltu`, `bgeu`
 - format: `instr[.cond] rs1 rs2 addr12`
 - pseudo:
-  - `b**z rs1 addr12` => `b** rs1 r0 addr12` (e.g. `beqz`, `bnez`, `bltz`, etc.)
+  - `bgt rs1 rs2 addr12` => `blt rs2 rs1 addr12`
+  - `ble rs1 rs2 addr12` => `bge rs2 rs1 addr12`
+  - `bgtu rs1 rs2 addr12` => `bltu rs2 rs1 addr12`
+  - `bleu rs1 rs2 addr12` => `bgeu rs2 rs1 addr12`
+  - `b**z rs1 addr12` => `b** rs1 r0 addr12` (e.g. `beqz`, `bnez`, `bltz`, `bgez`, `bgtz`, `blez`)
 - macros:
   - If the `rs2` operand is a numeric literal, it will be automatically expanded to use a temporary register.
   - A 32-bit immediate literal is also supported.

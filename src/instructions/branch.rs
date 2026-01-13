@@ -26,7 +26,7 @@ instruction! {
 
 instruction! {
     pub Ble {
-        name: "ble",
+        name: "bge",
         opcode: 0b_1001_100,
         itype: B,
     }
@@ -34,7 +34,7 @@ instruction! {
 
 instruction! {
     pub Bgt {
-        name: "bgt",
+        name: "bltu",
         opcode: 0b_1001_101,
         itype: B,
     }
@@ -42,7 +42,7 @@ instruction! {
 
 instruction! {
     pub Bge {
-        name: "bge",
+        name: "bgeu",
         opcode: 0b_1001_110,
         itype: B,
     }

@@ -30,7 +30,7 @@ exit_code: 0
 0xD2005006 # spx x y
 0x4218C001 # subi i i 1                                  [dec i]
 0x403E0001 # addi tmp r0 1                               [bge i 1 init_body_loop]
-0x9C3ECE9F # bge i tmp init_body_loop                    [bge i 1 init_body_loop]
+0x983ECE9F # bge i tmp init_body_loop                    [bge i 1 init_body_loop]
 0xA8000000 # ret
 0x403E0046 # addi tmp r0 70                              [beq key_code KEY_UP move_snake_up]        <label: move_snake>
 0x9200921F # beq key_code tmp move_snake_up              [beq key_code KEY_UP move_snake_up]
@@ -169,7 +169,7 @@ exit_code: 0
 0xABC1FF5A # call gen_food
 0x40180064 # addi i r0 100                               [li i 100]                                 <label: main_loop>
 0x4218C001 # subi i i 1                                  [dec i]                                    <label: sleep>
-0x9A3ECFC0 # bgt i r0 sleep                              [bgtz i sleep]
+0x963E0FCC # blt r0 i sleep                              [bgtz i sleep]
 0xABC1FFD2 # call read_key
 0xABC1FEEA # call move_snake
 0x91C1FFF6 # jal r0 main_loop                            [j main_loop]
