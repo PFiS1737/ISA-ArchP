@@ -63,141 +63,141 @@ j main
 
 
 init_screen:
-	# 画背景
-	clr x
-	clr y
-	col COLOR_BACK
-	draw_back:
-		spx x y
-		inc x
-		blt x SCREEN_WIDTH draw_back
-		inc y
-		clr x
-		blt y SCREEN_HEIGHT draw_back
+  # 画背景
+  clr x
+  clr y
+  col COLOR_BACK
+  draw_back:
+    spx x y
+    inc x
+    blt x SCREEN_WIDTH draw_back
+    inc y
+    clr x
+    blt y SCREEN_HEIGHT draw_back
 
-	# 画格子
-	clr x
-	clr y
-	col COLOR_HIDDEN
-	draw_grid:
-		spx x y
-		inc x
-		blt x GRID_WIDTH draw_grid
-		inc y
-		clr x
-		blt y GRID_HEIGHT draw_grid
+  # 画格子
+  clr x
+  clr y
+  col COLOR_HIDDEN
+  draw_grid:
+    spx x y
+    inc x
+    blt x GRID_WIDTH draw_grid
+    inc y
+    clr x
+    blt y GRID_HEIGHT draw_grid
 
-	# 画分隔线
-	clr x
-	clr y
-	col COLOR_GRID_LINE
-	draw_grid_line_row:
-		spx x y
-		inc x
-		blt x GRID_WIDTH draw_grid_line_row
-		add y y TILE_SIZE
-		clr x
-		blt y GRID_HEIGHT draw_grid_line_row
-	clr x
-	clr y
-	draw_grid_line_col:
-		spx x y
-		inc y
-		blt y GRID_HEIGHT draw_grid_line_col
-		add x x TILE_SIZE
-		clr y
-		blt x GRID_WIDTH draw_grid_line_col
+  # 画分隔线
+  clr x
+  clr y
+  col COLOR_GRID_LINE
+  draw_grid_line_row:
+    spx x y
+    inc x
+    blt x GRID_WIDTH draw_grid_line_row
+    add y y TILE_SIZE
+    clr x
+    blt y GRID_HEIGHT draw_grid_line_row
+  clr x
+  clr y
+  draw_grid_line_col:
+    spx x y
+    inc y
+    blt y GRID_HEIGHT draw_grid_line_col
+    add x x TILE_SIZE
+    clr y
+    blt x GRID_WIDTH draw_grid_line_col
 
-	# 画光标
-	clr cursor_x
-	clr cursor_y
-	col COLOR_CURSOR
-	call update_cursor
+  # 画光标
+  clr cursor_x
+  clr cursor_y
+  col COLOR_CURSOR
+  call update_cursor
 
-	ret
+  ret
 
 
 init_mines:
-	li mine_num MINE_NUM_MAX
-	clr i
+  li mine_num MINE_NUM_MAX
+  clr i
 
-	init_mines_loop:
-		mv t1 rng
-		mv t2 rng
-		mod x t1 GRID_COLS
-		mod y t2 GRID_ROWS
+  init_mines_loop:
+    mv t1 rng
+    mv t2 rng
+    mod x t1 GRID_COLS
+    mod y t2 GRID_ROWS
 
-		mul addr y GRID_COLS
-		add addr addr x
+    mul addr y GRID_COLS
+    add addr addr x
     mul addr addr 4
 
-		lw t1 addr
-		beq t1 MINE_MASK init_mines_loop
+    lw t1 addr
+    beq t1 MINE_MASK init_mines_loop
 
     li t1 MINE_MASK
-		sw t1 addr
-		inc i
-		blt i mine_num init_mines_loop
+    sw t1 addr
+    inc i
+    blt i mine_num init_mines_loop
 
-	ret
+  ret
 
 
 init_mine_counts:
-	clr x
-	clr y
-	clr addr
-	init_mine_counts_loop:
-		call count_around_mines
-		lw t1 addr
-		add t2 t1 cnt
-		sw t2 addr
-		inc x
-		add addr addr 4
-		blt x GRID_COLS init_mine_counts_loop
-		clr x
-		inc y
-		blt y GRID_ROWS init_mine_counts_loop
+  clr x
+  clr y
+  clr addr
+  init_mine_counts_loop:
+    call count_around_mines
+    lw t1 addr
+    add t2 t1 cnt
+    sw t2 addr
+    inc x
+    add addr addr 4
+    blt x GRID_COLS init_mine_counts_loop
+    clr x
+    inc y
+    blt y GRID_ROWS init_mine_counts_loop
 
-	ret
+  ret
 
 
 count_around_mines:
-	clr cnt
-	li ty -1
+  clr cnt
+  li ty -1
 
-	dy_loop:
-		li tx -1
+  dy_loop:
+    li tx -1
 
-	dx_loop:
-		add nx x tx
-		add ny y ty
+  dx_loop:
+    add nx x tx
+    add ny y ty
 
-		# 越界判断
-		bltz nx skip_this_neighbor
-		bge nx GRID_COLS skip_this_neighbor
-		bltz ny skip_this_neighbor
-		bge ny GRID_ROWS skip_this_neighbor
+    # 越界判断
+    bltz nx skip_this_neighbor
+    bge nx GRID_COLS skip_this_neighbor
+    bltz ny skip_this_neighbor
+    bge ny GRID_ROWS skip_this_neighbor
 
-		# 计算地址
-		mul t1 ny GRID_COLS
-		add t1 t1 nx
+    # 计算地址
+    mul t1 ny GRID_COLS
+    add t1 t1 nx
     mul t1 t1 4
 
-		# 读取格子值
-		lw t2 t1
-		
-		# 判断是否为地雷
-		and t2 t2 MINE_MASK
-		bne t2 MINE_MASK skip_this_neighbor
-		inc cnt
-	
-	skip_this_neighbor:
-		inc tx
-		ble tx 1 dx_loop
-		inc ty
-		ble ty 1 dy_loop
+    # 读取格子值
+    lw t2 t1
 
-	ret
+    # 判断是否为地雷
+    and t2 t2 MINE_MASK
+    bne t2 MINE_MASK skip_this_neighbor
+    inc cnt
+
+  skip_this_neighbor:
+    inc tx
+    ble tx 1 dx_loop
+    inc ty
+    ble ty 1 dy_loop
+
+  ret
 
 
 move_cursor:
@@ -227,65 +227,64 @@ move_cursor:
 
   ret
 
-
 update_cursor:
-	clr i
-	clr j
+  clr i
+  clr j
 
-	mul x cursor_x TILE_SIZE
-	mul y cursor_y TILE_SIZE
+  mul x cursor_x TILE_SIZE
+  mul y cursor_y TILE_SIZE
 
-	update_cursor_loop1:
-		spx x y
-		inc x
-		inc i
-		ble i TILE_SIZE update_cursor_loop1
-		mul x cursor_x TILE_SIZE
-		clr i
-		add y y TILE_SIZE
-		inc j
-		beq j 1 update_cursor_loop1
+  update_cursor_loop1:
+    spx x y
+    inc x
+    inc i
+    ble i TILE_SIZE update_cursor_loop1
+    mul x cursor_x TILE_SIZE
+    clr i
+    add y y TILE_SIZE
+    inc j
+    beq j 1 update_cursor_loop1
 
-	mul x cursor_x TILE_SIZE
-	mul y cursor_y TILE_SIZE
+  mul x cursor_x TILE_SIZE
+  mul y cursor_y TILE_SIZE
 
-	update_cursor_loop2:
-		spx x y
-		inc y
-		inc i
-		ble i TILE_SIZE update_cursor_loop2
-		mul y cursor_y TILE_SIZE
-		clr i
-		add x x TILE_SIZE
-		inc j
-		beq j 3 update_cursor_loop2
+  update_cursor_loop2:
+    spx x y
+    inc y
+    inc i
+    ble i TILE_SIZE update_cursor_loop2
+    mul y cursor_y TILE_SIZE
+    clr i
+    add x x TILE_SIZE
+    inc j
+    beq j 3 update_cursor_loop2
 
-	ret
+  ret
 
 
 reveal_tile:
-	mul addr cursor_y GRID_COLS
-	add addr addr cursor_x
+  mul addr cursor_y GRID_COLS
+  add addr addr cursor_x
   mul addr addr 4
-	lw t1 addr
+  lw t1 addr
 
-	and t2 t1 REVEAL_MASK
-	bnez t2 reveal_tile_ret
-	and t2 t1 FLAG_MASK
-	bnez t2 reveal_tile_ret
-	and t2 t1 MINE_MASK
-	bnez t2 lose_loop
-	and t2 t1 AROUND_COUNT_MASK
+  and t2 t1 REVEAL_MASK
+  bnez t2 reveal_tile_ret
+  and t2 t1 FLAG_MASK
+  bnez t2 reveal_tile_ret
+  and t2 t1 MINE_MASK
+  bnez t2 lose_loop
+  and t2 t1 AROUND_COUNT_MASK
 
-	mv arg_x cursor_x
-	mv arg_y cursor_y
+  mv arg_x cursor_x
+  mv arg_y cursor_y
 
-	bne t2 0 .Lreveal_tile_skip_reveal_around
-	call reveal_around
-  .Lreveal_tile_skip_reveal_around:
+  bne t2 0 reveal_tile_skip_reveal_around
+  call reveal_around
+  reveal_tile_skip_reveal_around:
 
-	or t1 t1 REVEAL_MASK
-	sw t1 addr
+  or t1 t1 REVEAL_MASK
+  sw t1 addr
 
   call draw_num
 
@@ -294,96 +293,96 @@ reveal_tile:
 
 
 reveal_around:
-	# 初始化当前坐标
-	mv nx cursor_x
-	mv ny cursor_y
+  # 初始化当前坐标
+  mv nx cursor_x
+  mv ny cursor_y
 
-	reveal_around_loop:
-		# 越界检查
-		bltz nx reveal_around_ret
-		bge nx GRID_COLS reveal_around_ret
-		bltz ny reveal_around_ret
-		bge ny GRID_ROWS reveal_around_ret
+  reveal_around_loop:
+    # 越界检查
+    bltz nx reveal_around_ret
+    bge nx GRID_COLS reveal_around_ret
+    bltz ny reveal_around_ret
+    bge ny GRID_ROWS reveal_around_ret
 
-		# 计算地址
-		mul addr ny GRID_COLS
-		add addr addr nx
+    # 计算地址
+    mul addr ny GRID_COLS
+    add addr addr nx
     mul addr addr 4
 
-		# 读取格子值
-		lw t1 addr
+    # 读取格子值
+    lw t1 addr
 
-		# 如果已揭示或有旗子，则返回
-		and t2 t1 REVEAL_MASK
-		bnez t2 reveal_around_ret
-		and t2 t1 FLAG_MASK
-		bnez t2 reveal_around_ret
+    # 如果已揭示或有旗子，则返回
+    and t2 t1 REVEAL_MASK
+    bnez t2 reveal_around_ret
+    and t2 t1 FLAG_MASK
+    bnez t2 reveal_around_ret
 
-		# 设置为已揭示
-		or t1 t1 REVEAL_MASK
-		sw t1 addr
+    # 设置为已揭示
+    or t1 t1 REVEAL_MASK
+    sw t1 addr
 
-		# 获取周围雷数
-		and t2 t1 AROUND_COUNT_MASK
+    # 获取周围雷数
+    and t2 t1 AROUND_COUNT_MASK
 
-		# 根据雷数绘图
-		mv arg_x nx
-		mv arg_y ny
+    # 根据雷数绘图
+    mv arg_x nx
+    mv arg_y ny
 
-		bne t2 0 .Lreveal_around_skip_draw_tile
-		col COLOR_REVEALED
-		call draw_tile
-    .Lreveal_around_skip_draw_tile:
+    bne t2 0 reveal_around_skip_draw_tile
+    col COLOR_REVEALED
+    call draw_tile
+    reveal_around_skip_draw_tile:
 
     call draw_num
 
-		# 如果不是空白格，不再递归
-		bnez t2 reveal_around_ret
+    # 如果不是空白格，不再递归
+    bnez t2 reveal_around_ret
 
-		# 递归
-		dec ny
-		call reveal_around_loop
-		inc ny
+    # 递归
+    dec ny
+    call reveal_around_loop
+    inc ny
 
-		inc ny
-		call reveal_around_loop
-		dec ny
+    inc ny
+    call reveal_around_loop
+    dec ny
 
-		dec nx
-		call reveal_around_loop
-		inc nx
+    dec nx
+    call reveal_around_loop
+    inc nx
 
-		inc nx
-		call reveal_around_loop
-		dec nx
+    inc nx
+    call reveal_around_loop
+    dec nx
 
   reveal_around_ret:
     ret
 
 
 toggle_flag:
-	mul addr cursor_y GRID_COLS
-	add addr addr cursor_x
+  mul addr cursor_y GRID_COLS
+  add addr addr cursor_x
   mul addr addr 4
-	lw t1 addr
+  lw t1 addr
 
-	and t2 t1 REVEAL_MASK
-	bnez t2 toggle_flag_ret
+  and t2 t1 REVEAL_MASK
+  bnez t2 toggle_flag_ret
 
-	mv arg_x cursor_x
-	mv arg_y cursor_y
+  mv arg_x cursor_x
+  mv arg_y cursor_y
 
-	and t2 t1 FLAG_MASK
-	bnez t2 toggle_flag_already_set
+  and t2 t1 FLAG_MASK
+  bnez t2 toggle_flag_already_set
 
-	dec mine_num
-	or t1 t1 FLAG_MASK
-	call draw_flag
+  dec mine_num
+  or t1 t1 FLAG_MASK
+  call draw_flag
   j toggle_flag_store
 
   toggle_flag_already_set:
     inc mine_num
-    li t2 0xFFFFFDF ; not.ne t2 FLAG_MASK
+    li t2 0xFFFFFDF ; not t2 FLAG_MASK
     and t1 t1 t2
     col COLOR_HIDDEN
     call draw_tile
@@ -396,254 +395,254 @@ toggle_flag:
 
 
 draw_tile:
-	clr i
-	clr j
-	mul x arg_x TILE_SIZE
-	mul y arg_y TILE_SIZE
-	inc x
-	inc y
-	draw_tile_loop:
-		spx x y
-		inc x
-		inc i
-		blt i 7 draw_tile_loop
-		mul x arg_x TILE_SIZE
-		inc x
-		inc y
-		clr i
-		inc j
-		blt j 7 draw_tile_loop
+  clr i
+  clr j
+  mul x arg_x TILE_SIZE
+  mul y arg_y TILE_SIZE
+  inc x
+  inc y
+  draw_tile_loop:
+    spx x y
+    inc x
+    inc i
+    blt i 7 draw_tile_loop
+    mul x arg_x TILE_SIZE
+    inc x
+    inc y
+    clr i
+    inc j
+    blt j 7 draw_tile_loop
 
-	ret
+  ret
 
 
 draw_flag:
-	mul x arg_x TILE_SIZE
-	mul y arg_y TILE_SIZE
-	col COLOR_FLAG
-	add x x 4
-	add y y 2
-	spx x y
-	inc y
-	spx x y
-	inc y
-	spx x y
-	dec x
-	spx x y
-	dec x
-	spx x y
-	inc x
-	dec y
-	spx x y
-	inc x
-	add y y 2
-	spx x y
-	sub x x 2
-	inc y
-	col COLOR_POLE
-	clr i
-	draw_pole:
-		spx x y
-		inc x
-		inc i
-		blt i 5 draw_pole
+  mul x arg_x TILE_SIZE
+  mul y arg_y TILE_SIZE
+  col COLOR_FLAG
+  add x x 4
+  add y y 2
+  spx x y
+  inc y
+  spx x y
+  inc y
+  spx x y
+  dec x
+  spx x y
+  dec x
+  spx x y
+  inc x
+  dec y
+  spx x y
+  inc x
+  add y y 2
+  spx x y
+  sub x x 2
+  inc y
+  col COLOR_POLE
+  clr i
+  draw_pole:
+    spx x y
+    inc x
+    inc i
+    blt i 5 draw_pole
 
-	ret
+  ret
 
 
 draw_mine:
-	mul x arg_x TILE_SIZE
-	mul y arg_y TILE_SIZE
-	add x x 4
-	add y y 2
-	col COLOR_MINE
-	spx x y
-	inc y
-	spx x y
-	dec x
-	spx x y
-	add x x 2
-	spx x y
-	inc y
-	spx x y
-	inc x
-	spx x y
-	sub x x 2
-	spx x y
-	dec x
-	spx x y
-	dec x
-	spx x y
-	inc x
-	inc y
-	spx x y
-	inc x
-	spx x y
-	inc x
-	spx x y
-	dec x
-	inc y
-	spx x y
+  mul x arg_x TILE_SIZE
+  mul y arg_y TILE_SIZE
+  add x x 4
+  add y y 2
+  col COLOR_MINE
+  spx x y
+  inc y
+  spx x y
+  dec x
+  spx x y
+  add x x 2
+  spx x y
+  inc y
+  spx x y
+  inc x
+  spx x y
+  sub x x 2
+  spx x y
+  dec x
+  spx x y
+  dec x
+  spx x y
+  inc x
+  inc y
+  spx x y
+  inc x
+  spx x y
+  inc x
+  spx x y
+  dec x
+  inc y
+  spx x y
 
-	ret
+  ret
 
 draw_num:
   # @t2: number to draw (1-5)
 
-  bne t2 1 .Lskip_draw1
+  bne t2 1 skip_draw1
   call draw_num1
-  .Lskip_draw1:
+  skip_draw1:
 
-  bne t2 2 .Lskip_draw2
+  bne t2 2 skip_draw2
   call draw_num2
-  .Lskip_draw2:
+  skip_draw2:
 
-  bne t2 3 .Lskip_draw3
+  bne t2 3 skip_draw3
   call draw_num3
-  .Lskip_draw3:
+  skip_draw3:
 
-  bne t2 4 .Lskip_draw4
+  bne t2 4 skip_draw4
   call draw_num4
-  .Lskip_draw4:
+  skip_draw4:
 
-  bne t2 5 .Lskip_draw5
+  bne t2 5 skip_draw5
   call draw_num5
-  .Lskip_draw5:
+  skip_draw5:
 
   ret
 
 draw_num1:
-	col COLOR_REVEALED
-	call draw_tile
-	clr i
-	clr j
-	mul x arg_x TILE_SIZE
-	mul y arg_y TILE_SIZE
-	add x x 4
-	add y y 2
-	col COLOR_NUM1
-	draw_num1_loop:
-		spx x y
-		inc y
-		inc i
-		blt i 5 draw_num1_loop
+  col COLOR_REVEALED
+  call draw_tile
+  clr i
+  clr j
+  mul x arg_x TILE_SIZE
+  mul y arg_y TILE_SIZE
+  add x x 4
+  add y y 2
+  col COLOR_NUM1
+  draw_num1_loop:
+    spx x y
+    inc y
+    inc i
+    blt i 5 draw_num1_loop
 
-	ret
+  ret
 
 
 draw_num2:
-	col COLOR_REVEALED
-	call draw_tile
-	clr i
-	clr j
-	mul x arg_x TILE_SIZE
-	mul y arg_y TILE_SIZE
-	add x x 3
-	add y y 2
-	col COLOR_NUM2
-	draw_num2_loop:
-		spx x y
-		inc x
-		inc i
-		blt i 3 draw_num2_loop
-		sub x x 3
-		add y y 2
-		clr i
-		inc j
-		blt j 3 draw_num2_loop
-		sub y y 3
-		spx x y
-		add x x 2
-		sub y y 2
-		spx x y
+  col COLOR_REVEALED
+  call draw_tile
+  clr i
+  clr j
+  mul x arg_x TILE_SIZE
+  mul y arg_y TILE_SIZE
+  add x x 3
+  add y y 2
+  col COLOR_NUM2
+  draw_num2_loop:
+    spx x y
+    inc x
+    inc i
+    blt i 3 draw_num2_loop
+    sub x x 3
+    add y y 2
+    clr i
+    inc j
+    blt j 3 draw_num2_loop
+    sub y y 3
+    spx x y
+    add x x 2
+    sub y y 2
+    spx x y
 
-	ret
+  ret
 
 
 draw_num3:
-	col COLOR_REVEALED
-	call draw_tile
-	clr i
-	clr j
-	mul x arg_x TILE_SIZE
-	mul y arg_y TILE_SIZE
-	add x x 3
-	add y y 2
-	col COLOR_NUM3
-	draw_num3_loop:
-		spx x y
-		inc x
-		inc i
-		blt i 3 draw_num3_loop
-		sub x x 3
-		add y y 2
-		clr i
-		inc j
-		blt j 3 draw_num3_loop
-		add x x 2
-		sub y y 3
-		spx x y
-		sub y y 2
-		spx x y
+  col COLOR_REVEALED
+  call draw_tile
+  clr i
+  clr j
+  mul x arg_x TILE_SIZE
+  mul y arg_y TILE_SIZE
+  add x x 3
+  add y y 2
+  col COLOR_NUM3
+  draw_num3_loop:
+    spx x y
+    inc x
+    inc i
+    blt i 3 draw_num3_loop
+    sub x x 3
+    add y y 2
+    clr i
+    inc j
+    blt j 3 draw_num3_loop
+    add x x 2
+    sub y y 3
+    spx x y
+    sub y y 2
+    spx x y
 
-	ret
+  ret
 
 
 draw_num4:
-	col COLOR_REVEALED
-	call draw_tile
-	clr i
-	mul x arg_x TILE_SIZE
-	mul y arg_y TILE_SIZE
-	add x x 3
-	add y y 2
-	col COLOR_NUM4
-	draw_num4_loop1:
-		spx x y
-		inc y
-		inc i
-		blt i 3 draw_num4_loop1
-	inc x
-	dec y
-	spx x y
-	inc x
-	sub y y 2
-	draw_num4_loop2:
-		spx x y
-		inc y
-		inc i
-		blt i 8 draw_num4_loop2
+  col COLOR_REVEALED
+  call draw_tile
+  clr i
+  mul x arg_x TILE_SIZE
+  mul y arg_y TILE_SIZE
+  add x x 3
+  add y y 2
+  col COLOR_NUM4
+  draw_num4_loop1:
+    spx x y
+    inc y
+    inc i
+    blt i 3 draw_num4_loop1
+  inc x
+  dec y
+  spx x y
+  inc x
+  sub y y 2
+  draw_num4_loop2:
+    spx x y
+    inc y
+    inc i
+    blt i 8 draw_num4_loop2
 
-	ret
+  ret
 
 
 draw_num5:
-	col COLOR_REVEALED
-	call draw_tile
-	clr i
-	clr j
-	mul x arg_x TILE_SIZE
-	mul y arg_y TILE_SIZE
-	add x x 3
-	add y y 2
-	col COLOR_NUM5
-	draw_num5_loop:
-		spx x y
-		inc x
-		inc i
-		blt i 3 draw_num5_loop
-		sub x x 3
-		add y y 2
-		clr i
-		inc j
-		blt j 3 draw_num5_loop
-		sub y y 5
-		spx x y
-		add x x 2
-		add y y 2
-		spx x y
+  col COLOR_REVEALED
+  call draw_tile
+  clr i
+  clr j
+  mul x arg_x TILE_SIZE
+  mul y arg_y TILE_SIZE
+  add x x 3
+  add y y 2
+  col COLOR_NUM5
+  draw_num5_loop:
+    spx x y
+    inc x
+    inc i
+    blt i 3 draw_num5_loop
+    sub x x 3
+    add y y 2
+    clr i
+    inc j
+    blt j 3 draw_num5_loop
+    sub y y 5
+    spx x y
+    add x x 2
+    add y y 2
+    spx x y
 
-	ret
+  ret
 
 
 read_key:
@@ -653,68 +652,68 @@ read_key:
 
 
 main:
-	call init_screen
-	call init_mines
-	call init_mine_counts
+  call init_screen
+  call init_mines
+  call init_mine_counts
 
-	main_loop:
+  main_loop:
     call read_key
 
-    beq key_code KEY_UP .Lmove_cursor
-    beq key_code KEY_DOWN .Lmove_cursor
-    beq key_code KEY_LEFT .Lmove_cursor
-    beq key_code KEY_RIGHT .Lmove_cursor
-    beq key_code KEY_REVEAL .Lreveal_tile
-    beq key_code KEY_FLAG .Ltoggle_flag
+    beq key_code KEY_UP main_loop_move_cursor
+    beq key_code KEY_DOWN main_loop_move_cursor
+    beq key_code KEY_LEFT main_loop_move_cursor
+    beq key_code KEY_RIGHT main_loop_move_cursor
+    beq key_code KEY_REVEAL main_loop_reveal_tile
+    beq key_code KEY_FLAG main_loop_toggle_flag
 
-    .Lmove_cursor:
+    main_loop_move_cursor:
       call move_cursor
-      j .Lupdate_seg
-    .Lreveal_tile:
+      j main_loop_update_seg
+    main_loop_reveal_tile:
       call reveal_tile
-      j .Lupdate_seg
-    .Ltoggle_flag:
+      j main_loop_update_seg
+    main_loop_toggle_flag:
       call toggle_flag
-      j .Lupdate_seg
+      j main_loop_update_seg
 
-		.Lupdate_seg:
+    main_loop_update_seg:
       seg mine_num
 
-		j main_loop
+    j main_loop
 
-	win_loop:
-		j win_loop
+  win_loop:
+    j win_loop
 
-	lose_loop:
-		mv arg_x cursor_x
-		mv arg_y cursor_y
-		col COLOR_MINE_BACK
-		call draw_tile
-		call draw_mine
+  lose_loop:
+    mv arg_x cursor_x
+    mv arg_y cursor_y
+    col COLOR_MINE_BACK
+    call draw_tile
+    call draw_mine
 
-		clr ny
-		clr addr
-		lose_row_loop:
-			clr nx
-		lose_col_loop:
-			bne nx cursor_x lose_loop_cont
-			bne ny cursor_y lose_loop_cont
-			j lose_loop_skip_draw
-		lose_loop_cont:
-			lw t1 addr
-			and t2 t1 MINE_MASK
+    clr ny
+    clr addr
+    lose_row_loop:
+      clr nx
+    lose_col_loop:
+      bne nx cursor_x lose_loop_cont
+      bne ny cursor_y lose_loop_cont
+      j lose_loop_skip_draw
+    lose_loop_cont:
+      lw t1 addr
+      and t2 t1 MINE_MASK
       beqz t2 lose_loop_skip_draw
-			mv arg_x nx
-			mv arg_y ny
-			col COLOR_REVEALED
-			call draw_tile
-			call draw_mine
-		lose_loop_skip_draw:
-			inc nx
-			add addr addr 4
-			blt nx GRID_COLS lose_col_loop
-			inc ny
-			blt ny GRID_ROWS lose_row_loop
+      mv arg_x nx
+      mv arg_y ny
+      col COLOR_REVEALED
+      call draw_tile
+      call draw_mine
+    lose_loop_skip_draw:
+      inc nx
+      add addr addr 4
+      blt nx GRID_COLS lose_col_loop
+      inc ny
+      blt ny GRID_ROWS lose_row_loop
 
 halt:
-	j halt
+  j halt

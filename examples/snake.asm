@@ -46,16 +46,16 @@ j main
 
 
 init_screen:
-	clr x
-	clr y
-	col COLOR_BACK
-	draw_back:
-		spx x y
-		inc x
-		blt x SCREEN_WIDTH draw_back
-		inc y
-		clr x
-		blt y SCREEN_HEIGHT draw_back
+  clr x
+  clr y
+  col COLOR_BACK
+  draw_back:
+    spx x y
+    inc x
+    blt x SCREEN_WIDTH draw_back
+    inc y
+    clr x
+    blt y SCREEN_HEIGHT draw_back
 
   ret
 
