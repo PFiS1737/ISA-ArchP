@@ -56,7 +56,7 @@ impl<'a> Context<'a> {
     }
 }
 
-pub type Line<'src> = (&'src str, Option<&'src str>, Vec<OperandValue<'src>>);
+pub type Line<'src> = (&'src str, Vec<OperandValue<'src>>);
 
 impl Assembler {
     pub fn new(settings: AssemblerSettings, source_lines: Vec<String>) -> Self {

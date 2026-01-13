@@ -116,14 +116,21 @@ move_snake:
     spx x y
 
     # 允许环绕
-    cmp nx 0
-    li.lt nx MAX_X
-    cmp nx SCREEN_WIDTH
-    li.ge nx 0
-    cmp ny 0
-    li.lt ny MAX_Y
-    cmp ny SCREEN_HEIGHT
-    li.ge ny 0
+    bge nx 0 move_snake_common_x_ge_0
+    li nx MAX_X
+    move_snake_common_x_ge_0:
+
+    blt nx SCREEN_WIDTH move_snake_common_x_lt_width
+    li nx 0
+    move_snake_common_x_lt_width:
+
+    bge ny 0 move_snake_common_y_ge_0
+    li ny MAX_Y
+    move_snake_common_y_ge_0:
+
+    blt ny SCREEN_HEIGHT move_snake_common_y_lt_height
+    li ny 0
+    move_snake_common_y_lt_height:
 
     # 画新头
     mv head_x nx

@@ -4,20 +4,20 @@ Types
 R-type
 ------
 
-xxxx xxx   xxx   xxxxx   xxxxx   0000000   xxxxx
- opcode  | cond|   rd  |  rs1  |   ---   |  rs2
+xxxx xxx   000   xxxxx   xxxxx   0000000   xxxxx
+ opcode  |  -  |   rd  |  rs1  |   ---   |  rs2
 
 I-type
 ------
 
-xxxx xxx   xxx   xxxxx   xxxxx   xxxxxxxxxxxx
- opcode  | cond|   rd  |  rs1  |    imm12
+xxxx xxx   000   xxxxx   xxxxx   xxxxxxxxxxxx
+ opcode  |  -  |   rd  |  rs1  |    imm12
 
 B/S-type
 ------
 
-xxxx xxx   xxx   xxxxx   xxxxx   xxxxxxx   xxxxx
- opcode  | cond|  hi5  |  rs1  |   lo7   |  rs2  (offset12 = hi5 << 7 | lo7)
+xxxx xxx   000   xxxxx   xxxxx   xxxxxxx   xxxxx
+ opcode  |  -  |  hi5  |  rs1  |   lo7   |  rs2  (offset12 = hi5 << 7 | lo7)
 
 U/J-type
 ------
@@ -59,8 +59,6 @@ R-type (register compute)
 0010 011 ror
 0010 100 sra
 
-0011 000 cmp __ rs1 rs2
-
 I-type (immediate compute)
 --------------------------
 
@@ -85,8 +83,6 @@ I-type (immediate compute)
 0110 010 roli
 0110 011 rori
 0110 100 srai
-
-0111 000 cmpi __ rs1 imm12
 
 I-type (load)
 -------------

@@ -12,7 +12,6 @@ const t1 r7
 
 const a0 r8
 const a1 r9
-const rt r10
 
 main:
   li t0 16
@@ -24,7 +23,7 @@ main:
 
   call solve
 
-  mv io rt
+  mv io a0
 
 solve:
   # l = 0
@@ -43,12 +42,13 @@ solve:
       # l++
       inc l
       # lmax = max(lmax, ht[l])
-      lbu a0 l
+      lbu t0 l
+      mv a0 t0
       mv a1 lmax
       call max
-      mv lmax rt
+      mv lmax a0
       # water += lmax - ht[l]
-      sub t1 lmax a0
+      sub t1 lmax t0
       add water water t1
 
       j endif
@@ -57,23 +57,24 @@ solve:
       # r--
       dec r
       # rmax = max(rmax, ht[r])
-      lbu a0 r
+      lbu t0 r
+      mv a0 t0
       mv a1 rmax
       call max
-      mv rmax rt
+      mv rmax a0
       # water += rmax - ht[r]
-      sub t1 rmax a0
+      sub t1 rmax t0
       add water water t1
 
     endif:
       j while
 
   endwhile:
-    mv rt water
+    mv a0 water
     ret
 
 max:
-  cmp a0 a1
-  mv.gt rt a0
-  mv.le rt a1
+  bgt a0 a1 max_ret
+  mv a0 a1
+  max_ret:
   ret

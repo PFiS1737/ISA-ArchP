@@ -5,12 +5,11 @@ use crate::{
     utils::fmt_line,
 };
 
-pub fn instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
+pub fn instr(cmd: &str) -> impl Fn(&[&str]) -> String {
     let instr = INSTRUCTIONS.get(cmd).unwrap();
-    move |cond, ops| match instr.encode(
+    move |ops| match instr.encode(
         &Context::test(),
         0,
-        if cond.is_empty() { None } else { Some(cond) },
         &ops.iter()
             .map(|e| OperandValue::from(*e))
             .collect::<Vec<_>>(),
@@ -20,13 +19,12 @@ pub fn instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
     }
 }
 
-pub fn mc_instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
+pub fn mc_instr(cmd: &str) -> impl Fn(&[&str]) -> String {
     let ps_instr = MACRO_INSTRUCTIONS.get(cmd).unwrap();
-    |cond, ops| match ps_instr.expand(
+    |ops| match ps_instr.expand(
         &Context::test(),
         0,
         cmd,
-        if cond.is_empty() { None } else { Some(cond) },
         &ops.iter()
             .map(|e| OperandValue::from(*e))
             .collect::<Vec<_>>(),
@@ -34,7 +32,7 @@ pub fn mc_instr(cmd: &str) -> impl Fn(&str, &[&str]) -> String {
         Ok(expanded) => match expanded {
             Some(expanded) => expanded
                 .into_iter()
-                .map(|(name, cond, ops)| fmt_line(name, cond, ops))
+                .map(|(name, ops)| fmt_line(name, ops))
                 .collect::<Vec<_>>()
                 .join("; "),
             None => "".to_string(),

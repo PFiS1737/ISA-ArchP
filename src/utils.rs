@@ -39,7 +39,7 @@ pub fn align_tabbed_lines(lines: &[String]) -> impl Iterator<Item = String> {
     })
 }
 
-pub fn fmt_line(name: &str, cond: Option<&str>, ops: Vec<OperandValue>) -> String {
+pub fn fmt_line(name: &str, ops: Vec<OperandValue>) -> String {
     let ops = ops
         .into_iter()
         .map(|e| match e {
@@ -51,18 +51,12 @@ pub fn fmt_line(name: &str, cond: Option<&str>, ops: Vec<OperandValue>) -> Strin
 
     let mut line = String::with_capacity(
         name.len()
-            + cond.map(|c| 1 + c.len()).unwrap_or(0)
             + if ops.is_empty() { 0 } else { 1 }
             + ops.iter().map(|o| o.len()).sum::<usize>()
             + ops.len().saturating_sub(1),
     );
 
     line.push_str(name);
-
-    if let Some(c) = cond {
-        line.push('.');
-        line.push_str(c);
-    }
 
     if !ops.is_empty() {
         for op in ops {

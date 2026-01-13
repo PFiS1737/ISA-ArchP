@@ -204,24 +204,40 @@ move_cursor:
   col COLOR_GRID_LINE
   call update_cursor
 
-  cmp key_code KEY_UP
-  dec.eq cursor_y
-  cmp key_code KEY_DOWN
-  inc.eq cursor_y
-  cmp key_code KEY_LEFT
-  dec.eq cursor_x
-  cmp key_code KEY_RIGHT
-  inc.eq cursor_x
+  bne key_code KEY_UP move_cursor_key_up_ne
+  dec cursor_y
+  move_cursor_key_up_ne:
 
-  # 回绕
-  cmp cursor_x 0
-  li.lt cursor_x 14
-  cmp cursor_x GRID_COLS
-  li.ge cursor_x 0
-  cmp cursor_y 0
-  li.lt cursor_y 7
-  cmp cursor_y GRID_ROWS
-  li.ge cursor_y 0
+  bne key_code KEY_DOWN move_cursor_key_down_ne
+  inc cursor_y
+  move_cursor_key_down_ne:
+
+  bne key_code KEY_LEFT move_cursor_key_left_ne
+  dec cursor_x
+  move_cursor_key_left_ne:
+
+  bne key_code KEY_RIGHT move_cursor_key_right_ne
+  inc cursor_x
+  move_cursor_key_right_ne:
+
+  # ---------- 回绕 ----------
+
+  bge cursor_x 0 move_cursor_x_ge_0
+  li cursor_x 14
+  move_cursor_x_ge_0:
+
+  blt cursor_x GRID_COLS move_cursor_x_lt_cols
+  li cursor_x 0
+  move_cursor_x_lt_cols:
+
+  bge cursor_y 0 move_cursor_y_ge_0
+  li cursor_y 7
+  move_cursor_y_ge_0:
+
+  blt cursor_y GRID_ROWS move_cursor_y_lt_rows
+  li cursor_y 0
+  move_cursor_y_lt_rows:
+
   col COLOR_CURSOR
   call update_cursor
 

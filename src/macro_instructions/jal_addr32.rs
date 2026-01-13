@@ -22,28 +22,28 @@ macro_instruction! {
     }
 }
 
-const F1: ExpandFn = |ctx, pc, _, cond, ops| {
+const F1: ExpandFn = |ctx, pc, _, ops| {
     if let Ok(addr) = parse_address(ctx, &ops[1])
         && let (hi, lo) = addr.try_as_i12(pc)
         && hi != 0
     {
         Some(vec![
-            ("auipc", cond, op_values!["tmp", hi]),
-            ("jalr", cond, op_values![ops[0], "tmp", lo]),
+            ("auipc", op_values!["tmp", hi]),
+            ("jalr", op_values![ops[0], "tmp", lo]),
         ])
     } else {
         None
     }
 };
 
-const F2: ExpandFn = |ctx, pc, _, cond, ops| {
+const F2: ExpandFn = |ctx, pc, _, ops| {
     if let Ok(addr) = parse_address(ctx, &ops[0])
         && let (hi, lo) = addr.try_as_i12(pc)
         && hi != 0
     {
         Some(vec![
-            ("auipc", cond, op_values!["tmp", hi]),
-            ("jr", cond, op_values!["tmp", lo]),
+            ("auipc", op_values!["tmp", hi]),
+            ("jr", op_values!["tmp", lo]),
         ])
     } else {
         None

@@ -67,7 +67,6 @@ If you require detailed information on the encoding formats, please refer to [is
 In this section:
 
 - `instr`: the instruction name.
-- `cond`: optional condition code (see [Conditions](#conditions)).
 - `rd`: the destination register.
 - `rs1`: the first source register.
 - `rs2`: the second source register.
@@ -93,7 +92,7 @@ In this section:
 - instructions:
   - `add`, `sub`, `mul`, `mulh`, `mulhu`, `mulhsu`, `div`, `mod`
   - `addi`, `subi`, `muli`, `mulhi`, `mulhui`, `mulhsui`, `divi`, `modi`
-- format: `instr[.cond] rd rs1 rs2/imm12`
+- format: `instr rd rs1 rs2/imm12`
 - pseudo:
   - `li rd imm12` => `addi rd r0 imm12`
   - `mv rd rs1` => `addi rd rs1 0`
@@ -111,7 +110,7 @@ In this section:
 - instructions:
   - `and`, `or`, `xor`, `nand`, `nor`, `xnor`
   - `andi`, `ori`, `xori`, `nandi`, `nori` `xnori`
-- format: `instr[.cond] rd rs1 rs2/imm12`
+- format: `instr rd rs1 rs2/imm12`
 - pseudo:
   - `not rd rs1` => `xori rd rs1 -1`
 - macros: Same as [Arithmetic](#arithmetic) instructions.
@@ -119,25 +118,19 @@ In this section:
 #### Shift and Rotate
 
 - instructions: `sll`, `srl`, `rol`, `ror`, `sra`, `slli`, `srli`, `roli`, `rori`, `srai`
-- format: `instr[.cond] rd rs1 rs2/imm5`, where `imm5` is a 5-bit unsigned immediate value from `0` to `31`.
-- macros: Same as [Arithmetic](#arithmetic) instructions.
-
-#### Comparison
-
-- instructions: `cmp`, `cmpi`
-- format: `instr[.cond] rs1 rs2/imm12`
+- format: `instr rd rs1 rs2/imm5`, where `imm5` is a 5-bit unsigned immediate value from `0` to `31`.
 - macros: Same as [Arithmetic](#arithmetic) instructions.
 
 #### Load and Store
 
-- `lw[.cond] rd rs1 imm12`: load word from memory address `rs1 + imm12` into `rd`.
-- `lh[.cond] rd rs1 imm12`: load half-word from memory address `rs1 + imm12` into the lower 16 bits of `rd`, sign-extended.
-- `lhu[.cond] rd rs1 imm12`: load half-word from memory address `rs1 + imm12` into the lower 16 bits of `rd`, zero-extended.
-- `lb[.cond] rd rs1 imm12`: load byte from memory address `rs1 + imm12` into the lower 8 bits of `rd`, sign-extended.
-- `lbu[.cond] rd rs1 imm12`: load byte from memory address `rs1 + imm12` into the lower 8 bits of `rd`, zero-extended.
-- `sw[.cond] rs1 rs2 imm12`: store word from `rs2` into memory address `rs1 + imm12`.
-- `sh[.cond] rs1 rs2 imm12`: store the lower 16 bits of `rs2` into memory address `rs1 + imm12`.
-- `sb[.cond] rs1 rs2 imm12`: store the lower 8 bits of `rs2` into memory address `rs1 + imm12`.
+- `lw rd rs1 imm12`: load word from memory address `rs1 + imm12` into `rd`.
+- `lh rd rs1 imm12`: load half-word from memory address `rs1 + imm12` into the lower 16 bits of `rd`, sign-extended.
+- `lhu rd rs1 imm12`: load half-word from memory address `rs1 + imm12` into the lower 16 bits of `rd`, zero-extended.
+- `lb rd rs1 imm12`: load byte from memory address `rs1 + imm12` into the lower 8 bits of `rd`, sign-extended.
+- `lbu rd rs1 imm12`: load byte from memory address `rs1 + imm12` into the lower 8 bits of `rd`, zero-extended.
+- `sw rs1 rs2 imm12`: store word from `rs2` into memory address `rs1 + imm12`.
+- `sh rs1 rs2 imm12`: store the lower 16 bits of `rs2` into memory address `rs1 + imm12`.
+- `sb rs1 rs2 imm12`: store the lower 8 bits of `rs2` into memory address `rs1 + imm12`.
 - note:
   - The unit of memory address is in bytes.
 - macros:
@@ -164,7 +157,7 @@ In this section:
 #### Branching
 
 - instructions: `beq`, `bne`, `blt`, `bge`, `bltu`, `bgeu`
-- format: `instr[.cond] rs1 rs2 addr12`
+- format: `instr rs1 rs2 addr12`
 - pseudo:
   - `bgt rs1 rs2 addr12` => `blt rs2 rs1 addr12`
   - `ble rs1 rs2 addr12` => `bge rs2 rs1 addr12`
@@ -178,21 +171,21 @@ In this section:
 
 #### Stack Operations
 
-- `push[.cond] rs1`: push the value of `rs1` onto the stack.
-- `pop[.cond] rd`: pop the top value from the stack into `rd`.
+- `push rs1`: push the value of `rs1` onto the stack.
+- `pop rd`: pop the top value from the stack into `rd`.
 
 #### Call and Return
 
-- `call[.cond] addr20`: call a subroutine at an address.
-- `callr[.cond] rs1 imm12`: call a subroutine at the address `(rs1 + sign_extend(imm12)) & ~1`.
-- `ret[.cond]`: return from the current subroutine.
+- `call addr20`: call a subroutine at an address.
+- `callr rs1 imm12`: call a subroutine at the address `(rs1 + sign_extend(imm12)) & ~1`.
+- `ret`: return from the current subroutine.
 - note:
   - The return address is automatically managed by the hardware stack.
 
 #### Jump and Link
 
-- `jal[.cond] rd addr20`: jump to an address and write the return address (`pc + 4`) into `rd`.
-- `jalr[.cond] rd rs1 imm12`: jump to the address `(rs1 + sign_extend(imm12)) & ~1` and write the return address (`pc + 4`) into `rd`.
+- `jal rd addr20`: jump to an address and write the return address (`pc + 4`) into `rd`.
+- `jalr rd rs1 imm12`: jump to the address `(rs1 + sign_extend(imm12)) & ~1` and write the return address (`pc + 4`) into `rd`.
 - pseudo:
   - `j addr12` => `jal r0 addr12`
   - `jr rs1` => `jalr r0 rs1`
@@ -202,22 +195,9 @@ In this section:
 #### Display (only in sandbox mode)
 
 - `col imm24u`: set the display color to the 24-bit unsigned immediate value `imm24u` (format: `0xRRGGBB`).
-- `spx[.cond] rs1 rs2`: set the `(rs1, rs2)` position to the color specified by the last `col` instruction.
-- `seg[.cond] rs1`: display the value of `rs1` (as 8-bit unsigned) on a 7-segment display.
-- `segi[.cond] imm8u`: display the 8-bit unsigned immediate value `imm8u` on a 7-segment display.
-
-### Conditions
-
-You can compare two registers using the `cmp` instruction, or `cmpi` to compare a register with an immediate value.
-The result of the comparison is stored internally and can be used by conditional instructions.
-
-- none: always execute
-- `eq`: execute if last comparison was equal
-- `ne`: execute if last comparison was not equal
-- `lt`: execute if last comparison was less than
-- `ge`: execute if last comparison was greater than or equal
-- `gt`: execute if last comparison was greater than
-- `le`: execute if last comparison was less than or equal
+- `spx rs1 rs2`: set the `(rs1, rs2)` position to the color specified by the last `col` instruction.
+- `seg rs1`: display the value of `rs1` (as 8-bit unsigned) on a 7-segment display.
+- `segi imm8u`: display the 8-bit unsigned immediate value `imm8u` on a 7-segment display.
 
 ## References
 

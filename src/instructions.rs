@@ -1,6 +1,5 @@
 mod arithmetic;
 mod branch;
-mod compare;
 mod display;
 mod jump_and_link;
 mod load_store;
@@ -17,7 +16,7 @@ use once_cell::sync::Lazy;
 use crate::{
     assembler::Context,
     operand::{OperandType, OperandValue, op_fmt},
-    parser::{parse_address, parse_cond, parse_imm, parse_reg_d, parse_reg_s},
+    parser::{parse_address, parse_imm, parse_reg_d, parse_reg_s},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -47,33 +46,17 @@ pub trait Instruction: Send + Sync {
     fn itype(&self) -> InstrType;
     fn operands_format(&self) -> Option<&'static [Option<OperandType>]>;
 
-    fn encode(
-        &self,
-        ctx: &Context,
-        pc: u32,
-        cond: Option<&str>,
-        operands: &[OperandValue],
-    ) -> Result<u32> {
-        let cond = cond.map(parse_cond).transpose()?.unwrap_or(0);
-
-        if matches!(self.itype(), InstrType::U | InstrType::C) && cond != 0 {
-            bail!(
-                "Condition is not allowed for {}-type instruction '{}'",
-                self.itype(),
-                self.name()
-            );
-        }
-
+    fn encode(&self, ctx: &Context, pc: u32, operands: &[OperandValue]) -> Result<u32> {
         let operands = self.parse(ctx, pc, operands)?;
 
         match self.itype() {
-            InstrType::R => self.encode_r(cond, &operands),
-            InstrType::I => self.encode_i(cond, &operands),
-            InstrType::B => self.encode_b(cond, &operands),
-            InstrType::S => self.encode_s(cond, &operands),
-            InstrType::U => self.encode_u(cond, &operands),
-            InstrType::J => self.encode_j(cond, &operands),
-            InstrType::C => self.encode_c(cond, &operands),
+            InstrType::R => self.encode_r(&operands),
+            InstrType::I => self.encode_i(&operands),
+            InstrType::B => self.encode_b(&operands),
+            InstrType::S => self.encode_s(&operands),
+            InstrType::U => self.encode_u(&operands),
+            InstrType::J => self.encode_j(&operands),
+            InstrType::C => self.encode_c(&operands),
         }
     }
 
@@ -112,64 +95,57 @@ pub trait Instruction: Send + Sync {
         Ok(ret)
     }
 
-    // xxxx xxx   xxx   xxxxx   xxxxx   0000000   xxxxx
-    //  opcode  | cond|   rd  |  rs1  |    --   |  rs2
-    fn encode_r(&self, cond: u32, operands: &[u32]) -> Result<u32> {
+    // xxxx xxx   000   xxxxx   xxxxx   0000000   xxxxx
+    //  opcode  |  -  |   rd  |  rs1  |    --   |  rs2
+    fn encode_r(&self, operands: &[u32]) -> Result<u32> {
         let rd = operands[0];
         let rs1 = operands[1];
         let rs2 = operands[2];
 
-        code!(self.opcode(), cond, rd, rs1, rs2)
+        code!(@R, self.opcode(), rd, rs1, rs2)
     }
 
-    // xxxx xxx   xxx   xxxxx   xxxxx   xxxxxxxxxxxx
-    //  opcode  | cond|   rd  |  rs1  |    imm12
-    fn encode_i(&self, cond: u32, operands: &[u32]) -> Result<u32> {
+    // xxxx xxx   000   xxxxx   xxxxx   xxxxxxxxxxxx
+    //  opcode  |  -  |   rd  |  rs1  |    imm12
+    fn encode_i(&self, operands: &[u32]) -> Result<u32> {
         let rd = operands[0];
         let rs1 = operands[1];
         let imm12 = operands[2];
 
-        code!(self.opcode(), cond, rd, rs1, imm12)
+        code!(@R, self.opcode(), rd, rs1, imm12)
     }
 
-    // 1001 xxx   xxx   xxxxx   xxxxx   xxxxxxx   xxxxx
-    //  opcode  | cond|  up5  |  rs1  |   low7  |  rs2  (offset12 = up5 << 7 | low7)
-    fn encode_b(&self, cond: u32, operands: &[u32]) -> Result<u32> {
+    // 1001 xxx   000    xxxxx   xxxxx   xxxxxxx   xxxxx
+    //  opcode  |  -  |  up5  |  rs1  |   low7  |  rs2  (offset12 = up5 << 7 | low7)
+    fn encode_b(&self, operands: &[u32]) -> Result<u32> {
         let rs1 = operands[0];
         let rs2 = operands[1];
         let offset12 = operands[2];
 
-        code!(
-            self.opcode(),
-            cond,
-            (offset12 >> 7),
-            rs1,
-            (offset12 & 0x7F),
-            rs2
-        )
+        code!(@B, self.opcode(), (offset12 >> 7), rs1, (offset12 & 0x7F), rs2)
     }
-    fn encode_s(&self, cond: u32, operands: &[u32]) -> Result<u32> {
-        self.encode_b(cond, operands)
+    fn encode_s(&self, operands: &[u32]) -> Result<u32> {
+        self.encode_b(operands)
     }
 
     // 1000 100   xxx   xxxxx   xxxxxxxxxxxxxxxxx
     //    lui  |uimm20u|  rd  |      uimm20l      (uimm20 = uimm20u << 17 | uimm20l)
-    fn encode_u(&self, _: u32, operands: &[u32]) -> Result<u32> {
+    fn encode_u(&self, operands: &[u32]) -> Result<u32> {
         let rd = operands[0];
         let imm20 = operands[1];
 
-        code!(self.opcode(), (imm20 >> 17), rd, (imm20 & 0x1FFFF))
+        code!(@U, self.opcode(), (imm20 >> 17), rd, (imm20 & 0x1FFFF))
     }
-    fn encode_j(&self, _: u32, operands: &[u32]) -> Result<u32> {
-        self.encode_u(0, operands)
+    fn encode_j(&self, operands: &[u32]) -> Result<u32> {
+        self.encode_u(operands)
     }
 
     // 1101 000   0   xxxxxxxx xxxxxxxx xxxxxxxx
     //    col   | - |           color24
-    fn encode_c(&self, _: u32, operands: &[u32]) -> Result<u32> {
+    fn encode_c(&self, operands: &[u32]) -> Result<u32> {
         let color24 = operands[0];
 
-        code!(self.opcode(), 0, 0, color24)
+        code!(@U, self.opcode(), 0, 0, color24)
     }
 
     fn assert_operand_count(&self, count: usize, expected: usize) -> Result<()> {
@@ -204,17 +180,17 @@ pub trait Instruction: Send + Sync {
 
 macro code {
     // R/I-type
-    ($opcode:expr, $cond:expr, $rd:expr, $rs1:expr, $rs2_or_imm12:expr) => {
-        Ok(($opcode << 25) | ($cond << 22) | ($rd << 17) | ($rs1 << 12) | $rs2_or_imm12)
+    (@R, $opcode:expr, $rd:expr, $rs1:expr, $rs2_or_imm12:expr) => {
+        Ok(($opcode << 25) | ($rd << 17) | ($rs1 << 12) | $rs2_or_imm12)
     },
 
     // B-type
-    ($opcode:expr, $cond:expr, $up5:expr, $rs1:expr, $low7:expr, $rs2:expr) => {
-        Ok(($opcode << 25) | ($cond << 22) | ($up5 << 17) | ($rs1 << 12) | ($low7 << 5) | $rs2)
+    (@B, $opcode:expr, $up5:expr, $rs1:expr, $low7:expr, $rs2:expr) => {
+        Ok(($opcode << 25) | ($up5 << 17) | ($rs1 << 12) | ($low7 << 5) | $rs2)
     },
 
     // U/C-type
-    ($opcode:expr, $uimm20u:expr, $rd:expr, $uimm20l:expr) => {
+    (@U, $opcode:expr, $uimm20u:expr, $rd:expr, $uimm20l:expr) => {
         Ok(($opcode << 25) | ($uimm20u << 22) | ($rd << 17) | $uimm20l)
     },
 }
@@ -316,80 +292,76 @@ mod tests {
     fn encode_r() {
         let cmd = instr("add");
 
-        assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Instruction 'add' requires 3 operands, got 2");
-        assert_snapshot!(cmd("", &["r1", "r2", "r3", "r4"]), @"Error: Instruction 'add' requires 3 operands, got 4");
-        assert_snapshot!(cmd("", &["r1", "r2", "rrr"]), @"Error: Invalid register: rrr");
-        assert_snapshot!(cmd("", &["r1", "r2", "123"]), @"Error: Expected register, found immediate: 123");
-        assert_snapshot!(cmd("invalid", &["r1", "r2", "r3"]), @"Error: Invalid condition: invalid");
+        assert_snapshot!(cmd(&["r1", "r2"]), @"Error: Instruction 'add' requires 3 operands, got 2");
+        assert_snapshot!(cmd(&["r1", "r2", "r3", "r4"]), @"Error: Instruction 'add' requires 3 operands, got 4");
+        assert_snapshot!(cmd(&["r1", "r2", "rrr"]), @"Error: Invalid register: rrr");
+        assert_snapshot!(cmd(&["r1", "r2", "123"]), @"Error: Expected register, found immediate: 123");
 
-        assert_snapshot!(cmd("lt", &["r1", "r2", "r3"]), @"0000 000 011 00001 00010 0000000 00011");
+        assert_snapshot!(cmd(&["r1", "r2", "r3"]), @"0000 000 000 00001 00010 0000000 00011");
     }
 
     #[test]
     fn encode_i() {
         let cmd = instr("addi");
-        assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Instruction 'addi' requires 3 operands, got 2");
-        assert_snapshot!(cmd("", &["r1", "r2", "r3", "r4"]), @"Error: Instruction 'addi' requires 3 operands, got 4");
-        assert_snapshot!(cmd("", &["r1", "rrr", "123"]), @"Error: Invalid register: rrr");
-        assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Invalid immediate: r3");
-        assert_snapshot!(cmd("", &["r1", "r2", "0xFFFF"]), @"Error: Immediate '65535' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(cmd("invalid", &["r1", "r2", "123"]), @"Error: Invalid condition: invalid");
+        assert_snapshot!(cmd(&["r1", "r2"]), @"Error: Instruction 'addi' requires 3 operands, got 2");
+        assert_snapshot!(cmd(&["r1", "r2", "r3", "r4"]), @"Error: Instruction 'addi' requires 3 operands, got 4");
+        assert_snapshot!(cmd(&["r1", "rrr", "123"]), @"Error: Invalid register: rrr");
+        assert_snapshot!(cmd(&["r1", "r2", "r3"]), @"Error: Invalid immediate: r3");
+        assert_snapshot!(cmd(&["r1", "r2", "0xFFFF"]), @"Error: Immediate '65535' out of range for i12 (-2048 ..= 2047)");
 
-        assert_snapshot!(cmd("", &["r1", "r2", "3"]), @"0100 000 000 00001 00010 0000000 00011");
-        assert_snapshot!(cmd("", &["r1", "r2", "2047"]), @"0100 000 000 00001 00010 0111111 11111");
-        assert_snapshot!(cmd("", &["r1", "r2", "2048"]), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(cmd("", &["r1", "r2", "-3"]), @"0100 000 000 00001 00010 1111111 11101");
-        assert_snapshot!(cmd("", &["r1", "r2", "-2048"]), @"0100 000 000 00001 00010 1000000 00000");
-        assert_snapshot!(cmd("", &["r1", "r2", "-2049"]), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(cmd(&["r1", "r2", "3"]), @"0100 000 000 00001 00010 0000000 00011");
+        assert_snapshot!(cmd(&["r1", "r2", "2047"]), @"0100 000 000 00001 00010 0111111 11111");
+        assert_snapshot!(cmd(&["r1", "r2", "2048"]), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(cmd(&["r1", "r2", "-3"]), @"0100 000 000 00001 00010 1111111 11101");
+        assert_snapshot!(cmd(&["r1", "r2", "-2048"]), @"0100 000 000 00001 00010 1000000 00000");
+        assert_snapshot!(cmd(&["r1", "r2", "-2049"]), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
 
         let cmd = instr("srli");
 
-        assert_snapshot!(cmd("", &["r1", "r2", "32"]), @"Error: Immediate '32' out of range for u5 (0 ..= 31)");
-        assert_snapshot!(cmd("", &["r1", "r2", "31"]), @"0110 001 000 00001 00010 0000000 11111");
+        assert_snapshot!(cmd(&["r1", "r2", "32"]), @"Error: Immediate '32' out of range for u5 (0 ..= 31)");
+        assert_snapshot!(cmd(&["r1", "r2", "31"]), @"0110 001 000 00001 00010 0000000 11111");
     }
 
     #[test]
     fn enocde_b() {
         let cmd = instr("beq");
         // Same to I-type, omitting ...
-        assert_snapshot!(cmd("ne", &["r1", "r0", "over"]), @"Error: Address offset '596523' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(cmd("ne", &["r1", "r0", "loop"]), @"1001 001 010 00000 00001 0000010 00000");
+        assert_snapshot!(cmd(&["r1", "r0", "over"]), @"Error: Address offset '596523' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(cmd(&["r1", "r0", "loop"]), @"1001 001 000 00000 00001 0000010 00000");
 
         let cmd = instr("sw");
 
-        assert_snapshot!(cmd("", &["r1", "r2", "3"]), @"1000 101 000 00000 00001 0000011 00010");
-        assert_snapshot!(cmd("", &["r1", "r2", "2047"]), @"1000 101 000 01111 00001 1111111 00010");
-        assert_snapshot!(cmd("", &["r1", "r2", "2048"]), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(cmd("", &["r1", "r2", "-3"]), @"1000 101 000 11111 00001 1111101 00010");
-        assert_snapshot!(cmd("", &["r1", "r2", "-2048"]), @"1000 101 000 10000 00001 0000000 00010");
-        assert_snapshot!(cmd("", &["r1", "r2", "-2049"]), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(cmd(&["r1", "r2", "3"]), @"1000 101 000 00000 00001 0000011 00010");
+        assert_snapshot!(cmd(&["r1", "r2", "2047"]), @"1000 101 000 01111 00001 1111111 00010");
+        assert_snapshot!(cmd(&["r1", "r2", "2048"]), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(cmd(&["r1", "r2", "-3"]), @"1000 101 000 11111 00001 1111101 00010");
+        assert_snapshot!(cmd(&["r1", "r2", "-2048"]), @"1000 101 000 10000 00001 0000000 00010");
+        assert_snapshot!(cmd(&["r1", "r2", "-2049"]), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
     }
 
     #[test]
     fn encode_u() {
         let cmd = instr("lui");
 
-        assert_snapshot!(cmd("", &["r1"]), @"Error: Instruction 'lui' requires 2 operands, got 1");
-        assert_snapshot!(cmd("", &["r1", "r2", "r3"]), @"Error: Instruction 'lui' requires 2 operands, got 3");
-        assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Invalid immediate: r2");
-        assert_snapshot!(cmd("", &["r3", "0x200000"]), @"Error: Immediate '2097152' out of range for u20 (0 ..= 1048575)");
-        assert_snapshot!(cmd("", &["r3", "-123"]), @"Error: Immediate '18446744073709551493' out of range for u20 (0 ..= 1048575)");
-        assert_snapshot!(cmd("eq", &["r3", "0xABCDE"]), @"Error: Condition is not allowed for U-type instruction 'lui'");
+        assert_snapshot!(cmd(&["r1"]), @"Error: Instruction 'lui' requires 2 operands, got 1");
+        assert_snapshot!(cmd(&["r1", "r2", "r3"]), @"Error: Instruction 'lui' requires 2 operands, got 3");
+        assert_snapshot!(cmd(&["r1", "r2"]), @"Error: Invalid immediate: r2");
+        assert_snapshot!(cmd(&["r3", "0x200000"]), @"Error: Immediate '2097152' out of range for u20 (0 ..= 1048575)");
+        assert_snapshot!(cmd(&["r3", "-123"]), @"Error: Immediate '18446744073709551493' out of range for u20 (0 ..= 1048575)");
 
-        assert_snapshot!(cmd("", &["r3", "0xABCDE"]), @"1011 000 101 00011 01011 1100110 11110");
+        assert_snapshot!(cmd(&["r3", "0xABCDE"]), @"1011 000 101 00011 01011 1100110 11110");
     }
 
     #[test]
     fn encode_c() {
         let cmd = instr("col");
 
-        assert_snapshot!(cmd("", &[]), @"Error: Instruction 'col' requires 1 operands, got 0");
-        assert_snapshot!(cmd("", &["r1", "r2"]), @"Error: Instruction 'col' requires 1 operands, got 2");
-        assert_snapshot!(cmd("", &["r1"]), @"Error: Invalid immediate: r1");
-        assert_snapshot!(cmd("", &["0x1FFFFFF"]), @"Error: Immediate '33554431' out of range for u24 (0 ..= 16777215)");
-        assert_snapshot!(cmd("", &["-123"]), @"Error: Immediate '18446744073709551493' out of range for u24 (0 ..= 16777215)");
-        assert_snapshot!(cmd("ne", &["0x123456"]), @"Error: Condition is not allowed for C-type instruction 'col'");
+        assert_snapshot!(cmd(&[]), @"Error: Instruction 'col' requires 1 operands, got 0");
+        assert_snapshot!(cmd(&["r1", "r2"]), @"Error: Instruction 'col' requires 1 operands, got 2");
+        assert_snapshot!(cmd(&["r1"]), @"Error: Invalid immediate: r1");
+        assert_snapshot!(cmd(&["0x1FFFFFF"]), @"Error: Immediate '33554431' out of range for u24 (0 ..= 16777215)");
+        assert_snapshot!(cmd(&["-123"]), @"Error: Immediate '18446744073709551493' out of range for u24 (0 ..= 16777215)");
 
-        assert_snapshot!(cmd("", &["0x123456"]), @"1101 000 000 01001 00011 0100010 10110");
+        assert_snapshot!(cmd(&["0x123456"]), @"1101 000 000 01001 00011 0100010 10110");
     }
 }

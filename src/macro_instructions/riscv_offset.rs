@@ -34,34 +34,34 @@ macro_instruction! {
     }
 }
 
-const F1: ExpandFn = |_, _, name, cond, ops| {
+const F1: ExpandFn = |_, _, name, ops| {
     if ops.len() != 2 {
         return None;
     }
 
     let (imm, base) = parse_offset(&ops[1])?;
 
-    Some(vec![(name, cond, op_values!(ops[0], base, imm))])
+    Some(vec![(name, op_values!(ops[0], base, imm))])
 };
 
-const F2: ExpandFn = |_, _, name, cond, ops| {
+const F2: ExpandFn = |_, _, name, ops| {
     if ops.len() != 1 {
         return None;
     }
 
     let (imm, base) = parse_offset(&ops[0])?;
 
-    Some(vec![(name, cond, op_values!(base, imm))])
+    Some(vec![(name, op_values!(base, imm))])
 };
 
-const F3: ExpandFn = |_, _, name, cond, ops| {
+const F3: ExpandFn = |_, _, name, ops| {
     if ops.len() != 2 {
         return None;
     }
 
     let (imm, base) = parse_offset(&ops[1])?;
 
-    Some(vec![(name, cond, op_values!(base, ops[0], imm))])
+    Some(vec![(name, op_values!(base, ops[0], imm))])
 };
 
 fn parse_offset<'a>(op: &OperandValue<'a>) -> Option<(&'a str, &'a str)> {
@@ -103,35 +103,33 @@ mod tests {
     fn load() {
         let lw = mc_instr("lw");
 
-        assert_snapshot!(lw("", &["r1"]), @"");
-        assert_snapshot!(lw("", &["r1", "r2", "123"]), @"");
+        assert_snapshot!(lw(&["r1"]), @"");
+        assert_snapshot!(lw(&["r1", "r2", "123"]), @"");
 
-        assert_snapshot!(lw("", &["r1", "100sp)"]), @"");
-        assert_snapshot!(lw("", &["r1", "100(sp"]), @"");
+        assert_snapshot!(lw(&["r1", "100sp)"]), @"");
+        assert_snapshot!(lw(&["r1", "100(sp"]), @"");
 
-        assert_snapshot!(lw("", &["r1", "100"]), @"lw r1 100 0");
-        assert_snapshot!(lw("", &["r1", "base"]), @"lw r1 base 0");
+        assert_snapshot!(lw(&["r1", "100"]), @"lw r1 100 0");
+        assert_snapshot!(lw(&["r1", "base"]), @"lw r1 base 0");
 
-        assert_snapshot!(lw("", &["r0", "10(r1)"]), @"lw r0 r1 10");
-        assert_snapshot!(lw("", &["r1", "100(sp)"]), @"lw r1 sp 100");
-        assert_snapshot!(lw("eq", &["r1", "200(r5)"]), @"lw.eq r1 r5 200");
+        assert_snapshot!(lw(&["r0", "10(r1)"]), @"lw r0 r1 10");
+        assert_snapshot!(lw(&["r1", "100(sp)"]), @"lw r1 sp 100");
     }
 
     #[test]
     fn save() {
         let sw = mc_instr("sw");
 
-        assert_snapshot!(sw("", &["r1"]), @"");
-        assert_snapshot!(sw("", &["r1", "r2", "123"]), @"");
+        assert_snapshot!(sw(&["r1"]), @"");
+        assert_snapshot!(sw(&["r1", "r2", "123"]), @"");
 
-        assert_snapshot!(sw("", &["r1", "100sp)"]), @"");
-        assert_snapshot!(sw("", &["r1", "100(sp"]), @"");
+        assert_snapshot!(sw(&["r1", "100sp)"]), @"");
+        assert_snapshot!(sw(&["r1", "100(sp"]), @"");
 
-        assert_snapshot!(sw("", &["r1", "100"]), @"sw 100 r1 0");
-        assert_snapshot!(sw("", &["r1", "base"]), @"sw base r1 0");
+        assert_snapshot!(sw(&["r1", "100"]), @"sw 100 r1 0");
+        assert_snapshot!(sw(&["r1", "base"]), @"sw base r1 0");
 
-        assert_snapshot!(sw("", &["r2", "10(r1)"]), @"sw r1 r2 10");
-        assert_snapshot!(sw("", &["r3", "100(sp)"]), @"sw sp r3 100");
-        assert_snapshot!(sw("ne", &["r4", "200(r5)"]), @"sw.ne r5 r4 200");
+        assert_snapshot!(sw(&["r2", "10(r1)"]), @"sw r1 r2 10");
+        assert_snapshot!(sw(&["r3", "100(sp)"]), @"sw sp r3 100");
     }
 }

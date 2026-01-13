@@ -81,11 +81,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                 None => (raw_line, tokens.as_ref()),
             };
 
-            let (name, cond) = if let Some((name, cond)) = tokens[0].split_once('.') {
-                (name, Some(cond))
-            } else {
-                (tokens[0], None)
-            };
+            let name = tokens[0];
 
             let ops = tokens[1..].iter().map(|e| (*e).into()).collect::<Vec<_>>();
 
@@ -94,19 +90,19 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
             if !self.context.settings.disable_macro
                 && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
                 && let Some(expanded) = mc_instr
-                    .expand(self.context, pc as u32, name, cond, &ops)
+                    .expand(self.context, pc as u32, name, &ops)
                     .map_err(|e| {
-                    anyhow!(
-                        "Error expanding macro-instruction at line {}: '{}' ({})",
-                        orig_idx + 1,
-                        raw_line,
-                        e
-                    )
-                })?
+                        anyhow!(
+                            "Error expanding macro-instruction at line {}: '{}' ({})",
+                            orig_idx + 1,
+                            raw_line,
+                            e
+                        )
+                    })?
             {
                 lines.extend(expanded);
             } else {
-                lines.push((name, cond, ops));
+                lines.push((name, ops));
             }
 
             for line in lines {

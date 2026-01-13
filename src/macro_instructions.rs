@@ -1,7 +1,6 @@
 mod als_imm32;
 mod auto_imm;
 mod branch_imm;
-mod cmp_imm32;
 mod jal_addr32;
 mod load_imm32;
 mod riscv_offset;
@@ -17,8 +16,7 @@ use crate::{
 };
 
 type ExpandRet<'a> = Option<Vec<Line<'a>>>;
-type ExpandFn =
-    for<'a> fn(&Context<'a>, u32, &'a str, Option<&'a str>, &[OperandValue<'a>]) -> ExpandRet<'a>;
+type ExpandFn = for<'a> fn(&Context<'a>, u32, &'a str, &[OperandValue<'a>]) -> ExpandRet<'a>;
 
 inventory::collect!(&'static dyn MacroInstruction);
 
@@ -43,25 +41,24 @@ pub trait MacroInstruction: Send + Sync {
         ctx: &Context<'a>,
         pc: u32,
         name: &'a str,
-        cond: Option<&'a str>,
         operands: &[OperandValue<'a>],
     ) -> Result<ExpandRet<'a>> {
         self.assert_operand_count(name, operands)?;
 
-        let mut deq: VecDeque<_> = match (self.expander())(ctx, pc, name, cond, operands) {
+        let mut deq: VecDeque<_> = match (self.expander())(ctx, pc, name, operands) {
             None => return Ok(None),
             Some(v) => v.into(),
         };
 
         let mut ret = Vec::new();
 
-        while let Some((name, cond, ops)) = deq.pop_front() {
+        while let Some((name, ops)) = deq.pop_front() {
             if let Some(mc) = MACRO_INSTRUCTIONS.get(name) {
                 mc.assert_operand_count(name, &ops)?;
 
-                match (mc.expander())(ctx, pc, name, cond, &ops) {
+                match (mc.expander())(ctx, pc, name, &ops) {
                     None => {
-                        ret.push((name, cond, ops));
+                        ret.push((name, ops));
                     }
                     Some(v) => {
                         let mut q: VecDeque<_> = v.into();
@@ -70,7 +67,7 @@ pub trait MacroInstruction: Send + Sync {
                     }
                 }
             } else {
-                ret.push((name, cond, ops));
+                ret.push((name, ops));
             }
         }
 
