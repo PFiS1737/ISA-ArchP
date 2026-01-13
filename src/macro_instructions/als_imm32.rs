@@ -16,7 +16,7 @@ macro_instruction! {
     }
 }
 
-const F: ExpandFn = |ctx, name, cond, ops| {
+const F: ExpandFn = |ctx, _, name, cond, ops| {
     let inst = &name[..name.len() - 1]; // remove the trailing 'i'
 
     if let Ok(imm) = parse_imm(ctx, &ops[2])

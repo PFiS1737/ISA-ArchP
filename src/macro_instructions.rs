@@ -2,8 +2,9 @@ mod als_imm32;
 mod auto_imm;
 mod branch_imm;
 mod cmp_imm32;
+mod jal_addr32;
 mod load_imm32;
-mod riscv_lsw;
+mod riscv_offset;
 
 use std::collections::{HashMap, VecDeque};
 
@@ -17,7 +18,7 @@ use crate::{
 
 type ExpandRet<'a> = Option<Vec<Line<'a>>>;
 type ExpandFn =
-    for<'a> fn(&Context<'a>, &'a str, Option<&'a str>, &[OperandValue<'a>]) -> ExpandRet<'a>;
+    for<'a> fn(&Context<'a>, u32, &'a str, Option<&'a str>, &[OperandValue<'a>]) -> ExpandRet<'a>;
 
 inventory::collect!(&'static dyn MacroInstruction);
 
@@ -40,13 +41,14 @@ pub trait MacroInstruction: Send + Sync {
     fn expand<'a>(
         &self,
         ctx: &Context<'a>,
+        pc: u32,
         name: &'a str,
         cond: Option<&'a str>,
         operands: &[OperandValue<'a>],
     ) -> Result<ExpandRet<'a>> {
         self.assert_operand_count(name, operands)?;
 
-        let mut deq: VecDeque<_> = match (self.expander())(ctx, name, cond, operands) {
+        let mut deq: VecDeque<_> = match (self.expander())(ctx, pc, name, cond, operands) {
             None => return Ok(None),
             Some(v) => v.into(),
         };
@@ -57,7 +59,7 @@ pub trait MacroInstruction: Send + Sync {
             if let Some(mc) = MACRO_INSTRUCTIONS.get(name) {
                 mc.assert_operand_count(name, &ops)?;
 
-                match (mc.expander())(ctx, name, cond, &ops) {
+                match (mc.expander())(ctx, pc, name, cond, &ops) {
                     None => {
                         ret.push((name, cond, ops));
                     }

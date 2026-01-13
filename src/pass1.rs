@@ -64,10 +64,11 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                 in_const_zone = false;
             }
 
+            let pc = processed.len() * 4;
+
             let (raw_line, tokens) = match tokens[0].strip_suffix(':') {
                 Some(label) => {
-                    let pc = processed.len();
-                    self.context.labels.insert(label, pc * 4);
+                    self.context.labels.insert(label, pc);
 
                     current_label = Some(label);
 
@@ -92,17 +93,16 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
 
             if !self.context.settings.disable_macro
                 && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
-                && let Some(expanded) =
-                    mc_instr
-                        .expand(self.context, name, cond, &ops)
-                        .map_err(|e| {
-                            anyhow!(
-                                "Error expanding macro-instruction at line {}: '{}' ({})",
-                                orig_idx + 1,
-                                raw_line,
-                                e
-                            )
-                        })?
+                && let Some(expanded) = mc_instr
+                    .expand(self.context, pc as u32, name, cond, &ops)
+                    .map_err(|e| {
+                    anyhow!(
+                        "Error expanding macro-instruction at line {}: '{}' ({})",
+                        orig_idx + 1,
+                        raw_line,
+                        e
+                    )
+                })?
             {
                 lines.extend(expanded);
             } else {

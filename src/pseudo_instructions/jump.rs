@@ -18,13 +18,14 @@ pseudo_instruction! {
 // jr rs1  =>  jalr r0 rs1
 pseudo_instruction! {
     name: "jr",
-    operand_types: [ RegS ],
+    operand_types: [ RegS, Imm(12, i) ],
     expander: |_, ops| {
         (
             "jalr",
             op_values![
                 "r0",
                 ops[0],
+                ops[1],
             ],
         )
     },

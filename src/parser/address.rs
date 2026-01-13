@@ -21,12 +21,10 @@ pub fn parse_address(ctx: &Context, op: &OperandValue) -> Result<Address> {
 pub struct Address(pub u64);
 
 impl Address {
-    #[cfg(test)]
     pub fn as_i12(&self, base: u32) -> Result<u32> {
         self.as_field(12, base)
     }
 
-    #[cfg(test)]
     pub fn try_as_i12(&self, base: u32) -> (u32, i32) {
         use crate::utils::sig_ext_12_to_32;
 

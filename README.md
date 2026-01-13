@@ -156,9 +156,10 @@ In this section:
 > remember to initialize it to point to the top of the stack memory region. (e.g. `li sp 4096`)  
 > Example: [fib.asm](./examples/fib.asm)
 
-#### Load Upper
+#### Upper Immediate
 
-- `lui rd imm20`: load upper immediate value `imm20` (20-bit unsigned) into the upper 20 bits of `rd`, setting the lower 12 bits to 0.
+- `lui rd imm20`: `rd = imm20 << 12`.
+- `auipc rd imm20`: `rd = pc + (imm20 << 12)`.
 
 #### Branching
 
@@ -179,7 +180,7 @@ In this section:
 #### Call and Return
 
 - `call[.cond] addr20`: call a subroutine at an address.
-- `callr[.cond] rs1`: call a subroutine at the address contained in `rs1`.
+- `callr[.cond] rs1 imm12`: call a subroutine at the address `(rs1 + sign_extend(imm12)) & ~1`.
 - `ret[.cond]`: return from the current subroutine.
 - note:
   - The return address is automatically managed by the hardware stack.
@@ -187,7 +188,7 @@ In this section:
 #### Jump and Link
 
 - `jal[.cond] rd addr20`: jump to an address and write the return address (`pc + 4`) into `rd`.
-- `jalr[.cond] rd rs1`: jump to the address contained in `rs1` and write the return address (`pc + 4`) into `rd`.
+- `jalr[.cond] rd rs1 imm12`: jump to the address `(rs1 + sign_extend(imm12)) & ~1` and write the return address (`pc + 4`) into `rd`.
 - pseudo:
   - `j addr12` => `jal r0 addr12`
   - `jr rs1` => `jalr r0 rs1`

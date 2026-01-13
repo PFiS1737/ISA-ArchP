@@ -16,7 +16,7 @@ macro_instruction! {
     }
 }
 
-const F1: ExpandFn = |ctx, name, cond, ops| {
+const F1: ExpandFn = |ctx, _, name, cond, ops| {
     let inst = match name {
         "add" => "addi",
         "sub" => "subi",
@@ -55,7 +55,7 @@ macro_instruction! {
     }
 }
 
-const F2: ExpandFn = |ctx, _, cond, ops| {
+const F2: ExpandFn = |ctx, _, _, cond, ops| {
     if let Ok(imm) = parse_imm(ctx, &ops[1]).and_then(|imm| imm.as_i32()) {
         Some(vec![("cmpi", cond, op_values![ops[0], imm])])
     } else {
@@ -71,7 +71,7 @@ macro_instruction! {
     }
 }
 
-const F3: ExpandFn = |ctx, name, cond, ops| {
+const F3: ExpandFn = |ctx, _, name, cond, ops| {
     let inst = match name {
         "beq" => "beqi",
         "bne" => "bnei",

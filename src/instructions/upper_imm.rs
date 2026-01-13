@@ -7,3 +7,11 @@ instruction! {
         itype: U,
     }
 }
+
+instruction! {
+    pub Auipc {
+        name: "auipc",
+        opcode: 0b_1011_001,
+        itype: U,
+    }
+}

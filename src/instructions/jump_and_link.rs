@@ -13,6 +13,5 @@ instruction! {
         name: "jalr",
         opcode: 0b_1001_111,
         itype: I,
-        operands_format: [ RegD, RegS, _ ],
     }
 }

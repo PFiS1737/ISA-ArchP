@@ -12,7 +12,7 @@ macro_instruction! {
     }
 }
 
-pub const F: ExpandFn = |ctx, _, cond, ops| {
+const F: ExpandFn = |ctx, _, _, cond, ops| {
     if let Ok((hi, lo)) = parse_imm(ctx, &ops[1]).and_then(|imm| imm.try_as_i12())
         && hi != 0
     {

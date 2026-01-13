@@ -7,14 +7,34 @@ use crate::{
 //       be checked during encoding.
 
 macro_instruction! {
-    /// lw rd imm(rs)  =>  lw rd rs imm12
-    pub RiscvLw {
+    pub RiscvLoad {
         name: [ "lw", "lh", "lhu", "lb", "lbu" ],
         expander: F1,
     }
 }
 
-const F1: ExpandFn = |_, name, cond, ops| {
+macro_instruction! {
+    pub RiscvJalr {
+        name: [ "jalr" ],
+        expander: F1,
+    }
+}
+
+macro_instruction! {
+    pub RiscvJr {
+        name: [ "jr" ],
+        expander: F2,
+    }
+}
+
+macro_instruction! {
+    pub RiscvSave {
+        name: [ "sw", "sh", "sb" ],
+        expander: F3,
+    }
+}
+
+const F1: ExpandFn = |_, _, name, cond, ops| {
     if ops.len() != 2 {
         return None;
     }
@@ -24,15 +44,17 @@ const F1: ExpandFn = |_, name, cond, ops| {
     Some(vec![(name, cond, op_values!(ops[0], base, imm))])
 };
 
-macro_instruction! {
-    /// sw rs2 imm(rs1)  =>  sw rs1 rs2 imm12
-    pub RiscvSw {
-        name: [ "sw", "sh", "sb" ],
-        expander: F2,
+const F2: ExpandFn = |_, _, name, cond, ops| {
+    if ops.len() != 1 {
+        return None;
     }
-}
 
-const F2: ExpandFn = |_, name, cond, ops| {
+    let (imm, base) = parse_offset(&ops[0])?;
+
+    Some(vec![(name, cond, op_values!(base, imm))])
+};
+
+const F3: ExpandFn = |_, _, name, cond, ops| {
     if ops.len() != 2 {
         return None;
     }
@@ -78,7 +100,7 @@ mod tests {
     }
 
     #[test]
-    fn lw() {
+    fn load() {
         let lw = mc_instr("lw");
 
         assert_snapshot!(lw("", &["r1"]), @"");
@@ -96,7 +118,7 @@ mod tests {
     }
 
     #[test]
-    fn sw() {
+    fn save() {
         let sw = mc_instr("sw");
 
         assert_snapshot!(sw("", &["r1"]), @"");

@@ -145,10 +145,11 @@ I-type (call register)
 
 1010 110 callr __ rs1 ___
 
-U-type (load upper immediate)
+U-type (upper immediate)
 -----------------------------
 
 1011 000 lui rd uimm20
+1011 001 auipc rd uimm20
 
 C-type (set pixel color)
 ------------------------

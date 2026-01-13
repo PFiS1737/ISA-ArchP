@@ -4,10 +4,10 @@ mod compare;
 mod display;
 mod jump_and_link;
 mod load_store;
-mod load_upper;
 mod logic;
 mod shift;
 mod stack_call_return;
+mod upper_imm;
 
 use std::{collections::HashMap, fmt::Display};
 

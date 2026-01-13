@@ -41,6 +41,6 @@ instruction! {
         name: "callr",
         opcode: 0b_1010_110,
         itype: I,
-        operands_format: [ _, RegS, _ ],
+        operands_format: [ _, RegS, Imm(12, i) ],
     }
 }
