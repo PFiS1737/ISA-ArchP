@@ -2,11 +2,11 @@
 authors = ["PFiS1737 <pfis1737@gmail.com>"]
 description = "Assembly implementation of the ArchP ISA"
 edition = "2024"
-homepage = "https://github.cim/PFiS1737/ArchP#readme"
+homepage = "https://github.cim/PFiS1737/ISA-ArchP#readme"
 license = "MIT"
 name = "archp_asmc"
-repository = "https://github.cim/PFiS1737/ArchP"
-version = "0.1.0"
+repository = "https://github.cim/PFiS1737/ISA-ArchP"
+version = "0.2.0"
 
 [dependencies]
 anyhow = "1.0.100"
