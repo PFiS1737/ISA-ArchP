@@ -73,8 +73,8 @@ I-type (immediate compute)
 0100 001 subi
 0100 010 muli
 0100 011 mulhi
-0100 100 mulhui
-0100 101 mulhsui
+0100 100 mulhiu
+0100 101 mulhisu
 0100 110 modi
 0100 111 divi
 

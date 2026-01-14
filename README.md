@@ -91,7 +91,7 @@ In this section:
 
 - instructions:
   - `add`, `sub`, `mul`, `mulh`, `mulhu`, `mulhsu`, `div`, `mod`
-  - `addi`, `subi`, `muli`, `mulhi`, `mulhui`, `mulhsui`, `divi`, `modi`
+  - `addi`, `subi`, `muli`, `mulhi`, `mulhiu`, `mulhisu`, `divi`, `modi`
 - format: `instr rd rs1 rs2/imm12`
 - pseudo:
   - `li rd imm12` => `addi rd r0 imm12`

@@ -7,7 +7,7 @@ use crate::{
 macro_instruction! {
     pub AlsImm32 {
         name: [
-            "addi", "subi", "muli", "mulhi", "mulhui", "mulhsui", "modi", "divi",
+            "addi", "subi", "muli", "mulhi", "mulhiu", "mulhisu", "modi", "divi",
             "andi", "nandi", "ori", "nori", "xori", "xnori",
             "slli", "srli", "roli", "rori", "srai",
             "seqi", "snei", "slti", "sgei", "sltiu", "sgeiu",
@@ -19,6 +19,8 @@ macro_instruction! {
 
 const F: ExpandFn = |ctx, _, name, ops| {
     let inst = match name {
+        "mulhiu" => "mulhu",
+        "mulhisu" => "mulhsu",
         "sltiu" => "sltu",
         "sgeiu" => "sgeu",
         _ => &name[..name.len() - 1],

@@ -97,16 +97,16 @@ instruction! {
 }
 
 instruction! {
-    pub Mulhui {
-        name: "mulhui",
+    pub Mulhiu {
+        name: "mulhiu",
         opcode: 0b_0100_100,
         itype: I,
     }
 }
 
 instruction! {
-    pub Mulhsui {
-        name: "mulhsui",
+    pub Mulhisu {
+        name: "mulhisu",
         opcode: 0b_0100_101,
         itype: I,
     }
