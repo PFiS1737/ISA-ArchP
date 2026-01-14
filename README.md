@@ -184,7 +184,7 @@ In this section:
 - macros:
   - If the `rs2` operand is a numeric literal, it will be automatically expanded to use a temporary register.
   - A 32-bit immediate literal is also supported.
-  - e.g. `beq r1 0x1234 10` => `beqi r1 0x1234 10` => `li tmp 0x1234; beq r1 tmp 10` => `lui tmp 0x1; addi tmp tmp 0x234; beq r1 tmp 10`
+  - e.g. `beq r1 0x1234 10` => `li tmp 0x1234; beq r1 tmp 10` => `lui tmp 0x1; addi tmp tmp 0x234; beq r1 tmp 10`
 
 #### Stack Operations
 

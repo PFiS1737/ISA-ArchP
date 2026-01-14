@@ -54,30 +54,29 @@ const F1: ExpandFn = |ctx, _, name, ops| {
     }
 };
 
-// FIXME: missing usigned variants
 macro_instruction! {
     pub AutoImmBranch {
-        name: [ "beq", "bne", "blt", "ble", "bgt", "bge" ],
+        name: [
+            "beq", "bne", "blt", "bge", "bgt", "ble",
+            "bltu", "bgeu", "bgtu", "bleu",
+        ],
         operand_count: 3,
         expander: F2,
     }
 }
 
 const F2: ExpandFn = |ctx, _, name, ops| {
-    let inst = match name {
-        "beq" => "beqi",
-        "bne" => "bnei",
-        "blt" => "blti",
-        "ble" => "blei",
-        "bgt" => "bgti",
-        "bge" => "bgei",
-        _ => unreachable!(),
+    let Ok(imm) = parse_imm(ctx, &ops[1]).and_then(|imm| imm.as_i32()) else {
+        return None;
     };
 
-    if let Ok(imm) = parse_imm(ctx, &ops[1]).and_then(|imm| imm.as_i32()) {
-        Some(vec![(inst, op_values![ops[0], imm, ops[2]])])
+    if imm == 0 {
+        Some(vec![(name, op_values![ops[0], "r0", ops[2]])])
     } else {
-        None
+        Some(vec![
+            ("li", op_values!["tmp", imm]),
+            (name, op_values![ops[0], "tmp", ops[2]]),
+        ])
     }
 };
 
@@ -113,6 +112,7 @@ mod tests {
         let add = mc_instr("add");
 
         assert_snapshot!(add(&["r1", "r2", "r3"]), @"");
+        assert_snapshot!(add(&["r1", "r2", "0"]), @"addi r1 r2 0");
         assert_snapshot!(add(&["r1", "r2", "0x123"]), @"addi r1 r2 0x123");
         assert_snapshot!(add(&["r1", "r2", "0x1234"]), @"lui tmp 1; addi tmp tmp 0x234; add r1 r2 tmp");
         assert_snapshot!(add(&["r1", "r2", "0x12345678"]), @"lui tmp 0x12345; addi tmp tmp 0x678; add r1 r2 tmp");
@@ -122,7 +122,6 @@ mod tests {
         assert_snapshot!(add(&["r1", "r2", "-123"]), @"addi r1 r2 -123");
         assert_snapshot!(add(&["r1", "r2", "-3000"]), @"lui tmp 0xFFFFF; addi tmp tmp 0x448; add r1 r2 tmp");
 
-        assert_snapshot!(add(&["r1", "r2", "r3"]), @"");
         assert_snapshot!(add(&["r1", "r2", "0x123"]), @"addi r1 r2 0x123");
         assert_snapshot!(add(&["r1", "r2", "0x1234"]), @"lui tmp 1; addi tmp tmp 0x234; add r1 r2 tmp");
     }
@@ -132,6 +131,7 @@ mod tests {
         let beq = mc_instr("beq");
 
         assert_snapshot!(beq(&["r1", "r2", "0"]), @"");
+        assert_snapshot!(beq(&["r1", "0", "0"]), @"beq r1 r0 0");
         assert_snapshot!(beq(&["r1", "0x123", "0"]), @"li tmp 0x123; beq r1 tmp 0");
         assert_snapshot!(beq(&["r1", "0x1234", "0"]), @"lui tmp 1; addi tmp tmp 0x234; beq r1 tmp 0");
         assert_snapshot!(beq(&["r1", "0x12345678", "0"]), @"lui tmp 0x12345; addi tmp tmp 0x678; beq r1 tmp 0");
@@ -141,7 +141,6 @@ mod tests {
         assert_snapshot!(beq(&["r1", "-123", "0"]), @"li tmp -123; beq r1 tmp 0");
         assert_snapshot!(beq(&["r1", "-3000", "0"]), @"lui tmp 0xFFFFF; addi tmp tmp 0x448; beq r1 tmp 0");
 
-        assert_snapshot!(beq(&["r1", "r2", "0"]), @"");
         assert_snapshot!(beq(&["r1", "0x123", "0"]), @"li tmp 0x123; beq r1 tmp 0");
         assert_snapshot!(beq(&["r1", "0x1234", "0"]), @"lui tmp 1; addi tmp tmp 0x234; beq r1 tmp 0");
     }

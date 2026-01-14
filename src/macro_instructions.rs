@@ -1,6 +1,5 @@
 mod als_imm32;
 mod auto_imm;
-mod branch_imm;
 mod load_imm32;
 mod riscv_offset;
 
