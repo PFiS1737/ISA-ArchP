@@ -113,13 +113,30 @@ In this section:
 - format: `instr rd rs1 rs2/imm12`
 - pseudo:
   - `not rd rs1` => `xori rd rs1 -1`
-- macros: Same as [Arithmetic](#arithmetic) instructions.
+- macros: Same as the [Arithmetic](#arithmetic) instructions.
 
 #### Shift and Rotate
 
 - instructions: `sll`, `srl`, `rol`, `ror`, `sra`, `slli`, `srli`, `roli`, `rori`, `srai`
 - format: `instr rd rs1 rs2/imm5`, where `imm5` is a 5-bit unsigned immediate value from `0` to `31`.
-- macros: Same as [Arithmetic](#arithmetic) instructions.
+- macros: Same as the [Arithmetic](#arithmetic) instructions.
+
+#### Set
+
+- instructions:
+  - `seq`, `sne`, `slt`, `sge`, `sltu`, `sgeu`
+  - `seqi`, `snei`, `slti`, `sgei`, `sltiu`, `sgeiu`
+- format: `instr rd rs1 rs2/imm12`
+- pseudo:
+  - `sgt rd rs1 rs2` => `slt rd rs2 rs1`
+  - `sle rd rs1 rs2` => `sge rd rs2 rs1`
+  - `sgtu rd rs1 rs2` => `sltu rd rs2 rs1`
+  - `sleu rd rs1 rs2` => `sgeu rd rs2 rs1`
+  - `s**z rd rs1` => `s** rd rs1 r0` (for `seqz`, `snez`, `sltz`, `sgez`, `sgtz`, `slez`)
+- macros:
+  - Same as the [arithmetic](#arithmetic) instructions, but with special handling for the pseudo-instructions like `sgt`.
+  - e.g. `slt r1 r2 0x1234` => `slti r1 r2 0x1234` => `lui tmp 0x1; addi tmp tmp 0x234; slt r1 r2 tmp`
+  - e.g. `sgt r1 r2 0x1234` => `li tmp 0x1234; sgt r1 r2 tmp` => `lui tmp 0x1; addi tmp tmp 0x234; slt r1 tmp r2`
 
 #### Load and Store
 
@@ -163,11 +180,11 @@ In this section:
   - `ble rs1 rs2 addr12` => `bge rs2 rs1 addr12`
   - `bgtu rs1 rs2 addr12` => `bltu rs2 rs1 addr12`
   - `bleu rs1 rs2 addr12` => `bgeu rs2 rs1 addr12`
-  - `b**z rs1 addr12` => `b** rs1 r0 addr12` (e.g. `beqz`, `bnez`, `bltz`, `bgez`, `bgtz`, `blez`)
+  - `b**z rs1 addr12` => `b** rs1 r0 addr12` (for `beqz`, `bnez`, `bltz`, `bgez`, `bgtz`, `blez`)
 - macros:
   - If the `rs2` operand is a numeric literal, it will be automatically expanded to use a temporary register.
   - A 32-bit immediate literal is also supported.
-  - e.g. `beq r1 0x1234 10` => `lui tmp 0x1; addi tmp tmp 0x234; beq r1 tmp 10`
+  - e.g. `beq r1 0x1234 10` => `beqi r1 0x1234 10` => `li tmp 0x1234; beq r1 tmp 10` => `lui tmp 0x1; addi tmp tmp 0x234; beq r1 tmp 10`
 
 #### Stack Operations
 

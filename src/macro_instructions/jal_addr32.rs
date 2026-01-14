@@ -22,6 +22,8 @@ macro_instruction! {
     }
 }
 
+// FIXME: 有端倪，在这里展开，有可能因为找不到 label 导致失败
+
 const F1: ExpandFn = |ctx, pc, _, ops| {
     if let Ok(addr) = parse_address(ctx, &ops[1])
         && let (hi, lo) = addr.try_as_i12(pc)
@@ -49,3 +51,5 @@ const F2: ExpandFn = |ctx, pc, _, ops| {
         None
     }
 };
+
+// TODO: test

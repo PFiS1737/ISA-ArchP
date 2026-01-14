@@ -10,6 +10,7 @@ macro_instruction! {
             "addi", "subi", "muli", "mulhi", "mulhui", "mulhsui", "modi", "divi",
             "andi", "nandi", "ori", "nori", "xori", "xnori",
             "slli", "srli", "roli", "rori", "srai",
+            "seqi", "snei", "slti", "sgei", "sltiu", "sgeiu",
         ],
         operand_count: 3,
         expander: F,
@@ -17,7 +18,11 @@ macro_instruction! {
 }
 
 const F: ExpandFn = |ctx, _, name, ops| {
-    let inst = &name[..name.len() - 1]; // remove the trailing 'i'
+    let inst = match name {
+        "sltiu" => "sltu",
+        "sgeiu" => "sgeu",
+        _ => &name[..name.len() - 1],
+    };
 
     if let Ok(imm) = parse_imm(ctx, &ops[2])
         && imm.as_i12().is_err()

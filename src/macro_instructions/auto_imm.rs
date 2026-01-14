@@ -10,6 +10,7 @@ macro_instruction! {
             "add", "sub", "mul", "mulh", "mulhu", "mulhsu", "mod", "div",
             "and", "nand", "or", "nor", "xor", "xnor",
             "sll", "srl", "rol", "ror", "sra",
+            "seq", "sne", "slt", "sge", "sltu", "sgeu",
         ],
         operand_count: 3,
         expander: F1,
@@ -37,6 +38,12 @@ const F1: ExpandFn = |ctx, _, name, ops| {
         "rol" => "roli",
         "ror" => "rori",
         "sra" => "srai",
+        "seq" => "seqi",
+        "sne" => "snei",
+        "slt" => "slti",
+        "sge" => "sgei",
+        "sltu" => "sltiu",
+        "sgeu" => "sgeiu",
         _ => unreachable!(),
     };
 
@@ -47,6 +54,7 @@ const F1: ExpandFn = |ctx, _, name, ops| {
     }
 };
 
+// FIXME: missing usigned variants
 macro_instruction! {
     pub AutoImmBranch {
         name: [ "beq", "bne", "blt", "ble", "bgt", "bge" ],
@@ -70,6 +78,29 @@ const F2: ExpandFn = |ctx, _, name, ops| {
         Some(vec![(inst, op_values![ops[0], imm, ops[2]])])
     } else {
         None
+    }
+};
+
+macro_instruction! {
+    pub AutoImmSet {
+        name: [ "sgt", "sle", "sgtu", "sleu" ],
+        operand_count: 3,
+        expander: F3,
+    }
+}
+
+const F3: ExpandFn = |ctx, _, name, ops| {
+    let Ok(imm) = parse_imm(ctx, &ops[2]).and_then(|imm| imm.as_i32()) else {
+        return None;
+    };
+
+    if imm == 0 {
+        Some(vec![(name, op_values![ops[0], ops[1], "r0"])])
+    } else {
+        Some(vec![
+            ("li", op_values!["tmp", imm]),
+            (name, op_values![ops[0], ops[1], "tmp"]),
+        ])
     }
 };
 
@@ -113,5 +144,16 @@ mod tests {
         assert_snapshot!(beq(&["r1", "r2", "0"]), @"");
         assert_snapshot!(beq(&["r1", "0x123", "0"]), @"li tmp 0x123; beq r1 tmp 0");
         assert_snapshot!(beq(&["r1", "0x1234", "0"]), @"lui tmp 1; addi tmp tmp 0x234; beq r1 tmp 0");
+    }
+
+    #[test]
+    fn auto_imm_set() {
+        let slt = mc_instr("slt");
+        assert_snapshot!(slt(&["r1", "r2", "0"]), @"slti r1 r2 0");
+        assert_snapshot!(slt(&["r1", "r2", "0x1234"]), @"lui tmp 1; addi tmp tmp 0x234; slt r1 r2 tmp");
+
+        let sle = mc_instr("sle");
+        assert_snapshot!(sle(&["r1", "r2", "0"]), @"sle r1 r2 r0");
+        assert_snapshot!(sle(&["r1", "r2", "0x1234"]), @"lui tmp 1; addi tmp tmp 0x234; sle r1 r2 tmp");
     }
 }

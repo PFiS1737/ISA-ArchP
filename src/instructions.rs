@@ -4,6 +4,7 @@ mod display;
 mod jump_and_link;
 mod load_store;
 mod logic;
+mod set;
 mod shift;
 mod stack_call_return;
 mod upper_imm;

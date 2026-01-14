@@ -59,6 +59,13 @@ R-type (register compute)
 0010 011 ror
 0010 100 sra
 
+0011 001 seq
+0011 010 sne
+0011 011 slt
+0011 100 sge
+0011 101 sltu
+0011 110 sgeu
+
 I-type (immediate compute)
 --------------------------
 
@@ -83,6 +90,13 @@ I-type (immediate compute)
 0110 010 roli
 0110 011 rori
 0110 100 srai
+
+0111 001 seqi
+0111 010 snei
+0111 011 slti
+0111 100 sgei
+0111 101 sltiu
+0111 110 sgeiu
 
 I-type (load)
 -------------

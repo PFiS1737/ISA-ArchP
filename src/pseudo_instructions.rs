@@ -7,6 +7,8 @@ mod load_imm;
 mod mv;
 mod negate;
 mod not;
+mod set;
+mod set_zero;
 
 use std::{collections::HashMap, iter::successors};
 
