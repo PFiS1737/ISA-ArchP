@@ -15,7 +15,7 @@ pub fn parse_reg_d(ctx: &Context, op: &OperandValue) -> Result<u32> {
         "io" => Ok(26),
         "tmp" => Ok(31),
 
-        "pc" | "kb" | "rng" => err_read_only_reg!(reg),
+        "kb" | "rng" => err_read_only_reg!(reg),
 
         r if let Some(n) = r.strip_prefix("r")
             && let Ok(n) = n.parse::<u32>() =>
@@ -46,7 +46,6 @@ pub fn parse_reg_s(ctx: &Context, op: &OperandValue) -> Result<u32> {
     match *reg {
         "r0" => Ok(0),
 
-        "pc" => Ok(25),
         "io" => Ok(26),
         "kb" => Ok(27),
         "rng" => Ok(28),
@@ -116,7 +115,6 @@ mod tests {
         assert_snapshot!(f("r0"), @"0");
         assert_snapshot!(f("r15"), @"15");
         assert_snapshot!(f("r30"), @"Error: Register number out of range (0-24): r30");
-        assert_snapshot!(f("pc"), @"25");
         assert_snapshot!(f("invalid"), @"Error: Invalid register: invalid");
         assert_snapshot!(f("FOO"), @"Error: Expected register, found immediate: 42");
         assert_snapshot!(f("BAR"), @"Error: Invalid register: BAR");

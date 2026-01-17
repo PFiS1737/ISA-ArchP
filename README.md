@@ -56,7 +56,6 @@ If you require detailed information on the encoding formats, please refer to [is
 - 24 general-purpose registers: `r1` to `r24`.
 - special registers:
   - `r0`: always contains 0, you can write to it but it has no effect.
-  - `pc`: program counter (read-only).
   - `io`: the level input/output (only in level mode).
   - `kb`: the keyboard input (only in sandbox mode, read-only).
   - `rng`: the random number generator (read-only).
