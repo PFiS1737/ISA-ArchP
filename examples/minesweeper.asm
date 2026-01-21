@@ -124,8 +124,8 @@ init_mines:
   init_mines_loop:
     mv t1 rng
     mv t2 rng
-    mod x t1 GRID_COLS
-    mod y t2 GRID_ROWS
+    rem x t1 GRID_COLS
+    rem y t2 GRID_ROWS
 
     mul addr y GRID_COLS
     add addr addr x

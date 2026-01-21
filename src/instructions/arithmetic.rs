@@ -49,8 +49,8 @@ instruction! {
 }
 
 instruction! {
-    pub Mod {
-        name: "mod",
+    pub Rem {
+        name: "rem",
         opcode: 0b_0000_110,
         itype: R,
     }
@@ -113,8 +113,8 @@ instruction! {
 }
 
 instruction! {
-    pub Modi {
-        name: "modi",
+    pub Remi {
+        name: "remi",
         opcode: 0b_0100_110,
         itype: I,
     }

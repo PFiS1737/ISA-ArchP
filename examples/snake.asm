@@ -161,8 +161,8 @@ move_snake:
 gen_food:
   mv x rng
   mv y rng
-  mod x x SCREEN_WIDTH
-  mod y y SCREEN_HEIGHT
+  rem x x SCREEN_WIDTH
+  rem y y SCREEN_HEIGHT
 
   call body_contains
   beq rt 1 gen_food
@@ -206,7 +206,7 @@ queue_push:
   sh que_val que_tmp
 
   inc que_head
-  mod que_head que_head QUEUE_SIZE
+  rem que_head que_head QUEUE_SIZE
 
   inc que_len
 
@@ -227,7 +227,7 @@ queue_pop:
 
   sub que_tmp que_head que_len
   add que_tmp que_tmp QUEUE_SIZE
-  mod que_tmp que_tmp QUEUE_SIZE
+  rem que_tmp que_tmp QUEUE_SIZE
 
   mul que_tmp que_tmp 2
   lhu que_val que_tmp
@@ -252,7 +252,7 @@ queue_contains:
   # que_tmp = (head - len + SIZE) % SIZE
   sub que_tmp que_head que_len
   add que_tmp que_tmp QUEUE_SIZE
-  mod que_tmp que_tmp QUEUE_SIZE
+  rem que_tmp que_tmp QUEUE_SIZE
 
   clr que_i
 
@@ -265,7 +265,7 @@ queue_contains:
     beq que_cur que_val queue_contains_found
 
     inc que_tmp
-    mod que_tmp que_tmp QUEUE_SIZE
+    rem que_tmp que_tmp QUEUE_SIZE
 
     inc que_i
     j queue_contains_loop

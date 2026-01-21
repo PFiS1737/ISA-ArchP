@@ -87,8 +87,8 @@ exit_code: 0
 0xA8000000 # ret
 0x400BC000 # addi x rng 0                                [mv x rng]                                            <label: gen_food>
 0x400DC000 # addi y rng 0                                [mv y rng]
-0x4C0A5040 # modi x x 64                                 [mod x x SCREEN_WIDTH]
-0x4C0C6024 # modi y y 36                                 [mod y y SCREEN_HEIGHT]
+0x4C0A5040 # remi x x 64                                 [rem x x SCREEN_WIDTH]
+0x4C0C6024 # remi y y 36                                 [rem y y SCREEN_HEIGHT]
 0xAA000020 # call body_contains
 0x403E0001 # addi tmp r0 1                               [beq rt 1 gen_food]
 0x923EDE9F # beq rt tmp gen_food                         [beq rt 1 gen_food]
@@ -114,7 +114,7 @@ exit_code: 0
 0x4422F002 # muli que_tmp que_head 2                     [mul que_tmp que_head 2]
 0x8C011010 # sh que_tmp que_val 0                        [sh que_val que_tmp]
 0x401EF001 # addi que_head que_head 1                    [inc que_head]
-0x4C1EF064 # modi que_head que_head 100                  [mod que_head que_head QUEUE_SIZE]
+0x4C1EF064 # remi que_head que_head 100                  [rem que_head que_head QUEUE_SIZE]
 0x401CE001 # addi que_len que_len 1                      [inc que_len]
 0x401A0000 # addi rt r0 0                                [li rt 0]
 0xA8000000 # ret
@@ -123,7 +123,7 @@ exit_code: 0
 0x9200E240 # beq que_len r0 queue_pop_empty              [beqz que_len queue_pop_empty]                        <label: queue_pop>
 0x0222F00E # sub que_tmp que_head que_len
 0x40231064 # addi que_tmp que_tmp 100                    [add que_tmp que_tmp QUEUE_SIZE]
-0x4C231064 # modi que_tmp que_tmp 100                    [mod que_tmp que_tmp QUEUE_SIZE]
+0x4C231064 # remi que_tmp que_tmp 100                    [rem que_tmp que_tmp QUEUE_SIZE]
 0x44231002 # muli que_tmp que_tmp 2                      [mul que_tmp que_tmp 2]
 0x84211000 # lhu que_val que_tmp 0                       [lhu que_val que_tmp]
 0x421CE001 # subi que_len que_len 1                      [dec que_len]
@@ -134,7 +134,7 @@ exit_code: 0
 0x9200E400 # beq que_len r0 queue_contains_not_found     [beqz que_len queue_contains_not_found]               <label: queue_contains>
 0x0222F00E # sub que_tmp que_head que_len
 0x40231064 # addi que_tmp que_tmp 100                    [add que_tmp que_tmp QUEUE_SIZE]
-0x4C231064 # modi que_tmp que_tmp 100                    [mod que_tmp que_tmp QUEUE_SIZE]
+0x4C231064 # remi que_tmp que_tmp 100                    [rem que_tmp que_tmp QUEUE_SIZE]
 0x40240000 # addi que_i r0 0                             [clr que_i]
 0x920122CE # beq que_i que_len queue_contains_not_found                                                        <label: queue_contains_loop>
 0x44231002 # muli que_tmp que_tmp 2                      [mul que_tmp que_tmp 2]
@@ -142,7 +142,7 @@ exit_code: 0
 0x4E231002 # divi que_tmp que_tmp 2                      [div que_tmp que_tmp 2]
 0x92013150 # beq que_cur que_val queue_contains_found
 0x40231001 # addi que_tmp que_tmp 1                      [inc que_tmp]
-0x4C231064 # modi que_tmp que_tmp 100                    [mod que_tmp que_tmp QUEUE_SIZE]
+0x4C231064 # remi que_tmp que_tmp 100                    [rem que_tmp que_tmp QUEUE_SIZE]
 0x40252001 # addi que_i que_i 1                          [inc que_i]
 0x91C1FFF0 # jal r0 queue_contains_loop                  [j queue_contains_loop]
 0x401A0001 # addi rt r0 1                                [li rt 1]                                             <label: queue_contains_found>

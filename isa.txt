@@ -43,7 +43,7 @@ R-type (register compute)
 0000 011 mulh
 0000 100 mulhu
 0000 101 mulhsu
-0000 110 mod
+0000 110 rem
 0000 111 div
 
 0001 000 and
@@ -75,7 +75,7 @@ I-type (immediate compute)
 0100 011 mulhi
 0100 100 mulhiu
 0100 101 mulhisu
-0100 110 modi
+0100 110 remi
 0100 111 divi
 
 0101 000 andi

@@ -7,7 +7,7 @@ use crate::{
 macro_instruction! {
     pub AlsImm32 {
         name: [
-            "addi", "subi", "muli", "mulhi", "mulhiu", "mulhisu", "modi", "divi",
+            "addi", "subi", "muli", "mulhi", "mulhiu", "mulhisu", "remi", "divi",
             "andi", "nandi", "ori", "nori", "xori", "xnori",
             "slli", "srli", "roli", "rori", "srai",
             "seqi", "snei", "slti", "sgei", "sltiu", "sgeiu",

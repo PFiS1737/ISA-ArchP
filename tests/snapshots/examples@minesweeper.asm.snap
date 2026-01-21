@@ -58,8 +58,8 @@ exit_code: 0
 0x40060000 # addi i r0 0                                [clr i]
 0x400BC000 # addi t1 rng 0                              [mv t1 rng]                                        <label: init_mines_loop>
 0x400DC000 # addi t2 rng 0                              [mv t2 rng]
-0x4C02500F # modi x t1 15                               [mod x t1 GRID_COLS]
-0x4C046008 # modi y t2 8                                [mod y t2 GRID_ROWS]
+0x4C02500F # remi x t1 15                               [rem x t1 GRID_COLS]
+0x4C046008 # remi y t2 8                                [rem y t2 GRID_ROWS]
 0x4412200F # muli addr y 15                             [mul addr y GRID_COLS]
 0x00129001 # add addr addr x
 0x44129004 # muli addr addr 4                           [mul addr addr 4]

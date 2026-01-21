@@ -89,8 +89,8 @@ In this section:
 #### Arithmetic
 
 - instructions:
-  - `add`, `sub`, `mul`, `mulh`, `mulhu`, `mulhsu`, `div`, `mod`
-  - `addi`, `subi`, `muli`, `mulhi`, `mulhiu`, `mulhisu`, `divi`, `modi`
+  - `add`, `sub`, `mul`, `mulh`, `mulhu`, `mulhsu`, `div`, `rem`
+  - `addi`, `subi`, `muli`, `mulhi`, `mulhiu`, `mulhisu`, `divi`, `remi`
 - format: `instr rd rs1 rs2/imm12`
 - pseudo:
   - `li rd imm12` => `addi rd r0 imm12`

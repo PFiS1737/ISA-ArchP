@@ -7,7 +7,7 @@ use crate::{
 macro_instruction! {
     pub AutoImmAls {
         name: [
-            "add", "sub", "mul", "mulh", "mulhu", "mulhsu", "mod", "div",
+            "add", "sub", "mul", "mulh", "mulhu", "mulhsu", "rem", "div",
             "and", "nand", "or", "nor", "xor", "xnor",
             "sll", "srl", "rol", "ror", "sra",
             "seq", "sne", "slt", "sge", "sltu", "sgeu",
@@ -25,7 +25,7 @@ const F1: ExpandFn = |ctx, _, name, ops| {
         "mulh" => "mulhi",
         "mulhu" => "mulhiu",
         "mulhsu" => "mulhisu",
-        "mod" => "modi",
+        "rem" => "remi",
         "div" => "divi",
         "and" => "andi",
         "nand" => "nandi",
