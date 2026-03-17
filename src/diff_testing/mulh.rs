@@ -2,7 +2,7 @@
 //!
 //! For the specific hardware implementation, please refer to the [schematics](../../assets/schematics).
 
-use rand::Rng;
+use rand::RngExt;
 
 #[test]
 fn mulh() {
