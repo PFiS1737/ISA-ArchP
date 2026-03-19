@@ -31,6 +31,6 @@ instruction! {
         name: "segi",
         opcode: 0b_1101_011,
         itype: I,
-        operands_format: [ _, _, Imm(8, u) ],
+        operands_format: [ _, _, Imm(12, i) ],
     }
 }
