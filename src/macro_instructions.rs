@@ -92,7 +92,7 @@ macro impl_macro_instruction {
     (
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
-            name: $names:tt,
+            names: $names:tt,
             operand_count: $count:ident $( ($value:literal) )? ,
             expander: $expander:expr,
         }
@@ -122,7 +122,7 @@ macro macro_instruction {
     (
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
-            name: $names:literal,
+            name: $name:literal,
             operand_count: $count:literal,
             expander: $expander:expr,
         }
@@ -130,7 +130,7 @@ macro macro_instruction {
         $crate::macro_instructions::impl_macro_instruction! {
             $( #[doc = $doc] )*
             $vis $id {
-                name: [ $names ],
+                names: [ $name ],
                 operand_count: Some($count),
                 expander: $expander,
             }
@@ -140,14 +140,14 @@ macro macro_instruction {
     (
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
-            name: $names:literal,
+            name: $name:literal,
             expander: $expander:expr,
         }
     ) => {
         $crate::macro_instructions::impl_macro_instruction! {
             $( #[doc = $doc] )*
             $vis $id {
-                name: [ $names ],
+                names: [ $name ],
                 operand_count: None,
                 expander: $expander,
             }
@@ -157,7 +157,7 @@ macro macro_instruction {
     (
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
-            name: $names:tt,
+            names: $names:tt,
             operand_count: $count:literal,
             expander: $expander:expr,
         }
@@ -165,7 +165,7 @@ macro macro_instruction {
         $crate::macro_instructions::impl_macro_instruction! {
             $( #[doc = $doc] )*
             $vis $id {
-                name: $names,
+                names: $names,
                 operand_count: Some($count),
                 expander: $expander,
             }
@@ -175,14 +175,14 @@ macro macro_instruction {
     (
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
-            name: $names:tt,
+            names: $names:tt,
             expander: $expander:expr,
         }
     ) => {
         $crate::macro_instructions::impl_macro_instruction! {
             $( #[doc = $doc] )*
             $vis $id {
-                name: $names,
+                names: $names,
                 operand_count: None,
                 expander: $expander,
             }

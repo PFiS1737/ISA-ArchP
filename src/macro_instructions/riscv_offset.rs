@@ -8,28 +8,28 @@ use crate::{
 
 macro_instruction! {
     pub RiscvLoad {
-        name: [ "lw", "lh", "lhu", "lb", "lbu" ],
+        names: [ "lw", "lh", "lhu", "lb", "lbu" ],
         expander: F1,
     }
 }
 
 macro_instruction! {
     pub RiscvJalr {
-        name: [ "jalr" ],
+        names: [ "jalr" ],
         expander: F1,
     }
 }
 
 macro_instruction! {
     pub RiscvJr {
-        name: [ "jr" ],
+        names: [ "jr" ],
         expander: F2,
     }
 }
 
 macro_instruction! {
     pub RiscvSave {
-        name: [ "sw", "sh", "sb" ],
+        names: [ "sw", "sh", "sb" ],
         expander: F3,
     }
 }

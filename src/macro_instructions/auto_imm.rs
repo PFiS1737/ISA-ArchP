@@ -6,7 +6,7 @@ use crate::{
 
 macro_instruction! {
     pub AutoImmAls {
-        name: [
+        names: [
             "add", "sub", "mul", "mulh", "mulhu", "mulhsu", "rem", "div",
             "and", "nand", "or", "nor", "xor", "xnor",
             "sll", "srl", "rol", "ror", "sra",
@@ -56,7 +56,7 @@ const F1: ExpandFn = |ctx, _, name, ops| {
 
 macro_instruction! {
     pub AutoImmBranch {
-        name: [
+        names: [
             "beq", "bne", "blt", "bge", "bgt", "ble",
             "bltu", "bgeu", "bgtu", "bleu",
         ],
@@ -82,7 +82,7 @@ const F2: ExpandFn = |ctx, _, name, ops| {
 
 macro_instruction! {
     pub AutoImmSet {
-        name: [ "sgt", "sle", "sgtu", "sleu" ],
+        names: [ "sgt", "sle", "sgtu", "sleu" ],
         operand_count: 3,
         expander: F3,
     }
