@@ -64,7 +64,7 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
 
         let (name, ops) = if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
             ps_instr
-                .expand(self.context, pc, &operands)
+                .expand(self.context, pc, name, &operands)
                 .map_err(|e| anyhow!("Error expanding pseudo-instruction '{}': {}", name, e))?
         } else {
             (name, operands)

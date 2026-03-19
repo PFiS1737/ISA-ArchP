@@ -16,47 +16,48 @@ use anyhow::{Result, bail};
 use once_cell::sync::Lazy;
 
 use crate::{
-    assembler::Context,
+    assembler::{Context, Line},
     operand::{OperandType, OperandValue},
     parser::{parse_address, parse_imm, parse_reg_d, parse_reg_s},
 };
 
-type ExpandRet<'a> = (&'static str, Vec<OperandValue<'a>>);
-type ExpandFn = for<'a> fn(&'static str, &[OperandValue<'a>]) -> ExpandRet<'a>;
+type ExpandRet<'a> = Line<'a>;
+type ExpandFn = for<'a> fn(&'a str, &[OperandValue<'a>]) -> ExpandRet<'a>;
 
-#[derive(Debug, Clone, Copy)]
-pub struct PseudoInstruction {
-    name: &'static str,
-    operand_types: &'static [OperandType],
-    expander: ExpandFn,
-}
+inventory::collect!(&'static dyn PseudoInstruction);
 
-inventory::collect!(PseudoInstruction);
+pub static PSEUDO_INSTRUCTIONS: Lazy<HashMap<&'static str, &'static dyn PseudoInstruction>> =
+    Lazy::new(|| {
+        let mut map = HashMap::new();
+        for entry in inventory::iter::<&'static dyn PseudoInstruction> {
+            for name in entry.names() {
+                map.insert(*name, *entry);
+            }
+        }
+        map
+    });
 
-pub static PSEUDO_INSTRUCTIONS: Lazy<HashMap<&'static str, PseudoInstruction>> = Lazy::new(|| {
-    let mut map = HashMap::new();
-    for entry in inventory::iter::<PseudoInstruction> {
-        map.insert(entry.name, *entry);
-    }
-    map
-});
+pub trait PseudoInstruction: Send + Sync {
+    fn names(&self) -> &'static [&'static str];
+    fn operand_types(&self) -> &'static [OperandType];
+    fn expander(&self) -> ExpandFn;
 
-impl PseudoInstruction {
-    pub fn expand<'a>(
+    fn expand<'a>(
         &self,
         ctx: &Context,
         pc: u32,
+        name: &'a str,
         operands: &[OperandValue<'a>],
     ) -> Result<ExpandRet<'a>> {
-        self.assert_operand_format(ctx, pc, operands)?;
+        self.assert_operand_format(ctx, pc, name, operands)?;
 
         Ok(
-            successors(Some((self.expander)(self.name, operands)), |(name, ops)| {
+            successors(Some((self.expander())(name, operands)), |(name, ops)| {
                 let ps_instr = PSEUDO_INSTRUCTIONS.get(*name)?;
 
-                ps_instr.assert_operand_format(ctx, pc, ops).ok()?;
+                ps_instr.assert_operand_format(ctx, pc, name, ops).ok()?;
 
-                Some((ps_instr.expander)(name, ops))
+                Some((ps_instr.expander())(name, ops))
             })
             .last()
             .unwrap(), // INFO: Safe because at least the first expansion exists
@@ -67,19 +68,20 @@ impl PseudoInstruction {
         &self,
         ctx: &Context,
         pc: u32,
+        name: &str,
         operands: &[OperandValue],
     ) -> Result<()> {
-        if operands.len() != self.operand_types.len() {
+        if operands.len() != self.operand_types().len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",
-                self.name,
-                self.operand_types.len(),
+                name,
+                self.operand_types().len(),
                 operands.len()
             );
         }
 
         for (i, operand) in operands.iter().enumerate() {
-            match self.operand_types[i] {
+            match self.operand_types()[i] {
                 OperandType::RegD => {
                     parse_reg_d(ctx, operand)?;
                 }
@@ -99,30 +101,68 @@ impl PseudoInstruction {
     }
 }
 
+macro impl_pseudo_instruction {
+    (
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            names: $names:tt,
+            operand_types: $types:tt,
+            expander: $expander:expr,
+        }
+    ) => {
+        $( #[doc = $doc] )*
+        $vis struct $id;
+
+        impl $crate::pseudo_instructions::PseudoInstruction for $id {
+            fn names(&self) -> &'static [&'static str] {
+                &$names
+            }
+            fn operand_types(&self) -> &'static [OperandType] {
+                $crate::operand::op_types! $types
+            }
+            fn expander(&self) -> $crate::pseudo_instructions::ExpandFn {
+                $expander
+            }
+        }
+
+        inventory::submit! {
+            &$id as &'static dyn $crate::pseudo_instructions::PseudoInstruction
+        }
+    }
+}
+
 macro pseudo_instruction {
     (
-        name: [ $($name:literal),+ ],
-        operand_types: $types:tt,
-        expander: $expander:expr,
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $name:literal,
+            operand_types: $types:tt,
+            expander: $expander:expr,
+        }
     ) => {
-        $(
-            $crate::pseudo_instructions::pseudo_instruction! {
-                name: $name,
+        $crate::pseudo_instructions::impl_pseudo_instruction! {
+            $( #[doc = $doc] )*
+            $vis $id {
+                names: [ $name ],
                 operand_types: $types,
                 expander: $expander,
             }
-        )+
+        }
     },
 
     (
-        name: $name:literal,
-        operand_types: $types:tt,
-        expander: $expander:expr,
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            names: $names:tt,
+            operand_types: $types:tt,
+            expander: $expander:expr,
+        }
     ) => {
-        inventory::submit! {
-            $crate::pseudo_instructions::PseudoInstruction {
-                name: $name,
-                operand_types: $crate::operand::op_types! $types,
+        $crate::pseudo_instructions::impl_pseudo_instruction! {
+            $( #[doc = $doc] )*
+            $vis $id {
+                names: $names,
+                operand_types: $types,
                 expander: $expander,
             }
         }
