@@ -81,6 +81,20 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                 None => (raw_line, tokens.as_ref()),
             };
 
+            // To support ',' separated operands
+            let mut new_tokens;
+            let tokens = if tokens.len() >= 2 && tokens[1].contains(',') {
+                let (name, remain) = raw_line.split_once(char::is_whitespace).unwrap(); // INFO: Safe because tokens.len() >= 2
+
+                new_tokens = Vec::with_capacity(5);
+                new_tokens.push(name);
+                new_tokens.extend(remain.split(',').map(str::trim));
+
+                &new_tokens
+            } else {
+                tokens
+            };
+
             let name = tokens[0];
 
             let ops = tokens[1..].iter().map(|e| (*e).into()).collect::<Vec<_>>();
