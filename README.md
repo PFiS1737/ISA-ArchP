@@ -212,8 +212,8 @@ In this section:
 
 - `col imm24u`: set the display color to the 24-bit unsigned immediate value `imm24u` (format: `0xRRGGBB`).
 - `spx rs1 rs2`: set the `(rs1, rs2)` position to the color specified by the last `col` instruction.
-- `seg rs1`: display the value of `rs1` (as 8-bit unsigned) on a 7-segment display.
-- `segi imm8u`: display the 8-bit unsigned immediate value `imm8u` on a 7-segment display.
+- `seg rs1`: display the value of `rs1` on a 7-segment display.
+- `segi imm12`: display the immediate value on a 7-segment display.
 
 ## References
 
