@@ -1,0 +1,9 @@
+[files]
+include = [
+  "Cargo.toml",
+  "rust-toolchain.toml",
+  ".cargo/config.toml",
+]
+
+[format.rules]
+line-width = 120
