@@ -28,8 +28,8 @@
 
 ## Pictures
 
-[![Mine Sweeper](./minesweeper.png)](../crates/archp_asmc/examples/minesweeper.asm)
-[![Snake Game](./snake.png)](../crates/archp_asmc/examples/snake.asm)
+[![Mine Sweeper](./minesweeper.png)](../crates/archp_assembler/examples/minesweeper.asm)
+[![Snake Game](./snake.png)](../crates/archp_assembler/examples/snake.asm)
 
 ## References
 

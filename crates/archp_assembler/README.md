@@ -3,10 +3,10 @@
 ```
 Assembly implementation of the ArchP ISA
 
-Usage: archp_asmc [OPTIONS] [SRC_FILE]
+Usage: archp_assembler [OPTIONS] <SRC_FILE>
 
 Arguments:
-  [SRC_FILE]  File path to the source assembly file
+  <SRC_FILE>  File path to the source assembly file
 
 Options:
       --complete <COMPLETE>  Print shell auto completions for the specified shell [possible values: bash, elvish, fish, powershell, zsh]

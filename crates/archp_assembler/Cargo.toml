@@ -1,5 +1,5 @@
 [package]
-name = "archp_asmc"
+name = "archp_assembler"
 version = "0.2.1"
 edition = { workspace = true }
 description = "Assembly implementation of the ArchP ISA"
@@ -9,7 +9,7 @@ license = { workspace = true }
 publish = false
 
 [[bin]]
-name = "archp_asmc"
+name = "archp_assembler"
 path = "src/main.rs"
 
 [dependencies]
