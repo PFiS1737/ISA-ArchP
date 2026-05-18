@@ -1,6 +1,6 @@
 [files]
 include = [
-  "Cargo.toml",
+  "**/Cargo.toml",
   "rust-toolchain.toml",
   ".cargo/config.toml",
 ]

@@ -1,10 +1,7 @@
-#![allow(clippy::unusual_byte_groupings)]
 #![feature(decl_macro)]
 
 mod assembler;
 mod cli;
-#[cfg(test)]
-mod diff_testing;
 mod instructions;
 mod macro_instructions;
 mod operand;
@@ -12,9 +9,12 @@ mod parser;
 mod pass1;
 mod pass2;
 mod pseudo_instructions;
+mod utils;
+
+#[cfg(test)]
+mod diff_testing;
 #[cfg(test)]
 mod testkit;
-mod utils;
 
 use std::{
     fs::read_to_string,

@@ -1,6 +1,6 @@
-## Turing Complete Schematics
+# Turing Complete Schematics
 
-### Usage
+## Usage
 
 > [!NOTE]
 > Turing Complete Version 0.1059 Beta.
@@ -8,7 +8,7 @@
 1. Unzip the [ArchP.tar.gz](./ArchP.tar.gz) file, and check the file structure:
 
 ```
-schematics
+.
 ├─ architecture
 │  └─ ArchP
 │     ├─ ...
@@ -25,3 +25,12 @@ schematics
    - Linux: `~/.local/share/godot/app_userdata/Turing Complete/schematics/`
 
 3. Put the `architecture/ArchP` and `component_factory/ArchP` folders into the same folder as above.
+
+## Pictures
+
+[![Mine Sweeper](./minesweeper.png)](../crates/archp_asmc/examples/minesweeper.asm)
+[![Snake Game](./snake.png)](../crates/archp_asmc/examples/snake.asm)
+
+## References
+
+- [ESnake37/Turing-Complete-Minesweeper](https://github.com/ESnake37/Turing-Complete-Minesweeper)

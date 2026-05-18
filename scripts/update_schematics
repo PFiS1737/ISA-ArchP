@@ -7,14 +7,16 @@ if test -z "$base"
     return 1
 end
 
-rm -rf ./schematics
+set tmpdir (mktemp -d)
 
-mkdir -p ./schematics/architecture
-mkdir -p ./schematics/component_factory
+mkdir -p $tmpdir/architecture
+mkdir -p $tmpdir/component_factory
 
-cp -r $base/architecture/ArchP ./schematics/architecture/
-cp -r $base/component_factory/ArchP ./schematics/component_factory/
+cp -r $base/architecture/ArchP $tmpdir/architecture/
+cp -r $base/component_factory/ArchP $tmpdir/component_factory/
 
-tar -czf ./assets/schematics/ArchP.tar.gz ./schematics
+tar -czf ./schematics/ArchP.tar.gz -C $tmpdir .
+
+rm -rf $tmpdir
 
 return 0
