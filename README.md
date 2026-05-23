@@ -21,7 +21,11 @@ See [schematics](./schematics).
 ## TODO
 
 - drop Turing Complete dependency.
-- cpu: Verilog implementation of the ArchP CPU.
-- elf: a simple ELF file format for ArchP.
-- linker: the linker.
-- os: a simple operating system kernel.
+- CPU: Verilog implementation of the ArchP CPU.
+  - Remove the workaround for working in the game.
+  - Corresponding ISA also needs to be modified, removing some unnecessary instructions and optimizing instruction encoding.
+  - Add privileged architecture.
+  - Use Verilator for top-level encapsulation and implement peripheral device simulation.
+- ELF: a simple ELF file format for ArchP.
+- linker: a custom linker for the ELF.
+- OS: a simple operating system kernel.

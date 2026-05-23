@@ -1,3 +1,5 @@
+# ArchP Assembler
+
 ## CLI Usage
 
 ```
@@ -30,7 +32,7 @@ Options:
 ## ISA
 
 This section is intended for users.
-If you require detailed information on the encoding formats, please refer to [isa.txt](./isa.txt).
+If you require detailed information on the encoding formats, please refer to [isa.md](./isa.md).
 
 ### Registers
 
@@ -72,6 +74,7 @@ In this section:
 - instructions:
   - `add`, `sub`, `mul`, `mulh`, `mulhu`, `mulhsu`, `div`, `rem`
   - `addi`, `subi`, `muli`, `mulhi`, `mulhiu`, `mulhisu`, `divi`, `remi`
+  - TODO: `divu`, `remu`, `diviu`, `remiu`
 - format: `instr rd rs1 rs2/imm12`
 - pseudo:
   - `li rd imm12` => `addi rd r0 imm12`
