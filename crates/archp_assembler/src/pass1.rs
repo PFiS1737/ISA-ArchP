@@ -19,13 +19,16 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
         Self { context }
     }
 
-    pub fn run(&mut self, source_lines: &'src [String]) -> Result<Vec<Line<'src>>> {
+    pub fn run(
+        &mut self,
+        source_lines: impl IntoIterator<Item = &'src str>,
+    ) -> Result<Vec<Line<'src>>> {
         let mut processed = Vec::new();
 
         let mut in_const_zone = true;
         let mut current_label = None;
 
-        for (orig_idx, raw_line) in source_lines.iter().enumerate() {
+        for (orig_idx, raw_line) in source_lines.into_iter().enumerate() {
             let raw_line = raw_line.trim();
             if raw_line.is_empty() {
                 continue;

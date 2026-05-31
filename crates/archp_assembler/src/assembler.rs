@@ -6,7 +6,6 @@ use crate::{operand::OperandValue, pass1::Pass1, pass2::Pass2};
 
 pub struct Assembler {
     settings: AssemblerSettings,
-    source_lines: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -15,22 +14,22 @@ pub struct AssemblerSettings {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct Context<'a> {
+pub struct Context<'src> {
     pub settings: AssemblerSettings,
 
-    pub constants: HashMap<&'a str, &'a str>,
-    pub labels: HashMap<&'a str, usize>,
+    pub constants: HashMap<&'src str, &'src str>,
+    pub labels: HashMap<&'src str, usize>,
 
-    pub instr_info: Vec<InstrInfo<'a>>,
+    pub instr_info: Vec<InstrInfo<'src>>,
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct InstrInfo<'a> {
-    pub original_line: (usize, &'a str),
-    pub label_name: Option<&'a str>,
+pub struct InstrInfo<'src> {
+    pub original_line: (usize, &'src str),
+    pub label_name: Option<&'src str>,
 }
 
-impl<'a> Context<'a> {
+impl<'src> Context<'src> {
     pub fn default_with_settings(settings: AssemblerSettings) -> Self {
         Context {
             settings,
@@ -59,18 +58,18 @@ impl<'a> Context<'a> {
 pub type Line<'src> = (&'src str, Vec<OperandValue<'src>>);
 
 impl Assembler {
-    pub fn new(settings: AssemblerSettings, source_lines: Vec<String>) -> Self {
-        Assembler {
-            settings,
-            source_lines,
-        }
+    pub fn new(settings: AssemblerSettings) -> Self {
+        Assembler { settings }
     }
 
-    pub fn assemble(&self) -> Result<(Vec<u32>, Vec<String>)> {
+    pub fn assemble<'src, T: IntoIterator<Item = &'src str>>(
+        &self,
+        source_lines: T,
+    ) -> Result<(Vec<u32>, Vec<String>)> {
         let mut context = Context::default_with_settings(self.settings);
 
         let mut pass1 = Pass1::new(&mut context);
-        let processed = pass1.run(&self.source_lines)?;
+        let processed = pass1.run(source_lines)?;
 
         let pass2 = Pass2::new(&mut context);
         pass2.run(processed)

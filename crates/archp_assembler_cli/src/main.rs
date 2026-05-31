@@ -35,11 +35,6 @@ fn main() -> Result<()> {
         unreachable!()
     };
 
-    let source_lines = read_to_string(src_file)?
-        .lines()
-        .map(|s| s.to_string())
-        .collect();
-
     if matches!(cli.output, Output::Stdout) && cli.bin {
         bail!("Cannot write binary output to stdout.");
     }
@@ -48,8 +43,8 @@ fn main() -> Result<()> {
         disable_macro: cli.disable_macro,
     };
 
-    let asmblr = Assembler::new(settings, source_lines);
-    let (codes, displays) = asmblr.assemble()?;
+    let asmblr = Assembler::new(settings);
+    let (codes, displays) = asmblr.assemble(read_to_string(src_file)?.lines())?;
 
     let mut out = BufWriter::new(cli.output.get()?);
 
