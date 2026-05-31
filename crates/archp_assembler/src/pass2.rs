@@ -1,10 +1,9 @@
 use anyhow::{Result, anyhow};
 
 use crate::{
-    assembler::{Context, Line},
+    assembler::{Context, Line, LineWithInfo},
     instructions::INSTRUCTIONS,
     pseudo_instructions::PSEUDO_INSTRUCTIONS,
-    utils::fmt::fmt_line,
 };
 
 /// Pass 3
@@ -20,16 +19,16 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
         Pass2 { context }
     }
 
-    pub fn run(&self, processed: Vec<Line<'src>>) -> Result<(Vec<u32>, Vec<String>)> {
+    pub fn run(&self, processed: Vec<Line<'src>>) -> Result<(Vec<u32>, Vec<LineWithInfo<'src>>)> {
         let mut codes = Vec::new();
-        let mut displays = Vec::new();
+        let mut lines = Vec::new();
 
         for (idx, line) in processed.into_iter().enumerate() {
-            let instr_info = &self.context.instr_info[idx];
+            let instr_info = self.context.instr_info[idx];
 
             let (original_idx, original_line) = instr_info.original_line;
 
-            let (code, mut display) = self.line_handler(idx, line).map_err(|e| {
+            let (code, line) = self.line_handler(idx, line).map_err(|e| {
                 anyhow!(
                     "Error encoding line {}: '{}' ({})",
                     original_idx + 1,
@@ -38,36 +37,24 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
                 )
             })?;
 
-            if display != original_line {
-                display = format!("{display}\t[{original_line}]");
-            } else {
-                display += "\t";
-            }
-
-            if let Some(label_name) = instr_info.label_name {
-                display = format!("{display}\t<label: {label_name}>");
-            } else {
-                display += "\t";
-            }
-
             codes.push(code);
-            displays.push(display);
+            lines.push((line, instr_info));
         }
 
-        Ok((codes, displays))
+        Ok((codes, lines))
     }
 
-    fn line_handler(&self, idx: usize, line: Line) -> Result<(u32, String)> {
+    fn line_handler(&self, idx: usize, line: Line<'src>) -> Result<(u32, Line<'src>)> {
         let pc = (idx * 4) as u32;
 
-        let (name, operands) = line;
+        let (name, ops) = line;
 
         let (name, ops) = if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
             ps_instr
-                .expand(self.context, pc, name, &operands)
+                .expand(self.context, pc, name, &ops)
                 .map_err(|e| anyhow!("Error expanding pseudo-instruction '{}': {}", name, e))?
         } else {
-            (name, operands)
+            (name, ops)
         };
 
         let code = INSTRUCTIONS
@@ -75,6 +62,6 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
             .ok_or_else(|| anyhow!("Unknown instruction: '{}'", name))?
             .encode(self.context, pc, &ops)?;
 
-        Ok((code, fmt_line(name, ops)))
+        Ok((code, (name, ops)))
     }
 }

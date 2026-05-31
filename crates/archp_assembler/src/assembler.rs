@@ -23,7 +23,7 @@ pub struct Context<'src> {
     pub instr_info: Vec<InstrInfo<'src>>,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct InstrInfo<'src> {
     pub original_line: (usize, &'src str),
     pub label_name: Option<&'src str>,
@@ -56,6 +56,7 @@ impl<'src> Context<'src> {
 }
 
 pub type Line<'src> = (&'src str, Vec<OperandValue<'src>>);
+pub type LineWithInfo<'src> = (Line<'src>, InstrInfo<'src>);
 
 impl Assembler {
     pub fn new(settings: AssemblerSettings) -> Self {
@@ -65,7 +66,7 @@ impl Assembler {
     pub fn assemble<'src, T: IntoIterator<Item = &'src str>>(
         &self,
         source_lines: T,
-    ) -> Result<(Vec<u32>, Vec<String>)> {
+    ) -> Result<(Vec<u32>, Vec<LineWithInfo<'src>>)> {
         let mut context = Context::default_with_settings(self.settings);
 
         let mut pass1 = Pass1::new(&mut context);

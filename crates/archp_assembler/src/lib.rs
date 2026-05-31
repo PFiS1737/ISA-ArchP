@@ -16,3 +16,4 @@ mod diff_testing;
 mod testkit;
 
 pub use assembler::{Assembler, AssemblerSettings};
+pub use utils::fmt::fmt_line;

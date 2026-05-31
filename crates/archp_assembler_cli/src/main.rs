@@ -6,8 +6,8 @@ use std::{
     io::{BufWriter, Write, stdout},
 };
 
-use anyhow::Result;
-use archp_assembler::{Assembler, AssemblerSettings};
+use anyhow::{Result, anyhow};
+use archp_assembler::{Assembler, AssemblerSettings, fmt_line};
 use clap::{CommandFactory, Parser};
 use clap_complete::CompleteEnv;
 
@@ -26,8 +26,11 @@ fn main() -> Result<()> {
         disable_macro: cli.disable_macro,
     };
 
+    let file_content = read_to_string(&cli.src_file)
+        .map_err(|e| anyhow!("Can't read source file '{}': {}", cli.src_file, e))?;
+
     let asmblr = Assembler::new(settings);
-    let (codes, displays) = asmblr.assemble(read_to_string(cli.src_file)?.lines())?;
+    let (codes, lines) = asmblr.assemble(file_content.lines())?;
 
     let mut out = BufWriter::new(if cli.stdout {
         Box::new(stdout()) as Box<dyn Write>
@@ -35,10 +38,35 @@ fn main() -> Result<()> {
         Box::new(File::create(cli.out_file)?) as Box<dyn Write>
     });
 
-    for (code, display) in codes.iter().zip(align_tabbed_lines(&displays)) {
-        if cli.hex {
+    if cli.hex {
+        for (code, display) in codes.into_iter().zip(align_tabbed_lines(
+            &lines
+                .into_iter()
+                .map(|((name, ops), instr_info)| {
+                    let mut display = fmt_line(name, ops);
+
+                    let (_, original_line) = instr_info.original_line;
+
+                    if display != original_line {
+                        display = format!("{display}\t[{original_line}]");
+                    } else {
+                        display += "\t";
+                    }
+
+                    if let Some(label_name) = instr_info.label_name {
+                        display = format!("{display}\t<label: {label_name}>");
+                    } else {
+                        display += "\t";
+                    }
+
+                    display
+                })
+                .collect::<Vec<String>>(),
+        )) {
             writeln!(out, "0x{:08X} # {}", code, display)?;
-        } else {
+        }
+    } else {
+        for code in codes {
             out.write_all(&code.to_le_bytes())?;
         }
     }
