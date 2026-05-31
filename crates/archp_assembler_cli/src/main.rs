@@ -25,8 +25,8 @@ fn main() -> Result<()> {
 
     let cli = Cli::parse();
 
-    if matches!(cli.output, Output::Stdout) && cli.bin {
-        bail!("Cannot write binary output to stdout.");
+    if matches!(cli.output, Output::Stdout) && !cli.hex {
+        bail!("You must specify an output file, or use --hex to output formatted hex to <stdout>.")
     }
 
     let settings = AssemblerSettings {
@@ -39,10 +39,10 @@ fn main() -> Result<()> {
     let mut out = BufWriter::new(cli.output.get()?);
 
     for (code, display) in codes.iter().zip(align_tabbed_lines(&displays)) {
-        if cli.bin {
-            out.write_all(&code.to_le_bytes())?;
-        } else {
+        if cli.hex {
             writeln!(out, "0x{:08X} # {}", code, display)?;
+        } else {
+            out.write_all(&code.to_le_bytes())?;
         }
     }
 

@@ -23,9 +23,9 @@ pub struct Cli {
     #[arg(short, long, value_hint = FilePath, default_value_t = Output::Stdout)]
     pub output: Output,
 
-    /// Output binary machine code instead of formatted hex.
+    /// Output formatted hex instead of binary machine code.
     #[arg(long)]
-    pub bin: bool,
+    pub hex: bool,
 
     /// Disable the macro-instructions.
     #[arg(long)]
