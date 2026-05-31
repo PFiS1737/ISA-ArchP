@@ -1,10 +1,3 @@
-use std::{
-    fmt::Display,
-    fs::File,
-    io::{Write, stdout},
-};
-
-use anyhow::Result;
 use clap::{
     Parser,
     ValueHint::FilePath,
@@ -20,8 +13,12 @@ pub struct Cli {
     pub src_file: String,
 
     /// The output file path.
-    #[arg(short, long, value_hint = FilePath, default_value_t = Output::Stdout)]
-    pub output: Output,
+    #[arg(short, long, value_hint = FilePath, default_value = "a.o")]
+    pub out_file: String,
+
+    /// Output to stdout
+    #[arg(long)]
+    pub stdout: bool,
 
     /// Output formatted hex instead of binary machine code.
     #[arg(long)]
@@ -30,42 +27,6 @@ pub struct Cli {
     /// Disable the macro-instructions.
     #[arg(long)]
     pub disable_macro: bool,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum Output {
-    Stdout,
-    File(String),
-}
-
-impl Output {
-    pub fn get(&self) -> Result<Box<dyn Write>> {
-        Ok(match self {
-            Self::Stdout => Box::new(stdout()),
-            Self::File(path) => Box::new(File::create(path)?),
-        })
-    }
-}
-
-const STDOUT: &str = "<stdout>";
-
-impl Display for Output {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Stdout => write!(f, "{}", STDOUT),
-            Self::File(path) => write!(f, "{}", path),
-        }
-    }
-}
-
-impl From<&str> for Output {
-    fn from(value: &str) -> Self {
-        if value == STDOUT {
-            Self::Stdout
-        } else {
-            Self::File(value.to_owned())
-        }
-    }
 }
 
 fn get_styles() -> Styles {

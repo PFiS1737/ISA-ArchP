@@ -11,11 +11,12 @@ Arguments:
   <SRC_FILE>  File path to the source assembly file
 
 Options:
-  -o, --output <OUTPUT>  The output file path [default: <stdout>]
-      --bin              Output binary machine code instead of formatted hex
-      --disable-macro    Disable the macro-instructions
-  -h, --help             Print help
-  -V, --version          Print version
+  -o, --out-file <OUT_FILE>  The output file path [default: a.o]
+      --stdout               Output to stdout
+      --hex                  Output formatted hex instead of binary machine code
+      --disable-macro        Disable the macro-instructions
+  -h, --help                 Print help
+  -V, --version              Print version
 ```
 
 ## Generate Completion Script
