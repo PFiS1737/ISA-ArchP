@@ -13,7 +13,7 @@ use clap::{
 use clap_complete::Shell;
 
 #[derive(Parser)]
-#[command(version, about, long_about = None)]
+#[command(name = env!("CARGO_BIN_NAME"), version, about, long_about = None)]
 #[command(styles = get_styles())]
 pub struct Cli {
     /// Print shell auto completions for the specified shell.

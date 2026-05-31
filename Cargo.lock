@@ -72,15 +72,22 @@ name = "archp_assembler"
 version = "0.2.1"
 dependencies = [
  "anyhow",
- "clap",
- "clap_complete",
- "env_logger",
  "insta",
  "insta-cmd",
  "inventory",
- "log",
  "once_cell",
  "rand",
+]
+
+[[package]]
+name = "archp_assembler_cli"
+version = "0.2.1"
+dependencies = [
+ "anyhow",
+ "archp_assembler",
+ "clap",
+ "clap_complete",
+ "env_logger",
 ]
 
 [[package]]

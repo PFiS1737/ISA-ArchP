@@ -1,0 +1,21 @@
+[package]
+name = "archp_assembler_cli"
+version = { workspace = true }
+edition = { workspace = true }
+description = "The ArchP Assembler CLI"
+homepage = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+publish = false
+
+[[bin]]
+name = "archp-as"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+clap_complete = { workspace = true }
+env_logger = { workspace = true }
+
+archp_assembler = { workspace = true }

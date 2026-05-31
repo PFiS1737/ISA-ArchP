@@ -4,7 +4,7 @@ use crate::{
     assembler::{Context, Line},
     instructions::INSTRUCTIONS,
     pseudo_instructions::PSEUDO_INSTRUCTIONS,
-    utils::fmt_line,
+    utils::fmt::fmt_line,
 };
 
 /// Pass 3

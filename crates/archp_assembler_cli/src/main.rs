@@ -1,20 +1,5 @@
-#![feature(decl_macro)]
-
-mod assembler;
-mod cli;
-mod instructions;
-mod macro_instructions;
-mod operand;
-mod parser;
-mod pass1;
-mod pass2;
-mod pseudo_instructions;
+mod command;
 mod utils;
-
-#[cfg(test)]
-mod diff_testing;
-#[cfg(test)]
-mod testkit;
 
 use std::{
     fs::read_to_string,
@@ -22,12 +7,12 @@ use std::{
 };
 
 use anyhow::{Result, bail};
+use archp_assembler::{Assembler, AssemblerSettings};
 use clap::{CommandFactory, Parser};
 use clap_complete::generate;
 
 use crate::{
-    assembler::{Assembler, AssemblerSettings},
-    cli::{Cli, Output},
+    command::{Cli, Output},
     utils::align_tabbed_lines,
 };
 

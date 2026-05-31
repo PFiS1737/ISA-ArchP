@@ -1,6 +1,6 @@
 [package]
 name = "archp_assembler"
-version = "0.2.1"
+version = { workspace = true }
 edition = { workspace = true }
 description = "Assembly implementation of the ArchP ISA"
 homepage = { workspace = true }
@@ -8,17 +8,9 @@ repository = { workspace = true }
 license = { workspace = true }
 publish = false
 
-[[bin]]
-name = "archp_assembler"
-path = "src/main.rs"
-
 [dependencies]
 anyhow = { workspace = true }
-clap = { workspace = true }
-clap_complete = { workspace = true }
-env_logger = { workspace = true }
 inventory = { workspace = true }
-log = { workspace = true }
 once_cell = { workspace = true }
 
 [dev-dependencies]

@@ -2,7 +2,7 @@ pub use insta::assert_snapshot;
 
 use crate::{
     assembler::Context, instructions::*, macro_instructions::*, operand::OperandValue,
-    utils::fmt_line,
+    utils::fmt::fmt_line,
 };
 
 pub fn instr(cmd: &str) -> impl Fn(&[&str]) -> String {

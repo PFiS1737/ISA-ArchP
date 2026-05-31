@@ -28,7 +28,7 @@ impl Address {
 
     #[cfg(test)]
     pub fn try_as_i12(&self, base: u32) -> (u32, i32) {
-        use crate::utils::sig_ext_12_to_32;
+        use crate::utils::sig_ext::sig_ext_12_to_32;
 
         match self.as_i12(base) {
             Ok(v) => (0, sig_ext_12_to_32(v)),
@@ -82,7 +82,7 @@ impl Address {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{testkit::assert_snapshot, utils::fmt_hex};
+    use crate::{testkit::assert_snapshot, utils::fmt::fmt_hex};
 
     fn test_parser(
         func: fn(&Context, &OperandValue) -> Result<Address>,

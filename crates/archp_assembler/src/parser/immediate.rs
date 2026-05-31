@@ -2,7 +2,7 @@ use std::num::{IntErrorKind, ParseIntError};
 
 use anyhow::{Result, anyhow, bail};
 
-use crate::{assembler::Context, operand::OperandValue, utils::sig_ext_12_to_32};
+use crate::{assembler::Context, operand::OperandValue, utils::sig_ext::sig_ext_12_to_32};
 
 pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<Immediate> {
     match imm {
@@ -114,7 +114,7 @@ impl Immediate {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{testkit::assert_snapshot, utils::fmt_hex};
+    use crate::{testkit::assert_snapshot, utils::fmt::fmt_hex};
 
     trait TestFormat {
         fn test_fmt(&self) -> String;
