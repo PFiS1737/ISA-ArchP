@@ -14,6 +14,6 @@ inventory = { workspace = true }
 once_cell = { workspace = true }
 
 [dev-dependencies]
-insta = { workspace = true }
+insta = { workspace = true, features = ["glob"] }
 insta-cmd = { workspace = true }
 rand = { workspace = true }

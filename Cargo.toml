@@ -12,10 +12,10 @@ license = "MIT"
 
 [workspace.dependencies]
 anyhow = "1.0.102"
-clap = { version = "4.6.1", features = ["derive"] }
+clap = "4.6.1"
 clap_complete = "4.6.5"
 env_logger = "0.11.10"
-insta = { version = "1.47.2", features = ["glob"] }
+insta = "1.47.2"
 insta-cmd = "0.6.0"
 inventory = "0.3.24"
 log = "0.4.29"
