@@ -84,16 +84,16 @@ pub trait PseudoInstruction: Send + Sync {
             match self.operand_types()[i] {
                 OperandType::RegD => {
                     parse_reg_d(ctx, operand)?;
-                }
+                },
                 OperandType::RegS => {
                     parse_reg_s(ctx, operand)?;
-                }
+                },
                 OperandType::Imm(bits, signed) => {
                     parse_imm(ctx, operand)?.as_field(bits, signed)?;
-                }
+                },
                 OperandType::Addr(bits) => {
                     parse_address(ctx, operand)?.as_field(bits, pc)?;
-                }
+                },
             };
         }
 

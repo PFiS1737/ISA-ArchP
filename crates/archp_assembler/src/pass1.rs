@@ -80,7 +80,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                     }
 
                     (raw_line[label.len() + 1..].trim(), &tokens[1..])
-                }
+                },
                 None => (raw_line, tokens.as_ref()),
             };
 

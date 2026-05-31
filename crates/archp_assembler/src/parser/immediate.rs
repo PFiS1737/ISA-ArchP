@@ -28,7 +28,7 @@ pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<Immediate> {
                     anyhow!("Invalid immediate: {}", imm)
                 }
             })
-        }
+        },
         OperandValue::Unsigned(n) => Ok(Immediate(*n as u64)),
         OperandValue::Signed(n) => Ok(Immediate(*n as u64)),
     }
@@ -41,9 +41,11 @@ impl Immediate {
     pub fn as_i12(&self) -> Result<u32> {
         self.as_field(12, true)
     }
+
     pub fn as_i32(&self) -> Result<i32> {
         self.as_field(32, true).map(|n| n as i32)
     }
+
     pub fn try_as_i12(&self) -> Result<(u32, i32)> {
         match self.as_i12() {
             Ok(v) => Ok((0, sig_ext_12_to_32(v))),
@@ -58,7 +60,7 @@ impl Immediate {
                 }
 
                 Ok((hi, sig_ext_12_to_32(lo)))
-            }
+            },
         }
     }
 }

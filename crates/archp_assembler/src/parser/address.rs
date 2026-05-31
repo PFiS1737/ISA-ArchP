@@ -11,7 +11,7 @@ pub fn parse_address(ctx: &Context, op: &OperandValue) -> Result<Address> {
             } else {
                 bail!("Undefined label: {}", label)
             }
-        }
+        },
         OperandValue::Unsigned(n) => Ok(Address(*n as u64)),
         OperandValue::Signed(n) => Ok(Address(*n as u64)),
     }
@@ -43,7 +43,7 @@ impl Address {
                 }
 
                 (hi, sig_ext_12_to_32(lo))
-            }
+            },
         }
     }
 }
@@ -91,7 +91,7 @@ mod tests {
             Ok(n) => {
                 let (hi, lo) = n.try_as_i12(12);
                 format!("({}, {})", fmt_hex(hi), fmt_hex(lo))
-            }
+            },
             Err(e) => format!("Error: {e}"),
         }
     }

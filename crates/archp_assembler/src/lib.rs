@@ -1,4 +1,5 @@
 #![feature(decl_macro)]
+#![allow(clippy::unusual_byte_groupings)]
 
 mod assembler;
 mod instructions;

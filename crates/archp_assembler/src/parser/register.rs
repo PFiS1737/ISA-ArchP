@@ -24,7 +24,7 @@ pub fn parse_reg_d(ctx: &Context, op: &OperandValue) -> Result<u32> {
                 err_reg_out_of_range!(reg, "1");
             }
             Ok(n)
-        }
+        },
 
         _ => {
             if parse_imm(ctx, op).is_ok() {
@@ -32,7 +32,7 @@ pub fn parse_reg_d(ctx: &Context, op: &OperandValue) -> Result<u32> {
             } else {
                 err_inval_reg!(reg)
             }
-        }
+        },
     }
 }
 
@@ -58,7 +58,7 @@ pub fn parse_reg_s(ctx: &Context, op: &OperandValue) -> Result<u32> {
                 err_reg_out_of_range!(reg, "0");
             }
             Ok(n)
-        }
+        },
 
         _ => {
             if parse_imm(ctx, op).is_ok() {
@@ -66,7 +66,7 @@ pub fn parse_reg_s(ctx: &Context, op: &OperandValue) -> Result<u32> {
             } else {
                 err_inval_reg!(reg)
             }
-        }
+        },
     }
 }
 
@@ -85,8 +85,9 @@ macro err_read_only_reg($e:expr) {
 
 #[cfg(test)]
 mod tests {
-    use crate::{assembler::Context, operand::OperandValue, testkit::*};
     use anyhow::Result;
+
+    use crate::{assembler::Context, operand::OperandValue, testkit::*};
 
     fn test(func: fn(&Context, &OperandValue) -> Result<u32>) -> impl Fn(&str) -> String {
         move |s| match func(&Context::test(), &OperandValue::from(s)) {

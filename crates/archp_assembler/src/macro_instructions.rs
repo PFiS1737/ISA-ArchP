@@ -57,12 +57,12 @@ pub trait MacroInstruction: Send + Sync {
                 match (mc.expander())(ctx, pc, name, &ops) {
                     None => {
                         ret.push((name, ops));
-                    }
+                    },
                     Some(v) => {
                         let mut q: VecDeque<_> = v.into();
                         q.append(&mut deq);
                         deq = q;
-                    }
+                    },
                 }
             } else {
                 ret.push((name, ops));

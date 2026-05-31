@@ -15,7 +15,8 @@ See [schematics](./schematics).
 ## Project Structure
 
 - Rust Crates:
-  - `archp_assembler`: the assembler for ArchP.
+  - `archp_assembler`: The assembler for ArchP.
+  - `archp_assembler_cli`: The command-line interface for the assembler.
 - _WIP_
 
 ## TODO

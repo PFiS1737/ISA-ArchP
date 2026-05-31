@@ -81,15 +81,15 @@ pub trait Instruction: Send + Sync {
                         OperandType::RegS => parse_reg_s(ctx, op)?,
                         OperandType::Imm(bits, signed) => {
                             parse_imm(ctx, op)?.as_field(bits, signed)?
-                        }
+                        },
                         OperandType::Addr(bits) => parse_address(ctx, op)?.as_field(bits, pc)?,
                     };
 
                     ret.push(val);
-                }
+                },
                 None => {
                     ret.push(0);
-                }
+                },
             }
         }
 
