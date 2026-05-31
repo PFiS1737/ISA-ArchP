@@ -73,7 +73,6 @@ version = "0.2.1"
 dependencies = [
  "anyhow",
  "insta",
- "insta-cmd",
  "inventory",
  "once_cell",
  "rand",
@@ -88,6 +87,7 @@ dependencies = [
  "clap",
  "clap_complete",
  "env_logger",
+ "insta",
 ]
 
 [[package]]
@@ -333,21 +333,9 @@ dependencies = [
  "console",
  "globset",
  "once_cell",
- "serde",
  "similar",
  "tempfile",
  "walkdir",
-]
-
-[[package]]
-name = "insta-cmd"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffeeefa927925cced49ccb01bf3e57c9d4cd132df21e576eb9415baeab2d3de6"
-dependencies = [
- "insta",
- "serde",
- "serde_json",
 ]
 
 [[package]]
@@ -582,7 +570,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
 dependencies = [
  "serde_core",
- "serde_derive",
 ]
 
 [[package]]
@@ -746,7 +733,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]

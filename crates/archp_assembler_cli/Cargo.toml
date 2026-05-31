@@ -19,3 +19,6 @@ clap_complete = { workspace = true, features = ["unstable-dynamic"] }
 env_logger = { workspace = true }
 
 archp_assembler = { workspace = true }
+
+[dev-dependencies]
+insta = { workspace = true, features = ["glob"] }

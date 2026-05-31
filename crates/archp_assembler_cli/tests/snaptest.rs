@@ -1,7 +1,6 @@
-use std::process::Command;
+use std::{env, process::Command};
 
 use insta::{assert_snapshot, glob, with_settings};
-use insta_cmd::get_cargo_bin;
 
 #[test]
 fn examples() {
@@ -9,8 +8,8 @@ fn examples() {
         prepend_module_to_snapshot => false,
         omit_expression => true,
     }, {
-        glob!("../examples", "*.asm", |path| {
-            let output = cli().arg(path).env("RUST_LOG", "debug").output().unwrap();
+        glob!("../../archp_assembler/examples", "*.asm", |path| {
+            let output = cli().arg(path).args(["--hex", "--stdout"]).env("RUST_LOG", "debug").output().unwrap();
             assert_snapshot!(format!(
                 "success: {}\nexit_code: {}\n----- stdout -----\n{}----- stderr -----\n{}",
                 output.status.success(),
@@ -23,5 +22,6 @@ fn examples() {
 }
 
 fn cli() -> Command {
-    Command::new(get_cargo_bin(env!("CARGO_PKG_NAME")))
+    let exe_path = env!("CARGO_BIN_EXE_archp-as");
+    Command::new(exe_path)
 }
