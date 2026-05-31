@@ -10,19 +10,14 @@ use clap::{
     ValueHint::FilePath,
     builder::{Styles, styling::AnsiColor},
 };
-use clap_complete::Shell;
 
 #[derive(Parser)]
 #[command(name = env!("CARGO_BIN_NAME"), version, about, long_about = None)]
 #[command(styles = get_styles())]
 pub struct Cli {
-    /// Print shell auto completions for the specified shell.
-    #[arg(long, exclusive = true)]
-    pub complete: Option<Shell>,
-
     /// File path to the source assembly file.
-    #[arg(value_hint = FilePath, required_unless_present = "complete")]
-    pub src_file: Option<String>,
+    #[arg(value_hint = FilePath)]
+    pub src_file: String,
 
     /// The output file path.
     #[arg(short, long, value_hint = FilePath, default_value_t = Output::Stdout)]

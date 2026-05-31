@@ -3,20 +3,27 @@
 ## CLI Usage
 
 ```
-Assembly implementation of the ArchP ISA
+The ArchP Assembler CLI
 
-Usage: archp_assembler [OPTIONS] <SRC_FILE>
+Usage: archp-as [OPTIONS] <SRC_FILE>
 
 Arguments:
   <SRC_FILE>  File path to the source assembly file
 
 Options:
-      --complete <COMPLETE>  Print shell auto completions for the specified shell [possible values: bash, elvish, fish, powershell, zsh]
-  -o, --output <OUTPUT>      The output file path [default: <stdout>]
-      --bin                  Output binary machine code instead of formatted hex
-      --disable-macro        Disable the macro-instructions
-  -h, --help                 Print help
-  -V, --version              Print version
+  -o, --output <OUTPUT>  The output file path [default: <stdout>]
+      --bin              Output binary machine code instead of formatted hex
+      --disable-macro    Disable the macro-instructions
+  -h, --help             Print help
+  -V, --version          Print version
+```
+
+## Generate Completion Script
+
+Where `<shell>` can be `bash`, `zsh`, `fish`, `powershell`, or `elvish`.
+
+```bash
+ARCHP_COMPLETE=<shell> archp-as
 ```
 
 ## Assembly Syntax

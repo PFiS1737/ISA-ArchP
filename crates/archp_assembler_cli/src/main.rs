@@ -3,13 +3,13 @@ mod utils;
 
 use std::{
     fs::read_to_string,
-    io::{BufWriter, Write, stdout},
+    io::{BufWriter, Write},
 };
 
 use anyhow::{Result, bail};
 use archp_assembler::{Assembler, AssemblerSettings};
 use clap::{CommandFactory, Parser};
-use clap_complete::generate;
+use clap_complete::CompleteEnv;
 
 use crate::{
     command::{Cli, Output},
@@ -17,23 +17,13 @@ use crate::{
 };
 
 fn main() -> Result<()> {
+    CompleteEnv::with_factory(Cli::command)
+        .var("ARCHP_COMPLETE")
+        .complete();
+
     env_logger::init();
 
     let cli = Cli::parse();
-
-    if let Some(shell) = cli.complete {
-        generate(
-            shell,
-            &mut Cli::command(),
-            env!("CARGO_BIN_NAME"),
-            &mut stdout(),
-        );
-        return Ok(());
-    }
-
-    let Some(src_file) = cli.src_file else {
-        unreachable!()
-    };
 
     if matches!(cli.output, Output::Stdout) && cli.bin {
         bail!("Cannot write binary output to stdout.");
@@ -44,7 +34,7 @@ fn main() -> Result<()> {
     };
 
     let asmblr = Assembler::new(settings);
-    let (codes, displays) = asmblr.assemble(read_to_string(src_file)?.lines())?;
+    let (codes, displays) = asmblr.assemble(read_to_string(cli.src_file)?.lines())?;
 
     let mut out = BufWriter::new(cli.output.get()?);
 
