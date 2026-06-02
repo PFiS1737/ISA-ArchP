@@ -3,7 +3,7 @@ name = "archp_cpu"
 
 [build]
 sources = ["src", "test"]
-target = { type = "bundle", path = "src/bundled.min.sv" }
+target = { type = "bundle", path = "bundled.min.sv" }
 sourcemap_target = { type = "directory", path = "sourcemaps" }
 incremental = true
 

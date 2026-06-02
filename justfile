@@ -31,5 +31,5 @@ clean:
   rm -rf ./dependencies
   rm -rf ./sourcemaps
   rm -rf ./waves
-  rm src/*.min.sv || true
+  rm *.min.sv || true
   rm *.f || true
