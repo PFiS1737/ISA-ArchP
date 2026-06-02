@@ -1,0 +1,21 @@
+[project]
+name = "archp_cpu"
+
+[build]
+sources = ["src", "test"]
+target = { type = "bundle", path = "src/bundled.min.sv" }
+sourcemap_target = { type = "directory", path = "sourcemaps" }
+incremental = true
+
+clock_type = "posedge"
+reset_type = "sync_high"
+
+[test]
+simulator = "verilator"
+waveform_format = "fst"
+waveform_target = { type = "directory", path = "waves" }
+
+[format]
+indent_width = 4
+vertical_align = false
+newline_style = "auto"

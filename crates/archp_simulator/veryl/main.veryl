@@ -1,0 +1,20 @@
+module top #(
+    param WIDTH: u32 = 8,
+) (
+    clk: input clock,
+    rst: input reset,
+    count: output logic<WIDTH>,
+    std_count: output logic<WIDTH>,
+) {
+    inst cnt: Counter #( WIDTH ) ( clk, rst, count );
+
+    inst std_cnt: $std::counter #(
+        WIDTH,
+        INITIAL_COUNT: 'b0111,
+    ) (
+        i_clk: clk,
+        i_rst: rst,
+        i_up: 'b1,
+        o_count: std_count,
+    );
+}

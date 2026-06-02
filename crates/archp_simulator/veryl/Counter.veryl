@@ -1,0 +1,19 @@
+module Counter #(
+    param WIDTH: u32 = 8,
+) (
+    clk: input clock,
+    rst: input reset,
+    count: output logic<WIDTH>,
+) {
+    var counter: logic<WIDTH>;
+
+    always_ff (clk) {
+        if_reset {
+            counter = '0;
+        } else {
+            counter += 1;
+        }
+    }
+
+    assign count = counter;
+}
