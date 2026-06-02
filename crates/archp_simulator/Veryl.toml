@@ -1,5 +1,8 @@
 [project]
 name = "archp_cpu"
+authors = ["PFiS1737"]
+description = "The implementation of ArchP CPU"
+version = "0.1.0"
 
 [build]
 sources = ["src", "test"]
