@@ -1,19 +1,110 @@
 module Counter #(
-    param WIDTH: u32 = 8,
+    param WIDTH: u32 = 32,
+    param STEP: u32 = 1,
 ) (
     clk: input clock,
     rst: input reset,
+
+    save_enable: input logic,
+    save_value: input logic<WIDTH>,
+
     count: output logic<WIDTH>,
 ) {
-    var counter: logic<WIDTH>;
+    var value: logic<WIDTH>;
 
     always_ff (clk) {
         if_reset {
-            counter = '0;
+            value = '0;
         } else {
-            counter += 1;
+            if (save_enable) {
+                value = save_value;
+            } else {
+                value += STEP;
+            }
         }
     }
 
-    assign count = counter;
+    assign count = value;
+}
+
+#[test(test_counter_step_1)]
+module test_counter_step_1 {
+    inst clk: $tb::clock_gen;
+    inst rst: $tb::reset_gen ( clk );
+
+    var count: logic<32>;
+
+    inst dut: Counter ( clk, rst, count, save_enable: 'b0, save_value: 'b0 );
+
+    initial {
+        rst.assert();
+        clk.next(10);
+        $assert(count == 'd10);
+        clk.next(13);
+        $assert(count == 'd23);
+        clk.next(42);
+        $assert(count == 'd65);
+        $finish();
+    }
+}
+
+#[test(test_counter_step_4)]
+module test_counter_step_4 {
+    inst clk: $tb::clock_gen;
+    inst rst: $tb::reset_gen ( clk );
+
+    var count: logic<32>;
+
+    inst dut: Counter #( STEP: 4 ) ( clk, rst, count, save_enable: 'b0, save_value: 'b0 );
+
+    initial {
+        rst.assert();
+        clk.next(10);
+        $assert(count == 32'd40);
+        clk.next(13);
+        $assert(count == 32'd92);
+        clk.next(42);
+        $assert(count == 32'd260);
+        $finish();
+    }
+}
+
+#[test(test_counter_save)]
+module test_counter_save {
+    inst clk: $tb::clock_gen;
+    inst rst: $tb::reset_gen ( clk );
+
+    var count: logic<32>;
+
+    var save_enable: logic<32>;
+    var save_value: logic<32>;
+
+    inst dut: Counter ( clk, rst, count, save_enable, save_value );
+
+    initial {
+        rst.assert();
+        clk.next(10);
+        $assert(count == 'd10);
+        clk.next(13);
+        $assert(count == 'd23);
+
+        save_enable = 'b1;
+        save_value = count;
+
+        clk.next(1);
+        $assert(count == 'd23);
+
+        save_enable = 'b0;
+
+        clk.next(42);
+        $assert(count == 'd65);
+
+        save_enable = 'b1;
+        save_value = 'd100;
+
+        clk.next(1);
+        $assert(count == 'd100);
+
+        $finish();
+    }
 }

@@ -1,0 +1,29 @@
+module Top #(
+    param WIDTH: u32 = 32,
+) (
+    clk: input clock,
+    rst: input reset,
+
+    top_input_enable: output logic,
+    top_input_value: input logic<WIDTH>,
+
+    top_output_enable: output logic,
+    top_output_value: output logic<WIDTH>,
+
+) {
+    var pc: logic<WIDTH>;
+    var pc_save_enable: logic;
+    var pc_save_value: logic<WIDTH>;
+
+    inst pc_counter: Counter #(
+        WIDTH,
+        STEP: 4,
+    ) (
+        clk,
+        rst,
+        save_enable: pc_save_enable,
+        save_value: pc_save_value,
+        count: pc,
+    );
+
+}
