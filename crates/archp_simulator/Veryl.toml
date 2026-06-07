@@ -20,5 +20,6 @@ waveform_target = { type = "directory", path = "waves" }
 
 [format]
 indent_width = 4
+max_width = 80
 vertical_align = false
 newline_style = "auto"

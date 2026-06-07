@@ -1,16 +1,15 @@
 module Counter #(
-    param WIDTH: u32 = 32,
     param STEP: u32 = 1,
 ) (
     clk: input clock,
     rst: input reset,
 
     save_enable: input logic,
-    save_value: input logic<WIDTH>,
+    save_value: input u32,
 
-    count: output logic<WIDTH>,
+    count: output u32,
 ) {
-    var value: logic<WIDTH>;
+    var value: u32;
 
     always_ff (clk) {
         if_reset {
@@ -32,9 +31,15 @@ module test_counter_step_1 {
     inst clk: $tb::clock_gen;
     inst rst: $tb::reset_gen ( clk );
 
-    var count: logic<32>;
+    var count: u32;
 
-    inst dut: Counter ( clk, rst, count, save_enable: 'b0, save_value: 'b0 );
+    inst _counter: Counter (
+        clk,
+        rst,
+        count,
+        save_enable: 'b0,
+        save_value: 'b0,
+    );
 
     initial {
         rst.assert();
@@ -53,9 +58,17 @@ module test_counter_step_4 {
     inst clk: $tb::clock_gen;
     inst rst: $tb::reset_gen ( clk );
 
-    var count: logic<32>;
+    var count: u32;
 
-    inst dut: Counter #( STEP: 4 ) ( clk, rst, count, save_enable: 'b0, save_value: 'b0 );
+    inst _counter: Counter #(
+        STEP: 4,
+    ) (
+        clk,
+        rst,
+        count,
+        save_enable: 'b0,
+        save_value: 'b0,
+    );
 
     initial {
         rst.assert();
@@ -74,12 +87,12 @@ module test_counter_save {
     inst clk: $tb::clock_gen;
     inst rst: $tb::reset_gen ( clk );
 
-    var count: logic<32>;
+    var count: u32;
 
     var save_enable: logic<32>;
-    var save_value: logic<32>;
+    var save_value: u32;
 
-    inst dut: Counter ( clk, rst, count, save_enable, save_value );
+    inst _counter: Counter ( clk, rst, count, save_enable, save_value );
 
     initial {
         rst.assert();
