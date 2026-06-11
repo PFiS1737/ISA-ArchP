@@ -6,9 +6,10 @@ version = "0.1.0"
 
 [build]
 sources = ["src", "test"]
-target = { type = "bundle", path = "src/bundled.sv" }
+target = { type = "bundle", path = "bundled.sv" }
 sourcemap_target = { type = "directory", path = "sourcemaps" }
 incremental = true
+omit_project_prefix = true
 
 clock_type = "posedge"
 reset_type = "sync_high"

@@ -1,5 +1,5 @@
-module Counter #(
-    param STEP: u32 = 1,
+module ProgramCounter #(
+    param STEP: u32 = 4,
 ) (
     clk: input clock,
     rst: input reset,
@@ -7,65 +7,39 @@ module Counter #(
     save_enable: input logic,
     save_value: input u32,
 
-    count: output u32,
+    pc: output u32,
 ) {
     var value: u32;
 
     always_ff (clk) {
         if_reset {
             value = '0;
+            pc = '0;
         } else {
             if (save_enable) {
-                value = save_value;
+                pc = save_value;
+                value = save_value + STEP;
             } else {
+                pc = value;
                 value += STEP;
             }
         }
     }
-
-    assign count = value;
 }
 
-#[test(test_counter_step_1)]
-module test_counter_step_1 {
+#[test(test_pc_step_2)]
+module test_pcer_step_2 {
     inst clk: $tb::clock_gen;
     inst rst: $tb::reset_gen ( clk );
 
-    var count: u32;
+    var pc: u32;
 
-    inst _counter: Counter (
-        clk,
-        rst,
-        count,
-        save_enable: 'b0,
-        save_value: 'b0,
-    );
-
-    initial {
-        rst.assert();
-        clk.next(10);
-        $assert(count == 'd10);
-        clk.next(13);
-        $assert(count == 'd23);
-        clk.next(42);
-        $assert(count == 'd65);
-        $finish();
-    }
-}
-
-#[test(test_counter_step_4)]
-module test_counter_step_4 {
-    inst clk: $tb::clock_gen;
-    inst rst: $tb::reset_gen ( clk );
-
-    var count: u32;
-
-    inst _counter: Counter #(
-        STEP: 4,
+    inst _pc: ProgramCounter #(
+        STEP: 2,
     ) (
         clk,
         rst,
-        count,
+        pc,
         save_enable: 'b0,
         save_value: 'b0,
     );
@@ -73,50 +47,85 @@ module test_counter_step_4 {
     initial {
         rst.assert();
         clk.next(10);
-        $assert(count == 32'd40);
+        $assert(pc == 'd18);
         clk.next(13);
-        $assert(count == 32'd92);
+        $assert(pc == 'd44);
         clk.next(42);
-        $assert(count == 32'd260);
+        $assert(pc == 'd128);
         $finish();
     }
 }
 
-#[test(test_counter_save)]
-module test_counter_save {
+#[test(test_pc_step_4)]
+module test_pcer_step_4 {
     inst clk: $tb::clock_gen;
     inst rst: $tb::reset_gen ( clk );
 
-    var count: u32;
+    var pc: u32;
+
+    inst _pc: ProgramCounter (
+        clk,
+        rst,
+        pc,
+        save_enable: 'b0,
+        save_value: 'b0,
+    );
+
+    initial {
+        rst.assert();
+        clk.next(10);
+        $assert(pc == 32'd36);
+        clk.next(13);
+        $assert(pc == 32'd88);
+        clk.next(42);
+        $assert(pc == 32'd256);
+        $finish();
+    }
+}
+
+#[test(test_pcer_save)]
+module test_pcer_save {
+    inst clk: $tb::clock_gen;
+    inst rst: $tb::reset_gen ( clk );
+
+    var pc: u32;
 
     var save_enable: logic<32>;
     var save_value: u32;
 
-    inst _counter: Counter ( clk, rst, count, save_enable, save_value );
+    inst _pc: ProgramCounter #(
+        STEP: 1,
+    ) (
+        clk,
+        rst,
+        pc,
+        save_enable,
+        save_value,
+    );
 
     initial {
         rst.assert();
         clk.next(10);
-        $assert(count == 'd10);
+        $assert(pc == 'd9);
         clk.next(13);
-        $assert(count == 'd23);
+        $assert(pc == 'd22);
 
         save_enable = 'b1;
-        save_value = count;
+        save_value = pc;
 
         clk.next(1);
-        $assert(count == 'd23);
+        $assert(pc == 'd22);
 
         save_enable = 'b0;
 
         clk.next(42);
-        $assert(count == 'd65);
+        $assert(pc == 'd64);
 
         save_enable = 'b1;
         save_value = 'd100;
 
         clk.next(1);
-        $assert(count == 'd100);
+        $assert(pc == 'd100);
 
         $finish();
     }

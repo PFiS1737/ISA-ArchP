@@ -7,20 +7,32 @@ module Top (
 
     top_output_enable: output logic,
     top_output_value: output bit<32>,
-
 ) {
     var pc: u32;
     var pc_save_enable: logic;
     var pc_save_value: u32;
-
-    inst _counter: Counter #(
-        STEP: 4,
-    ) (
+    inst _pc: ProgramCounter (
         clk,
         rst,
         save_enable: pc_save_enable,
         save_value: pc_save_value,
-        count: pc,
+        pc,
     );
 
+    var instr: bit<32>;
+    inst _program: $sv::Program ( pc, instr );
+
+    // Temporary logic to halt the simulation.
+    always_comb {
+        if instr == 32'hffff_ffff {
+            $finish();
+        }
+    }
+
+    assign top_input_enable = '0;
+    assign top_output_enable = '0;
+    assign top_output_value = '0;
+
+    assign pc_save_enable = '0;
+    assign pc_save_value = '0;
 }
