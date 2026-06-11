@@ -17,7 +17,7 @@ build *args="":
 alias b := build
 
 run *args="":
-  @xmake run --workdir=. archp_cpu {{args}}
+  @xmake run --workdir=. Vtop {{args}}
 
 clean:
   @# Xmake
