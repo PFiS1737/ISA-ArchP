@@ -2,11 +2,12 @@ set working-directory := "."
 set shell := ["bash", "-uc"]
 
 default:
-  @just config debug
+  @just config
   @echo
   @just build
 
-config mode:
+[arg("mode", pattern="trace|")]
+config mode="":
   @veryl build --quiet
   @xmake config --clean --mode={{mode}}
 

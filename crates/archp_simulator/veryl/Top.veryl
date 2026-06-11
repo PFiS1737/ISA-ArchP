@@ -35,4 +35,11 @@ module Top (
 
     assign pc_save_enable = '0;
     assign pc_save_value = '0;
+
+    #[ifdef(TRACE)]
+    initial {
+        $display("Tracing enabled...");
+        $dumpfile("dump.fst");
+        $dumpvars();
+    }
 }
