@@ -10,15 +10,14 @@ config mode:
   @veryl build --quiet
   @xmake config --clean --mode={{mode}}
 
-[arg("flag", pattern="--verbose|")]
-build flag="":
-  @veryl build {{flag}}
-  @xmake build {{flag}}
+build *args="":
+  @veryl build {{args}}
+  @xmake build {{args}}
 
 alias b := build
 
-run:
-  @xmake run --workdir=.
+run *args="":
+  @xmake run --workdir=. archp_cpu {{args}}
 
 clean:
   @# Xmake
