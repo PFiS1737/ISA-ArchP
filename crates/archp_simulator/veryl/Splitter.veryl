@@ -5,7 +5,7 @@ module Splitter (
     funct3: output bit<3>,
     rd: output bit<5>,
     rs1: output bit<5>,
-    imm12: output bit<12>,
+    imm12: output signed bit<12>,
 ) {
     always_comb {
         opcode = instr[31:25];

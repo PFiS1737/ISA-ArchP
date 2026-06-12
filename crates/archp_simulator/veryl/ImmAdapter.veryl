@@ -1,0 +1,49 @@
+module ImmAdapter (
+    opcode: input bit<7>,
+    imm12: input signed bit<12>,
+    rdata1_i: input bit<32>,
+    rdata2_i: input bit<32>,
+    rdata1_o: output bit<32>,
+    rdata2_o: output bit<32>,
+) {
+    assign rdata1_o = rdata1_i;
+
+    assign rdata2_o = if inside opcode {7'b0100_000..=7'b0111_111} ?
+        {imm12[msb] repeat 20, imm12}
+    :
+        rdata2_i
+    ;
+}
+
+#[test(test_imm_adapter)]
+module test_imm_adapter {
+    var opcode: bit<7>;
+    var imm12: signed bit<12>;
+    var rdata1_i: bit<32>;
+    var rdata2_i: bit<32>;
+    var rdata1_o: bit<32>;
+    var rdata2_o: bit<32>;
+
+    inst _imm_adapter: ImmAdapter (
+        opcode,
+        imm12,
+        rdata1_i,
+        rdata1_o,
+        rdata2_i,
+        rdata2_o,
+    );
+
+    initial {
+        imm12 = -78;
+        rdata1_i = -123;
+        rdata2_i = 456;
+
+        opcode = 7'b0000_000;
+        $assert(rdata1_o == rdata1_i);
+        $assert(rdata2_o == rdata2_i);
+
+        opcode = 7'b0100_000;
+        $assert(rdata1_o == rdata1_i);
+        $assert(rdata2_o == {imm12[msb] repeat 20, imm12});
+    }
+}

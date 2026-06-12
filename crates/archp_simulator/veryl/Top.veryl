@@ -33,7 +33,7 @@ module Top (
     var funct3: bit<3>;
     var rd: bit<5>;
     var rs1: bit<5>;
-    var imm12: bit<12>;
+    var imm12: signed bit<12>;
 
     inst _splitter: Splitter ( instr, opcode, funct3, rd, rs1, imm12 );
 
@@ -52,6 +52,26 @@ module Top (
         rs2: imm12[4:0],
         rdata1,
         rdata2,
+    );
+
+    var rdata1_o: bit<32>;
+    var rdata2_o: bit<32>;
+
+    inst _imm_adapter: ImmAdapter (
+        opcode,
+        imm12,
+        rdata1_i: rdata1,
+        rdata2_i: rdata2,
+        rdata1_o,
+        rdata2_o,
+    );
+
+    inst _alsu: ALSU (
+        opcode,
+        rdata1: rdata1_o,
+        rdata2: rdata2_o,
+        wdata,
+        rf_we,
     );
 
     assign top_input_enable = '0;

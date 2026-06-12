@@ -28,7 +28,7 @@ module ProgramCounter #(
 }
 
 #[test(test_pc_step_2)]
-module test_pcer_step_2 {
+module test_pc_step_2 {
     inst clk: $tb::clock_gen;
     inst rst: $tb::reset_gen ( clk );
 
@@ -57,7 +57,7 @@ module test_pcer_step_2 {
 }
 
 #[test(test_pc_step_4)]
-module test_pcer_step_4 {
+module test_pc_step_4 {
     inst clk: $tb::clock_gen;
     inst rst: $tb::reset_gen ( clk );
 
@@ -83,8 +83,8 @@ module test_pcer_step_4 {
     }
 }
 
-#[test(test_pcer_save)]
-module test_pcer_save {
+#[test(test_pc_save)]
+module test_pc_save {
     inst clk: $tb::clock_gen;
     inst rst: $tb::reset_gen ( clk );
 
