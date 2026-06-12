@@ -22,7 +22,7 @@ module Top (
     var instr: bit<32>;
     inst _program: $sv::Program ( pc, instr );
 
-    // Temporary logic to halt the simulation.
+    // TODO: remove this
     always_comb {
         if instr == 32'hffff_ffff {
             $finish();
@@ -52,6 +52,11 @@ module Top (
         rs2: imm12[4:0],
         rdata1,
         rdata2,
+        // TODO: remove this
+        top_input_enable,
+        top_input_value,
+        top_output_enable,
+        top_output_value,
     );
 
     var rdata1_o: bit<32>;
@@ -73,10 +78,6 @@ module Top (
         wdata,
         rf_we,
     );
-
-    assign top_input_enable = '0;
-    assign top_output_enable = '0;
-    assign top_output_value = '0;
 
     assign pc_save_enable = '0;
     assign pc_save_value = '0;
