@@ -29,6 +29,31 @@ module Top (
         }
     }
 
+    var opcode: bit<7>;
+    var funct3: bit<3>;
+    var rd: bit<5>;
+    var rs1: bit<5>;
+    var imm12: bit<12>;
+
+    inst _splitter: Splitter ( instr, opcode, funct3, rd, rs1, imm12 );
+
+    var rf_we: logic;
+    var wdata: bit<32>;
+    var rdata1: bit<32>;
+    var rdata2: bit<32>;
+
+    inst _regfile: RegisterFile (
+        clk,
+        rst,
+        we: rf_we,
+        rd,
+        wdata,
+        rs1,
+        rs2: imm12[4:0],
+        rdata1,
+        rdata2,
+    );
+
     assign top_input_enable = '0;
     assign top_output_enable = '0;
     assign top_output_value = '0;

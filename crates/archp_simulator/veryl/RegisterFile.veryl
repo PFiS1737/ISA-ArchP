@@ -1,0 +1,91 @@
+module RegisterFile (
+    clk: input clock,
+    rst: input reset,
+
+    we: input logic,
+
+    rd: input bit<5>,
+    wdata: input bit<32>,
+
+    rs1: input bit<5>,
+    rs2: input bit<5>,
+    rdata1: output bit<32>,
+    rdata2: output bit<32>,
+) {
+    var regs: bit<32> [32];
+
+    always_ff {
+        if_reset {
+            for i in 0..32 {
+                regs[i] = '0;
+            }
+            rdata1 = '0;
+            rdata2 = '0;
+        } else {
+            if we && rd != 0 {
+                regs[rd] = wdata;
+            }
+            rdata1 = regs[rs1];
+            rdata2 = regs[rs2];
+        }
+    }
+}
+
+#[test(regfile_test)]
+module regfile_test {
+    inst clk: $tb::clock_gen;
+    inst rst: $tb::reset_gen ( clk );
+
+    var we: logic;
+
+    var rd: bit<5>;
+    var wdata: bit<32>;
+
+    var rs1: bit<5>;
+    var rs2: bit<5>;
+    var rdata1: bit<32>;
+    var rdata2: bit<32>;
+
+    inst _regfile: RegisterFile (
+        clk,
+        rst,
+        we,
+        rd,
+        wdata,
+        rs1,
+        rs2,
+        rdata1,
+        rdata2,
+    );
+
+    initial {
+        rst.assert();
+
+        we = 1;
+        rd = 1;
+        wdata = 'h12345678;
+        clk.next();
+
+        rs1 = 1;
+        rs2 = 2;
+        clk.next();
+        $assert(rdata1 == 'h12345678);
+        $assert(rdata2 == 'h0);
+
+        rd = 0;
+        clk.next();
+
+        rs1 = 0;
+        clk.next();
+        $assert(rdata1 == 'h0);
+
+        rd = 2;
+        clk.next();
+
+        rs1 = 2;
+        clk.next();
+        $assert(rdata1 == 'h12345678);
+
+        $finish();
+    }
+}
