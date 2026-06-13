@@ -37,7 +37,7 @@ module Top (
     var rdata1: bit<32>;
     var rdata2: bit<32>;
 
-    inst _regfile: RegisterFile (
+    inst _regfile: RF (
         clk,
         rst,
         we: rfwe,

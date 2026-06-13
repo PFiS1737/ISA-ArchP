@@ -1,4 +1,4 @@
-module RegisterFile (
+module RF (
     clk: input clock,
     rst: input reset,
 
@@ -85,7 +85,7 @@ module regfile_test {
     var top_output_enable: logic;
     var top_output_value: bit<32>;
 
-    inst _regfile: RegisterFile (
+    inst _regfile: RF (
         clk,
         rst,
         we,
