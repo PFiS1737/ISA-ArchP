@@ -1,0 +1,90 @@
+/// Load + Store Unit
+module LSU (
+    clk: input clock,
+    rst: input reset,
+
+    opcode: input bit<7>,
+
+    rd: input bit<5>,
+    imm12: input signed bit<12>,
+    rdata1: input bit<32>,
+    rdata2: input bit<32>,
+
+    rfwe: output logic,
+    wdata: output bit<32>,
+) {
+    let en: logic = inside opcode {7'b1000_000..=7'b1000_111};
+
+    let imm_load: signed bit<32> = {imm12[msb] repeat 20, imm12};
+    let addr_load: bit<32> = rdata1 + imm_load;
+
+    let imm_store: signed bit<32> = {rd[msb] repeat 20, rd, imm12[11:5]};
+    let addr_store: bit<32> = rdata1 + imm_store;
+
+    var addr: bit<32>;
+    var width: bit<3>;
+    var mem_rdata: bit<32>;
+
+    var rdata: bit<32>;
+
+    always_comb {
+        #[cond_type(unique)]
+        case opcode[2:0] {
+            'b000 /* LW */: {
+                addr = addr_load & ~3; // TODO: don't ignore
+                width = 3'd4;
+                rdata = mem_rdata;
+            }
+            'b001 /* LH */: {
+                addr = addr_load & ~1; // TODO: don't ignore
+                width = 3'd2;
+                rdata = {mem_rdata[15] repeat 16, mem_rdata[15:0]};
+            }
+            'b010 /* LHU */: {
+                addr = addr_load & ~1; // TODO: don't ignore
+                width = 3'd2;
+                rdata = {16'b0, mem_rdata[15:0]};
+            }
+            'b011 /* LB */: {
+                addr = addr_load;
+                width = 3'd1;
+                rdata = {mem_rdata[7] repeat 24, mem_rdata[7:0]};
+            }
+            'b100 /* LBU */: {
+                addr = addr_load;
+                width = 3'd1;
+                rdata = {24'b0, mem_rdata[7:0]};
+            }
+            'b101 /* SW */: {
+                addr = addr_store & ~3; // TODO: don't ignore
+                width = 3'd4;
+                rdata = '0;
+            }
+            'b110 /* SH */: {
+                addr = addr_store & ~1; // TODO: don't ignore
+                width = 3'd2;
+                rdata = '0;
+            }
+            'b111 /* SB */: {
+                addr = addr_store;
+                width = 3'd1;
+                rdata = '0;
+            }
+        }
+    }
+
+    always_ff {
+        if_reset {
+            $sv::mem_reset();
+            mem_rdata = '0;
+        } else {
+            case opcode[2:0] {
+                'b000..='b100: mem_rdata = $sv::mem_load(addr, width); // @goto ../systemverilog/Memory.sv
+                'b101..='b111: $sv::mem_store(addr, width, rdata2); // @goto ../systemverilog/Memory.sv
+            }
+        }
+    }
+
+    assign rfwe = en && (opcode[2:0] <= 'b100);
+    assign wdata = if en ? rdata : '0;
+}

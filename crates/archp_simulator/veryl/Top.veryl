@@ -74,6 +74,20 @@ module Top (
         wdata: wdata_uiu,
     );
 
+    var rfwe_lsu: logic;
+    var wdata_lsu: bit<32>;
+    inst _lsu: LSU (
+        clk,
+        rst,
+        opcode,
+        rd,
+        imm12,
+        rdata1,
+        rdata2,
+        rfwe: rfwe_lsu,
+        wdata: wdata_lsu,
+    );
+
     var rfwe_bjlu: logic;
     var wdata_bjlu: bit<32>;
     var pcwe_bjlu: logic;
@@ -93,8 +107,8 @@ module Top (
         pcwdata: pcwdata_bjlu,
     );
 
-    assign rfwe = rfwe_alsu | rfwe_uiu | rfwe_bjlu;
-    assign wdata = wdata_alsu | wdata_uiu | wdata_bjlu;
+    assign rfwe = rfwe_alsu | rfwe_uiu | rfwe_bjlu | rfwe_lsu;
+    assign wdata = wdata_alsu | wdata_uiu | wdata_bjlu | wdata_lsu;
 
     assign pcwe = pcwe_bjlu;
     assign pcwdata = pcwdata_bjlu;
