@@ -40,27 +40,27 @@ module BJLU (
                 npc = pc_jal;
             }
             'b001 /* BEQ */: {
-                cond = (rdata1 == rdata2);
+                cond = rdata1 == rdata2;
                 npc = pc_branch;
             }
             'b010 /* BNE */: {
-                cond = (rdata1 != rdata2);
+                cond = rdata1 != rdata2;
                 npc = pc_branch;
             }
             'b011 /* BLT */: {
-                cond = ($signed(rdata1) <: $signed(rdata2));
+                cond = $signed(rdata1) <: $signed(rdata2);
                 npc = pc_branch;
             }
             'b100 /* BGE */: {
-                cond = ($signed(rdata1) >= $signed(rdata2));
+                cond = $signed(rdata1) >= $signed(rdata2);
                 npc = pc_branch;
             }
             'b101 /* BLTU */: {
-                cond = (rdata1 <: rdata2);
+                cond = rdata1 <: rdata2;
                 npc = pc_branch;
             }
             'b110 /* BGEU */: {
-                cond = (rdata1 >= rdata2);
+                cond = rdata1 >= rdata2;
                 npc = pc_branch;
             }
             'b111 /* JALR */: {
@@ -74,7 +74,7 @@ module BJLU (
         }
     }
 
-    assign rfwe = en && (opcode == 7'b1001_000 || opcode == 7'b1001_111);
+    assign rfwe = en && (opcode[2:0] == 'b000 || opcode[2:0] == 'b111);
     assign wdata = if rfwe ? pc + 4 : '0;
 
     assign pcwe = en && cond;
