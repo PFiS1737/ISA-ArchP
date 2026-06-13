@@ -25,42 +25,37 @@ module RF (
             for i in 0..32 {
                 regs[i] = '0;
             }
-            rdata1 = '0;
-            rdata2 = '0;
-            top_output_value = '0;
         } else {
             if we && rd != 0 {
                 regs[rd] = wdata;
-
-                // TODO: remove this
-                if rd == 26 {
-                    top_output_value = wdata;
-                }
             }
+        }
+    }
 
-            case rs1 {
-                0: rdata1 = '0;
-                // TODO: remove this
-                26: rdata1 = top_input_value;
-                27: rdata1 = '0;
-                28: rdata1 = $urandom(); // FIXME: veryl's simulator does not support $urandom
-                default: rdata1 = regs[rs1];
-            }
+    always_comb {
+        case rs1 {
+            0: rdata1 = '0;
+            // TODO: remove this
+            26: rdata1 = top_input_value;
+            27: rdata1 = '0;
+            28: rdata1 = $urandom(); // FIXME: veryl's simulator does not support $urandom
+            default: rdata1 = regs[rs1];
+        }
 
-            case rs2 {
-                0: rdata2 = '0;
-                // TODO: remove this
-                26: rdata2 = top_input_value;
-                27: rdata2 = '0;
-                28: rdata2 = $urandom(); // FIXME: veryl's simulator does not support $urandom
-                default: rdata2 = regs[rs2];
-            }
+        case rs2 {
+            0: rdata2 = '0;
+            // TODO: remove this
+            26: rdata2 = top_input_value;
+            27: rdata2 = '0;
+            28: rdata2 = $urandom(); // FIXME: veryl's simulator does not support $urandom
+            default: rdata2 = regs[rs2];
         }
     }
 
     // TODO: remove this
     assign top_input_enable = rs1 == 26 || rs2 == 26;
     assign top_output_enable = rd == 26;
+    assign top_output_value = if rd == 26 ? wdata : '0;
 }
 
 #[test(regfile_test)]
@@ -113,7 +108,6 @@ module regfile_test {
 
         rs1 = 1;
         rs2 = 2;
-        clk.next();
         $assert(rdata1 == wdata);
         $assert(rdata2 == 'h0);
 
@@ -121,27 +115,25 @@ module regfile_test {
         clk.next();
 
         rs1 = 0;
-        clk.next();
         $assert(rdata1 == 'h0);
 
         rd = 2;
         clk.next();
 
         rs1 = 2;
-        clk.next();
         $assert(rdata1 == wdata);
 
         $assert(top_input_enable == 'b0);
         rs2 = 26;
         $assert(top_input_enable == 'b1);
-        clk.next();
         $assert(rdata2 == top_input_value);
 
         $assert(top_output_enable == 'b0);
         rd = 26;
         $assert(top_output_enable == 'b1);
-        clk.next();
         $assert(top_output_value == wdata);
+        clk.next();
+        $assert(top_output_value == '0);
 
         $finish();
     }
