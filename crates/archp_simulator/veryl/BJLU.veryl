@@ -18,23 +18,22 @@ module BJLU (
 ) {
     let en: logic = inside opcode {7'b1001_000..=7'b1001_111};
 
-    let imm_branch: bit<32> = $signed(
-        {rd[msb] repeat 19, rd, imm12[11:5], 1'b0},
-    );
+    let imm_branch: signed bit<32> = {rd[msb] repeat 19, rd, imm12[11:5], 1'b0};
     let pc_branch: bit<32> = pc + imm_branch;
 
-    let imm_jal: bit<32> = $signed(
-        {funct3[msb] repeat 11, funct3, rs1, imm12, 1'b0},
-    );
+    let imm_jal: signed bit<32> = {
+        funct3[msb] repeat 11, funct3, rs1, imm12, 1'b0
+    };
     let pc_jal: bit<32> = pc + imm_jal;
 
-    let imm_jalr: bit<32> = $signed({imm12[msb] repeat 20, imm12});
+    let imm_jalr: signed bit<32> = {imm12[msb] repeat 20, imm12};
     let pc_jalr: bit<32> = (rdata1 + imm_jalr) & ~1;
 
     var cond: logic;
     var npc: bit<32>;
 
     always_comb {
+        #[cond_type(unique)]
         case opcode[2:0] {
             'b000 /* JAL */: {
                 cond = 1;

@@ -18,12 +18,9 @@ module ALSU (
         rdata2
     ;
 
-    var tmp: bit<64>;
-    var result: bit<32>;
-
-    let a_i32: signed bit<32> = $signed(a);
+    let a_i32: signed bit<32> = a;
     let a_u32: bit<32> = a;
-    let b_i32: signed bit<32> = $signed(b);
+    let b_i32: signed bit<32> = b;
     let b_u32: bit<32> = b;
 
     let a_i64: signed bit<64> = {a_i32[msb] repeat 32, a_i32};
@@ -31,9 +28,11 @@ module ALSU (
     let b_i64: signed bit<64> = {b_i32[msb] repeat 32, b_i32};
     let b_u64: bit<64> = {32'b0, b_i32};
 
+    var tmp: bit<64>;
+    var result: bit<32>;
+
     always_comb {
         tmp = '0;
-        result = '0;
 
         #[cond_type(unique)]
         case (opcode[4:0]) {

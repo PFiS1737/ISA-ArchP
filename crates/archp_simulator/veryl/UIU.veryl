@@ -13,11 +13,12 @@ module UIU (
 ) {
     let en: logic = inside opcode {7'b1011_000, 7'b1011_001};
 
-    var result: bit<32>;
-
     let uimm: signed bit<32> = {funct3, rs1, imm12, 12'b0};
 
+    var result: bit<32>;
+
     always_comb {
+        #[cond_type(unique)]
         case opcode[2:0] {
             'b000 /* LUI */: result = uimm;
             'b001 /* AULPC*/: result = pc + uimm;
