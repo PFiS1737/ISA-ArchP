@@ -67,7 +67,7 @@ module LSU (
 
     always_comb {
         if en && opcode[2:0] <= 'b100 {
-            mem_rdata = $sv::mem_load(addr, width); // @goto ../systemverilog/Memory.sv
+            mem_rdata = $sv::mem_load(addr, width); // @goto ../dpi/Memory.sv
         } else {
             mem_rdata = '0;
         }
@@ -88,7 +88,7 @@ module LSU (
             $sv::mem_reset();
         } else {
             if en && opcode[2:0] >= 'b101 {
-                $sv::mem_store(addr, width, rdata2); // @goto ../systemverilog/Memory.sv
+                $sv::mem_store(addr, width, rdata2); // @goto ../dpi/Memory.sv
             }
         }
     }
