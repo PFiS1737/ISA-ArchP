@@ -9,15 +9,9 @@ module Top (
     top_output_value: output bit<32>,
 ) {
     var pc: u32;
-    var pc_save_enable: logic;
-    var pc_save_value: u32;
-    inst _pc: ProgramCounter (
-        clk,
-        rst,
-        save_enable: pc_save_enable,
-        save_value: pc_save_value,
-        pc,
-    );
+    var pcwe: logic;
+    var pcwdata: u32;
+    inst _pc: PC ( clk, rst, we: pcwe, wdata: pcwdata, pc );
 
     var instr: bit<32>;
     inst _program: $sv::Program ( pc, instr );
@@ -37,7 +31,7 @@ module Top (
 
     inst _splitter: Splitter ( instr, opcode, funct3, rd, rs1, imm12 );
 
-    var rf_we: logic;
+    var rfwe: logic;
     var wdata: bit<32>;
 
     var rdata1: bit<32>;
@@ -46,7 +40,7 @@ module Top (
     inst _regfile: RegisterFile (
         clk,
         rst,
-        we: rf_we,
+        we: rfwe,
         rd,
         wdata,
         rs1,
@@ -60,18 +54,18 @@ module Top (
         top_output_value,
     );
 
-    var rf_we_alsu: logic;
+    var rfwe_alsu: logic;
     var wdata_alsu: bit<32>;
     inst _alsu: ALSU (
         opcode,
         imm12,
         rdata1,
         rdata2,
-        rf_we: rf_we_alsu,
+        rfwe: rfwe_alsu,
         wdata: wdata_alsu,
     );
 
-    var rf_we_uiu: logic;
+    var rfwe_uiu: logic;
     var wdata_uiu: bit<32>;
     inst _uiu: UIU (
         opcode,
@@ -79,15 +73,15 @@ module Top (
         rs1,
         imm12,
         pc,
-        rf_we: rf_we_uiu,
+        rfwe: rfwe_uiu,
         wdata: wdata_uiu,
     );
 
-    assign rf_we = rf_we_alsu | rf_we_uiu;
+    assign rfwe = rfwe_alsu | rfwe_uiu;
     assign wdata = wdata_alsu | wdata_uiu;
 
-    assign pc_save_enable = '0;
-    assign pc_save_value = '0;
+    assign pcwe = '0;
+    assign pcwdata = '0;
 
     #[ifdef(TRACE)]
     initial {

@@ -8,7 +8,7 @@ module UIU (
 
     pc: input bit<32>,
 
-    rf_we: output logic,
+    rfwe: output logic,
     wdata: output bit<32>,
 ) {
     let en: logic = inside opcode {7'b1011_000, 7'b1011_001};
@@ -25,6 +25,6 @@ module UIU (
         }
     }
 
-    assign rf_we = en;
+    assign rfwe = en;
     assign wdata = if en ? result : '0;
 }

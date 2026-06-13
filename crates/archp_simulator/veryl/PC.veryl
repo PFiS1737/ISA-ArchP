@@ -1,11 +1,11 @@
-module ProgramCounter #(
+module PC #(
     param STEP: u32 = 4,
 ) (
     clk: input clock,
     rst: input reset,
 
-    save_enable: input logic,
-    save_value: input u32,
+    we: input logic,
+    wdata: input u32,
 
     pc: output u32,
 ) {
@@ -16,9 +16,9 @@ module ProgramCounter #(
             value = '0;
             pc = '0;
         } else {
-            if (save_enable) {
-                pc = save_value;
-                value = save_value + STEP;
+            if (we) {
+                pc = wdata;
+                value = wdata + STEP;
             } else {
                 pc = value;
                 value += STEP;
@@ -34,15 +34,7 @@ module test_pc_step_2 {
 
     var pc: u32;
 
-    inst _pc: ProgramCounter #(
-        STEP: 2,
-    ) (
-        clk,
-        rst,
-        pc,
-        save_enable: 'b0,
-        save_value: 'b0,
-    );
+    inst _pc: PC #( STEP: 2 ) ( clk, rst, pc, we: 'b0, wdata: 'b0 );
 
     initial {
         rst.assert();
@@ -63,13 +55,7 @@ module test_pc_step_4 {
 
     var pc: u32;
 
-    inst _pc: ProgramCounter (
-        clk,
-        rst,
-        pc,
-        save_enable: 'b0,
-        save_value: 'b0,
-    );
+    inst _pc: PC ( clk, rst, pc, we: 'b0, wdata: 'b0 );
 
     initial {
         rst.assert();
@@ -90,18 +76,10 @@ module test_pc_save {
 
     var pc: u32;
 
-    var save_enable: logic<32>;
-    var save_value: u32;
+    var we: logic<32>;
+    var wdata: u32;
 
-    inst _pc: ProgramCounter #(
-        STEP: 1,
-    ) (
-        clk,
-        rst,
-        pc,
-        save_enable,
-        save_value,
-    );
+    inst _pc: PC #( STEP: 1 ) ( clk, rst, pc, we, wdata );
 
     initial {
         rst.assert();
@@ -110,19 +88,19 @@ module test_pc_save {
         clk.next(13);
         $assert(pc == 'd22);
 
-        save_enable = 'b1;
-        save_value = pc;
+        we = 'b1;
+        wdata = pc;
 
         clk.next(1);
         $assert(pc == 'd22);
 
-        save_enable = 'b0;
+        we = 'b0;
 
         clk.next(42);
         $assert(pc == 'd64);
 
-        save_enable = 'b1;
-        save_value = 'd100;
+        we = 'b1;
+        wdata = 'd100;
 
         clk.next(1);
         $assert(pc == 'd100);
