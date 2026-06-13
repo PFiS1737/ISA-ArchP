@@ -13,8 +13,7 @@ module Top (
     var pcwdata: u32;
     inst _pc: PC ( clk, rst, we: pcwe, wdata: pcwdata, pc );
 
-    var instr: bit<32>;
-    inst _program: $sv::Program ( pc, instr );
+    let instr: bit<32> = $sv::get_instruction(pc); // @goto ../systemverilog/Program.sv
 
     // TODO: remove this
     always_comb {
