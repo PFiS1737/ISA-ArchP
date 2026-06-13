@@ -52,8 +52,8 @@ module ALSU (
                 tmp = a_i64 * b_u64;
                 result = tmp[63:32];
             }
-            'b00_110 /* REM */: result = a_i32 % b_i32;
-            'b00_111 /* DIV */: result = a_i32 / b_i32;
+            'b00_110 /* REM */: result = if b_i32 == 0 ? '0 : a_i32 % b_i32;
+            'b00_111 /* DIV */: result = if b_i32 == 0 ? '1 : a_i32 / b_i32;
 
             'b01_000 /* AND */: result = a & b;
             'b01_001 /* NAND */: result = ~(a & b);
@@ -64,8 +64,16 @@ module ALSU (
 
             'b10_000 /* SLL */: result = a << b[4:0];
             'b10_001 /* SRL */: result = a >> b[4:0];
-            'b10_010 /* ROL */: result = (a << b[4:0]) | (a >> (32 - b[4:0]));
-            'b10_011 /* ROR */: result = (a >> b[4:0]) | (a << (32 - b[4:0]));
+            'b10_010 /* ROL */: result = if b[4:0] == 0 ?
+                a
+            :
+                (a << b[4:0]) | (a >> (32 - b[4:0]))
+            ;
+            'b10_011 /* ROR */: result = if b[4:0] == 0 ?
+                a
+            :
+                (a >> b[4:0]) | (a << (32 - b[4:0]))
+            ;
             'b10_100 /* SRA */: result = a_i32 >>> b[4:0];
 
             'b11_001 /* SEQ */: result = if a_i32 == b_i32 ? 1 : 0;
