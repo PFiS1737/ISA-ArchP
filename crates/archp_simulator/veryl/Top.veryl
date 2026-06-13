@@ -62,7 +62,6 @@ module Top (
 
     var rf_we_alsu: logic;
     var wdata_alsu: bit<32>;
-
     inst _alsu: ALSU (
         opcode,
         imm12,
@@ -72,8 +71,20 @@ module Top (
         wdata: wdata_alsu,
     );
 
-    assign wdata = wdata_alsu;
-    assign rf_we = rf_we_alsu;
+    var rf_we_uiu: logic;
+    var wdata_uiu: bit<32>;
+    inst _uiu: UIU (
+        opcode,
+        funct3,
+        rs1,
+        imm12,
+        pc,
+        rf_we: rf_we_uiu,
+        wdata: wdata_uiu,
+    );
+
+    assign rf_we = rf_we_alsu | rf_we_uiu;
+    assign wdata = wdata_alsu | wdata_uiu;
 
     assign pc_save_enable = '0;
     assign pc_save_value = '0;

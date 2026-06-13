@@ -20,7 +20,7 @@ module RegisterFile (
 ) {
     var regs: bit<32> [32];
 
-    // Temporary
+    // TODO: remove this
     assign top_input_enable = rs1 == 26 || rs2 == 26;
     assign top_output_enable = rd == 26;
 

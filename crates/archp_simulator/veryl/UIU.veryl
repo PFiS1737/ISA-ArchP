@@ -1,0 +1,30 @@
+/// Upper Immediate Unit
+module UIU (
+    opcode: input bit<7>,
+
+    funct3: input bit<3>,
+    rs1: input bit<5>,
+    imm12: input signed bit<12>,
+
+    pc: input bit<32>,
+
+    rf_we: output logic,
+    wdata: output bit<32>,
+) {
+    let en: logic = inside opcode {7'b1011_000, 7'b1011_001};
+
+    var result: bit<32>;
+
+    let uimm: signed bit<32> = {funct3, rs1, imm12, 12'b0};
+
+    always_comb {
+        case opcode[2:0] {
+            'b000 /* LUI */: result = uimm;
+            'b001 /* AULPC*/: result = pc + uimm;
+            default: result = '0;
+        }
+    }
+
+    assign rf_we = en;
+    assign wdata = if en ? result : '0;
+}
