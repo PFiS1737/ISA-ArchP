@@ -2,51 +2,29 @@
 module ALSU (
     opcode: input bit<7>,
 
+    imm12: input signed bit<12>,
     rdata1: input bit<32>,
     rdata2: input bit<32>,
 
     rf_we: output logic,
     wdata: output bit<32>,
 ) {
-    let en: logic = inside opcode {7'b0000_000..=7'b0011_111};
+    let en: logic = inside opcode {7'b0000_000..=7'b0111_111};
 
-    enum OPS: bit<7> {
-        ADD = 'b0000_000,
-        SUB = 'b0000_001,
-        MUL = 'b0000_010,
-        MULH = 'b0000_011,
-        MULHU = 'b0000_100,
-        MULHSU = 'b0000_101,
-        REM = 'b0000_110,
-        DIV = 'b0000_111,
+    let a: bit<32> = rdata1;
+    let b: bit<32> = if inside opcode {7'b0100_000..=7'b0111_111} ?
+        {imm12[msb] repeat 20, imm12}
+    :
+        rdata2
+    ;
 
-        AND = 'b0001_000,
-        NAND = 'b0001_001,
-        OR = 'b0001_010,
-        NOR = 'b0001_011,
-        XOR = 'b0001_100,
-        XNOR = 'b0001_101,
-
-        SLL = 'b0010_000,
-        SRL = 'b0010_001,
-        ROL = 'b0010_010,
-        ROR = 'b0010_011,
-        SRA = 'b0010_100,
-
-        SEQ = 'b0011_001,
-        SNE = 'b0011_010,
-        SLT = 'b0011_011,
-        SGE = 'b0011_100,
-        SLTU = 'b0011_101,
-        SGEU = 'b0011_110,
-    }
-
+    var tmp: bit<64>;
     var result: bit<32>;
 
-    let a_i32: signed bit<32> = $signed(rdata1);
-    let a_u32: bit<32> = rdata1;
-    let b_i32: signed bit<32> = $signed(rdata2);
-    let b_u32: bit<32> = rdata2;
+    let a_i32: signed bit<32> = $signed(a);
+    let a_u32: bit<32> = a;
+    let b_i32: signed bit<32> = $signed(b);
+    let b_u32: bit<32> = b;
 
     let a_i64: signed bit<64> = {a_i32[msb] repeat 32, a_i32};
     let a_u64: bit<64> = {32'b0, a_i32};
@@ -54,46 +32,48 @@ module ALSU (
     let b_u64: bit<64> = {32'b0, b_i32};
 
     always_comb {
-        case (opcode as OPS) {
-            OPS::ADD: result = a_i32 + b_i32;
-            OPS::SUB: result = a_i32 - b_i32;
-            OPS::MUL: result = a_i32 * b_i32;
-            OPS::MULH: {
-                let tmp: bit<64> = a_i64 * b_i64;
+        tmp = '0;
+        result = '0;
+
+        #[cond_type(unique)]
+        case (opcode[4:0]) {
+            'b00_000 /* ADD */: result = a_i32 + b_i32;
+            'b00_001 /* SUB */: result = a_i32 - b_i32;
+            'b00_010 /* MUL */: result = a_i32 * b_i32;
+            'b00_011 /* MULH */: {
+                tmp = a_i64 * b_i64;
                 result = tmp[63:32];
             }
-            OPS::MULHU: {
-                let tmp: bit<64> = a_u64 * b_u64;
+            'b00_100 /* MULHU */: {
+                tmp = a_u64 * b_u64;
                 result = tmp[63:32];
             }
-            OPS::MULHSU: {
-                let tmp: bit<64> = a_i64 * b_u64;
+            'b00_101 /* MULHSU */: {
+                tmp = a_i64 * b_u64;
                 result = tmp[63:32];
             }
-            OPS::REM: result = a_i32 % b_i32;
-            OPS::DIV: result = a_i32 / b_i32;
+            'b00_110 /* REM */: result = a_i32 % b_i32;
+            'b00_111 /* DIV */: result = a_i32 / b_i32;
 
-            OPS::AND: result = rdata1 & rdata2;
-            OPS::NAND: result = ~(rdata1 & rdata2);
-            OPS::OR: result = rdata1 | rdata2;
-            OPS::NOR: result = ~(rdata1 | rdata2);
-            OPS::XOR: result = rdata1 ^ rdata2;
-            OPS::XNOR: result = rdata1 ~^ rdata2;
+            'b01_000 /* AND */: result = a & b;
+            'b01_001 /* NAND */: result = ~(a & b);
+            'b01_010 /* OR */: result = a | b;
+            'b01_011 /* NOR */: result = ~(a | b);
+            'b01_100 /* XOR */: result = a ^ b;
+            'b01_101 /* XNOR */: result = a ~^ b;
 
-            OPS::SLL: result = rdata1 << rdata2[4:0];
-            OPS::SRL: result = rdata1 >> rdata2[4:0];
-            OPS::ROL: result = (rdata1 << rdata2[4:0])
-                | (rdata1 >> (32 - rdata2[4:0]));
-            OPS::ROR: result = (rdata1 >> rdata2[4:0])
-                | (rdata1 << (32 - rdata2[4:0]));
-            OPS::SRA: result = a_i32 >>> rdata2[4:0];
+            'b10_000 /* SLL */: result = a << b[4:0];
+            'b10_001 /* SRL */: result = a >> b[4:0];
+            'b10_010 /* ROL */: result = (a << b[4:0]) | (a >> (32 - b[4:0]));
+            'b10_011 /* ROR */: result = (a >> b[4:0]) | (a << (32 - b[4:0]));
+            'b10_100 /* SRA */: result = a_i32 >>> b[4:0];
 
-            OPS::SEQ: result = if a_i32 == b_i32 ? '1 : '0;
-            OPS::SNE: result = if a_i32 != b_i32 ? '1 : '0;
-            OPS::SLT: result = if a_i32 <: b_i32 ? '1 : '0;
-            OPS::SGE: result = if a_i32 >: b_i32 || a_i32 == b_i32 ? '1 : '0;
-            OPS::SLTU: result = if a_u32 <: b_u32 ? '1 : '0;
-            OPS::SGEU: result = if a_u32 >: b_u32 || a_u32 == b_u32 ? '1 : '0;
+            'b11_001 /* SEQ */: result = if a_i32 == b_i32 ? 1 : 0;
+            'b11_010 /* SNE */: result = if a_i32 != b_i32 ? 1 : 0;
+            'b11_011 /* SLT */: result = if a_i32 <: b_i32 ? 1 : 0;
+            'b11_100 /* SGE */: result = if a_i32 >= b_i32 ? 1 : 0;
+            'b11_101 /* SLTU */: result = if a_u32 <: b_u32 ? 1 : 0;
+            'b11_110 /* SGEU */: result = if a_u32 >= b_u32 ? 1 : 0;
 
             default: result = '0;
         }
@@ -102,16 +82,3 @@ module ALSU (
     assign rf_we = en;
     assign wdata = if en ? result : '0;
 }
-
-//  TODO:
-// #[test(test_alsu)]
-// module test_alsu {
-//     var opcode: bit<7>;
-//     var rdata1: bit<32>;
-//     var rdata2: bit<32>;
-//     var wdata: bit<32>;
-//
-//     inst _alsu: ALSU ( opcode, rdata1, rdata2, wdata );
-//
-//     initial {}
-// }

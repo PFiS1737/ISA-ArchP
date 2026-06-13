@@ -39,6 +39,7 @@ module Top (
 
     var rf_we: logic;
     var wdata: bit<32>;
+
     var rdata1: bit<32>;
     var rdata2: bit<32>;
 
@@ -59,25 +60,20 @@ module Top (
         top_output_value,
     );
 
-    var rdata1_o: bit<32>;
-    var rdata2_o: bit<32>;
-
-    inst _imm_adapter: ImmAdapter (
-        opcode,
-        imm12,
-        rdata1_i: rdata1,
-        rdata2_i: rdata2,
-        rdata1_o,
-        rdata2_o,
-    );
+    var rf_we_alsu: logic;
+    var wdata_alsu: bit<32>;
 
     inst _alsu: ALSU (
         opcode,
-        rdata1: rdata1_o,
-        rdata2: rdata2_o,
-        wdata,
-        rf_we,
+        imm12,
+        rdata1,
+        rdata2,
+        rf_we: rf_we_alsu,
+        wdata: wdata_alsu,
     );
+
+    assign wdata = wdata_alsu;
+    assign rf_we = rf_we_alsu;
 
     assign pc_save_enable = '0;
     assign pc_save_value = '0;
