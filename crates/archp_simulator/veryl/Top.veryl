@@ -22,13 +22,11 @@ module Top (
         }
     }
 
-    var opcode: bit<7>;
-    var funct3: bit<3>;
-    var rd: bit<5>;
-    var rs1: bit<5>;
-    var imm12: signed bit<12>;
-
-    inst _splitter: Splitter ( instr, opcode, funct3, rd, rs1, imm12 );
+    let opcode: bit<7> = instr[31:25];
+    let funct3: bit<3> = instr[24:22];
+    let rd: bit<5> = instr[21:17];
+    let rs1: bit<5> = instr[16:12];
+    let imm12: signed bit<12> = instr[11:0];
 
     var rfwe: logic;
     var wdata: bit<32>;
