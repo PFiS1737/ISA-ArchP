@@ -11,7 +11,7 @@ module Top (
     var pc: u32;
     var pcwe: logic;
     var pcwdata: u32;
-    inst _pc: PC ( clk, rst, we: pcwe, wdata: pcwdata, pc );
+    inst PC_: PC ( clk, rst, we: pcwe, wdata: pcwdata, pc );
 
     let instr: bit<32> = $sv::get_instruction(pc); // @goto ../dpi/Program.sv
 
@@ -34,7 +34,7 @@ module Top (
     var rdata1: bit<32>;
     var rdata2: bit<32>;
 
-    inst _regfile: RF (
+    inst RF_: RF (
         clk,
         rst,
         we: rfwe,
@@ -53,7 +53,7 @@ module Top (
 
     var rfwe_alsu: logic;
     var wdata_alsu: bit<32>;
-    inst _alsu: ALSU (
+    inst ALSU_: ALSU (
         opcode,
         imm12,
         rdata1,
@@ -64,7 +64,7 @@ module Top (
 
     var rfwe_uiu: logic;
     var wdata_uiu: bit<32>;
-    inst _uiu: UIU (
+    inst UIU_: UIU (
         opcode,
         funct3,
         rs1,
@@ -76,7 +76,7 @@ module Top (
 
     var rfwe_lsu: logic;
     var wdata_lsu: bit<32>;
-    inst _lsu: LSU (
+    inst LSU_: LSU (
         clk,
         rst,
         opcode,
@@ -92,7 +92,7 @@ module Top (
     var wdata_bjlu: bit<32>;
     var pcwe_bjlu: logic;
     var pcwdata_bjlu: bit<32>;
-    inst _bjlu: BJLU (
+    inst BJLU_: BJLU (
         opcode,
         funct3,
         rd,
@@ -116,7 +116,7 @@ module Top (
     #[ifdef(TRACE)]
     initial {
         $display("Tracing enabled...");
-        $dumpfile("dump.fst");
+        $dumpfile("__dump__.fst");
         $dumpvars();
     }
 }
