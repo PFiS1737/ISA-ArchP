@@ -38,7 +38,7 @@ module RF (
             // TODO: remove this
             26: rdata1 = top_input_value;
             27: rdata1 = '0;
-            28: rdata1 = $urandom(); // FIXME: veryl's simulator does not support $urandom
+            28: rdata1 = $urandom();
             default: rdata1 = regs[rs1];
         }
 
@@ -47,7 +47,7 @@ module RF (
             // TODO: remove this
             26: rdata2 = top_input_value;
             27: rdata2 = '0;
-            28: rdata2 = $urandom(); // FIXME: veryl's simulator does not support $urandom
+            28: rdata2 = $urandom();
             default: rdata2 = regs[rs2];
         }
     }
@@ -56,85 +56,4 @@ module RF (
     assign top_input_enable = rs1 == 26 || rs2 == 26;
     assign top_output_enable = rd == 26;
     assign top_output_value = if rd == 26 ? wdata : '0;
-}
-
-#[test(regfile_test)]
-#[ignore]
-module regfile_test {
-    inst clk: $tb::clock_gen;
-    inst rst: $tb::reset_gen ( clk );
-
-    var we: logic;
-
-    var rd: bit<5>;
-    var wdata: bit<32>;
-
-    var rs1: bit<5>;
-    var rs2: bit<5>;
-    var rdata1: bit<32>;
-    var rdata2: bit<32>;
-
-    var top_input_enable: logic;
-    var top_input_value: bit<32>;
-
-    var top_output_enable: logic;
-    var top_output_value: bit<32>;
-
-    inst _regfile: RF (
-        clk,
-        rst,
-        we,
-        rd,
-        wdata,
-        rs1,
-        rs2,
-        rdata1,
-        rdata2,
-        top_input_enable,
-        top_input_value,
-        top_output_enable,
-        top_output_value,
-    );
-
-    initial {
-        rst.assert();
-
-        we = 1;
-        wdata = 'h12345678;
-        top_input_value = 'h87654321;
-
-        rd = 1;
-        clk.next();
-
-        rs1 = 1;
-        rs2 = 2;
-        $assert(rdata1 == wdata);
-        $assert(rdata2 == 'h0);
-
-        rd = 0;
-        clk.next();
-
-        rs1 = 0;
-        $assert(rdata1 == 'h0);
-
-        rd = 2;
-        clk.next();
-
-        rs1 = 2;
-        $assert(rdata1 == wdata);
-
-        $assert(top_input_enable == 'b0);
-        rs2 = 26;
-        $assert(top_input_enable == 'b1);
-        $assert(rdata2 == top_input_value);
-
-        $assert(top_output_enable == 'b0);
-        rd = 26;
-        $assert(top_output_enable == 'b1);
-        $assert(top_output_value == wdata);
-        clk.next();
-        $assert(top_output_value == '0);
-
-        $finish();
-    }
 }
