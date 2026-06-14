@@ -1,0 +1,76 @@
+/// Call Stack Unit
+module CSU (
+    clk: input clock,
+    rst: input reset,
+
+    opcode: input bit<7>,
+
+    funct3: input bit<3>,
+    rs1: input bit<5>,
+    imm12: input signed bit<12>,
+
+    rdata1: input bit<32>,
+    pc: input bit<32>,
+
+    rfwe: output logic,
+    wdata: output bit<32>,
+    pcwe: output logic,
+    pcwdata: output bit<32>,
+) {
+    let en: logic = inside opcode {7'b1010_000..=7'b1010_111};
+
+    let imm_call: signed bit<32> = {
+        funct3[msb] repeat 11, funct3, rs1, imm12, 1'b0
+    };
+    let pc_call: bit<32> = pc + imm_call;
+
+    let imm_callr: signed bit<32> = {imm12[msb] repeat 20, imm12};
+    let pc_callr: bit<32> = (rdata1 + imm_callr) & ~1;
+
+    always_ff {
+        if_reset {
+            $sv::call_stack_reset();
+            $sv::data_stack_reset();
+        } else if en {
+            #[cond_type(unique)]
+            case opcode[2:0] {
+                'b000 /* POP */: $sv::data_stack_pop();
+                'b001 /* PUSH */: $sv::data_stack_push(rdata1);
+                'b100 /* RET */: $sv::call_stack_pop();
+                'b101 /* CALL */: $sv::call_stack_push(pc + 4);
+                'b110 /* CALLR */: $sv::call_stack_push(pc + 4);
+                default: {}
+            }
+        }
+    }
+
+    always_comb {
+        rfwe = 0;
+        wdata = '0;
+        pcwe = 0;
+        pcwdata = '0;
+
+        if en {
+            #[cond_type(unique)]
+            case opcode[2:0] {
+                'b000 /* POP */: {
+                    rfwe = 1;
+                    wdata = $sv::data_stack_peek();
+                }
+                'b100 /* RET */: {
+                    pcwe = 1;
+                    pcwdata = $sv::call_stack_peek();
+                }
+                'b101 /* CALL */: {
+                    pcwe = 1;
+                    pcwdata = pc_call;
+                }
+                'b110 /* CALLR */: {
+                    pcwe = 1;
+                    pcwdata = pc_callr;
+                }
+                default: {}
+            }
+        }
+    }
+}

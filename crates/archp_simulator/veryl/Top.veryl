@@ -107,11 +107,30 @@ module Top (
         pcwdata: pcwdata_bjlu,
     );
 
-    assign rfwe = rfwe_alsu | rfwe_uiu | rfwe_bjlu | rfwe_lsu;
-    assign wdata = wdata_alsu | wdata_uiu | wdata_bjlu | wdata_lsu;
+    var rfwe_csu: logic;
+    var wdata_csu: bit<32>;
+    var pcwe_csu: logic;
+    var pcwdata_csu: bit<32>;
+    inst CSU_: CSU (
+        clk,
+        rst,
+        opcode,
+        funct3,
+        rs1,
+        imm12,
+        rdata1,
+        pc,
+        rfwe: rfwe_csu,
+        wdata: wdata_csu,
+        pcwe: pcwe_csu,
+        pcwdata: pcwdata_csu,
+    );
 
-    assign pcwe = pcwe_bjlu;
-    assign pcwdata = pcwdata_bjlu;
+    assign rfwe = rfwe_alsu | rfwe_uiu | rfwe_bjlu | rfwe_lsu | rfwe_csu;
+    assign wdata = wdata_alsu | wdata_uiu | wdata_bjlu | wdata_lsu | wdata_csu;
+
+    assign pcwe = pcwe_bjlu | pcwe_csu;
+    assign pcwdata = pcwdata_bjlu | pcwdata_csu;
 
     #[ifdef(TRACE)]
     initial {
