@@ -1,7 +1,6 @@
 /// Arithmetic + Logical + Shift + Rotate + Set Unit
 module ALSU (
     opcode: input bit<7>,
-
     imm12: input signed bit<12>,
     rdata1: input bit<32>,
     rdata2: input bit<32>,

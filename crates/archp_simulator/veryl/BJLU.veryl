@@ -1,7 +1,6 @@
 /// Branch + Jump + Link Unit
 module BJLU (
     opcode: input bit<7>,
-
     funct3: input bit<3>,
     rd: input bit<5>,
     rs1: input bit<5>,

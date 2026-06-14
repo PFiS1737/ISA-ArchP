@@ -1,7 +1,6 @@
 /// Upper Immediate Unit
 module UIU (
     opcode: input bit<7>,
-
     funct3: input bit<3>,
     rs1: input bit<5>,
     imm12: input signed bit<12>,

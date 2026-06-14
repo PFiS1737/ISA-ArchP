@@ -4,9 +4,9 @@ module LSU (
     rst: input reset,
 
     opcode: input bit<7>,
-
     rd: input bit<5>,
     imm12: input signed bit<12>,
+
     rdata1: input bit<32>,
     rdata2: input bit<32>,
 
