@@ -11,6 +11,7 @@ module BJLU (
     pc: input bit<32>,
 
     rfwe: output logic,
+    rfoe: output logic<2>,
     wdata: output bit<32>,
     pcwe: output logic,
     pcwdata: output bit<32>,
@@ -32,43 +33,51 @@ module BJLU (
     var npc: bit<32>;
 
     always_comb {
-        #[cond_type(unique)]
-        case opcode[2:0] {
-            'b000 /* JAL */: {
-                cond = 1;
-                npc = pc_jal;
-            }
-            'b001 /* BEQ */: {
-                cond = rdata1 == rdata2;
-                npc = pc_branch;
-            }
-            'b010 /* BNE */: {
-                cond = rdata1 != rdata2;
-                npc = pc_branch;
-            }
-            'b011 /* BLT */: {
-                cond = $signed(rdata1) <: $signed(rdata2);
-                npc = pc_branch;
-            }
-            'b100 /* BGE */: {
-                cond = $signed(rdata1) >= $signed(rdata2);
-                npc = pc_branch;
-            }
-            'b101 /* BLTU */: {
-                cond = rdata1 <: rdata2;
-                npc = pc_branch;
-            }
-            'b110 /* BGEU */: {
-                cond = rdata1 >= rdata2;
-                npc = pc_branch;
-            }
-            'b111 /* JALR */: {
-                cond = 1;
-                npc = pc_jalr;
-            }
-            default: {
-                cond = 0;
-                npc = '0;
+        cond = 0;
+        npc = '0;
+        rfoe = 'b00;
+
+        if en {
+            case opcode[2:0] {
+                'b000 /* JAL */: {
+                    cond = 1;
+                    npc = pc_jal;
+                }
+                'b001 /* BEQ */: {
+                    cond = rdata1 == rdata2;
+                    npc = pc_branch;
+                    rfoe = 'b11;
+                }
+                'b010 /* BNE */: {
+                    cond = rdata1 != rdata2;
+                    npc = pc_branch;
+                    rfoe = 'b11;
+                }
+                'b011 /* BLT */: {
+                    cond = $signed(rdata1) <: $signed(rdata2);
+                    npc = pc_branch;
+                    rfoe = 'b11;
+                }
+                'b100 /* BGE */: {
+                    cond = $signed(rdata1) >= $signed(rdata2);
+                    npc = pc_branch;
+                    rfoe = 'b11;
+                }
+                'b101 /* BLTU */: {
+                    cond = rdata1 <: rdata2;
+                    npc = pc_branch;
+                    rfoe = 'b11;
+                }
+                'b110 /* BGEU */: {
+                    cond = rdata1 >= rdata2;
+                    npc = pc_branch;
+                    rfoe = 'b11;
+                }
+                'b111 /* JALR */: {
+                    cond = 1;
+                    npc = pc_jalr;
+                    rfoe = 'b01;
+                }
             }
         }
     }

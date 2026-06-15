@@ -3,6 +3,8 @@ module RF (
     rst: input reset,
 
     we: input logic,
+    // FIXME: Signal unoptimizable: Circular combinational logic: 'Top.RF_.oe'
+    oe: input logic<2> /* verilator lint_off UNOPTFLAT */,
 
     rd: input bit<5>,
     wdata: input bit<32>,
@@ -33,27 +35,33 @@ module RF (
     }
 
     always_comb {
-        case rs1 {
-            0: rdata1 = '0;
-            // TODO: remove this
-            26: rdata1 = top_input_value;
-            27: rdata1 = '0;
-            28: rdata1 = $urandom();
-            default: rdata1 = regs[rs1];
-        }
+        rdata1 = '0;
+        rdata2 = '0;
 
-        case rs2 {
-            0: rdata2 = '0;
-            // TODO: remove this
-            26: rdata2 = top_input_value;
-            27: rdata2 = '0;
-            28: rdata2 = $urandom();
-            default: rdata2 = regs[rs2];
+        if oe[0] {
+            case rs1 {
+                0: rdata1 = '0;
+                // TODO: remove this
+                26: rdata1 = top_input_value;
+                27: rdata1 = '0;
+                28: rdata1 = $urandom();
+                default: rdata1 = regs[rs1];
+            }
+        }
+        if oe[1] {
+            case rs2 {
+                0: rdata2 = '0;
+                // TODO: remove this
+                26: rdata2 = top_input_value;
+                27: rdata2 = '0;
+                28: rdata2 = $urandom();
+                default: rdata2 = regs[rs2];
+            }
         }
     }
 
     // TODO: remove this
-    assign top_input_enable = rs1 == 26 || rs2 == 26;
-    assign top_output_enable = rd == 26;
+    assign top_input_enable = (oe[0] && rs1 == 26) || (oe[1] && rs2 == 26);
+    assign top_output_enable = we && rd == 26;
     assign top_output_value = if rd == 26 ? wdata : '0;
 }

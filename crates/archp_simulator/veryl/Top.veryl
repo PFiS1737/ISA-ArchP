@@ -29,6 +29,7 @@ module Top (
     let imm12: signed bit<12> = instr[11:0];
 
     var rfwe: logic;
+    var rfoe: logic<2>;
     var wdata: bit<32>;
 
     var rdata1: bit<32>;
@@ -38,6 +39,7 @@ module Top (
         clk,
         rst,
         we: rfwe,
+        oe: rfoe,
         rd,
         wdata,
         rs1,
@@ -52,6 +54,7 @@ module Top (
     );
 
     var rfwe_alsu: logic;
+    var rfoe_alsu: logic<2>;
     var wdata_alsu: bit<32>;
     inst ALSU_: ALSU (
         opcode,
@@ -59,6 +62,7 @@ module Top (
         rdata1,
         rdata2,
         rfwe: rfwe_alsu,
+        rfoe: rfoe_alsu,
         wdata: wdata_alsu,
     );
 
@@ -75,6 +79,7 @@ module Top (
     );
 
     var rfwe_lsu: logic;
+    var rfoe_lsu: logic<2>;
     var wdata_lsu: bit<32>;
     inst LSU_: LSU (
         clk,
@@ -85,10 +90,12 @@ module Top (
         rdata1,
         rdata2,
         rfwe: rfwe_lsu,
+        rfoe: rfoe_lsu,
         wdata: wdata_lsu,
     );
 
     var rfwe_bjlu: logic;
+    var rfoe_bjlu: logic<2>;
     var wdata_bjlu: bit<32>;
     var pcwe_bjlu: logic;
     var pcwdata_bjlu: bit<32>;
@@ -102,12 +109,14 @@ module Top (
         rdata2,
         pc,
         rfwe: rfwe_bjlu,
+        rfoe: rfoe_bjlu,
         wdata: wdata_bjlu,
         pcwe: pcwe_bjlu,
         pcwdata: pcwdata_bjlu,
     );
 
     var rfwe_csu: logic;
+    var rfoe_csu: logic<2>;
     var wdata_csu: bit<32>;
     var pcwe_csu: logic;
     var pcwdata_csu: bit<32>;
@@ -121,12 +130,14 @@ module Top (
         rdata1,
         pc,
         rfwe: rfwe_csu,
+        rfoe: rfoe_csu,
         wdata: wdata_csu,
         pcwe: pcwe_csu,
         pcwdata: pcwdata_csu,
     );
 
     assign rfwe = rfwe_alsu | rfwe_uiu | rfwe_bjlu | rfwe_lsu | rfwe_csu;
+    assign rfoe = rfoe_alsu | rfoe_bjlu | rfoe_lsu | rfoe_csu;
     assign wdata = wdata_alsu | wdata_uiu | wdata_bjlu | wdata_lsu | wdata_csu;
 
     assign pcwe = pcwe_bjlu | pcwe_csu;
