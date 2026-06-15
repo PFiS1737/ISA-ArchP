@@ -17,7 +17,9 @@ public:
   void set(uint32_t x, uint32_t y, uint32_t color);
 
   void commit();
-  bool exit();
+  bool handle_event();
+
+  SDL_Scancode scancode;
 
 private:
   uint32_t W, H, SCALE;

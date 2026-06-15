@@ -43,7 +43,14 @@ module RF (
                 0: rdata1 = '0;
                 // TODO: remove this
                 26: rdata1 = top_input_value;
-                27: rdata1 = '0;
+                // FIXME: You can only read kd in this way, now
+                // read_key:
+                //   mv a0 kb
+                //   beqz a0 read_key
+                //   wait_release:
+                //     bnez kb wait_release
+                //   ret
+                27: rdata1 = $sv::keyboard_get();
                 28: rdata1 = $urandom();
                 default: rdata1 = regs[rs1];
             }
@@ -53,7 +60,7 @@ module RF (
                 0: rdata2 = '0;
                 // TODO: remove this
                 26: rdata2 = top_input_value;
-                27: rdata2 = '0;
+                27: rdata2 = $sv::keyboard_get();
                 28: rdata2 = $urandom();
                 default: rdata2 = regs[rs2];
             }

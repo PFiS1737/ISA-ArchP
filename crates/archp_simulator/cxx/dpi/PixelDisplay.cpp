@@ -61,14 +61,30 @@ void PixelDisplay::commit() {
   SDL_RenderPresent(ren);
 }
 
-bool PixelDisplay::exit() {
+bool PixelDisplay::handle_event() {
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
-    if (e.type == SDL_EVENT_QUIT || e.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
-      return true;
+    switch (e.type) {
+      case SDL_EVENT_QUIT: {
+        return false;
+      }
+      case SDL_EVENT_WINDOW_CLOSE_REQUESTED: {
+        return false;
+      }
+      case SDL_EVENT_KEY_DOWN: {
+        if (e.key.scancode == SDL_SCANCODE_Q) {
+          return false;
+        }
+        scancode = e.key.scancode;
+        break;
+      }
+      case SDL_EVENT_KEY_UP: {
+        scancode = SDL_SCANCODE_UNKNOWN;
+        break;
+      }
     }
   }
-  return false;
+  return true;
 }
 
 PixelDisplay pd;
@@ -80,4 +96,8 @@ void pixel_display_reset() {
 void pixel_display_set(unsigned int x, unsigned int y, unsigned int color) {
   pd.set(x, y, color);
   pd.commit();
+}
+
+unsigned int keyboard_get() {
+  return pd.scancode;
 }
