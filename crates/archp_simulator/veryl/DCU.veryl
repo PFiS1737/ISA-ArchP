@@ -22,6 +22,9 @@ module DCU (
             $sv::pixel_display_reset();
         } else if opcode == 'b1101_000 /* COL */ {
             color = {8'b0, funct3[1:0], rd, rs1, imm12};
+
+            // INFO: See https://verilator.org/warn/UNUSEDSIGNAL
+            let _unused_ok: logic = 1'b0 && &{1'b0, funct3[2], 1'b0};
         } else if opcode == 'b1101_001 /* SPX */ {
             $sv::pixel_display_set(rdata1, rdata2, color);
         }

@@ -31,6 +31,9 @@ module ALSU (
     var tmp: bit<64>;
     var result: bit<32>;
 
+    // INFO: See https://verilator.org/warn/UNUSEDSIGNAL
+    let _unused_ok: logic = 1'b0 && &{1'b0, tmp[31:0], 1'b0};
+
     always_comb {
         tmp = '0;
 
