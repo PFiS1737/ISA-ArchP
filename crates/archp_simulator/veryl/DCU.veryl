@@ -1,0 +1,31 @@
+/// Display Control Unit
+module DCU (
+    clk: input clock,
+    rst: input reset,
+
+    opcode: input bit<7>,
+    funct3: input bit<3>,
+    rd: input bit<5>,
+    rs1: input bit<5>,
+    imm12: input signed bit<12>,
+
+    rdata1: input bit<32>,
+    rdata2: input bit<32>,
+
+    rfoe: output logic<2>,
+) {
+    var color: bit<32>;
+
+    always_ff {
+        if_reset {
+            color = '0;
+            $sv::pixel_display_reset();
+        } else if opcode == 'b1101_000 /* COL */ {
+            color = {8'b0, funct3[1:0], rd, rs1, imm12};
+        } else if opcode == 'b1101_001 /* SPX */ {
+            $sv::pixel_display_set(rdata1, rdata2, color);
+        }
+    }
+
+    assign rfoe = if opcode == 'b1101_001 ? 'b11 : 'b00;
+}

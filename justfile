@@ -17,6 +17,7 @@ build *args="":
 
 alias b := build
 
+[no-exit-message]
 run *args="":
   @xmake run --workdir=. Vtop {{args}}
 
