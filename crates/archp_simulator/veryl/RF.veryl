@@ -13,12 +13,6 @@ module RF (
     rs2: input bit<5>,
     rdata1: output bit<32>,
     rdata2: output bit<32>,
-
-    top_input_enable: output logic,
-    top_input_value: input bit<32>,
-
-    top_output_enable: output logic,
-    top_output_value: output bit<32>,
 ) {
     var regs: bit<32> [32];
 
@@ -30,6 +24,10 @@ module RF (
         } else {
             if we && rd != 0 {
                 regs[rd] = wdata;
+
+                if rd == 26 {
+                    $sv::simple_output(wdata);
+                }
             }
         }
     }
@@ -42,7 +40,7 @@ module RF (
             case rs1 {
                 0: rdata1 = '0;
                 // TODO: remove this
-                26: rdata1 = top_input_value;
+                26: rdata1 = $sv::simple_input();
                 // FIXME: You can only read kd in this way, now
                 // read_key:
                 //   mv a0 kb
@@ -59,16 +57,11 @@ module RF (
             case rs2 {
                 0: rdata2 = '0;
                 // TODO: remove this
-                26: rdata2 = top_input_value;
+                26: rdata2 = $sv::simple_input();
                 27: rdata2 = $sv::keyboard_get();
                 28: rdata2 = $urandom();
                 default: rdata2 = regs[rs2];
             }
         }
     }
-
-    // TODO: remove this
-    assign top_input_enable = (oe[0] && rs1 == 26) || (oe[1] && rs2 == 26);
-    assign top_output_enable = we && rd == 26;
-    assign top_output_value = if rd == 26 ? wdata : '0;
 }
