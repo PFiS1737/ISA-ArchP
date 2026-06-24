@@ -13,7 +13,6 @@ module CSU (
     pc: input bit<32>,
 
     rfwe: output logic,
-    rfoe: output logic<2>,
     wdata: output bit<32>,
     pcwe: output logic,
     pcwdata: output bit<32>,
@@ -47,7 +46,6 @@ module CSU (
 
     always_comb {
         rfwe = 0;
-        rfoe = 0;
         wdata = '0;
         pcwe = 0;
         pcwdata = '0;
@@ -59,9 +57,6 @@ module CSU (
                     rfwe = 1;
                     wdata = $sv::data_stack_peek();
                 }
-                'b001 /* PUSH */: {
-                    rfoe = 'b01;
-                }
                 'b100 /* RET */: {
                     pcwe = 1;
                     pcwdata = $sv::call_stack_peek();
@@ -71,7 +66,6 @@ module CSU (
                     pcwdata = pc_call;
                 }
                 'b110 /* CALLR */: {
-                    rfoe = 'b01;
                     pcwe = 1;
                     pcwdata = pc_callr;
                 }

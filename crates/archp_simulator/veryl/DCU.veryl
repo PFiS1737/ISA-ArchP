@@ -11,8 +11,6 @@ module DCU (
 
     rdata1: input bit<32>,
     rdata2: input bit<32>,
-
-    rfoe: output logic<2>,
 ) {
     var color: bit<32>;
 
@@ -29,6 +27,4 @@ module DCU (
             $sv::pixel_display_set(rdata1, rdata2, color);
         }
     }
-
-    assign rfoe = if opcode == 'b1101_001 ? 'b11 : 'b00;
 }

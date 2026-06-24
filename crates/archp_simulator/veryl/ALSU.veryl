@@ -6,7 +6,6 @@ module ALSU (
     rdata2: input bit<32>,
 
     rfwe: output logic,
-    rfoe: output logic<2>,
     wdata: output bit<32>,
 ) {
     let en: logic = inside opcode {7'b0000_000..=7'b0111_111};
@@ -90,6 +89,5 @@ module ALSU (
     }
 
     assign rfwe = en;
-    assign rfoe = if en ? 'b11 : 'b00;
     assign wdata = if en ? result : '0;
 }
