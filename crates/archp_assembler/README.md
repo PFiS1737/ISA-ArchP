@@ -17,13 +17,9 @@ If you require detailed information on the encoding formats, please refer to [is
 
 ### Registers
 
-- 24 general-purpose registers: `r1` to `r24`.
-- special registers:
-  - `r0`: always contains 0, you can write to it but it has no effect.
-  - `io`: the level input/output (only in level mode).
-  - `kb`: the keyboard input (only in sandbox mode, read-only).
-  - `rng`: the random number generator (read-only).
-  - `tmp`: used by the assembler for expanding macro-instructions.
+- 31 general-purpose registers: `r0` to `r30`.
+- `r0`: always contains 0, you can write to it but it has no effect.
+- `r31`: used by the assembler for expanding macro-instructions.
 
 ### Instructions
 
@@ -173,9 +169,13 @@ In this section:
 - note:
   - You may know how to use this instruction if you are familiar with the RISC-V architecture.
 
-#### Display (only in sandbox mode)
+#### Misc
 
 - `col imm24u`: set the display color to the 24-bit unsigned immediate value `imm24u` (format: `0xRRGGBB`).
 - `spx rs1 rs2`: set the `(rs1, rs2)` position to the color specified by the last `col` instruction.
 - `seg rs1`: display the value of `rs1` on a 7-segment display.
 - `segi imm12`: display the immediate value on a 7-segment display.
+- `in rd`: read a 32-bit value to `rd`.
+- `out rs1`: write the 32-bit value of `rs1` to the output.
+- `kbget rd`: read a key press to `rd`. (TODO:  define a key code specification)
+- `rand rd`: generate a random 32-bit number and write it to `rd`.

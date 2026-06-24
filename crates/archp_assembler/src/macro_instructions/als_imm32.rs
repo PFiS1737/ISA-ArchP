@@ -30,8 +30,8 @@ const F: ExpandFn = |ctx, _, name, ops| {
         && imm.as_i12().is_err()
     {
         Some(vec![
-            ("li", op_values!["tmp", ops[2]]),
-            (inst, op_values![ops[0], ops[1], "tmp"]),
+            ("li", op_values!["r31", ops[2]]),
+            (inst, op_values![ops[0], ops[1], "r31"]),
         ])
     } else {
         None
@@ -53,15 +53,15 @@ mod tests {
         assert_snapshot!(addi(&["123", "r1", "456"]), @"");
 
         assert_snapshot!(addi(&["r1", "r2", "0x123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "0x1234"]), @"lui tmp 1; addi tmp tmp 0x234; add r1 r2 tmp");
-        assert_snapshot!(addi(&["r1", "r2", "0x12345678"]), @"lui tmp 0x12345; addi tmp tmp 0x678; add r1 r2 tmp");
+        assert_snapshot!(addi(&["r1", "r2", "0x1234"]), @"lui r31 1; addi r31 r31 0x234; add r1 r2 r31");
+        assert_snapshot!(addi(&["r1", "r2", "0x12345678"]), @"lui r31 0x12345; addi r31 r31 0x678; add r1 r2 r31");
 
         assert_snapshot!(addi(&["r1", "r2", "123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "3000"]), @"lui tmp 1; addi tmp tmp 0xFFFFFBB8; add r1 r2 tmp");
+        assert_snapshot!(addi(&["r1", "r2", "3000"]), @"lui r31 1; addi r31 r31 0xFFFFFBB8; add r1 r2 r31");
         assert_snapshot!(addi(&["r1", "r2", "-123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "-3000"]), @"lui tmp 0xFFFFF; addi tmp tmp 0x448; add r1 r2 tmp");
+        assert_snapshot!(addi(&["r1", "r2", "-3000"]), @"lui r31 0xFFFFF; addi r31 r31 0x448; add r1 r2 r31");
 
         assert_snapshot!(addi(&["r1", "r2", "0x123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "0x1234"]), @"lui tmp 1; addi tmp tmp 0x234; add r1 r2 tmp");
+        assert_snapshot!(addi(&["r1", "r2", "0x1234"]), @"lui r31 1; addi r31 r31 0x234; add r1 r2 r31");
     }
 }

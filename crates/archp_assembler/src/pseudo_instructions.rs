@@ -18,7 +18,7 @@ use once_cell::sync::Lazy;
 use crate::{
     assembler::{Context, Line},
     operand::{OperandType, OperandValue},
-    parser::{parse_address, parse_imm, parse_reg_d, parse_reg_s},
+    parser::{parse_address, parse_imm, parse_reg},
 };
 
 type ExpandRet<'a> = Line<'a>;
@@ -82,11 +82,8 @@ pub trait PseudoInstruction: Send + Sync {
 
         for (i, operand) in operands.iter().enumerate() {
             match self.operand_types()[i] {
-                OperandType::RegD => {
-                    parse_reg_d(ctx, operand)?;
-                },
-                OperandType::RegS => {
-                    parse_reg_s(ctx, operand)?;
+                OperandType::RegD | OperandType::RegS => {
+                    parse_reg(ctx, operand)?;
                 },
                 OperandType::Imm(bits, signed) => {
                     parse_imm(ctx, operand)?.as_field(bits, signed)?;

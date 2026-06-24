@@ -34,3 +34,39 @@ instruction! {
         operands_format: [ _, _, Imm(12, i) ],
     }
 }
+
+instruction! {
+    pub In {
+        name: "in",
+        opcode: 0b_1110_000,
+        itype: I,
+        operands_format: [ RegD, _, _ ],
+    }
+}
+
+instruction! {
+    pub Out {
+        name: "out",
+        opcode: 0b_1110_001,
+        itype: I,
+        operands_format: [ _, RegS, _ ],
+    }
+}
+
+instruction! {
+    pub Kbget {
+        name: "kbget",
+        opcode: 0b_1110_010,
+        itype: I,
+        operands_format: [ RegD, _, _ ],
+    }
+}
+
+instruction! {
+    pub Rand {
+        name: "rand",
+        opcode: 0b_1110_011,
+        itype: I,
+        operands_format: [ RegD, _, _ ],
+    }
+}

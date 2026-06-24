@@ -1,17 +1,18 @@
 ---
-source: tests/snaptest.rs
-input_file: examples/trapping-rain-water.asm
+source: crates/archp_assembler_cli/tests/snaptest.rs
+input_file: crates/archp_assembler/examples/trapping-rain-water.asm
 ---
 success: true
 exit_code: 0
 ----- stdout -----
 0x400C0010 # addi t0 r0 16       [li t0 16]           <label: main>
-0x8E00701A # sb t1 io 0          [sb io t1]           <label: input>
+0xE0100000 # in t3                                    <label: input>
+0x8E007008 # sb t1 t3 0          [sb t3 t1]
 0x400E7001 # addi t1 t1 1        [inc t1]
 0x420C6001 # subi t0 t0 1        [dec t0]
-0x963E0F46 # blt r0 t0 input     [bgtz t0 input]
+0x963E0F06 # blt r0 t0 input     [bgtz t0 input]
 0xAA000004 # call solve
-0x40348000 # addi io a0 0        [mv io a0]
+0xE2009000 # out a0
 0x40020000 # addi l r0 0         [li l 0]             <label: solve>
 0x4004000F # addi r r0 15        [li r 15]
 0x88061000 # lbu lmax l 0        [lbu lmax l]
@@ -20,25 +21,25 @@ exit_code: 0
 0x98003284 # bge lmax rmax else
 0x40021001 # addi l l 1          [inc l]
 0x880C1000 # lbu t0 l 0          [lbu t0 l]
-0x40106000 # addi a0 t0 0        [mv a0 t0]
-0x40123000 # addi a1 lmax 0      [mv a1 lmax]
+0x40126000 # addi a0 t0 0        [mv a0 t0]
+0x40143000 # addi a1 lmax 0      [mv a1 lmax]
 0xAA000020 # call max
-0x40068000 # addi lmax a0 0      [mv lmax a0]
+0x40069000 # addi lmax a0 0      [mv lmax a0]
 0x020E3006 # sub t1 lmax t0
 0x000A5007 # add water water t1
 0x90000012 # jal r0 endif        [j endif]
 0x42042001 # subi r r 1          [dec r]              <label: else>
 0x880C2000 # lbu t0 r 0          [lbu t0 r]
-0x40106000 # addi a0 t0 0        [mv a0 t0]
-0x40124000 # addi a1 rmax 0      [mv a1 rmax]
+0x40126000 # addi a0 t0 0        [mv a0 t0]
+0x40144000 # addi a1 rmax 0      [mv a1 rmax]
 0xAA00000E # call max
-0x40088000 # addi rmax a0 0      [mv rmax a0]
+0x40089000 # addi rmax a0 0      [mv rmax a0]
 0x020E4006 # sub t1 rmax t0
 0x000A5007 # add water water t1
 0x91C1FFDA # jal r0 while        [j while]            <label: endif>
-0x40105000 # addi a0 water 0     [mv a0 water]        <label: endwhile>
+0x40125000 # addi a0 water 0     [mv a0 water]        <label: endwhile>
 0xA8000000 # ret
-0x96009088 # blt a1 a0 max_ret   [bgt a0 a1 max_ret]  <label: max>
-0x40109000 # addi a0 a1 0        [mv a0 a1]
+0x9600A089 # blt a1 a0 max_ret   [bgt a0 a1 max_ret]  <label: max>
+0x4012A000 # addi a0 a1 0        [mv a0 a1]
 0xA8000000 # ret                                      <label: max_ret>
 ----- stderr -----

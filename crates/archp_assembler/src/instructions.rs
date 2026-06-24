@@ -1,9 +1,9 @@
 mod arithmetic;
 mod branch;
-mod display;
 mod jump_and_link;
 mod load_store;
 mod logic;
+mod misc;
 mod set;
 mod shift;
 mod stack_call_return;
@@ -17,7 +17,7 @@ use once_cell::sync::Lazy;
 use crate::{
     assembler::Context,
     operand::{OperandType, OperandValue, op_fmt},
-    parser::{parse_address, parse_imm, parse_reg_d, parse_reg_s},
+    parser::{parse_address, parse_imm, parse_reg},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -77,8 +77,7 @@ pub trait Instruction: Send + Sync {
                     op_idx += 1;
 
                     let val = match *op_ty {
-                        OperandType::RegD => parse_reg_d(ctx, op)?,
-                        OperandType::RegS => parse_reg_s(ctx, op)?,
+                        OperandType::RegD | OperandType::RegS => parse_reg(ctx, op)?,
                         OperandType::Imm(bits, signed) => {
                             parse_imm(ctx, op)?.as_field(bits, signed)?
                         },

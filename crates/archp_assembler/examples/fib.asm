@@ -12,7 +12,7 @@ li sp 4096
 main:
   li a0 10
   jal ra fib
-  mv io a0
+  out a0
 
 fib:
   bgt a0 2 .L0

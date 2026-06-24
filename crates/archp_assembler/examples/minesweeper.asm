@@ -122,8 +122,8 @@ init_mines:
   clr i
 
   init_mines_loop:
-    mv t1 rng
-    mv t2 rng
+    rand t1
+    rand t2
     rem x t1 GRID_COLS
     rem y t2 GRID_ROWS
 
@@ -662,7 +662,7 @@ draw_num5:
 
 
 read_key:
-  mv key_code kb
+  kbget key_code
   beqz key_code read_key
   ret
 

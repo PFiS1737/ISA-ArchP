@@ -133,7 +133,7 @@ read_digit:
     ret
 
 read_key:
-  mv a0 kb
+  kbget a0
 
   # a0 not in [KEY_1, KEY_0] or not KEY_ENTER
   blt a0 KEY_1 read_key
@@ -143,7 +143,7 @@ read_key:
   .Lread_key_end: ret
 
 wait:
-  mv t0 kb
+  kbget t0
   beqz t0 wait
   ret
 

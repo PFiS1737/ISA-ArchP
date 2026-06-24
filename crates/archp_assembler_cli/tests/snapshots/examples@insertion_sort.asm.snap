@@ -1,6 +1,6 @@
 ---
-source: tests/snaptest.rs
-input_file: examples/insertion_sort.asm
+source: crates/archp_assembler_cli/tests/snaptest.rs
+input_file: crates/archp_assembler/examples/insertion_sort.asm
 ---
 success: true
 exit_code: 0
@@ -40,10 +40,10 @@ exit_code: 0
 0x40021004 # addi sp sp 4                               [add sp sp 4]
 0xA8000000 # ret
 0xAA00001E # call read_key                                                                         <label: read_digit>
-0x403E0035 # addi tmp r0 53                             [beq a0 KEY_ENTER .Lread_digit_enter]
-0x920022DF # beq a0 tmp .Lread_digit_enter              [beq a0 KEY_ENTER .Lread_digit_enter]
-0x403E0017 # addi tmp r0 23                             [beq a0 KEY_0 .Lread_digit_is_zero]
-0x9200211F # beq a0 tmp .Lread_digit_is_zero            [beq a0 KEY_0 .Lread_digit_is_zero]
+0x403E0035 # addi r31 r0 53                             [beq a0 KEY_ENTER .Lread_digit_enter]
+0x920022DF # beq a0 r31 .Lread_digit_enter              [beq a0 KEY_ENTER .Lread_digit_enter]
+0x403E0017 # addi r31 r0 23                             [beq a0 KEY_0 .Lread_digit_is_zero]
+0x9200211F # beq a0 r31 .Lread_digit_is_zero            [beq a0 KEY_0 .Lread_digit_is_zero]
 0x4210200E # subi t0 a0 14                              [sub t0 a0 KEY_1]
 0x40108001 # addi t0 t0 1                               [inc t0]
 0x90000004 # jal r0 .Lread_digit_acc                    [j .Lread_digit_acc]
@@ -54,15 +54,15 @@ exit_code: 0
 0xA8000000 # ret
 0x40040001 # addi a0 r0 1                               [li a0 1]                                  <label: .Lread_digit_enter>
 0xA8000000 # ret
-0x4005B000 # addi a0 kb 0                               [mv a0 kb]                                 <label: read_key>
-0x403E000E # addi tmp r0 14                             [blt a0 KEY_1 read_key]
-0x963E2F9F # blt a0 tmp read_key                        [blt a0 KEY_1 read_key]
-0x403E0035 # addi tmp r0 53                             [beq a0 KEY_ENTER .Lread_key_end]
-0x920020DF # beq a0 tmp .Lread_key_end                  [beq a0 KEY_ENTER .Lread_key_end]
-0x403E0017 # addi tmp r0 23                             [bgt a0 KEY_0 read_key]
-0x963FFE82 # blt tmp a0 read_key                        [bgt a0 KEY_0 read_key]
+0xE4040000 # kbget a0                                                                              <label: read_key>
+0x403E000E # addi r31 r0 14                             [blt a0 KEY_1 read_key]
+0x963E2F9F # blt a0 r31 read_key                        [blt a0 KEY_1 read_key]
+0x403E0035 # addi r31 r0 53                             [beq a0 KEY_ENTER .Lread_key_end]
+0x920020DF # beq a0 r31 .Lread_key_end                  [beq a0 KEY_ENTER .Lread_key_end]
+0x403E0017 # addi r31 r0 23                             [bgt a0 KEY_0 read_key]
+0x963FFE82 # blt r31 a0 read_key                        [bgt a0 KEY_0 read_key]
 0xA8000000 # ret                                                                                   <label: .Lread_key_end>
-0x4011B000 # addi t0 kb 0                               [mv t0 kb]                                 <label: wait>
+0xE4100000 # kbget t0                                                                              <label: wait>
 0x923E8FC0 # beq t0 r0 wait                             [beqz t0 wait]
 0xA8000000 # ret
 0xABC1FFB8 # call read_num_with_seg_disp                                                           <label: main>

@@ -159,8 +159,8 @@ move_snake:
 
 
 gen_food:
-  mv x rng
-  mv y rng
+  rand x
+  rand y
   rem x x SCREEN_WIDTH
   rem y y SCREEN_HEIGHT
 
@@ -280,7 +280,7 @@ queue_contains:
 
 
 read_key:
-  mv t0 kb
+  kbget t0
 
   beq t0 KEY_UP read_key_ok
   beq t0 KEY_DOWN read_key_ok

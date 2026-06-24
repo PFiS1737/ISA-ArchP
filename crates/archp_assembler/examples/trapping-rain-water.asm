@@ -9,21 +9,23 @@ const water r5
 
 const t0 r6
 const t1 r7
+const t3 r8
 
-const a0 r8
-const a1 r9
+const a0 r9
+const a1 r10
 
 main:
   li t0 16
   input:
-    sb io t1
+    in t3
+    sb t3 t1
     inc t1
     dec t0
     bgtz t0 input
 
   call solve
 
-  mv io a0
+  out a0
 
 solve:
   # l = 0

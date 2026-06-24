@@ -4,4 +4,4 @@ mod register;
 
 pub use address::parse_address;
 pub use immediate::parse_imm;
-pub use register::{parse_reg_d, parse_reg_s};
+pub use register::parse_reg;

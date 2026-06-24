@@ -1,6 +1,6 @@
 ---
-source: tests/snaptest.rs
-input_file: examples/fib.asm
+source: crates/archp_assembler_cli/tests/snaptest.rs
+input_file: crates/archp_assembler/examples/fib.asm
 ---
 success: true
 exit_code: 0
@@ -9,9 +9,9 @@ exit_code: 0
 0x400C6000 # addi sp sp 0    [li sp 4096]
 0x4008000A # addi a0 r0 10   [li a0 10]      <label: main>
 0x900A0004 # jal ra fib
-0x40344000 # addi io a0 0    [mv io a0]
-0x403E0002 # addi tmp r0 2   [bgt a0 2 .L0]  <label: fib>
-0x9601F0C4 # blt tmp a0 .L0  [bgt a0 2 .L0]
+0xE2004000 # out a0
+0x403E0002 # addi r31 r0 2   [bgt a0 2 .L0]  <label: fib>
+0x9601F0C4 # blt r31 a0 .L0  [bgt a0 2 .L0]
 0x40080001 # addi a0 r0 1    [li a0 1]
 0x9E005000 # jalr r0 ra 0    [jr ra]
 0x420C600C # subi sp sp 12   [sub sp sp 12]  <label: .L0>

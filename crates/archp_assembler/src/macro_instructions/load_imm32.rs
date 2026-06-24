@@ -36,7 +36,6 @@ mod tests {
         assert_snapshot!(li(&["r1"]), @"Error: Macro-instruction 'li' requires 2 operands, got 1");
         assert_snapshot!(li(&["r1", "r2"]), @"");
         assert_snapshot!(li(&["123", "123"]), @"");
-        assert_snapshot!(li(&["kb", "123"]), @"");
 
         assert_snapshot!(li(&["r1", "0x123"]), @"");
         assert_snapshot!(li(&["r1", "0x1234"]), @"lui r1 1; addi r1 r1 0x234");

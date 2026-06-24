@@ -154,3 +154,10 @@ xxxx xxx   xxx   xxxxx   xxxxxxxxxxxxxxxxx
 | 1101 001 | spx | R | set pixel |
 | 1101 010 | seg | R | segment display |
 | 1101 011 | segi | I | segment display immediate |
+
+| Encoding | Instruction | Type | Notes |
+|----------|------------|------|-------|
+| 1110 000 | in | I | simple input |
+| 1110 001 | out | I | simple output |
+| 1110 010 | kbget | I | keyboard get |
+| 1110 011 | rand | I | random number generator |
