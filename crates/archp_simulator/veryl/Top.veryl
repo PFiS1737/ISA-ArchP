@@ -139,7 +139,7 @@ module Top (
     #[ifdef(TRACE)]
     initial {
         $display("Tracing enabled...");
-        $dumpfile("__dump__.fst");
+        $dumpfile("__dump__.fst"); // TODO: able to set dump file path from command line
         $dumpvars();
     }
 }

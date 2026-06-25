@@ -11,15 +11,19 @@ config mode="":
   @veryl build --quiet
   @xmake config --clean --mode={{mode}}
 
+alias f := config
+
 build *args="":
   @veryl build {{args}}
   @xmake build {{args}}
 
 alias b := build
 
-[no-exit-message]
 run *args="":
-  @xmake run --workdir=. Vtop {{args}}
+  @./scripts/run {{args}}
+
+trace *args="":
+  @./scripts/trace {{args}}
 
 clean:
   @# Xmake

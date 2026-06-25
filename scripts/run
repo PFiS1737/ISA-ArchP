@@ -1,0 +1,70 @@
+#!/usr/bin/env fish
+
+source ./scripts/common.fish
+
+argparse h/help b/build t/trace s/asm -- $argv
+or return 1
+
+if set -q _flag_help
+    echo "Usage: run [options] <file>"
+    echo ""
+    echo "Options:"
+    echo "  -h, --help      Show this help message and exit"
+    echo "  -b, --build     Force a rebuild before running"
+    echo "  -t, --trace     Open the trace file after the program exits"
+    echo "  -s, --asm       <file> is an assembly file, assemble it before running"
+    return 0
+end
+
+set is_trace_mode 0
+if set -q _flag_trace
+    if test "$(xmake show --format=json | jq ".project.mode" -r)" = trace
+        set is_trace_mode 1
+    else
+        echo_warning "Warning: Trace mode is not enabled in the project, '--trace' option will be ignored."
+        echo_warning "Use 'just config trace' to enable."
+    end
+end
+
+set file $argv[1]
+if test -z "$file"
+    echo_error "Error: No file specified."
+    return 1
+end
+if not test -f "$file"
+    echo_error "Error: File '$file' does not exist."
+    return 1
+end
+
+trap "rm -rf output.bin __dump__.fst .surfer/mappings/Instr.hex" EXIT INT QUIT TERM
+
+if set -q _flag_build
+    echo_h1 "Building..."
+    just build
+    echo
+end
+
+if set -q _flag_asm
+    or string match -q "*.s" $file
+    echo_h1 "Assembling..."
+
+    cargo run -p archp_assembler_cli -- $file -o output.bin
+
+    if test $is_trace_mode -eq 1
+        mkdir -p .surfer/mappings/
+        cargo run -p archp_assembler_cli -- $file --hex -o .surfer/mappings/$file.hex 2>&1 >/dev/null
+    end
+
+    set file output.bin
+
+    echo
+end
+
+echo_h1 "Running..."
+xmake run --workdir=. Vtop +FILE=$file
+echo
+
+if test $is_trace_mode -eq 1
+    echo_h1 "Opening trace file..."
+    ./scripts/trace __dump__.fst
+end
