@@ -3,10 +3,12 @@ mod auto_imm;
 mod load_imm32;
 mod riscv_offset;
 
-use std::collections::{HashMap, VecDeque};
+use std::{
+    collections::{HashMap, VecDeque},
+    sync::LazyLock,
+};
 
 use anyhow::{Result, bail};
-use once_cell::sync::Lazy;
 
 use crate::{
     assembler::{Context, Line},
@@ -18,8 +20,8 @@ type ExpandFn = for<'a> fn(&Context<'a>, u32, &'a str, &[OperandValue<'a>]) -> E
 
 inventory::collect!(&'static dyn MacroInstruction);
 
-pub static MACRO_INSTRUCTIONS: Lazy<HashMap<&'static str, &'static dyn MacroInstruction>> =
-    Lazy::new(|| {
+pub static MACRO_INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static dyn MacroInstruction>> =
+    LazyLock::new(|| {
         let mut map = HashMap::new();
         for entry in inventory::iter::<&'static dyn MacroInstruction> {
             for name in entry.names() {

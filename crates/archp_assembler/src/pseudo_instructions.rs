@@ -10,10 +10,9 @@ mod not;
 mod set;
 mod set_zero;
 
-use std::{collections::HashMap, iter::successors};
+use std::{collections::HashMap, iter::successors, sync::LazyLock};
 
 use anyhow::{Result, bail};
-use once_cell::sync::Lazy;
 
 use crate::{
     assembler::{Context, Line},
@@ -26,8 +25,8 @@ type ExpandFn = for<'a> fn(&'a str, &[OperandValue<'a>]) -> ExpandRet<'a>;
 
 inventory::collect!(&'static dyn PseudoInstruction);
 
-pub static PSEUDO_INSTRUCTIONS: Lazy<HashMap<&'static str, &'static dyn PseudoInstruction>> =
-    Lazy::new(|| {
+pub static PSEUDO_INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static dyn PseudoInstruction>> =
+    LazyLock::new(|| {
         let mut map = HashMap::new();
         for entry in inventory::iter::<&'static dyn PseudoInstruction> {
             for name in entry.names() {

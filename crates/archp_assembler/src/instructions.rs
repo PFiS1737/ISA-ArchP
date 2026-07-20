@@ -9,10 +9,9 @@ mod shift;
 mod stack_call_return;
 mod upper_imm;
 
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display, sync::LazyLock};
 
 use anyhow::{Result, bail};
-use once_cell::sync::Lazy;
 
 use crate::{
     assembler::Context,
@@ -33,13 +32,14 @@ pub enum InstrType {
 
 inventory::collect!(&'static dyn Instruction);
 
-pub static INSTRUCTIONS: Lazy<HashMap<&'static str, &'static dyn Instruction>> = Lazy::new(|| {
-    let mut map = HashMap::new();
-    for entry in inventory::iter::<&'static dyn Instruction> {
-        map.insert(entry.name(), *entry);
-    }
-    map
-});
+pub static INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static dyn Instruction>> =
+    LazyLock::new(|| {
+        let mut map = HashMap::new();
+        for entry in inventory::iter::<&'static dyn Instruction> {
+            map.insert(entry.name(), *entry);
+        }
+        map
+    });
 
 pub trait Instruction: Send + Sync {
     fn name(&self) -> &'static str;
