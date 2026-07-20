@@ -5,7 +5,7 @@ input_file: crates/archp_assembler/examples/minesweeper.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x9000039C # jal r0 main                                [j main]
+0x900003A0 # jal r0 main                                [j main]
 0x40020000 # addi x r0 0                                [clr x]                                            <label: init_screen>
 0x40040000 # addi y r0 0                                [clr y]
 0xD0181A1B # col COLOR_BACK
@@ -115,16 +115,16 @@ exit_code: 0
 0xA8000000 # ret
 0xD022262E # col COLOR_GRID_LINE                                                                           <label: move_cursor>
 0xAA000034 # call update_cursor
-0x403E0046 # addi r31 r0 70                             [bne key_code KEY_UP move_cursor_key_up_ne]
+0x403E0052 # addi r31 r0 82                             [bne key_code KEY_UP move_cursor_key_up_ne]
 0x9400F09F # bne key_code r31 move_cursor_key_up_ne     [bne key_code KEY_UP move_cursor_key_up_ne]
 0x42108001 # subi cursor_y cursor_y 1                   [dec cursor_y]
-0x403E0048 # addi r31 r0 72                             [bne key_code KEY_DOWN move_cursor_key_down_ne]    <label: move_cursor_key_up_ne>
+0x403E0051 # addi r31 r0 81                             [bne key_code KEY_DOWN move_cursor_key_down_ne]    <label: move_cursor_key_up_ne>
 0x9400F09F # bne key_code r31 move_cursor_key_down_ne   [bne key_code KEY_DOWN move_cursor_key_down_ne]
 0x40108001 # addi cursor_y cursor_y 1                   [inc cursor_y]
-0x403E0045 # addi r31 r0 69                             [bne key_code KEY_LEFT move_cursor_key_left_ne]    <label: move_cursor_key_down_ne>
+0x403E0050 # addi r31 r0 80                             [bne key_code KEY_LEFT move_cursor_key_left_ne]    <label: move_cursor_key_down_ne>
 0x9400F09F # bne key_code r31 move_cursor_key_left_ne   [bne key_code KEY_LEFT move_cursor_key_left_ne]
 0x420E7001 # subi cursor_x cursor_x 1                   [dec cursor_x]
-0x403E0047 # addi r31 r0 71                             [bne key_code KEY_RIGHT move_cursor_key_right_ne]  <label: move_cursor_key_left_ne>
+0x403E004F # addi r31 r0 79                             [bne key_code KEY_RIGHT move_cursor_key_right_ne]  <label: move_cursor_key_left_ne>
 0x9400F09F # bne key_code r31 move_cursor_key_right_ne  [bne key_code KEY_RIGHT move_cursor_key_right_ne]
 0x400E7001 # addi cursor_x cursor_x 1                   [inc cursor_x]
 0x98007080 # bge cursor_x r0 move_cursor_x_ge_0         [bge cursor_x 0 move_cursor_x_ge_0]                <label: move_cursor_key_right_ne>
@@ -178,7 +178,7 @@ exit_code: 0
 0x500C5020 # andi t2 t1 32                              [and t2 t1 FLAG_MASK]
 0x940062C0 # bne t2 r0 reveal_tile_ret                  [bnez t2 reveal_tile_ret]
 0x500C5008 # andi t2 t1 8                               [and t2 t1 MINE_MASK]
-0x94086E80 # bne t2 r0 lose_loop                        [bnez t2 lose_loop]
+0x94086F00 # bne t2 r0 lose_loop                        [bnez t2 lose_loop]
 0x500C5007 # andi t2 t1 7                               [and t2 t1 AROUND_COUNT_MASK]
 0x40207000 # addi arg_x cursor_x 0                      [mv arg_x cursor_x]
 0x40228000 # addi arg_y cursor_y 0                      [mv arg_y cursor_y]
@@ -466,28 +466,30 @@ exit_code: 0
 0xA8000000 # ret
 0xE41E0000 # kbget key_code                                                                                <label: read_key>
 0x923EFFC0 # beq key_code r0 read_key                   [beqz key_code read_key]
+0xE40A0000 # kbget t1                                                                                      <label: read_key_wait_release>
+0x943E5FC0 # bne t1 r0 read_key_wait_release            [bnez t1 read_key_wait_release]
 0xA8000000 # ret
-0xABC1FC66 # call init_screen                                                                              <label: main>
-0xABC1FCC4 # call init_mines
-0xABC1FCE4 # call init_mine_counts
-0xABC1FFF4 # call read_key                                                                                 <label: main_loop>
-0x403E0046 # addi r31 r0 70                             [beq key_code KEY_UP main_loop_move_cursor]
+0xABC1FC62 # call init_screen                                                                              <label: main>
+0xABC1FCC0 # call init_mines
+0xABC1FCE0 # call init_mine_counts
+0xABC1FFF0 # call read_key                                                                                 <label: main_loop>
+0x403E0052 # addi r31 r0 82                             [beq key_code KEY_UP main_loop_move_cursor]
 0x9200F2DF # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_UP main_loop_move_cursor]
-0x403E0048 # addi r31 r0 72                             [beq key_code KEY_DOWN main_loop_move_cursor]
+0x403E0051 # addi r31 r0 81                             [beq key_code KEY_DOWN main_loop_move_cursor]
 0x9200F25F # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_DOWN main_loop_move_cursor]
-0x403E0045 # addi r31 r0 69                             [beq key_code KEY_LEFT main_loop_move_cursor]
+0x403E0050 # addi r31 r0 80                             [beq key_code KEY_LEFT main_loop_move_cursor]
 0x9200F1DF # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_LEFT main_loop_move_cursor]
-0x403E0047 # addi r31 r0 71                             [beq key_code KEY_RIGHT main_loop_move_cursor]
+0x403E004F # addi r31 r0 79                             [beq key_code KEY_RIGHT main_loop_move_cursor]
 0x9200F15F # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_RIGHT main_loop_move_cursor]
-0x403E0037 # addi r31 r0 55                             [beq key_code KEY_REVEAL main_loop_reveal_tile]
+0x403E001D # addi r31 r0 29                             [beq key_code KEY_REVEAL main_loop_reveal_tile]
 0x9200F15F # beq key_code r31 main_loop_reveal_tile     [beq key_code KEY_REVEAL main_loop_reveal_tile]
-0x403E0038 # addi r31 r0 56                             [beq key_code KEY_FLAG main_loop_toggle_flag]
+0x403E001B # addi r31 r0 27                             [beq key_code KEY_FLAG main_loop_toggle_flag]
 0x9200F15F # beq key_code r31 main_loop_toggle_flag     [beq key_code KEY_FLAG main_loop_toggle_flag]
-0xABC1FD1C # call move_cursor                                                                              <label: main_loop_move_cursor>
+0xABC1FD18 # call move_cursor                                                                              <label: main_loop_move_cursor>
 0x9000000A # jal r0 main_loop_update_seg                [j main_loop_update_seg]
-0xABC1FD88 # call reveal_tile                                                                              <label: main_loop_reveal_tile>
+0xABC1FD84 # call reveal_tile                                                                              <label: main_loop_reveal_tile>
 0x90000006 # jal r0 main_loop_update_seg                [j main_loop_update_seg]
-0xABC1FDF8 # call toggle_flag                                                                              <label: main_loop_toggle_flag>
+0xABC1FDF4 # call toggle_flag                                                                              <label: main_loop_toggle_flag>
 0x90000002 # jal r0 main_loop_update_seg                [j main_loop_update_seg]
 0xD4000012 # seg mine_num                                                                                  <label: main_loop_update_seg>
 0x91C1FFD8 # jal r0 main_loop                           [j main_loop]
@@ -495,8 +497,8 @@ exit_code: 0
 0x40207000 # addi arg_x cursor_x 0                      [mv arg_x cursor_x]                                <label: lose_loop>
 0x40228000 # addi arg_y cursor_y 0                      [mv arg_y cursor_y]
 0xD0EE6666 # col COLOR_MINE_BACK
-0xABC1FE14 # call draw_tile
-0xABC1FE74 # call draw_mine
+0xABC1FE10 # call draw_tile
+0xABC1FE70 # call draw_mine
 0x401A0000 # addi ny r0 0                               [clr ny]
 0x40120000 # addi addr r0 0                             [clr addr]
 0x40180000 # addi nx r0 0                               [clr nx]                                           <label: lose_row_loop>
@@ -509,8 +511,8 @@ exit_code: 0
 0x4020C000 # addi arg_x nx 0                            [mv arg_x nx]
 0x4022D000 # addi arg_y ny 0                            [mv arg_y ny]
 0xD0384048 # col COLOR_REVEALED
-0xABC1FDF8 # call draw_tile
-0xABC1FE58 # call draw_mine
+0xABC1FDF4 # call draw_tile
+0xABC1FE54 # call draw_mine
 0x4018C001 # addi nx nx 1                               [inc nx]                                           <label: lose_loop_skip_draw>
 0x40129004 # addi addr addr 4                           [add addr addr 4]
 0x403E000F # addi r31 r0 15                             [blt nx GRID_COLS lose_col_loop]

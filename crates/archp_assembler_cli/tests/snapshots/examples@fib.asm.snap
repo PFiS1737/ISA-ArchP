@@ -7,7 +7,7 @@ exit_code: 0
 ----- stdout -----
 0xB00C0001 # lui sp 1        [li sp 4096]
 0x400C6000 # addi sp sp 0    [li sp 4096]
-0x4008000A # addi a0 r0 10   [li a0 10]      <label: main>
+0xE0080000 # in a0                           <label: main>
 0x900A0004 # jal ra fib
 0xE2004000 # out a0
 0x403E0002 # addi r31 r0 2   [bgt a0 2 .L0]  <label: fib>

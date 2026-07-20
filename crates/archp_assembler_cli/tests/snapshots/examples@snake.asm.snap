@@ -5,7 +5,7 @@ input_file: crates/archp_assembler/examples/snake.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x90000142 # jal r0 main                                 [j main]
+0x90000138 # jal r0 main                                 [j main]
 0x400A0000 # addi x r0 0                                 [clr x]                                               <label: init_screen>
 0x400C0000 # addi y r0 0                                 [clr y]
 0xD0000000 # col COLOR_BACK
@@ -32,13 +32,13 @@ exit_code: 0
 0x403E0001 # addi r31 r0 1                               [bge i 1 init_body_loop]
 0x983ECE9F # bge i r31 init_body_loop                    [bge i 1 init_body_loop]
 0xA8000000 # ret
-0x403E0046 # addi r31 r0 70                              [beq key_code KEY_UP move_snake_up]                   <label: move_snake>
+0x403E0052 # addi r31 r0 82                              [beq key_code KEY_UP move_snake_up]                   <label: move_snake>
 0x9200921F # beq key_code r31 move_snake_up              [beq key_code KEY_UP move_snake_up]
-0x403E0048 # addi r31 r0 72                              [beq key_code KEY_DOWN move_snake_down]
+0x403E0051 # addi r31 r0 81                              [beq key_code KEY_DOWN move_snake_down]
 0x9200925F # beq key_code r31 move_snake_down            [beq key_code KEY_DOWN move_snake_down]
-0x403E0045 # addi r31 r0 69                              [beq key_code KEY_LEFT move_snake_left]
+0x403E0050 # addi r31 r0 80                              [beq key_code KEY_LEFT move_snake_left]
 0x9200929F # beq key_code r31 move_snake_left            [beq key_code KEY_LEFT move_snake_left]
-0x403E0047 # addi r31 r0 71                              [beq key_code KEY_RIGHT move_snake_right]
+0x403E004F # addi r31 r0 79                              [beq key_code KEY_RIGHT move_snake_right]
 0x920092DF # beq key_code r31 move_snake_right           [beq key_code KEY_RIGHT move_snake_right]
 0xA8000000 # ret
 0x400E1000 # addi nx head_x 0                            [mv nx head_x]                                        <label: move_snake_up>
@@ -76,7 +76,7 @@ exit_code: 0
 0x400C2000 # addi y head_y 0                             [mv y head_y]
 0xAA00003E # call body_contains
 0x403E0001 # addi r31 r0 1                               [beq rt 1 lose_loop]
-0x9202D8DF # beq rt r31 lose_loop                        [beq rt 1 lose_loop]
+0x9202D6DF # beq rt r31 lose_loop                        [beq rt 1 lose_loop]
 0x94001103 # bne head_x food_x move_snake_not_eat
 0x940020C4 # bne head_y food_y move_snake_not_eat
 0xAA00000C # call gen_food
@@ -150,30 +150,22 @@ exit_code: 0
 0x401A0000 # addi rt r0 0                                [li rt 0]                                             <label: queue_contains_not_found>
 0xA8000000 # ret
 0xE4140000 # kbget t0                                                                                          <label: read_key>
-0x403E0046 # addi r31 r0 70                              [beq t0 KEY_UP read_key_ok]
+0x403E0052 # addi r31 r0 82                              [beq t0 KEY_UP read_key_ok]
 0x9200A21F # beq t0 r31 read_key_ok                      [beq t0 KEY_UP read_key_ok]
-0x403E0048 # addi r31 r0 72                              [beq t0 KEY_DOWN read_key_ok]
+0x403E0051 # addi r31 r0 81                              [beq t0 KEY_DOWN read_key_ok]
 0x9200A19F # beq t0 r31 read_key_ok                      [beq t0 KEY_DOWN read_key_ok]
-0x403E0045 # addi r31 r0 69                              [beq t0 KEY_LEFT read_key_ok]
+0x403E0050 # addi r31 r0 80                              [beq t0 KEY_LEFT read_key_ok]
 0x9200A11F # beq t0 r31 read_key_ok                      [beq t0 KEY_LEFT read_key_ok]
-0x403E0047 # addi r31 r0 71                              [beq t0 KEY_RIGHT read_key_ok]
+0x403E004F # addi r31 r0 79                              [beq t0 KEY_RIGHT read_key_ok]
 0x9200A09F # beq t0 r31 read_key_ok                      [beq t0 KEY_RIGHT read_key_ok]
 0xA8000000 # ret
-0x0216900A # sub t1 key_code t0                                                                                <label: read_key_ok>
-0x403E0002 # addi r31 r0 2                               [beq t1 2 read_key_ret]
-0x9200B11F # beq t1 r31 read_key_ret                     [beq t1 2 read_key_ret]
-0x403E0FFE # addi r31 r0 -2                              [beq t1 -2 read_key_ret]
-0x9200B09F # beq t1 r31 read_key_ret                     [beq t1 -2 read_key_ret]
-0x4012A000 # addi key_code t0 0                          [mv key_code t0]
+0x4012A000 # addi key_code t0 0                          [mv key_code t0]                                      <label: read_key_ok>
 0xA8000000 # ret                                                                                               <label: read_key_ret>
-0xABC1FEC0 # call init_screen                                                                                  <label: main>
-0xABC1FED6 # call init_snake
-0xABC1FF5A # call gen_food
-0x40180064 # addi i r0 100                               [li i 100]                                            <label: main_loop>
-0x4218C001 # subi i i 1                                  [dec i]                                               <label: sleep>
-0x963E0FCC # blt r0 i sleep                              [bgtz i sleep]
-0xABC1FFD2 # call read_key
-0xABC1FEE6 # call move_snake
-0x91C1FFF6 # jal r0 main_loop                            [j main_loop]
+0xABC1FECA # call init_screen                                                                                  <label: main>
+0xABC1FEE0 # call init_snake
+0xABC1FF64 # call gen_food
+0xABC1FFE2 # call read_key                                                                                     <label: main_loop>
+0xABC1FEF6 # call move_snake
+0x91C1FFFC # jal r0 main_loop                            [j main_loop]
 0x90000000 # jal r0 lose_loop                            [j lose_loop]                                         <label: lose_loop>
 ----- stderr -----
