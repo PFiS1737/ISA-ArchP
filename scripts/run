@@ -38,7 +38,7 @@ if not test -f "$file"
     return 1
 end
 
-trap "rm -rf output.bin __dump__.fst .surfer/mappings/*.hex" EXIT INT QUIT TERM
+trap "rm -rf output.bin __dump__.fst .surfer/mappings/Instr.hex" EXIT INT QUIT TERM
 
 if set -q _flag_build
     echo_h1 "Building..."
@@ -56,7 +56,7 @@ if set -q _flag_asm
 
     if test $is_trace_mode -eq 1
         mkdir -p .surfer/mappings/
-        cargo run -p archp_assembler_cli -- $file --hex -o .surfer/mappings/$file.hex 2>&1 >/dev/null
+        cargo run -p archp_assembler_cli -- $file --hex -o .surfer/mappings/Instr 2>&1 >/dev/null
     end
 
     set file output.bin
@@ -65,8 +65,7 @@ if set -q _flag_asm
 end
 
 echo_h1 "Running..."
-cargo run -p archp_simulator -- +FILE=$file
-or return 1
+cargo run -p archp_simulator -- $file
 echo
 
 if test $is_trace_mode -eq 1

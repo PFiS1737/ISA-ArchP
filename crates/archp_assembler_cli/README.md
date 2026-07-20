@@ -24,7 +24,7 @@ Options:
 Where `<shell>` can be `bash`, `zsh`, `fish`, `powershell`, or `elvish`.
 
 ```bash
-ARCHP_COMPLETE=<shell> archp-as
+ARCHP_AS_COMPLETE=<shell> archp-as
 ```
 
 ## Assembly Syntax

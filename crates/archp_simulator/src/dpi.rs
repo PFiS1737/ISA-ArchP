@@ -23,3 +23,9 @@ unsafe extern "C" {
     pub static pd: ffi::PixelDisplay;
     pub static program: ffi::Program;
 }
+
+impl Drop for ffi::PixelDisplay {
+    fn drop(&mut self) {
+        self.destroy();
+    }
+}

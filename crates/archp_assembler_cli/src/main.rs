@@ -15,7 +15,7 @@ use crate::{command::Cli, utils::align_tabbed_lines};
 
 fn main() -> Result<()> {
     CompleteEnv::with_factory(Cli::command)
-        .var("ARCHP_COMPLETE")
+        .var("ARCHP_AS_COMPLETE")
         .complete();
 
     env_logger::init();
