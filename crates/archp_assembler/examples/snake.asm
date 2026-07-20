@@ -31,10 +31,11 @@ const COLOR_BODY 0xFFFFFF
 const COLOR_HEAD 0xFF0000
 const COLOR_FOOD 0xFFFF00
 
-const KEY_UP 70
-const KEY_DOWN 72
-const KEY_LEFT 69
-const KEY_RIGHT 71
+# SDL3 scancode
+const KEY_UP 82
+const KEY_DOWN 81
+const KEY_LEFT 80
+const KEY_RIGHT 79
 
 const INIT_X 5
 const INIT_Y 18
@@ -290,10 +291,6 @@ read_key:
   ret
 
   read_key_ok:
-    sub t1 key_code t0
-    beq t1 2 read_key_ret
-    beq t1 -2 read_key_ret
-
     mv key_code t0
 
   read_key_ret:
@@ -306,11 +303,6 @@ main:
   call gen_food
 
   main_loop:
-    li i 100
-    sleep:
-      dec i
-      bgtz i sleep
-
     call read_key
     call move_snake
     j main_loop

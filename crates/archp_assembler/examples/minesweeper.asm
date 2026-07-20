@@ -51,12 +51,13 @@ const MINE_MASK 8
 const REVEAL_MASK 16
 const FLAG_MASK 32
 
-const KEY_UP 70
-const KEY_DOWN 72
-const KEY_LEFT 69
-const KEY_RIGHT 71
-const KEY_REVEAL 55 # 'z'
-const KEY_FLAG 56 # 'x'
+# SDL3 scancode
+const KEY_UP 82
+const KEY_DOWN 81
+const KEY_LEFT 80
+const KEY_RIGHT 79
+const KEY_REVEAL 29 # 'z'
+const KEY_FLAG 27 # 'x'
 
 
 j main
@@ -664,6 +665,9 @@ draw_num5:
 read_key:
   kbget key_code
   beqz key_code read_key
+  read_key_wait_release:
+    kbget t1
+    bnez t1 read_key_wait_release
   ret
 
 
