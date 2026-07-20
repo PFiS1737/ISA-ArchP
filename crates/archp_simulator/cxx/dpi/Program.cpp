@@ -10,7 +10,7 @@
 void Program::open(rust::Str file_name) const {
   std::ifstream ifs((std::string)file_name, std::ios::binary);
   if (!ifs) {
-    throw new std::runtime_error("Failed to open file: " + (std::string)file_name);
+    throw std::runtime_error("Failed to open file: " + (std::string)file_name);
   }
 
   ifs.seekg(0, std::ios::end);

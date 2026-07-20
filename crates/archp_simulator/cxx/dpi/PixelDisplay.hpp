@@ -19,14 +19,14 @@ public:
   void commit();
   bool handle_event() const;
 
-  mutable SDL_Scancode scancode;
+  mutable SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
 
 private:
-  mutable uint32_t W, H, SCALE;
+  mutable uint32_t W = 0, H = 0, SCALE = 1;
 
-  mutable SDL_Window *win;
-  mutable SDL_Renderer *ren;
-  mutable SDL_Texture *tex;
+  mutable SDL_Window *win = nullptr;
+  mutable SDL_Renderer *ren = nullptr;
+  mutable SDL_Texture *tex = nullptr;
 
   mutable std::vector<uint32_t> fb;
 };

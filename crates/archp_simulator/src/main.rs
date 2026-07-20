@@ -57,7 +57,7 @@ fn main() -> ExitCode {
         cpu_top.flip_clk();
 
         if cpu_top.posedge_clk() {
-            stopped.store(unsafe { !dpi::pd.handle_event() }, atomic::Ordering::SeqCst);
+            stopped.fetch_or(unsafe { !dpi::pd.handle_event() }, atomic::Ordering::SeqCst);
         }
 
         if stopped.load(atomic::Ordering::SeqCst) {
