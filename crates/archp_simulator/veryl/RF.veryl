@@ -1,0 +1,31 @@
+module RF (
+    clk: input clock,
+    rst: input reset,
+
+    we: input logic,
+
+    rd: input bit<5>,
+    wdata: input bit<32>,
+
+    rs1: input bit<5>,
+    rs2: input bit<5>,
+    rdata1: output bit<32>,
+    rdata2: output bit<32>,
+) {
+    var regs: bit<32> [32];
+
+    always_ff {
+        if_reset {
+            for i in 0..32 {
+                regs[i] = '0;
+            }
+        } else {
+            if we && rd != 0 {
+                regs[rd] = wdata;
+            }
+        }
+    }
+
+    assign rdata1 = regs[rs1];
+    assign rdata2 = regs[rs2];
+}

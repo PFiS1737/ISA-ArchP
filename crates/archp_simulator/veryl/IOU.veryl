@@ -1,0 +1,44 @@
+/// Input/Output Unit
+module IOU (
+    clk: input clock,
+    rst: input reset,
+
+    opcode: input bit<7>,
+    rdata1: input bit<32>,
+
+    rfwe: output logic,
+    wdata: output bit<32>,
+) {
+    let en: logic = inside opcode {7'b1110_000..=7'b1110_111};
+
+    always_comb {
+        rfwe = 0;
+        wdata = '0;
+
+        if en {
+            case (opcode[2:0]) {
+                'b000 /* IN */: {
+                    rfwe = 1;
+                    wdata = $sv::simple_input();
+                }
+                'b010 /* KBGET */: {
+                    rfwe = 1;
+                    wdata = $sv::keyboard_get();
+                }
+                'b011 /* RAND */: {
+                    rfwe = 1;
+                    wdata = $urandom();
+                }
+                default: {}
+            }
+        }
+    }
+
+    always_ff {
+        if_reset {} else {
+            if en && opcode[2:0] == 'b001 /* OUT */ {
+                $sv::simple_output(rdata1);
+            }
+        }
+    }
+}

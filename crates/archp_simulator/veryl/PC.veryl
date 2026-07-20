@@ -1,0 +1,28 @@
+module PC #(
+    param STEP: u32 = 4,
+) (
+    clk: input clock,
+    rst: input reset,
+
+    we: input logic,
+    wdata: input u32,
+
+    pc: output u32,
+) {
+    var value: u32;
+
+    always_ff (clk) {
+        if_reset {
+            value = '0;
+            pc = '0;
+        } else {
+            if (we) {
+                pc = wdata;
+                value = wdata + STEP;
+            } else {
+                pc = value;
+                value += STEP;
+            }
+        }
+    }
+}
