@@ -1,12 +1,25 @@
 mod cpu;
 mod dpi;
 
-use std::{env, process::ExitCode};
-
-static mut STOPED: bool = false;
+use std::{
+    env,
+    process::ExitCode,
+    sync::{
+        Arc,
+        atomic::{self, AtomicBool},
+    },
+};
 
 fn main() -> ExitCode {
-    ctrlc::set_handler(|| unsafe { STOPED = true }).expect("Error setting Ctrl-C handler");
+    let stopped = Arc::new(AtomicBool::new(false));
+
+    {
+        let stopped = Arc::clone(&stopped);
+        ctrlc::set_handler(move || {
+            stopped.store(true, atomic::Ordering::SeqCst);
+        })
+        .expect("Error setting Ctrl-C handler");
+    }
 
     let Some(file) = env::args().find_map(|arg| arg.strip_prefix("+FILE=").map(|s| s.to_string()))
     else {
@@ -44,14 +57,12 @@ fn main() -> ExitCode {
         cpu_top.flip_clk();
 
         if cpu_top.posedge_clk() {
-            unsafe { STOPED |= !dpi::pd.handle_event() }
+            stopped.store(unsafe { !dpi::pd.handle_event() }, atomic::Ordering::SeqCst);
         }
 
-        unsafe {
-            if STOPED {
-                eprintln!("Simulation interrupted by user.");
-                break;
-            }
+        if stopped.load(atomic::Ordering::SeqCst) {
+            eprintln!("Simulation interrupted by user.");
+            break;
         }
 
         cpu_top.eval();
