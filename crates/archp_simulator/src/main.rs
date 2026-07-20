@@ -13,7 +13,7 @@ use clap_complete::CompleteEnv;
 
 use crate::{
     command::Cli,
-    dpi::{mem, pd, program},
+    dpi::{MEMORY, PIXEL_DISPLAY, PROGRAM},
 };
 
 fn main() -> Result<()> {
@@ -34,15 +34,9 @@ fn main() -> Result<()> {
         })?;
     }
 
-    unsafe {
-        program.open(&cli.file)?;
-
-        mem.init(1024 * 1024 * 1024);
-
-        if !pd.init(128, 96, 6) {
-            bail!("Failed to initialize PixelDisplay.");
-        }
-    }
+    MEMORY.lock().unwrap().init(1024 * 1024 * 4);
+    PIXEL_DISPLAY.with(|pd| pd.borrow_mut().init(128, 96, 6))?;
+    PROGRAM.lock().unwrap().open(&cli.file)?;
 
     let cpu_top = cpu::ffi::create_cpu();
 
@@ -56,7 +50,10 @@ fn main() -> Result<()> {
         cpu_top.flip_clk();
 
         if cpu_top.posedge_clk() {
-            stopped.fetch_or(unsafe { !pd.handle_event() }, atomic::Ordering::SeqCst);
+            stopped.fetch_or(
+                !PIXEL_DISPLAY.with(|pd| pd.borrow_mut().handle_event()),
+                atomic::Ordering::SeqCst,
+            );
         }
 
         if stopped.load(atomic::Ordering::SeqCst) {

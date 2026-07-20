@@ -97,7 +97,7 @@ fn main() {
     let config: VerilatorMakeConfig =
         serde_json::from_str(&config_data).expect("Failed to parse Verilator JSON config");
 
-    cxx_build::bridges(["src/cpu.rs", "src/dpi.rs"])
+    cxx_build::bridge("src/cpu.rs")
         .cpp(true)
         .std("c++20")
         .warnings(false)
@@ -112,28 +112,14 @@ fn main() {
         .include(verilator_out_dir)
         .include(config.system.verilator_root.join("include"))
         .include(config.system.verilator_root.join("include/vltstd"))
-        .include("cxx/dpi")
         .files(config.sources.global)
         .files(config.sources.classes_slow)
         .files(config.sources.classes_fast)
         .files(config.sources.support_slow)
         .files(config.sources.support_fast)
-        .files([
-            "cxx/cpu.cpp",
-            "cxx/dpi/Memory.cpp",
-            "cxx/dpi/PixelDisplay.cpp",
-            "cxx/dpi/Program.cpp",
-            "cxx/dpi/Stack.cpp",
-            "cxx/dpi/SimpleIO.cpp",
-        ])
+        .file("cxx/cpu.cpp")
         .compile("archp_cpu");
 
-    pkg_config::Config::new()
-        .atleast_version("3.0")
-        .probe("sdl3")
-        .unwrap();
-
-    println!("cargo:rerun-if-changed=cxx");
     println!("cargo:rerun-if-changed=src/cpu.rs");
-    println!("cargo:rerun-if-changed=src/dpi.rs");
+    println!("cargo:rerun-if-changed=cxx");
 }
