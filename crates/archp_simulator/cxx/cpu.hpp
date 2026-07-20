@@ -2,25 +2,25 @@
 
 #include "Vtop.h"
 
-class Top {
+class CPU {
 public:
-  Top(int argc, char **argv);
-  ~Top();
+  CPU();
+  ~CPU();
 
-  bool gotFinish() const;
+  bool got_finish() const;
 
   uint64_t time() const;
-  void increase_time(uint64_t add);
+  void increase_time(uint64_t add) const;
 
-  void flip_clk();
-  void set_rst(bool rst);
+  void flip_clk() const;
+  void set_rst(bool rst) const;
   bool posedge_clk() const;
 
-  void eval();
-
-  std::string _commandArgsPlusMatch(const char *prefixp);
+  void eval() const;
 
 private:
   std::unique_ptr<VerilatedContext> ctx = nullptr;
   std::unique_ptr<Vtop> top = nullptr;
 };
+
+std::unique_ptr<CPU> create_cpu();

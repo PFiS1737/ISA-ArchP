@@ -5,19 +5,13 @@ description = "The implementation of ArchP CPU"
 version = "0.1.0"
 
 [build]
-sources = ["src", "test"]
+sources = ["veryl"]
 target = { type = "bundle", path = "bundled.sv" }
-sourcemap_target = { type = "directory", path = "sourcemaps" }
 incremental = true
 omit_project_prefix = true
 
 clock_type = "posedge"
 reset_type = "sync_high"
-
-[test]
-simulator = "verilator"
-waveform_format = "fst"
-waveform_target = { type = "directory", path = "waves" }
 
 [format]
 indent_width = 4

@@ -15,3 +15,5 @@ private:
   std::vector<uint32_t> stack;
   size_t size = 0;
 };
+
+extern "C" Stack call_stack, data_stack;

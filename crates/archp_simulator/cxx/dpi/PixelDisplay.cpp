@@ -2,7 +2,7 @@
 
 #include "PixelDisplay.hpp"
 
-bool PixelDisplay::init(uint32_t w, uint32_t h, uint32_t scale) {
+bool PixelDisplay::init(uint32_t w, uint32_t h, uint32_t scale) const {
   W = w;
   H = h;
   SCALE = scale;
@@ -29,7 +29,7 @@ bool PixelDisplay::init(uint32_t w, uint32_t h, uint32_t scale) {
   return true;
 }
 
-void PixelDisplay::destroy() {
+void PixelDisplay::destroy() const {
   if (tex) {
     SDL_DestroyTexture(tex);
   }
@@ -61,7 +61,7 @@ void PixelDisplay::commit() {
   SDL_RenderPresent(ren);
 }
 
-bool PixelDisplay::handle_event() {
+bool PixelDisplay::handle_event() const {
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
     switch (e.type) {

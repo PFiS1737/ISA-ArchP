@@ -2,6 +2,8 @@
 
 source ./scripts/common.fish
 
+# FIXME: trace
+
 argparse h/help b/build t/trace s/asm -- $argv
 or return 1
 
@@ -49,6 +51,7 @@ if set -q _flag_asm
     echo_h1 "Assembling..."
 
     cargo run -p archp_assembler_cli -- $file -o output.bin
+    or return 1
 
     if test $is_trace_mode -eq 1
         mkdir -p .surfer/mappings/
@@ -61,7 +64,8 @@ if set -q _flag_asm
 end
 
 echo_h1 "Running..."
-xmake run --workdir=. Vtop +FILE=$file
+cargo run -p archp_simulator -- +FILE=$file
+or return 1
 echo
 
 if test $is_trace_mode -eq 1

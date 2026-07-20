@@ -1,0 +1,6 @@
+Language: Cpp
+MaxEmptyLinesToKeep: 1
+AllowShortFunctionsOnASingleLine: None
+ColumnLimit: 120
+IndentCaseLabels: true
+AlignAfterOpenBracket: BlockIndent

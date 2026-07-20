@@ -1,15 +1,16 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
 #include "Vtop__Dpi.h"
 
 #include "./Program.hpp"
 
-void Program::open(const std::string &file_name) {
-  std::ifstream ifs(file_name, std::ios::binary);
+void Program::open(rust::Str file_name) const {
+  std::ifstream ifs((std::string)file_name, std::ios::binary);
   if (!ifs) {
-    throw new std::runtime_error("Failed to open file: " + file_name);
+    throw new std::runtime_error("Failed to open file: " + (std::string)file_name);
   }
 
   ifs.seekg(0, std::ios::end);

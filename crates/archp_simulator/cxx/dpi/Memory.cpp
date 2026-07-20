@@ -6,7 +6,7 @@
 
 #include "./Memory.hpp"
 
-void Memory::init(size_t size_in_bytes) {
+void Memory::init(size_t size_in_bytes) const {
   mem.resize(size_in_bytes, 0);
   size = size_in_bytes;
 }
