@@ -23,18 +23,6 @@ const t5 r13
 
 const s0 r14
 
-const KEY_1 14
-const KEY_2 15
-const KEY_3 16
-const KEY_4 17
-const KEY_5 18
-const KEY_6 19
-const KEY_7 20
-const KEY_8 21
-const KEY_9 22
-const KEY_0 23
-const KEY_ENTER 53
-
 li sp 8192
 
 j main
@@ -83,73 +71,8 @@ insertion_sort:
   .Linsertion_sort_done:
     ret
 
-read_num_with_seg_disp:
-  sub sp sp 4
-  sw s0 0(sp)
-
-  clr s0
-
-  .Lread_digit_with_seg_disp_loop:
-    seg s0
-    call read_digit
-    beqz a0 .Lread_digit_with_seg_disp_loop
-
-  mv a0 s0
-
-  lw s0 0(sp)
-  add sp sp 4
-
-  ret
-
-# s0 = current accumulated value
-# a0 = done flag (0 / 1)
-read_digit:
-  call read_key  # a0 = keycode
-
-  # ENTER
-  beq a0 KEY_ENTER .Lread_digit_enter
-
-  # KEY_0
-  beq a0 KEY_0 .Lread_digit_is_zero
-
-  # digit = key - KEY_1 + 1
-  sub t0 a0 KEY_1
-  inc t0
-  j .Lread_digit_acc
-
-  .Lread_digit_is_zero:
-    li t0 0
-
-  .Lread_digit_acc:
-    # s0 = s0 * 10 + digit
-    mul s0 s0 10
-    add s0 s0 t0
-
-    li a0 0
-    ret
-
-  .Lread_digit_enter:
-    li a0 1
-    ret
-
-read_key:
-  kbget a0
-
-  # a0 not in [KEY_1, KEY_0] or not KEY_ENTER
-  blt a0 KEY_1 read_key
-  beq a0 KEY_ENTER .Lread_key_end
-  bgt a0 KEY_0 read_key
-
-  .Lread_key_end: ret
-
-wait:
-  kbget t0
-  beqz t0 wait
-  ret
-
 main:
-  call read_num_with_seg_disp
-  mv a1 a0  # length
+  in a1  # length
 
   # malloc from stack frame
   sll s0 a1 2  # size = length * 4
@@ -161,8 +84,7 @@ main:
   .Lmain_input_loop:
     beqz t3 .Lmain_input_done
 
-    call read_num_with_seg_disp
-    mv t2 a0
+    in t2
 
     sw t2 0(t1)
     add t1 t1 4
@@ -171,20 +93,14 @@ main:
     j .Lmain_input_loop
 
   .Lmain_input_done:
-    segi 255  # just a symbolic way to indicate "input done"
-    call wait
     mv a0 sp
     call insertion_sort
-
-  segi 254  # just indicate "sorting done"
-  call wait
 
   .Lmain_output_loop:
     beq a1 zero .Lmain_output_done
 
     lw t0 0(a0)
-    seg t0
-    call wait
+    out t0
     add a0 a0 4
 
     dec a1
@@ -192,7 +108,6 @@ main:
 
   .Lmain_output_done:
     add sp sp s0
-    segi 0
     j halt
 
 halt:

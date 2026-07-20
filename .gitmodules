@@ -1,3 +1,0 @@
-[submodule "cpu"]
-	path = cpu
-	url = https://github.com/PFiS1737/archp_cpu.git

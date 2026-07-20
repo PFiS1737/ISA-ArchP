@@ -1,0 +1,20 @@
+[project]
+name = "archp_cpu"
+authors = ["PFiS1737"]
+description = "The implementation of ArchP CPU"
+version = "0.1.0"
+
+[build]
+sources = ["veryl"]
+target = { type = "bundle", path = "bundled.sv" }
+incremental = true
+omit_project_prefix = true
+
+clock_type = "posedge"
+reset_type = "sync_high"
+
+[format]
+indent_width = 4
+max_width = 80
+vertical_align = false
+newline_style = "auto"

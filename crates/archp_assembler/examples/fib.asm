@@ -10,7 +10,7 @@ const sp r6
 li sp 4096
 
 main:
-  li a0 10
+  in a0
   jal ra fib
   out a0
 
