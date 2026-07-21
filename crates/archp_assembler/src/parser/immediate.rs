@@ -84,8 +84,8 @@ impl Immediate {
         self.raw == 0
     }
 
-    /// 'signed' 为 'true' 时，保证输出满足 'self.0 == (hi << bits) + sig_ext(low, bits)'
-    /// 'signed' 为 'false' 时，保证输出满足 'self.0 == (hi << bits) + low'
+    /// 'signed' 为 'true' 时，保证输出满足 'self.raw == (hi << bits) + sig_ext(low, bits)'
+    /// 'signed' 为 'false' 时，保证输出满足 'self.raw == (hi << bits) + low'
     pub fn split(&self, bits: u8, signed: bool) -> (u32, u32) {
         assert!(bits > 0 && bits <= 32);
 
@@ -127,6 +127,15 @@ mod tests {
 
     fn test_and_fmt(imm: Immediate, bits: u8, signed: bool) -> String {
         let (low, hi) = imm.split(bits, signed);
+
+        if signed {
+            assert_eq!(
+                sign_extend(imm.raw, imm.bits) as i32,
+                ((hi << bits) as i32).wrapping_add(sign_extend(low, bits) as i32)
+            )
+        } else {
+            assert_eq!(imm.raw, (hi << bits) + low)
+        }
 
         format!(
             "({}, {}) - {}{}",
