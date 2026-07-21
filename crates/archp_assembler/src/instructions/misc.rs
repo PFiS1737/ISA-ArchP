@@ -2,9 +2,9 @@ use crate::instructions::instruction;
 
 instruction! {
     pub Col {
-        name: "col",
+        name: "colr",
         opcode: 0b_1101_000,
-        itype: C,
+        itype: I,
     }
 }
 

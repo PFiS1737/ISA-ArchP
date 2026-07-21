@@ -115,7 +115,18 @@ module Top (
         pcwdata: pcwdata_csu,
     );
 
-    inst DCU_: DCU ( clk, rst, opcode, funct3, rd, rs1, imm12, rdata1, rdata2 );
+    var rfwe_dcu: logic;
+    var wdata_dcu: bit<32>;
+    inst DCU_: DCU (
+        clk,
+        rst,
+        opcode,
+        imm12,
+        rdata1,
+        rdata2,
+        rfwe: rfwe_dcu,
+        wdata: wdata_dcu,
+    );
 
     var rfwe_iou: logic;
     var wdata_iou: bit<32>;
@@ -129,9 +140,9 @@ module Top (
     );
 
     assign rfwe = rfwe_alsu | rfwe_uiu | rfwe_bjlu | rfwe_lsu | rfwe_csu
-        | rfwe_iou;
+        | rfwe_dcu | rfwe_iou;
     assign wdata = wdata_alsu | wdata_uiu | wdata_bjlu | wdata_lsu | wdata_csu
-        | wdata_iou;
+        | wdata_dcu | wdata_iou;
 
     assign pcwe = pcwe_bjlu | pcwe_csu;
     assign pcwdata = pcwdata_bjlu | pcwdata_csu;

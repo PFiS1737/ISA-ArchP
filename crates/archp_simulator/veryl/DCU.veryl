@@ -4,27 +4,32 @@ module DCU (
     rst: input reset,
 
     opcode: input bit<7>,
-    funct3: input bit<3>,
-    rd: input bit<5>,
-    rs1: input bit<5>,
     imm12: input signed bit<12>,
 
     rdata1: input bit<32>,
     rdata2: input bit<32>,
+
+    rfwe: output logic,
+    wdata: output bit<32>,
 ) {
     var color: bit<32>;
+
+    var col: bit<32>;
+    always_comb {
+        col = $signed(rdata1) + $signed({imm12[msb] repeat 20, imm12});
+    }
 
     always_ff {
         if_reset {
             color = '0;
             $sv::pixel_display_reset();
         } else if opcode == 'b1101_000 /* COL */ {
-            color = {8'b0, funct3[1:0], rd, rs1, imm12};
-
-            // INFO: See https://verilator.org/warn/UNUSEDSIGNAL
-            let _unused_ok: logic = 1'b0 && &{1'b0, funct3[2], 1'b0};
+            color = col;
         } else if opcode == 'b1101_001 /* SPX */ {
             $sv::pixel_display_set(rdata1, rdata2, color);
         }
     }
+
+    assign rfwe = opcode == 'b1101_000 /* COL */;
+    assign wdata = if rfwe ? col : '0;
 }

@@ -1,6 +1,7 @@
 mod branch;
 mod branch_zero;
 mod clear;
+mod col_imm;
 mod inc_dec;
 mod jump;
 mod load_imm;

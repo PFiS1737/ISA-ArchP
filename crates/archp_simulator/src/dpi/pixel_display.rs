@@ -5,6 +5,7 @@ use sdl3::{
     EventPump,
     event::{Event, WindowEvent},
     keyboard::Scancode,
+    pixels::PixelFormat,
     render::{Canvas, ScaleMode, Texture},
     video::Window,
 };
@@ -56,7 +57,7 @@ impl PixelDisplay {
                 .as_ref()
                 .unwrap()
                 .texture_creator()
-                .create_texture_target(None, w as u32, h as u32)?,
+                .create_texture_target(Some(PixelFormat::RGBA8888), w as u32, h as u32)?,
         );
         self.texture
             .as_mut()
@@ -71,7 +72,7 @@ impl PixelDisplay {
     }
 
     pub fn reset(&mut self) {
-        self.framebuffer = vec![0x00404040; self.w * self.h];
+        self.framebuffer = vec![0x404040FF; self.w * self.h];
     }
 
     pub fn set(&mut self, x: usize, y: usize, color: u32) {

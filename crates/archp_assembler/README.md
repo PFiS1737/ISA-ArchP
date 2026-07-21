@@ -171,7 +171,9 @@ In this section:
 
 #### Misc
 
-- `col imm24u`: set the display color to the 24-bit unsigned immediate value `imm24u` (format: `0xRRGGBB`).
+- `colr rd rs imm12`: set the display color to `rs + imm12` (format: `0xRRGGBBAA`), also set it to `rd`.
+  - pseudo: `col imm12` => `colr r0 r0 imm12`
+  - macros: `col 0x1234` => `lui tmp 0x1; colr r0 tmp 0x234`
 - `spx rs1 rs2`: set the `(rs1, rs2)` position to the color specified by the last `col` instruction.
 - `seg rs1`: display the value of `rs1` on a 7-segment display.
 - `segi imm12`: display the immediate value on a 7-segment display.

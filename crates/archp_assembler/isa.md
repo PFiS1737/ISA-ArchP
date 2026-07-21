@@ -30,13 +30,6 @@ xxxx xxx   xxx   xxxxx   xxxxxxxxxxxxxxxxx
  opcode  | hi3 |  rd  |        low17       (uimm20 = hi3 << 17 | lo17)
 ```
 
-### C-type
-
-```
-1101 000   0   xxxxxxxx xxxxxxxx xxxxxxxx
-   col   | - |          color24
-```
-
 ## Instructions
 
 > [!NOTE]
@@ -150,7 +143,7 @@ xxxx xxx   xxx   xxxxx   xxxxxxxxxxxxxxxxx
 
 | Encoding | Instruction | Type | Notes |
 |----------|------------|------|-------|
-| 1101 000 | col | C | set color |
+| 1101 000 | colr | I | set color |
 | 1101 001 | spx | R | set pixel |
 | 1101 010 | seg | R | segment display |
 | 1101 011 | segi | I | segment display immediate |

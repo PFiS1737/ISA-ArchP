@@ -27,7 +27,6 @@ pub enum InstrType {
     S,
     U,
     J,
-    C,
 }
 
 inventory::collect!(&'static dyn Instruction);
@@ -57,7 +56,6 @@ pub trait Instruction: Send + Sync {
             InstrType::S => self.encode_s(&operands),
             InstrType::U => self.encode_u(&operands),
             InstrType::J => self.encode_j(&operands),
-            InstrType::C => self.encode_c(&operands),
         }
     }
 
@@ -170,7 +168,6 @@ pub trait Instruction: Send + Sync {
                 InstrType::S => op_fmt![RegS, RegS, Imm(12, i)],
                 InstrType::U => op_fmt![RegD, Imm(20, u)],
                 InstrType::J => op_fmt![RegD, Addr(20)],
-                InstrType::C => op_fmt![Imm(24, u)],
             }
         }
     }
@@ -277,7 +274,6 @@ impl Display for InstrType {
             InstrType::S => write!(f, "S"),
             InstrType::U => write!(f, "U"),
             InstrType::J => write!(f, "J"),
-            InstrType::C => write!(f, "C"),
         }
     }
 }
@@ -320,6 +316,10 @@ mod tests {
 
         assert_snapshot!(cmd(&["r1", "r2", "32"]), @"Error: Immediate '32' out of range for u5 (0 ..= 31)");
         assert_snapshot!(cmd(&["r1", "r2", "31"]), @"0110 001 000 00001 00010 0000000 11111");
+
+        let cmd = instr("colr");
+
+        assert_snapshot!(cmd(&["r0", "r31", "0xB00"]), @"1101 000 000 00000 11111 1011000 00000");
     }
 
     #[test]
@@ -350,18 +350,5 @@ mod tests {
         assert_snapshot!(cmd(&["r3", "-123"]), @"Error: Immediate '-123' out of range for u20 (0 ..= 1048575)");
 
         assert_snapshot!(cmd(&["r3", "0xABCDE"]), @"1011 000 101 00011 01011 1100110 11110");
-    }
-
-    #[test]
-    fn encode_c() {
-        let cmd = instr("col");
-
-        assert_snapshot!(cmd(&[]), @"Error: Instruction 'col' requires 1 operands, got 0");
-        assert_snapshot!(cmd(&["r1", "r2"]), @"Error: Instruction 'col' requires 1 operands, got 2");
-        assert_snapshot!(cmd(&["r1"]), @"Error: Invalid immediate: r1");
-        assert_snapshot!(cmd(&["0x1FFFFFF"]), @"Error: Immediate '0x1FFFFFF' out of range for u24 (0 ..= 16777215)");
-        assert_snapshot!(cmd(&["-123"]), @"Error: Immediate '-123' out of range for u24 (0 ..= 16777215)");
-
-        assert_snapshot!(cmd(&["0x123456"]), @"1101 000 000 01001 00011 0100010 10110");
     }
 }
