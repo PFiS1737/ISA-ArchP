@@ -17,7 +17,7 @@ use anyhow::{Result, bail};
 use crate::{
     assembler::{Context, Line},
     operand::{OperandType, OperandValue},
-    parser::{parse_address, parse_imm, parse_reg},
+    parser::{address::parse_address, immediate::parse_imm_as, register::parse_reg},
 };
 
 type ExpandRet<'a> = Line<'a>;
@@ -79,16 +79,16 @@ pub trait PseudoInstruction: Send + Sync {
             );
         }
 
-        for (i, operand) in operands.iter().enumerate() {
+        for (i, op) in operands.iter().enumerate() {
             match self.operand_types()[i] {
                 OperandType::RegD | OperandType::RegS => {
-                    parse_reg(ctx, operand)?;
+                    parse_reg(ctx, op)?;
                 },
                 OperandType::Imm(bits, signed) => {
-                    parse_imm(ctx, operand)?.as_field(bits, signed)?;
+                    parse_imm_as(ctx, op, bits, signed)?;
                 },
                 OperandType::Addr(bits) => {
-                    parse_address(ctx, operand)?.as_field(bits, pc)?;
+                    parse_address(ctx, op)?.as_field(bits, pc)?;
                 },
             };
         }

@@ -7,47 +7,19 @@ pub fn parse_address(ctx: &Context, op: &OperandValue) -> Result<Address> {
         OperandValue::StringSlice(s) => {
             let label = ctx.constants.get(s).unwrap_or(s);
             if let Some(&addr) = ctx.labels.get(label) {
-                Ok(Address(addr as u64))
+                Ok(Address(addr as u32))
             } else {
                 bail!("Undefined label: {}", label)
             }
         },
-        OperandValue::Unsigned(n) => Ok(Address(*n as u64)),
-        OperandValue::Signed(n) => Ok(Address(*n as u64)),
+        OperandValue::Integer(n, _) => Ok(Address(*n)),
     }
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Address(pub u64);
+pub struct Address(pub u32);
 
-impl Address {
-    #[cfg(test)]
-    pub fn as_i12(&self, base: u32) -> Result<u32> {
-        self.as_field(12, base)
-    }
-
-    #[cfg(test)]
-    pub fn try_as_i12(&self, base: u32) -> (u32, i32) {
-        use crate::utils::sig_ext::sig_ext_12_to_32;
-
-        match self.as_i12(base) {
-            Ok(v) => (0, sig_ext_12_to_32(v)),
-            Err(_) => {
-                let v = ((self.0 as i32) - (base as i32)) as u32;
-
-                let mut hi = v >> 12;
-                let lo = v & 0xFFF;
-
-                if lo >= 0x800 {
-                    hi += 1;
-                }
-
-                (hi, sig_ext_12_to_32(lo))
-            },
-        }
-    }
-}
-
+// TODO: refactor like imm
 impl Address {
     pub fn as_field(&self, bits: u8, base: u32) -> Result<u32> {
         if bits == 0 || bits > 32 {
@@ -84,6 +56,32 @@ mod tests {
     use super::*;
     use crate::{testkit::assert_snapshot, utils::fmt::fmt_hex};
 
+    impl Address {
+        pub fn as_i12(&self, base: u32) -> Result<u32> {
+            self.as_field(12, base)
+        }
+
+        pub fn try_as_i12(&self, base: u32) -> (u32, i32) {
+            use crate::utils::sig_ext::sign_extend;
+
+            match self.as_i12(base) {
+                Ok(v) => (0, sign_extend(v, 12) as i32),
+                Err(_) => {
+                    let v = ((self.0 as i32) - (base as i32)) as u32;
+
+                    let mut hi = v >> 12;
+                    let lo = v & 0xFFF;
+
+                    if lo >= 0x800 {
+                        hi += 1;
+                    }
+
+                    (hi, sign_extend(lo, 12) as i32)
+                },
+            }
+        }
+    }
+
     fn test_parser(
         func: fn(&Context, &OperandValue) -> Result<Address>,
     ) -> impl Fn(&str) -> String {
@@ -107,7 +105,7 @@ mod tests {
     }
 
     fn test_addr(addr: u32, base: u32) -> String {
-        let addr = Address(addr as u64);
+        let addr = Address(addr);
         let (hi, lo) = addr.try_as_i12(base);
         format!("({}, {})", fmt_hex(hi), fmt_hex(lo))
     }

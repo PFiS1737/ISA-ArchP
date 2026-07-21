@@ -16,7 +16,7 @@ use anyhow::{Result, bail};
 use crate::{
     assembler::Context,
     operand::{OperandType, OperandValue, op_fmt},
-    parser::{parse_address, parse_imm, parse_reg},
+    parser::{address::parse_address, immediate::parse_imm_as, register::parse_reg},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -78,9 +78,7 @@ pub trait Instruction: Send + Sync {
 
                     let val = match *op_ty {
                         OperandType::RegD | OperandType::RegS => parse_reg(ctx, op)?,
-                        OperandType::Imm(bits, signed) => {
-                            parse_imm(ctx, op)?.as_field(bits, signed)?
-                        },
+                        OperandType::Imm(bits, signed) => parse_imm_as(ctx, op, bits, signed)?,
                         OperandType::Addr(bits) => parse_address(ctx, op)?.as_field(bits, pc)?,
                     };
 
@@ -307,7 +305,9 @@ mod tests {
         assert_snapshot!(cmd(&["r1", "r2", "r3", "r4"]), @"Error: Instruction 'addi' requires 3 operands, got 4");
         assert_snapshot!(cmd(&["r1", "rrr", "123"]), @"Error: Invalid register: rrr");
         assert_snapshot!(cmd(&["r1", "r2", "r3"]), @"Error: Invalid immediate: r3");
-        assert_snapshot!(cmd(&["r1", "r2", "0xFFFF"]), @"Error: Immediate '65535' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(cmd(&["r1", "r2", "0xFFF"]), @"0100 000 000 00001 00010 1111111 11111");
+        assert_snapshot!(cmd(&["r1", "r2", "0xFFFF"]), @"0100 000 000 00001 00010 1111111 11111");
+        assert_snapshot!(cmd(&["r1", "r2", "0xFFFFFFFF"]), @"0100 000 000 00001 00010 1111111 11111");
 
         assert_snapshot!(cmd(&["r1", "r2", "3"]), @"0100 000 000 00001 00010 0000000 00011");
         assert_snapshot!(cmd(&["r1", "r2", "2047"]), @"0100 000 000 00001 00010 0111111 11111");
@@ -346,8 +346,8 @@ mod tests {
         assert_snapshot!(cmd(&["r1"]), @"Error: Instruction 'lui' requires 2 operands, got 1");
         assert_snapshot!(cmd(&["r1", "r2", "r3"]), @"Error: Instruction 'lui' requires 2 operands, got 3");
         assert_snapshot!(cmd(&["r1", "r2"]), @"Error: Invalid immediate: r2");
-        assert_snapshot!(cmd(&["r3", "0x200000"]), @"Error: Immediate '2097152' out of range for u20 (0 ..= 1048575)");
-        assert_snapshot!(cmd(&["r3", "-123"]), @"Error: Immediate '18446744073709551493' out of range for u20 (0 ..= 1048575)");
+        assert_snapshot!(cmd(&["r3", "0x200000"]), @"Error: Immediate '0x200000' out of range for u20 (0 ..= 1048575)");
+        assert_snapshot!(cmd(&["r3", "-123"]), @"Error: Immediate '-123' out of range for u20 (0 ..= 1048575)");
 
         assert_snapshot!(cmd(&["r3", "0xABCDE"]), @"1011 000 101 00011 01011 1100110 11110");
     }
@@ -359,8 +359,8 @@ mod tests {
         assert_snapshot!(cmd(&[]), @"Error: Instruction 'col' requires 1 operands, got 0");
         assert_snapshot!(cmd(&["r1", "r2"]), @"Error: Instruction 'col' requires 1 operands, got 2");
         assert_snapshot!(cmd(&["r1"]), @"Error: Invalid immediate: r1");
-        assert_snapshot!(cmd(&["0x1FFFFFF"]), @"Error: Immediate '33554431' out of range for u24 (0 ..= 16777215)");
-        assert_snapshot!(cmd(&["-123"]), @"Error: Immediate '18446744073709551493' out of range for u24 (0 ..= 16777215)");
+        assert_snapshot!(cmd(&["0x1FFFFFF"]), @"Error: Immediate '0x1FFFFFF' out of range for u24 (0 ..= 16777215)");
+        assert_snapshot!(cmd(&["-123"]), @"Error: Immediate '-123' out of range for u24 (0 ..= 16777215)");
 
         assert_snapshot!(cmd(&["0x123456"]), @"1101 000 000 01001 00011 0100010 10110");
     }

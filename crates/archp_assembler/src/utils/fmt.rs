@@ -9,8 +9,7 @@ pub fn fmt_line(name: &str, ops: Vec<OperandValue>) -> String {
         .into_iter()
         .map(|e| match e {
             OperandValue::StringSlice(s) => s.to_string(),
-            OperandValue::Unsigned(n) => fmt_hex(n), // FIXME: 根据指令显示不同位数
-            OperandValue::Signed(n) => fmt_hex(n),
+            OperandValue::Integer(n, _) => fmt_hex(n), // FIXME: 根据指令显示不同位数
         })
         .collect::<Vec<_>>();
 

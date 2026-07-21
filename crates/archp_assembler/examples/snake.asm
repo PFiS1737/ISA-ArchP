@@ -185,7 +185,7 @@ body_push:
 body_pop:
   call queue_pop
   srl x que_val 8
-  and y que_val 0xFF
+  and y que_val 0x0FF
   ret
 
 body_contains:

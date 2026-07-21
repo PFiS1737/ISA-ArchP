@@ -103,7 +103,7 @@ exit_code: 0
 0xA8000000 # ret
 0xAA000026 # call queue_pop                                                                                    <label: body_pop>
 0x620B0008 # srli x que_val 8                            [srl x que_val 8]
-0x500D00FF # andi y que_val 255                          [and y que_val 0xFF]
+0x500D00FF # andi y que_val 255                          [and y que_val 0x0FF]
 0xA8000000 # ret
 0x60205008 # slli que_val x 8                            [sll que_val x 8]                                     <label: body_contains>
 0x14210006 # or que_val que_val y

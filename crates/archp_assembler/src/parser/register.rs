@@ -5,8 +5,7 @@ use crate::{assembler::Context, operand::OperandValue, parser::immediate::parse_
 pub fn parse_reg(ctx: &Context, op: &OperandValue) -> Result<u32> {
     let reg = match op {
         OperandValue::StringSlice(s) => ctx.constants.get(s).unwrap_or(s),
-        OperandValue::Unsigned(n) => err_expect_reg!(n),
-        OperandValue::Signed(n) => err_expect_reg!(n),
+        OperandValue::Integer(n, _) => err_expect_reg!(n),
     };
 
     match *reg {

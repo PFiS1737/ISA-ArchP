@@ -13,7 +13,7 @@ exit_code: 0
 0x60128002 # slli t1 t0 2                         [sll t1 t0 2]
 0x00122009 # add t1 a0 t1
 0x80149000 # lw t2 t1 0                           [lw t2 0(t1)]
-0x40168FFF # addi t3 t0 -1                        [add t3 t0 -1]
+0x40168FFF # addi t3 t0 0xFFFFFFFF                [add t3 t0 -1]
 0x9600B200 # blt t3 zero .Linsertion_sort_insert                                       <label: .Linsertion_sort_inner>
 0x6018B002 # slli t4 t3 2                         [sll t4 t3 2]
 0x0018200C # add t4 a0 t4

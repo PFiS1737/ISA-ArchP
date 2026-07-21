@@ -5,7 +5,7 @@ input_file: crates/archp_assembler/examples/minesweeper.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x900003A0 # jal r0 main                                [j main]
+0x9000039E # jal r0 main                                [j main]
 0x40020000 # addi x r0 0                                [clr x]                                            <label: init_screen>
 0x40040000 # addi y r0 0                                [clr y]
 0xD0181A1B # col COLOR_BACK
@@ -178,7 +178,7 @@ exit_code: 0
 0x500C5020 # andi t2 t1 32                              [and t2 t1 FLAG_MASK]
 0x940062C0 # bne t2 r0 reveal_tile_ret                  [bnez t2 reveal_tile_ret]
 0x500C5008 # andi t2 t1 8                               [and t2 t1 MINE_MASK]
-0x94086F00 # bne t2 r0 lose_loop                        [bnez t2 lose_loop]
+0x94086EC0 # bne t2 r0 lose_loop                        [bnez t2 lose_loop]
 0x500C5007 # andi t2 t1 7                               [and t2 t1 AROUND_COUNT_MASK]
 0x40207000 # addi arg_x cursor_x 0                      [mv arg_x cursor_x]
 0x40228000 # addi arg_y cursor_y 0                      [mv arg_y cursor_y]
@@ -186,7 +186,7 @@ exit_code: 0
 0xAA00000A # call reveal_around
 0x540A5010 # ori t1 t1 16                               [or t1 t1 REVEAL_MASK]                             <label: reveal_tile_skip_reveal_around>
 0x8A009005 # sw addr t1 0                               [sw t1 addr]
-0xAA000122 # call draw_num
+0xAA000120 # call draw_num
 0xA8000000 # ret                                                                                           <label: reveal_tile_ret>
 0x40187000 # addi nx cursor_x 0                         [mv nx cursor_x]                                   <label: reveal_around>
 0x401A8000 # addi ny cursor_y 0                         [mv ny cursor_y]
@@ -211,8 +211,8 @@ exit_code: 0
 0x4022D000 # addi arg_y ny 0                            [mv arg_y ny]
 0x940060C0 # bne t2 r0 reveal_around_skip_draw_tile     [bne t2 0 reveal_around_skip_draw_tile]
 0xD0384048 # col COLOR_REVEALED
-0xAA00004C # call draw_tile
-0xAA0000EE # call draw_num                                                                                 <label: reveal_around_skip_draw_tile>
+0xAA00004A # call draw_tile
+0xAA0000EC # call draw_num                                                                                 <label: reveal_around_skip_draw_tile>
 0x94006340 # bne t2 r0 reveal_around_ret                [bnez t2 reveal_around_ret]
 0x421AD001 # subi ny ny 1                               [dec ny]
 0xABC1FFCE # call reveal_around_loop
@@ -232,18 +232,17 @@ exit_code: 0
 0x44129004 # muli addr addr 4                           [mul addr addr 4]
 0x800A9000 # lw t1 addr 0                               [lw t1 addr]
 0x500C5010 # andi t2 t1 16                              [and t2 t1 REVEAL_MASK]
-0x94006400 # bne t2 r0 toggle_flag_ret                  [bnez t2 toggle_flag_ret]
+0x940063C0 # bne t2 r0 toggle_flag_ret                  [bnez t2 toggle_flag_ret]
 0x40207000 # addi arg_x cursor_x 0                      [mv arg_x cursor_x]
 0x40228000 # addi arg_y cursor_y 0                      [mv arg_y cursor_y]
 0x500C5020 # andi t2 t1 32                              [and t2 t1 FLAG_MASK]
 0x94006140 # bne t2 r0 toggle_flag_already_set          [bnez t2 toggle_flag_already_set]
 0x42252001 # subi mine_num mine_num 1                   [dec mine_num]
 0x540A5020 # ori t1 t1 32                               [or t1 t1 FLAG_MASK]
-0xAA00003A # call draw_flag
-0x9000000E # jal r0 toggle_flag_store                   [j toggle_flag_store]
+0xAA000038 # call draw_flag
+0x9000000C # jal r0 toggle_flag_store                   [j toggle_flag_store]
 0x40252001 # addi mine_num mine_num 1                   [inc mine_num]                                     <label: toggle_flag_already_set>
-0xB00D0000 # lui t2 0x10000                             [li t2 0xFFFFFDF]
-0x400C6FDF # addi t2 t2 -33                             [li t2 0xFFFFFDF]
+0x400C0FDF # addi t2 r0 -33                             [li t2 -33]
 0x100A5006 # and t1 t1 t2
 0xD04C545C # col COLOR_HIDDEN
 0xAA000006 # call draw_tile
@@ -469,9 +468,9 @@ exit_code: 0
 0xE40A0000 # kbget t1                                                                                      <label: read_key_wait_release>
 0x943E5FC0 # bne t1 r0 read_key_wait_release            [bnez t1 read_key_wait_release]
 0xA8000000 # ret
-0xABC1FC62 # call init_screen                                                                              <label: main>
-0xABC1FCC0 # call init_mines
-0xABC1FCE0 # call init_mine_counts
+0xABC1FC64 # call init_screen                                                                              <label: main>
+0xABC1FCC2 # call init_mines
+0xABC1FCE2 # call init_mine_counts
 0xABC1FFF0 # call read_key                                                                                 <label: main_loop>
 0x403E0052 # addi r31 r0 82                             [beq key_code KEY_UP main_loop_move_cursor]
 0x9200F2DF # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_UP main_loop_move_cursor]
@@ -485,11 +484,11 @@ exit_code: 0
 0x9200F15F # beq key_code r31 main_loop_reveal_tile     [beq key_code KEY_REVEAL main_loop_reveal_tile]
 0x403E001B # addi r31 r0 27                             [beq key_code KEY_FLAG main_loop_toggle_flag]
 0x9200F15F # beq key_code r31 main_loop_toggle_flag     [beq key_code KEY_FLAG main_loop_toggle_flag]
-0xABC1FD18 # call move_cursor                                                                              <label: main_loop_move_cursor>
+0xABC1FD1A # call move_cursor                                                                              <label: main_loop_move_cursor>
 0x9000000A # jal r0 main_loop_update_seg                [j main_loop_update_seg]
-0xABC1FD84 # call reveal_tile                                                                              <label: main_loop_reveal_tile>
+0xABC1FD86 # call reveal_tile                                                                              <label: main_loop_reveal_tile>
 0x90000006 # jal r0 main_loop_update_seg                [j main_loop_update_seg]
-0xABC1FDF4 # call toggle_flag                                                                              <label: main_loop_toggle_flag>
+0xABC1FDF6 # call toggle_flag                                                                              <label: main_loop_toggle_flag>
 0x90000002 # jal r0 main_loop_update_seg                [j main_loop_update_seg]
 0xD4000012 # seg mine_num                                                                                  <label: main_loop_update_seg>
 0x91C1FFD8 # jal r0 main_loop                           [j main_loop]

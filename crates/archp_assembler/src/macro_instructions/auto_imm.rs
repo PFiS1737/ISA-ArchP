@@ -1,7 +1,7 @@
 use crate::{
     macro_instructions::{ExpandFn, macro_instruction},
     operand::op_values,
-    parser::parse_imm,
+    parser::immediate::parse_imm,
 };
 
 macro_instruction! {
@@ -47,7 +47,7 @@ const F1: ExpandFn = |ctx, _, name, ops| {
         _ => unreachable!(),
     };
 
-    if let Ok(imm) = parse_imm(ctx, &ops[2]).and_then(|imm| imm.as_i32()) {
+    if let Ok(imm) = parse_imm(ctx, &ops[2]) {
         Some(vec![(inst, op_values![ops[0], ops[1], imm])])
     } else {
         None
@@ -66,17 +66,17 @@ macro_instruction! {
 }
 
 const F2: ExpandFn = |ctx, _, name, ops| {
-    let Ok(imm) = parse_imm(ctx, &ops[1]).and_then(|imm| imm.as_i32()) else {
-        return None;
-    };
-
-    if imm == 0 {
-        Some(vec![(name, op_values![ops[0], "r0", ops[2]])])
+    if let Ok(imm) = parse_imm(ctx, &ops[1]) {
+        if imm.is_zero() {
+            Some(vec![(name, op_values![ops[0], "r0", ops[2]])])
+        } else {
+            Some(vec![
+                ("li", op_values!["r31", imm]),
+                (name, op_values![ops[0], "r31", ops[2]]),
+            ])
+        }
     } else {
-        Some(vec![
-            ("li", op_values!["r31", imm]),
-            (name, op_values![ops[0], "r31", ops[2]]),
-        ])
+        None
     }
 };
 
@@ -89,17 +89,17 @@ macro_instruction! {
 }
 
 const F3: ExpandFn = |ctx, _, name, ops| {
-    let Ok(imm) = parse_imm(ctx, &ops[2]).and_then(|imm| imm.as_i32()) else {
-        return None;
-    };
-
-    if imm == 0 {
-        Some(vec![(name, op_values![ops[0], ops[1], "r0"])])
+    if let Ok(imm) = parse_imm(ctx, &ops[2]) {
+        if imm.is_zero() {
+            Some(vec![(name, op_values![ops[0], ops[1], "r0"])])
+        } else {
+            Some(vec![
+                ("li", op_values!["r31", imm]),
+                (name, op_values![ops[0], ops[1], "r31"]),
+            ])
+        }
     } else {
-        Some(vec![
-            ("li", op_values!["r31", imm]),
-            (name, op_values![ops[0], ops[1], "r31"]),
-        ])
+        None
     }
 };
 
@@ -119,7 +119,7 @@ mod tests {
 
         assert_snapshot!(add(&["r1", "r2", "123"]), @"addi r1 r2 123");
         assert_snapshot!(add(&["r1", "r2", "3000"]), @"lui r31 1; addi r31 r31 0xFFFFFBB8; add r1 r2 r31");
-        assert_snapshot!(add(&["r1", "r2", "-123"]), @"addi r1 r2 -123");
+        assert_snapshot!(add(&["r1", "r2", "-123"]), @"addi r1 r2 0xFFFFFF85");
         assert_snapshot!(add(&["r1", "r2", "-3000"]), @"lui r31 0xFFFFF; addi r31 r31 0x448; add r1 r2 r31");
 
         assert_snapshot!(add(&["r1", "r2", "0x123"]), @"addi r1 r2 0x123");
@@ -138,7 +138,7 @@ mod tests {
 
         assert_snapshot!(beq(&["r1", "123", "0"]), @"li r31 123; beq r1 r31 0");
         assert_snapshot!(beq(&["r1", "3000", "0"]), @"lui r31 1; addi r31 r31 0xFFFFFBB8; beq r1 r31 0");
-        assert_snapshot!(beq(&["r1", "-123", "0"]), @"li r31 -123; beq r1 r31 0");
+        assert_snapshot!(beq(&["r1", "-123", "0"]), @"li r31 0xFFFFFF85; beq r1 r31 0");
         assert_snapshot!(beq(&["r1", "-3000", "0"]), @"lui r31 0xFFFFF; addi r31 r31 0x448; beq r1 r31 0");
 
         assert_snapshot!(beq(&["r1", "0x123", "0"]), @"li r31 0x123; beq r1 r31 0");

@@ -1,7 +1,7 @@
 use crate::{
     macro_instructions::{ExpandFn, macro_instruction},
     operand::op_values,
-    parser::parse_imm,
+    parser::immediate::parse_imm,
 };
 
 macro_instruction! {
@@ -26,8 +26,8 @@ const F: ExpandFn = |ctx, _, name, ops| {
         _ => &name[..name.len() - 1],
     };
 
-    if let Ok(imm) = parse_imm(ctx, &ops[2])
-        && imm.as_i12().is_err()
+    if let Ok((_, hi)) = parse_imm(ctx, &ops[2]).map(|imm| imm.split(12, true))
+        && hi != 0
     {
         Some(vec![
             ("li", op_values!["r31", ops[2]]),
@@ -55,6 +55,7 @@ mod tests {
         assert_snapshot!(addi(&["r1", "r2", "0x123"]), @"");
         assert_snapshot!(addi(&["r1", "r2", "0x1234"]), @"lui r31 1; addi r31 r31 0x234; add r1 r2 r31");
         assert_snapshot!(addi(&["r1", "r2", "0x12345678"]), @"lui r31 0x12345; addi r31 r31 0x678; add r1 r2 r31");
+        assert_snapshot!(addi(&["r1", "r2", "0xFFFFFFFF"]), @"");
 
         assert_snapshot!(addi(&["r1", "r2", "123"]), @"");
         assert_snapshot!(addi(&["r1", "r2", "3000"]), @"lui r31 1; addi r31 r31 0xFFFFFBB8; add r1 r2 r31");

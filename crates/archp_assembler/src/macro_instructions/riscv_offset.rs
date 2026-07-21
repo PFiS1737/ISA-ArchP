@@ -67,7 +67,7 @@ const F3: ExpandFn = |_, _, name, ops| {
 fn parse_offset<'a>(op: &OperandValue<'a>) -> Option<(&'a str, &'a str)> {
     let s = match op {
         OperandValue::StringSlice(s) => s,
-        OperandValue::Unsigned(_) | OperandValue::Signed(_) => return None,
+        OperandValue::Integer(_, _) => return None,
     };
 
     if let Some(s) = s.strip_suffix(')') {
@@ -89,7 +89,6 @@ mod tests {
 
         assert!(f(&OperandValue::StringSlice("100sp)")).is_none());
         assert!(f(&OperandValue::StringSlice("100(sp")).is_none());
-        assert!(f(&OperandValue::Unsigned(123)).is_none());
 
         assert_eq!(f(&OperandValue::StringSlice("100")).unwrap(), ("0", "100"));
         assert_eq!(f(&OperandValue::StringSlice("r1")).unwrap(), ("0", "r1"));

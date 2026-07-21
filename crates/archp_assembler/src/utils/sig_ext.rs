@@ -1,7 +1,8 @@
-pub fn sig_ext_12_to_32(val: u32) -> i32 {
-    (if (val & 0x800) != 0 {
-        val | 0xFFFFF000
+pub fn sign_extend(v: u32, bits: u8) -> u32 {
+    let shift = 32 - bits;
+    if bits == 32 {
+        v
     } else {
-        val & 0x00000FFF
-    }) as i32
+        ((v << shift) as i32 >> shift) as u32
+    }
 }
