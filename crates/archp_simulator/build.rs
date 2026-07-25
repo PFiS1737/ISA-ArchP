@@ -6,12 +6,25 @@ use serde::{Deserialize, Serialize};
 struct VerilatorMakeConfig {
     version: i32,
     system: VerilatorMakeConfigSystem,
+    options: VerilatorMakeConfigOptions,
     sources: VerilatorMakeConfigSources,
 }
 
 #[derive(Serialize, Deserialize)]
 struct VerilatorMakeConfigSystem {
     verilator_root: PathBuf,
+}
+
+#[derive(Serialize, Deserialize)]
+struct VerilatorMakeConfigOptions {
+    system_c: bool,
+    coverage: bool,
+    use_timing: bool,
+    threads: i32,
+    trace: bool,
+    trace_fst: bool,
+    trace_saif: bool,
+    trace_vcd: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -72,7 +85,7 @@ fn main() {
             "fast",
             "--x-initial",
             "fast",
-            "--noassert",
+            "--no-assert",
         ])
         .args(dpi_files)
         .arg(veryl_out_dir.join("bundled.sv"))
@@ -98,17 +111,31 @@ fn main() {
         serde_json::from_str(&config_data).expect("Failed to parse Verilator JSON config");
 
     cxx_build::bridge("src/cpu.rs")
-        .cpp(true)
         .std("c++20")
         .warnings(false)
-        .define("VM_COVERAGE", "0")
-        .define("VM_SC", "0")
-        .define("VM_THREADS", "1")
-        .define("VM_TIMING", "0")
-        .define("VM_TRACE", "0")
-        .define("VM_TRACE_FST", "0")
-        .define("VM_TRACE_SAIF", "0")
-        .define("VM_TRACE_VCD", "0")
+        .define("VM_SC", if config.options.system_c { "1" } else { "0" })
+        .define(
+            "VM_COVERAGE",
+            if config.options.coverage { "1" } else { "0" },
+        )
+        .define(
+            "VM_TIMING",
+            if config.options.use_timing { "1" } else { "0" },
+        )
+        .define("VM_THREADS", config.options.threads.to_string().as_str())
+        .define("VM_TRACE", if config.options.trace { "1" } else { "0" })
+        .define(
+            "VM_TRACE_FST",
+            if config.options.trace_fst { "1" } else { "0" },
+        )
+        .define(
+            "VM_TRACE_SAIF",
+            if config.options.trace_saif { "1" } else { "0" },
+        )
+        .define(
+            "VM_TRACE_VCD",
+            if config.options.trace_vcd { "1" } else { "0" },
+        )
         .include(verilator_out_dir)
         .include(config.system.verilator_root.join("include"))
         .include(config.system.verilator_root.join("include/vltstd"))
