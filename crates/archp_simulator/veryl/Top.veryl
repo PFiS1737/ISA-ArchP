@@ -2,9 +2,9 @@ module Top (
     clk: input clock,
     rst: input reset,
 ) {
-    var pc: u32;
+    var pc: bit<32>;
     var pcwe: logic;
-    var pcwdata: u32;
+    var pcwdata: bit<32>;
     inst PC_: PC ( clk, rst, we: pcwe, wdata: pcwdata, pc );
 
     let instr: bit<32> = $sv::get_instruction(pc); // @goto ../dpi/Program.sv
