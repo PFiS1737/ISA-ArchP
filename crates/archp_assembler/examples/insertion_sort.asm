@@ -1,8 +1,5 @@
 # The insertion sort algorithm implemented in assembly.
 
-# Also demonstrates reading multiple digits from the keyboard,
-# accumulating them into an integer, and displaying integers on the 7-segment display.
-
 const zero r0
 
 const sp r1

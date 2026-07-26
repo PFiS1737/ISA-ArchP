@@ -120,6 +120,7 @@ init_screen:
 
 init_mines:
   li mine_num MINE_NUM_MAX
+  out mine_num
   clr i
 
   init_mines_loop:
@@ -406,6 +407,7 @@ toggle_flag:
 
   toggle_flag_store:
     sw t1 addr
+    out mine_num
 
   toggle_flag_ret:
     ret
@@ -688,18 +690,14 @@ main:
 
     main_loop_move_cursor:
       call move_cursor
-      j main_loop_update_seg
+      j main_loop
     main_loop_reveal_tile:
       call reveal_tile
-      j main_loop_update_seg
+      j main_loop
     main_loop_toggle_flag:
       call toggle_flag
-      j main_loop_update_seg
+      j main_loop
 
-    main_loop_update_seg:
-      seg mine_num
-
-    j main_loop
 
   win_loop:
     j win_loop

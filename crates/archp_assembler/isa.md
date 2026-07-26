@@ -145,8 +145,6 @@ xxxx xxx   xxx   xxxxx   xxxxxxxxxxxxxxxxx
 |----------|------------|------|-------|
 | 1101 000 | colr | I | set color |
 | 1101 001 | spx | R | set pixel |
-| 1101 010 | seg | R | segment display |
-| 1101 011 | segi | I | segment display immediate |
 
 | Encoding | Instruction | Type | Notes |
 |----------|------------|------|-------|
