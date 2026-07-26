@@ -1,9 +1,10 @@
 mod command;
 mod cpu;
 mod dpi;
+mod memory;
 
 use std::sync::{
-    Arc,
+    Arc, Mutex,
     atomic::{self, AtomicBool},
 };
 
@@ -13,7 +14,8 @@ use clap_complete::CompleteEnv;
 
 use crate::{
     command::Cli,
-    dpi::{MEMORY, PIXEL_DISPLAY, PROGRAM},
+    dpi::{memory::MEMORY, pixel_display::PIXEL_DISPLAY, program::PROGRAM},
+    memory::Memory,
 };
 
 fn main() -> Result<()> {
@@ -34,7 +36,9 @@ fn main() -> Result<()> {
         })?;
     }
 
-    MEMORY.lock().unwrap().init(1024 * 1024 * 4);
+    MEMORY
+        .set(Mutex::new(Memory::new(cli.memory_size as usize)))
+        .expect("'MEMORY' has already been initialized.");
     PIXEL_DISPLAY.with(|pd| pd.borrow_mut().init(128, 96, 6))?;
     PROGRAM.lock().unwrap().open(&cli.file)?;
 

@@ -1,9 +1,5 @@
-mod memory;
-mod pixel_display;
-mod program;
-mod simple_io;
-mod stack;
-
-pub use memory::MEMORY;
-pub use pixel_display::PIXEL_DISPLAY;
-pub use program::PROGRAM;
+pub mod memory;
+pub mod pixel_display;
+pub mod program;
+pub mod simple_io;
+pub mod stack;
