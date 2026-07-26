@@ -99,6 +99,24 @@ instruction! {
 }
 
 instruction! {
+    pub Divu {
+        name: "divu",
+        opcode: 0b0000011,
+        funct3: 0b010,
+        itype: R,
+    }
+}
+
+instruction! {
+    pub Remu {
+        name: "remu",
+        opcode: 0b0000011,
+        funct3: 0b011,
+        itype: R,
+    }
+}
+
+instruction! {
     pub Divi {
         name: "divi",
         opcode: 0b0000011,
@@ -112,6 +130,24 @@ instruction! {
         name: "remi",
         opcode: 0b0000011,
         funct3: 0b101,
+        itype: I,
+    }
+}
+
+instruction! {
+    pub Diviu {
+        name: "diviu",
+        opcode: 0b0000011,
+        funct3: 0b110,
+        itype: I,
+    }
+}
+
+instruction! {
+    pub Remiu {
+        name: "remiu",
+        opcode: 0b0000011,
+        funct3: 0b111,
         itype: I,
     }
 }

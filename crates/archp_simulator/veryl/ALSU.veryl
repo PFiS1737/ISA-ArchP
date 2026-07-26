@@ -66,6 +66,8 @@ module ALSU (
 
             'b011_z00 /* DIV */: result = if b_i32 == 0 ? '1 : a_i32 / b_i32;
             'b011_z01 /* REM */: result = if b_i32 == 0 ? '0 : a_i32 % b_i32;
+            'b011_z10 /* DIVU */: result = if b_u32 == 0 ? '1 : a_u32 / b_u32;
+            'b011_z11 /* REMU */: result = if b_u32 == 0 ? '0 : a_u32 % b_u32;
 
             'b10z_000 /* SLL */: result = a << b[4:0];
             'b10z_001 /* SRL */: result = a >> b[4:0];

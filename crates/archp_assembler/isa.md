@@ -76,8 +76,12 @@ xxxxxxx   xxx   xxxxx   xxxxxxxxxxxxxxxxx
 | ------- | ------ | ---- | ----------- |
 | 0000011 | 000    | R    | div         |
 | 0000011 | 001    | R    | rem         |
+| 0000011 | 010    | R    | divu        |
+| 0000011 | 011    | R    | remu        |
 | 0000011 | 100    | I    | divi        |
 | 0000011 | 101    | I    | remi        |
+| 0000011 | 110    | I    | diviu       |
+| 0000011 | 111    | I    | remiu       |
 
 ### Shift / Rotate
 

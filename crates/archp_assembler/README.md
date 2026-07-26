@@ -49,9 +49,8 @@ In this section:
 #### Arithmetic
 
 - instructions:
-  - `add`, `sub`, `mul`, `mulh`, `mulhu`, `mulhsu`, `div`, `rem`
-  - `addi`, `subi`, `muli`, `mulhi`, `mulhiu`, `mulhisu`, `divi`, `remi`
-  - TODO: `divu`, `remu`, `diviu`, `remiu`
+  - `add`, `sub`, `mul`, `mulh`, `mulhu`, `mulhsu`, `div`, `rem`, `divu`, `remu`
+  - `addi`, `subi`, `muli`, `mulhi`, `mulhiu`, `mulhisu`, `divi`, `remi`, `diviu`, `remiu`
 - format: `instr rd rs1 rs2/imm12`
 - pseudo:
   - `li rd imm12` => `addi rd r0 imm12`
