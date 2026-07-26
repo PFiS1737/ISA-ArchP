@@ -1,11 +1,11 @@
-mod arithmetic;
+mod arithmetic_logic;
 mod branch;
 mod jump_and_link;
 mod load_store;
-mod logic;
 mod misc;
+mod mul_div;
 mod set;
-mod shift;
+mod shift_rotate;
 mod stack_call_return;
 mod upper_imm;
 
@@ -43,6 +43,7 @@ pub static INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static dyn Instruction
 pub trait Instruction: Send + Sync {
     fn name(&self) -> &'static str;
     fn opcode(&self) -> u32;
+    fn funct3(&self) -> u32;
     fn itype(&self) -> InstrType;
     fn operands_format(&self) -> Option<&'static [Option<OperandType>]>;
 
@@ -91,57 +92,68 @@ pub trait Instruction: Send + Sync {
         Ok(ret)
     }
 
-    // xxxx xxx   000   xxxxx   xxxxx   0000000   xxxxx
-    //  opcode  |  -  |   rd  |  rs1  |    --   |  rs2
-    fn encode_r(&self, operands: &[u32]) -> Result<u32> {
-        let rd = operands[0];
-        let rs1 = operands[1];
-        let rs2 = operands[2];
+    fn encode_r(&self, ops: &[u32]) -> Result<u32> {
+        let rd = ops[0];
+        let rs1 = ops[1];
+        let rs2 = ops[2];
 
-        code!(@R, self.opcode(), rd, rs1, rs2)
+        field! {
+            self.opcode(), 25, 7;
+            self.funct3(), 22, 3;
+            rd, 17, 5;
+            rs1, 12, 5;
+            0, 5, 7;
+            rs2, 0, 5;
+        }
     }
 
-    // xxxx xxx   000   xxxxx   xxxxx   xxxxxxxxxxxx
-    //  opcode  |  -  |   rd  |  rs1  |    imm12
-    fn encode_i(&self, operands: &[u32]) -> Result<u32> {
-        let rd = operands[0];
-        let rs1 = operands[1];
-        let imm12 = operands[2];
+    fn encode_i(&self, ops: &[u32]) -> Result<u32> {
+        let rd = ops[0];
+        let rs1 = ops[1];
+        let imm12 = ops[2];
 
-        code!(@R, self.opcode(), rd, rs1, imm12)
+        field! {
+            self.opcode(), 25, 7;
+            self.funct3(), 22, 3;
+            rd, 17, 5;
+            rs1, 12, 5;
+            imm12, 0, 12;
+        }
     }
 
-    // 1001 xxx   000    xxxxx   xxxxx   xxxxxxx   xxxxx
-    //  opcode  |  -  |  up5  |  rs1  |   low7  |  rs2  (offset12 = up5 << 7 | low7)
-    fn encode_b(&self, operands: &[u32]) -> Result<u32> {
-        let rs1 = operands[0];
-        let rs2 = operands[1];
-        let offset12 = operands[2];
+    fn encode_b(&self, ops: &[u32]) -> Result<u32> {
+        let rs1 = ops[0];
+        let rs2 = ops[1];
+        let offset12 = ops[2];
 
-        code!(@B, self.opcode(), (offset12 >> 7), rs1, (offset12 & 0x7F), rs2)
-    }
-    fn encode_s(&self, operands: &[u32]) -> Result<u32> {
-        self.encode_b(operands)
-    }
-
-    // 1000 100   xxx   xxxxx   xxxxxxxxxxxxxxxxx
-    //    lui  |uimm20u|  rd  |      uimm20l      (uimm20 = uimm20u << 17 | uimm20l)
-    fn encode_u(&self, operands: &[u32]) -> Result<u32> {
-        let rd = operands[0];
-        let imm20 = operands[1];
-
-        code!(@U, self.opcode(), (imm20 >> 17), rd, (imm20 & 0x1FFFF))
-    }
-    fn encode_j(&self, operands: &[u32]) -> Result<u32> {
-        self.encode_u(operands)
+        field! {
+            self.opcode(), 25, 7;
+            self.funct3(), 22, 3;
+            (offset12 >> 7), 17, 5;
+            rs1, 12, 5;
+            (offset12 & 0x7F), 5, 7;
+            rs2, 0, 5;
+        }
     }
 
-    // 1101 000   0   xxxxxxxx xxxxxxxx xxxxxxxx
-    //    col   | - |           color24
-    fn encode_c(&self, operands: &[u32]) -> Result<u32> {
-        let color24 = operands[0];
+    fn encode_s(&self, ops: &[u32]) -> Result<u32> {
+        self.encode_b(ops)
+    }
 
-        code!(@U, self.opcode(), 0, 0, color24)
+    fn encode_u(&self, ops: &[u32]) -> Result<u32> {
+        let rd = ops[0];
+        let imm20 = ops[1];
+
+        field! {
+            self.opcode(), 25, 7;
+            (imm20 >> 17), 22, 3;
+            rd, 17, 5;
+            (imm20 & 0x1FFFF), 0, 17;
+        }
+    }
+
+    fn encode_j(&self, ops: &[u32]) -> Result<u32> {
+        self.encode_u(ops)
     }
 
     fn assert_operand_count(&self, count: usize, expected: usize) -> Result<()> {
@@ -173,21 +185,18 @@ pub trait Instruction: Send + Sync {
     }
 }
 
-macro code {
-    // R/I-type
-    (@R, $opcode:expr, $rd:expr, $rs1:expr, $rs2_or_imm12:expr) => {
-        Ok(($opcode << 25) | ($rd << 17) | ($rs1 << 12) | $rs2_or_imm12)
+macro field {
+    ( $( $value:expr, $shift:literal, $len:literal );* $(;)? ) => {
+        Ok(
+            $(
+                field!(@one, $value, $shift, $len)
+            )|*
+        )
     },
 
-    // B-type
-    (@B, $opcode:expr, $up5:expr, $rs1:expr, $low7:expr, $rs2:expr) => {
-        Ok(($opcode << 25) | ($up5 << 17) | ($rs1 << 12) | ($low7 << 5) | $rs2)
-    },
-
-    // U/C-type
-    (@U, $opcode:expr, $uimm20u:expr, $rd:expr, $uimm20l:expr) => {
-        Ok(($opcode << 25) | ($uimm20u << 22) | ($rd << 17) | $uimm20l)
-    },
+    (@one, $value:expr, $shift:literal, $len:literal) => {{
+        ((($value) as u32) & ((1u32 << $len) - 1)) << $shift
+    }},
 }
 
 macro impl_instruction {
@@ -196,6 +205,7 @@ macro impl_instruction {
         $vis:vis $id:ident {
             name: $name:literal,
             opcode: $opcode:literal,
+            funct3: $funct3:literal,
             itype: $itype:ident,
             operands_format: $opt:ident $( ($format:tt) )? ,
         }
@@ -209,6 +219,9 @@ macro impl_instruction {
             }
             fn opcode(&self) -> u32 {
                 $opcode
+            }
+            fn funct3(&self) -> u32 {
+                $funct3
             }
             fn itype(&self) -> $crate::instructions::InstrType {
                 $crate::instructions::InstrType::$itype
@@ -230,6 +243,7 @@ macro instruction {
         $vis:vis $id:ident {
             name: $name:literal,
             opcode: $opcode:literal,
+            funct3: $funct3:literal,
             itype: $itype:ident,
         }
     ) => {
@@ -238,8 +252,51 @@ macro instruction {
             $vis $id {
                 name: $name,
                 opcode: $opcode,
+                funct3: $funct3,
                 itype: $itype,
                 operands_format: None,
+            }
+        }
+    },
+
+    (
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $name:literal,
+            opcode: $opcode:literal,
+            itype: $itype:ident,
+        }
+    ) => {
+        $crate::instructions::impl_instruction!{
+            $( #[doc = $doc] )*
+            $vis $id {
+                name: $name,
+                opcode: $opcode,
+                funct3: 0,
+                itype: $itype,
+                operands_format: None,
+            }
+        }
+    },
+
+    (
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $name:literal,
+            opcode: $opcode:literal,
+            funct3: $funct3:literal,
+            itype: $itype:ident,
+            operands_format: $format:tt,
+        }
+    ) => {
+        $crate::instructions::impl_instruction!{
+            $( #[doc = $doc] )*
+            $vis $id {
+                name: $name,
+                opcode: $opcode,
+                funct3: $funct3,
+                itype: $itype,
+                operands_format: Some($format),
             }
         }
     },
@@ -258,6 +315,7 @@ macro instruction {
             $vis $id {
                 name: $name,
                 opcode: $opcode,
+                funct3: 0,
                 itype: $itype,
                 operands_format: Some($format),
             }
@@ -301,25 +359,25 @@ mod tests {
         assert_snapshot!(cmd(&["r1", "r2", "r3", "r4"]), @"Error: Instruction 'addi' requires 3 operands, got 4");
         assert_snapshot!(cmd(&["r1", "rrr", "123"]), @"Error: Invalid register: rrr");
         assert_snapshot!(cmd(&["r1", "r2", "r3"]), @"Error: Invalid immediate: r3");
-        assert_snapshot!(cmd(&["r1", "r2", "0xFFF"]), @"0100 000 000 00001 00010 1111111 11111");
-        assert_snapshot!(cmd(&["r1", "r2", "0xFFFF"]), @"0100 000 000 00001 00010 1111111 11111");
-        assert_snapshot!(cmd(&["r1", "r2", "0xFFFFFFFF"]), @"0100 000 000 00001 00010 1111111 11111");
+        assert_snapshot!(cmd(&["r1", "r2", "0xFFF"]), @"0000 000 100 00001 00010 1111111 11111");
+        assert_snapshot!(cmd(&["r1", "r2", "0xFFFF"]), @"0000 000 100 00001 00010 1111111 11111");
+        assert_snapshot!(cmd(&["r1", "r2", "0xFFFFFFFF"]), @"0000 000 100 00001 00010 1111111 11111");
 
-        assert_snapshot!(cmd(&["r1", "r2", "3"]), @"0100 000 000 00001 00010 0000000 00011");
-        assert_snapshot!(cmd(&["r1", "r2", "2047"]), @"0100 000 000 00001 00010 0111111 11111");
+        assert_snapshot!(cmd(&["r1", "r2", "3"]), @"0000 000 100 00001 00010 0000000 00011");
+        assert_snapshot!(cmd(&["r1", "r2", "2047"]), @"0000 000 100 00001 00010 0111111 11111");
         assert_snapshot!(cmd(&["r1", "r2", "2048"]), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(cmd(&["r1", "r2", "-3"]), @"0100 000 000 00001 00010 1111111 11101");
-        assert_snapshot!(cmd(&["r1", "r2", "-2048"]), @"0100 000 000 00001 00010 1000000 00000");
+        assert_snapshot!(cmd(&["r1", "r2", "-3"]), @"0000 000 100 00001 00010 1111111 11101");
+        assert_snapshot!(cmd(&["r1", "r2", "-2048"]), @"0000 000 100 00001 00010 1000000 00000");
         assert_snapshot!(cmd(&["r1", "r2", "-2049"]), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
 
         let cmd = instr("srli");
 
         assert_snapshot!(cmd(&["r1", "r2", "32"]), @"Error: Immediate '32' out of range for u5 (0 ..= 31)");
-        assert_snapshot!(cmd(&["r1", "r2", "31"]), @"0110 001 000 00001 00010 0000000 11111");
+        assert_snapshot!(cmd(&["r1", "r2", "31"]), @"0000 101 001 00001 00010 0000000 11111");
 
         let cmd = instr("colr");
 
-        assert_snapshot!(cmd(&["r0", "r31", "0xB00"]), @"1101 000 000 00000 11111 1011000 00000");
+        assert_snapshot!(cmd(&["r0", "r31", "0xB00"]), @"1111 111 000 00000 11111 1011000 00000");
     }
 
     #[test]
@@ -327,15 +385,15 @@ mod tests {
         let cmd = instr("beq");
         // Same to I-type, omitting ...
         assert_snapshot!(cmd(&["r1", "r0", "over"]), @"Error: Address offset '596523' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(cmd(&["r1", "r0", "loop"]), @"1001 001 000 00000 00001 0000010 00000");
+        assert_snapshot!(cmd(&["r1", "r0", "loop"]), @"0001 001 000 00000 00001 0000010 00000");
 
         let cmd = instr("sw");
 
-        assert_snapshot!(cmd(&["r1", "r2", "3"]), @"1000 101 000 00000 00001 0000011 00010");
-        assert_snapshot!(cmd(&["r1", "r2", "2047"]), @"1000 101 000 01111 00001 1111111 00010");
+        assert_snapshot!(cmd(&["r1", "r2", "3"]), @"0001 000 101 00000 00001 0000011 00010");
+        assert_snapshot!(cmd(&["r1", "r2", "2047"]), @"0001 000 101 01111 00001 1111111 00010");
         assert_snapshot!(cmd(&["r1", "r2", "2048"]), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(cmd(&["r1", "r2", "-3"]), @"1000 101 000 11111 00001 1111101 00010");
-        assert_snapshot!(cmd(&["r1", "r2", "-2048"]), @"1000 101 000 10000 00001 0000000 00010");
+        assert_snapshot!(cmd(&["r1", "r2", "-3"]), @"0001 000 101 11111 00001 1111101 00010");
+        assert_snapshot!(cmd(&["r1", "r2", "-2048"]), @"0001 000 101 10000 00001 0000000 00010");
         assert_snapshot!(cmd(&["r1", "r2", "-2049"]), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
     }
 
@@ -349,6 +407,6 @@ mod tests {
         assert_snapshot!(cmd(&["r3", "0x200000"]), @"Error: Immediate '0x200000' out of range for u20 (0 ..= 1048575)");
         assert_snapshot!(cmd(&["r3", "-123"]), @"Error: Immediate '-123' out of range for u20 (0 ..= 1048575)");
 
-        assert_snapshot!(cmd(&["r3", "0xABCDE"]), @"1011 000 101 00011 01011 1100110 11110");
+        assert_snapshot!(cmd(&["r3", "0xABCDE"]), @"0001 011 101 00011 01011 1100110 11110");
     }
 }

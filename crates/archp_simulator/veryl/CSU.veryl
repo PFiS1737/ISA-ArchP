@@ -17,8 +17,6 @@ module CSU (
     pcwe: output logic,
     pcwdata: output bit<32>,
 ) {
-    let en: logic = inside opcode {7'b1010_000..=7'b1010_111};
-
     let imm_call: signed bit<32> = {
         funct3[msb] repeat 11, funct3, rs1, imm12, 1'b0
     };
@@ -31,15 +29,18 @@ module CSU (
         if_reset {
             $sv::call_stack_reset();
             $sv::data_stack_reset();
-        } else if en {
-            #[cond_type(unique)]
-            case opcode[2:0] {
-                'b000 /* POP */: $sv::data_stack_pop();
-                'b001 /* PUSH */: $sv::data_stack_push(rdata1);
-                'b100 /* RET */: $sv::call_stack_pop();
-                'b101 /* CALL */: $sv::call_stack_push(pc + 4);
-                'b110 /* CALLR */: $sv::call_stack_push(pc + 4);
-                default: {}
+        } else {
+            if /* CALL */ opcode == 'b1111101 {
+                $sv::call_stack_push(pc + 4);
+            } else if opcode == 'b1111110 {
+                #[cond_type(unique)]
+                case funct3 {
+                    'b000 /* POP */: $sv::data_stack_pop();
+                    'b001 /* PUSH */: $sv::data_stack_push(rdata1);
+                    'b010 /* RET */: $sv::call_stack_pop();
+                    'b011 /* CALLR */: $sv::call_stack_push(pc + 4);
+                    default: {}
+                }
             }
         }
     }
@@ -50,22 +51,21 @@ module CSU (
         pcwe = 0;
         pcwdata = '0;
 
-        if en {
+        if /* CALL */ opcode == 'b1111101 {
+            pcwe = 1;
+            pcwdata = pc_call;
+        } else if opcode == 'b1111110 {
             #[cond_type(unique)]
-            case opcode[2:0] {
+            case funct3 {
                 'b000 /* POP */: {
                     rfwe = 1;
                     wdata = $sv::data_stack_peek();
                 }
-                'b100 /* RET */: {
+                'b010 /* RET */: {
                     pcwe = 1;
                     pcwdata = $sv::call_stack_peek();
                 }
-                'b101 /* CALL */: {
-                    pcwe = 1;
-                    pcwdata = pc_call;
-                }
-                'b110 /* CALLR */: {
+                'b011 /* CALLR */: {
                     pcwe = 1;
                     pcwdata = pc_callr;
                 }

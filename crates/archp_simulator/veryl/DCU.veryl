@@ -4,6 +4,7 @@ module DCU (
     rst: input reset,
 
     opcode: input bit<7>,
+    funct3: input bit<3>,
     imm12: input signed bit<12>,
 
     rdata1: input bit<32>,
@@ -12,24 +13,25 @@ module DCU (
     rfwe: output logic,
     wdata: output bit<32>,
 ) {
+    let en: logic = opcode == 'b1111111;
+
     var color: bit<32>;
 
-    var col: bit<32>;
-    always_comb {
-        col = $signed(rdata1) + $signed({imm12[msb] repeat 20, imm12});
-    }
+    let col: bit<32> = $signed(rdata1) + $signed({imm12[msb] repeat 20, imm12});
 
     always_ff {
         if_reset {
             color = '0;
             $sv::pixel_display_reset();
-        } else if opcode == 'b1101_000 /* COL */ {
-            color = col;
-        } else if opcode == 'b1101_001 /* SPX */ {
-            $sv::pixel_display_set(rdata1, rdata2, color);
+        } else {
+            if /* COLR */ en && funct3 == 'b000 {
+                color = col;
+            } else if /* SPX */ en && funct3 == 'b001 {
+                $sv::pixel_display_set(rdata1, rdata2, color);
+            }
         }
     }
 
-    assign rfwe = opcode == 'b1101_000 /* COL */;
+    assign rfwe = /* COL */ en && funct3 == 'b000;
     assign wdata = if rfwe ? col : '0;
 }

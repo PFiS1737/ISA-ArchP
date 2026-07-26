@@ -1,9 +1,12 @@
 use crate::instructions::instruction;
 
+// func3[2:0]: encoding
+
 instruction! {
     pub Beq {
         name: "beq",
-        opcode: 0b_1001_001,
+        opcode: 0b0001001,
+        funct3: 0b000,
         itype: B,
     }
 }
@@ -11,7 +14,8 @@ instruction! {
 instruction! {
     pub Bne {
         name: "bne",
-        opcode: 0b_1001_010,
+        opcode: 0b0001001,
+        funct3: 0b001,
         itype: B,
     }
 }
@@ -19,31 +23,35 @@ instruction! {
 instruction! {
     pub Blt {
         name: "blt",
-        opcode: 0b_1001_011,
-        itype: B,
-    }
-}
-
-instruction! {
-    pub Ble {
-        name: "bge",
-        opcode: 0b_1001_100,
-        itype: B,
-    }
-}
-
-instruction! {
-    pub Bgt {
-        name: "bltu",
-        opcode: 0b_1001_101,
+        opcode: 0b0001001,
+        funct3: 0b010,
         itype: B,
     }
 }
 
 instruction! {
     pub Bge {
+        name: "bge",
+        opcode: 0b0001001,
+        funct3: 0b011,
+        itype: B,
+    }
+}
+
+instruction! {
+    pub Bltu {
+        name: "bltu",
+        opcode: 0b0001001,
+        funct3: 0b100,
+        itype: B,
+    }
+}
+
+instruction! {
+    pub Bgeu {
         name: "bgeu",
-        opcode: 0b_1001_110,
+        opcode: 0b0001001,
+        funct3: 0b101,
         itype: B,
     }
 }

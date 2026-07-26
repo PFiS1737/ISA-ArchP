@@ -5,50 +5,50 @@ input_file: crates/archp_assembler/examples/insertion_sort.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0xB0020002 # lui sp 2                             [li sp 8192]
-0x40021000 # addi sp sp 0                         [li sp 8192]
-0x9000002C # jal r0 main                          [j main]
-0x40100001 # addi t0 r0 1                         [li t0 1]                            <label: insertion_sort>
-0x980084C3 # bge t0 a1 .Linsertion_sort_done                                           <label: .Linsertion_sort_outer>
-0x60128002 # slli t1 t0 2                         [sll t1 t0 2]
+0x16020002 # lui sp 2                             [li sp 8192]
+0x01021000 # addi sp sp 0                         [li sp 8192]
+0x1400002C # jal r0 main                          [j main]
+0x01100001 # addi t0 r0 1                         [li t0 1]                            <label: insertion_sort>
+0x12C084C3 # bge t0 a1 .Linsertion_sort_done                                           <label: .Linsertion_sort_outer>
+0x0A128002 # slli t1 t0 2                         [sll t1 t0 2]
 0x00122009 # add t1 a0 t1
-0x80149000 # lw t2 t1 0                           [lw t2 0(t1)]
-0x40168FFF # addi t3 t0 0xFFFFFFFF                [add t3 t0 -1]
-0x9600B200 # blt t3 zero .Linsertion_sort_insert                                       <label: .Linsertion_sort_inner>
-0x6018B002 # slli t4 t3 2                         [sll t4 t3 2]
+0x10149000 # lw t2 t1 0                           [lw t2 0(t1)]
+0x01168FFF # addi t3 t0 0xFFFFFFFF                [add t3 t0 -1]
+0x1280B200 # blt t3 zero .Linsertion_sort_insert                                       <label: .Linsertion_sort_inner>
+0x0A18B002 # slli t4 t3 2                         [sll t4 t3 2]
 0x0018200C # add t4 a0 t4
-0x801AC000 # lw t5 t4 0                           [lw t5 0(t4)]
-0x9800A10D # bge t2 t5 .Linsertion_sort_insert    [ble t5 t2 .Linsertion_sort_insert]
-0x8A00C08D # sw t4 t5 4                           [sw t5 4(t4)]
-0x4216B001 # subi t3 t3 1                         [dec t3]
-0x91C1FFF2 # jal r0 .Linsertion_sort_inner        [j .Linsertion_sort_inner]
-0x4016B001 # addi t3 t3 1                         [inc t3]                             <label: .Linsertion_sort_insert>
-0x6016B002 # slli t3 t3 2                         [sll t3 t3 2]
+0x101AC000 # lw t5 t4 0                           [lw t5 0(t4)]
+0x12C0A10D # bge t2 t5 .Linsertion_sort_insert    [ble t5 t2 .Linsertion_sort_insert]
+0x1140C08D # sw t4 t5 4                           [sw t5 4(t4)]
+0x0156B001 # subi t3 t3 1                         [dec t3]
+0x15C1FFF2 # jal r0 .Linsertion_sort_inner        [j .Linsertion_sort_inner]
+0x0116B001 # addi t3 t3 1                         [inc t3]                             <label: .Linsertion_sort_insert>
+0x0A16B002 # slli t3 t3 2                         [sll t3 t3 2]
 0x0016200B # add t3 a0 t3
-0x8A00B00A # sw t3 t2 0                           [sw t2 0(t3)]
-0x40108001 # addi t0 t0 1                         [inc t0]
-0x91C1FFDC # jal r0 .Linsertion_sort_outer        [j .Linsertion_sort_outer]
-0xA8000000 # ret                                                                       <label: .Linsertion_sort_done>
-0xE0060000 # in a1                                                                     <label: main>
-0x601C3002 # slli s0 a1 2                         [sll s0 a1 2]
-0x0202100E # sub sp sp s0
-0x40163000 # addi t3 a1 0                         [mv t3 a1]
-0x40121000 # addi t1 sp 0                         [mv t1 sp]
-0x9200B180 # beq t3 r0 .Lmain_input_done          [beqz t3 .Lmain_input_done]          <label: .Lmain_input_loop>
-0xE0140000 # in t2
-0x8A00900A # sw t1 t2 0                           [sw t2 0(t1)]
-0x40129004 # addi t1 t1 4                         [add t1 t1 4]
-0x4216B001 # subi t3 t3 1                         [dec t3]
-0x91C1FFF6 # jal r0 .Lmain_input_loop             [j .Lmain_input_loop]
-0x40041000 # addi a0 sp 0                         [mv a0 sp]                           <label: .Lmain_input_done>
-0xABC1FFBE # call insertion_sort
-0x92003180 # beq a1 zero .Lmain_output_done                                            <label: .Lmain_output_loop>
-0x80102000 # lw t0 a0 0                           [lw t0 0(a0)]
-0xE2008000 # out t0
-0x40042004 # addi a0 a0 4                         [add a0 a0 4]
-0x42063001 # subi a1 a1 1                         [dec a1]
-0x91C1FFF6 # jal r0 .Lmain_output_loop            [j .Lmain_output_loop]
+0x1140B00A # sw t3 t2 0                           [sw t2 0(t3)]
+0x01108001 # addi t0 t0 1                         [inc t0]
+0x15C1FFDC # jal r0 .Linsertion_sort_outer        [j .Linsertion_sort_outer]
+0xFC800000 # ret                                                                       <label: .Linsertion_sort_done>
+0xFE860000 # in a1                                                                     <label: main>
+0x0A1C3002 # slli s0 a1 2                         [sll s0 a1 2]
+0x0042100E # sub sp sp s0
+0x01163000 # addi t3 a1 0                         [mv t3 a1]
+0x01121000 # addi t1 sp 0                         [mv t1 sp]
+0x1200B180 # beq t3 r0 .Lmain_input_done          [beqz t3 .Lmain_input_done]          <label: .Lmain_input_loop>
+0xFE940000 # in t2
+0x1140900A # sw t1 t2 0                           [sw t2 0(t1)]
+0x01129004 # addi t1 t1 4                         [add t1 t1 4]
+0x0156B001 # subi t3 t3 1                         [dec t3]
+0x15C1FFF6 # jal r0 .Lmain_input_loop             [j .Lmain_input_loop]
+0x01041000 # addi a0 sp 0                         [mv a0 sp]                           <label: .Lmain_input_done>
+0xFBC1FFBE # call insertion_sort
+0x12003180 # beq a1 zero .Lmain_output_done                                            <label: .Lmain_output_loop>
+0x10102000 # lw t0 a0 0                           [lw t0 0(a0)]
+0xFEC08000 # out t0
+0x01042004 # addi a0 a0 4                         [add a0 a0 4]
+0x01463001 # subi a1 a1 1                         [dec a1]
+0x15C1FFF6 # jal r0 .Lmain_output_loop            [j .Lmain_output_loop]
 0x0002100E # add sp sp s0                                                              <label: .Lmain_output_done>
-0x90000002 # jal r0 halt                          [j halt]
-0x90000000 # jal r0 halt                          [j halt]                             <label: halt>
+0x14000002 # jal r0 halt                          [j halt]
+0x14000000 # jal r0 halt                          [j halt]                             <label: halt>
 ----- stderr -----

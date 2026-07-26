@@ -4,6 +4,7 @@ module LSU (
     rst: input reset,
 
     opcode: input bit<7>,
+    funct3: input bit<3>,
     rd: input bit<5>,
     imm12: input signed bit<12>,
 
@@ -13,7 +14,7 @@ module LSU (
     rfwe: output logic,
     wdata: output bit<32>,
 ) {
-    let en: logic = inside opcode {7'b1000_000..=7'b1000_111};
+    let en: logic = opcode == 'b0001000;
 
     let imm_load: signed bit<32> = {imm12[msb] repeat 20, imm12};
     let addr_load: bit<32> = rdata1 + imm_load;
@@ -26,7 +27,7 @@ module LSU (
 
     always_comb {
         #[cond_type(unique)]
-        case opcode[2:0] {
+        case funct3 {
             'b000 /* LW */: {
                 addr = addr_load & ~3; // TODO: don't ignore
                 width = 3'd4;
@@ -70,14 +71,14 @@ module LSU (
         rdata = '0;
 
         if en {
-            if opcode[2:0] <= 'b100 {
-                mem_rdata = $sv::mem_load(addr, width); // @goto ../dpi/Memory.sv
+            if funct3 <= 'b100 {
+                mem_rdata = $sv::mem_load(addr, width);
             } else {
                 mem_rdata = '0;
             }
 
             #[cond_type(unique)]
-            case opcode[2:0] {
+            case funct3 {
                 'b000 /* LW */: rdata = mem_rdata;
                 'b001 /* LH */: rdata = {
                     mem_rdata[15] repeat 16, mem_rdata[15:0]
@@ -97,12 +98,12 @@ module LSU (
         if_reset {
             $sv::mem_reset();
         } else {
-            if en && opcode[2:0] >= 'b101 {
-                $sv::mem_store(addr, width, rdata2); // @goto ../dpi/Memory.sv
+            if en && funct3 >= 'b101 {
+                $sv::mem_store(addr, width, rdata2);
             }
         }
     }
 
-    assign rfwe = en && (opcode[2:0] <= 'b100);
+    assign rfwe = en && (funct3 <= 'b100);
     assign wdata = if en ? rdata : '0;
 }

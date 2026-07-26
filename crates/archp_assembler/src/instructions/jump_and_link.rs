@@ -3,7 +3,7 @@ use crate::instructions::instruction;
 instruction! {
     pub Jal {
         name: "jal",
-        opcode: 0b_1001_000,
+        opcode: 0b0001010,
         itype: J,
     }
 }
@@ -11,7 +11,8 @@ instruction! {
 instruction! {
     pub Jalr {
         name: "jalr",
-        opcode: 0b_1001_111,
+        opcode: 0b0001001,
+        funct3: 0b111,
         itype: I,
     }
 }

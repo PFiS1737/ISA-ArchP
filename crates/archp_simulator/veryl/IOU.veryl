@@ -4,28 +4,29 @@ module IOU (
     rst: input reset,
 
     opcode: input bit<7>,
+    funct3: input bit<3>,
     rdata1: input bit<32>,
 
     rfwe: output logic,
     wdata: output bit<32>,
 ) {
-    let en: logic = inside opcode {7'b1110_000..=7'b1110_111};
+    let en: logic = opcode == 'b1111111;
 
     always_comb {
         rfwe = 0;
         wdata = '0;
 
         if en {
-            case (opcode[2:0]) {
-                'b000 /* IN */: {
+            case funct3 {
+                'b010 /* IN */: {
                     rfwe = 1;
                     wdata = $sv::simple_input();
                 }
-                'b010 /* KBGET */: {
+                'b100 /* KBGET */: {
                     rfwe = 1;
                     wdata = $sv::keyboard_get();
                 }
-                'b011 /* RAND */: {
+                'b101 /* RAND */: {
                     rfwe = 1;
                     wdata = $urandom();
                 }
@@ -36,7 +37,7 @@ module IOU (
 
     always_ff {
         if_reset {} else {
-            if en && opcode[2:0] == 'b001 /* OUT */ {
+            if /* OUT */ en && funct3 == 'b011 {
                 $sv::simple_output(rdata1);
             }
         }

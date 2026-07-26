@@ -7,7 +7,7 @@ module Top (
     var pcwdata: bit<32>;
     inst PC_: PC ( clk, rst, we: pcwe, wdata: pcwdata, pc );
 
-    let instr: bit<32> = $sv::get_instruction(pc); // @goto ../dpi/Program.sv
+    let instr: bit<32> = $sv::get_instruction(pc);
 
     // TODO: remove this
     always_comb {
@@ -44,6 +44,7 @@ module Top (
     var wdata_alsu: bit<32>;
     inst ALSU_: ALSU (
         opcode,
+        funct3,
         imm12,
         rdata1,
         rdata2,
@@ -69,6 +70,7 @@ module Top (
         clk,
         rst,
         opcode,
+        funct3,
         rd,
         imm12,
         rdata1,
@@ -121,6 +123,7 @@ module Top (
         clk,
         rst,
         opcode,
+        funct3,
         imm12,
         rdata1,
         rdata2,
@@ -134,6 +137,7 @@ module Top (
         clk,
         rst,
         opcode,
+        funct3,
         rdata1,
         rfwe: rfwe_iou,
         wdata: wdata_iou,

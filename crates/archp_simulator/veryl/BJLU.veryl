@@ -15,8 +15,6 @@ module BJLU (
     pcwe: output logic,
     pcwdata: output bit<32>,
 ) {
-    let en: logic = inside opcode {7'b1001_000..=7'b1001_111};
-
     let imm_branch: signed bit<32> = {rd[msb] repeat 19, rd, imm12[11:5], 1'b0};
     let pc_branch: bit<32> = pc + imm_branch;
 
@@ -28,54 +26,52 @@ module BJLU (
     let imm_jalr: signed bit<32> = {imm12[msb] repeat 20, imm12};
     let pc_jalr: bit<32> = (rdata1 + imm_jalr) & ~1;
 
-    var cond: logic;
-    var npc: bit<32>;
-
     always_comb {
-        cond = 0;
-        npc = '0;
+        rfwe = 0;
+        wdata = '0;
+        pcwe = 0;
+        pcwdata = '0;
 
-        if en {
-            case opcode[2:0] {
-                'b000 /* JAL */: {
-                    cond = 1;
-                    npc = pc_jal;
+        if opcode == 'b0001001 {
+            #[cond_type(unique)]
+            case funct3 {
+                'b000 /* BEQ */: {
+                    pcwe = rdata1 == rdata2;
+                    pcwdata = pc_branch;
                 }
-                'b001 /* BEQ */: {
-                    cond = rdata1 == rdata2;
-                    npc = pc_branch;
+                'b001 /* BNE */: {
+                    pcwe = rdata1 != rdata2;
+                    pcwdata = pc_branch;
                 }
-                'b010 /* BNE */: {
-                    cond = rdata1 != rdata2;
-                    npc = pc_branch;
+                'b010 /* BLT */: {
+                    pcwe = $signed(rdata1) <: $signed(rdata2);
+                    pcwdata = pc_branch;
                 }
-                'b011 /* BLT */: {
-                    cond = $signed(rdata1) <: $signed(rdata2);
-                    npc = pc_branch;
+                'b011 /* BGE */: {
+                    pcwe = $signed(rdata1) >= $signed(rdata2);
+                    pcwdata = pc_branch;
                 }
-                'b100 /* BGE */: {
-                    cond = $signed(rdata1) >= $signed(rdata2);
-                    npc = pc_branch;
+                'b100 /* BLTU */: {
+                    pcwe = rdata1 <: rdata2;
+                    pcwdata = pc_branch;
                 }
-                'b101 /* BLTU */: {
-                    cond = rdata1 <: rdata2;
-                    npc = pc_branch;
-                }
-                'b110 /* BGEU */: {
-                    cond = rdata1 >= rdata2;
-                    npc = pc_branch;
+                'b101 /* BGEU */: {
+                    pcwe = rdata1 >= rdata2;
+                    pcwdata = pc_branch;
                 }
                 'b111 /* JALR */: {
-                    cond = 1;
-                    npc = pc_jalr;
+                    pcwe = 1;
+                    pcwdata = pc_jalr;
+                    rfwe = 1;
+                    wdata = pc + 4;
                 }
+                default: {}
             }
+        } else if /* JAL */ opcode == 'b0001010 {
+            pcwe = 1;
+            pcwdata = pc_jal;
+            rfwe = 1;
+            wdata = pc + 4;
         }
     }
-
-    assign rfwe = en && (opcode[2:0] == 'b000 || opcode[2:0] == 'b111);
-    assign wdata = if rfwe ? pc + 4 : '0;
-
-    assign pcwe = en && cond;
-    assign pcwdata = if pcwe ? npc : '0;
 }

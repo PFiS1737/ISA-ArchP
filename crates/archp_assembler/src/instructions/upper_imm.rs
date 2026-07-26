@@ -3,7 +3,7 @@ use crate::instructions::instruction;
 instruction! {
     pub Lui {
         name: "lui",
-        opcode: 0b_1011_000,
+        opcode: 0b0001011,
         itype: U,
     }
 }
@@ -11,7 +11,7 @@ instruction! {
 instruction! {
     pub Auipc {
         name: "auipc",
-        opcode: 0b_1011_001,
+        opcode: 0b0001100,
         itype: U,
     }
 }

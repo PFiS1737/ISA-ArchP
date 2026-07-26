@@ -1,17 +1,19 @@
 /// Arithmetic + Logical + Shift + Rotate + Set Unit
 module ALSU (
     opcode: input bit<7>,
+    funct3: input bit<3>,
     imm12: input signed bit<12>,
+
     rdata1: input bit<32>,
     rdata2: input bit<32>,
 
     rfwe: output logic,
     wdata: output bit<32>,
 ) {
-    let en: logic = inside opcode {7'b0000_000..=7'b0111_111};
+    let en: logic = opcode ==? 'b0000zzz;
 
     let a: bit<32> = rdata1;
-    let b: bit<32> = if inside opcode {7'b0100_000..=7'b0111_111} ?
+    let b: bit<32> = if ((~opcode[2] & funct3[2]) | (opcode[2] & opcode[0])) ?
         {imm12[msb] repeat 20, imm12}
     :
         rdata2
@@ -37,52 +39,54 @@ module ALSU (
         tmp = '0;
 
         #[cond_type(unique)]
-        case (opcode[4:0]) {
-            'b00_000 /* ADD */: result = a_i32 + b_i32;
-            'b00_001 /* SUB */: result = a_i32 - b_i32;
-            'b00_010 /* MUL */: result = a_i32 * b_i32;
-            'b00_011 /* MULH */: {
+        case {opcode[2:0], funct3} {
+            'b000_z00 /* ADD */: result = a_i32 + b_i32;
+            'b000_z01 /* SUB */: result = a_i32 - b_i32;
+            'b000_z10 /* AND */: result = a & b;
+            'b000_z11 /* OR */: result = a | b;
+
+            'b001_z00 /* XOR */: result = a ^ b;
+            'b001_z01 /* XNOR */: result = a ~^ b;
+            'b001_z10 /* NAND */: result = ~(a & b);
+            'b001_z11 /* NOR */: result = ~(a | b);
+
+            'b010_z00 /* MUL */: result = a_i32 * b_i32;
+            'b010_z01 /* MULH */: {
                 tmp = a_i64 * b_i64;
                 result = tmp[63:32];
             }
-            'b00_100 /* MULHU */: {
+            'b010_z10 /* MULHU */: {
                 tmp = a_u64 * b_u64;
                 result = tmp[63:32];
             }
-            'b00_101 /* MULHSU */: {
+            'b010_z11 /* MULHSU */: {
                 tmp = a_i64 * b_u64;
                 result = tmp[63:32];
             }
-            'b00_110 /* REM */: result = if b_i32 == 0 ? '0 : a_i32 % b_i32;
-            'b00_111 /* DIV */: result = if b_i32 == 0 ? '1 : a_i32 / b_i32;
 
-            'b01_000 /* AND */: result = a & b;
-            'b01_001 /* NAND */: result = ~(a & b);
-            'b01_010 /* OR */: result = a | b;
-            'b01_011 /* NOR */: result = ~(a | b);
-            'b01_100 /* XOR */: result = a ^ b;
-            'b01_101 /* XNOR */: result = a ~^ b;
+            'b011_z00 /* DIV */: result = if b_i32 == 0 ? '1 : a_i32 / b_i32;
+            'b011_z01 /* REM */: result = if b_i32 == 0 ? '0 : a_i32 % b_i32;
 
-            'b10_000 /* SLL */: result = a << b[4:0];
-            'b10_001 /* SRL */: result = a >> b[4:0];
-            'b10_010 /* ROL */: result = if b[4:0] == 0 ?
+            'b10z_000 /* SLL */: result = a << b[4:0];
+            'b10z_001 /* SRL */: result = a >> b[4:0];
+            'b10z_011 /* SRA */: result = a_i32 >>> b[4:0];
+            'b10z_100 /* ROL */: result = if b[4:0] == 0 ?
                 a
             :
                 (a << b[4:0]) | (a >> (32 - b[4:0]))
             ;
-            'b10_011 /* ROR */: result = if b[4:0] == 0 ?
+            'b10z_101 /* ROR */: result = if b[4:0] == 0 ?
                 a
             :
                 (a >> b[4:0]) | (a << (32 - b[4:0]))
             ;
-            'b10_100 /* SRA */: result = a_i32 >>> b[4:0];
 
-            'b11_001 /* SEQ */: result = if a_i32 == b_i32 ? 1 : 0;
-            'b11_010 /* SNE */: result = if a_i32 != b_i32 ? 1 : 0;
-            'b11_011 /* SLT */: result = if a_i32 <: b_i32 ? 1 : 0;
-            'b11_100 /* SGE */: result = if a_i32 >= b_i32 ? 1 : 0;
-            'b11_101 /* SLTU */: result = if a_u32 <: b_u32 ? 1 : 0;
-            'b11_110 /* SGEU */: result = if a_u32 >= b_u32 ? 1 : 0;
+            'b11z_000 /* SEQ */: result = if a_i32 == b_i32 ? 1 : 0;
+            'b11z_001 /* SNE */: result = if a_i32 != b_i32 ? 1 : 0;
+            'b11z_010 /* SLT */: result = if a_i32 <: b_i32 ? 1 : 0;
+            'b11z_011 /* SGE */: result = if a_i32 >= b_i32 ? 1 : 0;
+            'b11z_100 /* SLTU */: result = if a_u32 <: b_u32 ? 1 : 0;
+            'b11z_101 /* SGEU */: result = if a_u32 >= b_u32 ? 1 : 0;
 
             default: result = '0;
         }
