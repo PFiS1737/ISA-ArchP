@@ -22,7 +22,6 @@ module DCU (
     always_ff {
         if_reset {
             color = '0;
-            $sv::pixel_display_reset();
         } else {
             if /* COLR */ en && funct3 == 'b000 {
                 color = col;

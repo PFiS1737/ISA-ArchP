@@ -14,7 +14,6 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = { workspace = true }
-bytemuck = "1.25.2"
 clap = { workspace = true, features = ["derive"] }
 clap_complete = { workspace = true, features = ["unstable-dynamic"] }
 ctrlc = "3.5.2"

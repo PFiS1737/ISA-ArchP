@@ -1,3 +1,5 @@
+#![feature(decl_macro)]
+
 mod command;
 mod cpu;
 mod dpi;
@@ -37,9 +39,12 @@ fn main() -> Result<()> {
     }
 
     MEMORY
-        .set(Mutex::new(Memory::new(cli.memory_size as usize)))
+        .set(Mutex::new(Memory::new(
+            cli.memory_size,
+            cli.framebuffer_size,
+        )))
         .expect("'MEMORY' has already been initialized.");
-    PIXEL_DISPLAY.with(|pd| pd.borrow_mut().init(128, 96, 6))?;
+    PIXEL_DISPLAY.with(|pd| pd.borrow_mut().init(6))?;
     PROGRAM.lock().unwrap().open(&cli.file)?;
 
     let cpu_top = cpu::ffi::create_cpu();

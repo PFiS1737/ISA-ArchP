@@ -10,44 +10,44 @@ use sdl3::{
     video::Window,
 };
 
+use crate::dpi::memory::MEMORY;
+
 pub struct PixelDisplay {
-    w: usize,
-    h: usize,
     scale: usize,
 
     canvas: Option<Canvas<Window>>,
     texture: Option<Texture>,
-    framebuffer: Vec<u32>,
 
     event_pump: Option<EventPump>,
 
-    pub scancode: Scancode,
+    scancode: Scancode,
 }
 
 impl PixelDisplay {
     pub fn new() -> Self {
         Self {
-            w: 0,
-            h: 0,
             scale: 0,
             canvas: None,
             texture: None,
-            framebuffer: Vec::new(),
             event_pump: None,
             scancode: Scancode::Unknown,
         }
     }
 
-    pub fn init(&mut self, w: usize, h: usize, scale: usize) -> Result<()> {
-        self.w = w;
-        self.h = h;
+    pub fn init(&mut self, scale: usize) -> Result<()> {
         self.scale = scale;
 
         let sdl = sdl3::init()?;
         let video = sdl.video()?;
 
+        let memory = MEMORY.get().unwrap().lock().unwrap();
+
         let window = video
-            .window("PixelDisplay", (w * scale) as u32, (h * scale) as u32)
+            .window(
+                "PixelDisplay",
+                (memory.fb_width * scale) as u32,
+                (memory.fb_height * scale) as u32,
+            )
             .position_centered()
             .build()?;
 
@@ -57,44 +57,27 @@ impl PixelDisplay {
                 .as_ref()
                 .unwrap()
                 .texture_creator()
-                .create_texture_target(Some(PixelFormat::RGBA8888), w as u32, h as u32)?,
+                .create_texture_target(
+                    Some(PixelFormat::RGBA8888),
+                    memory.fb_width as u32,
+                    memory.fb_height as u32,
+                )?,
         );
         self.texture
             .as_mut()
             .unwrap()
             .set_scale_mode(ScaleMode::Nearest);
 
-        self.reset();
-
         self.event_pump = Some(sdl.event_pump()?);
 
         Ok(())
     }
 
-    pub fn reset(&mut self) {
-        self.framebuffer = vec![0x404040FF; self.w * self.h];
-    }
-
-    pub fn set(&mut self, x: usize, y: usize, color: u32) {
-        if x >= self.w || y >= self.h {
-            panic!(
-                "Coordinates out of bounds: x={} y={} w={} h={}",
-                x, y, self.w, self.h
-            );
-        }
-
-        self.framebuffer[y * self.w + x] = color;
-    }
-
-    pub fn commit(&mut self) -> Result<()> {
+    pub fn commit(&mut self, fb_data: &[u8], fb_width: usize) -> Result<()> {
         let canvas = self.canvas.as_mut().unwrap();
         let texture = self.texture.as_mut().unwrap();
 
-        texture.update(
-            None,
-            bytemuck::cast_slice(&self.framebuffer),
-            self.w * size_of::<u32>(),
-        )?;
+        texture.update(None, fb_data, fb_width * size_of::<u32>())?;
 
         canvas.clear();
         canvas.copy(texture, None, None)?;
@@ -138,15 +121,15 @@ thread_local! {
 }
 
 #[unsafe(no_mangle)]
-extern "C" fn pixel_display_reset() {
-    PIXEL_DISPLAY.with(|pd| pd.borrow_mut().reset());
-}
-
-#[unsafe(no_mangle)]
 extern "C" fn pixel_display_set(x: u32, y: u32, color: u32) {
     PIXEL_DISPLAY.with(|pd| {
-        pd.borrow_mut().set(x as usize, y as usize, color);
-        pd.borrow_mut().commit().unwrap();
+        let mut memory = MEMORY.get().unwrap().lock().unwrap();
+
+        let addr = memory.to_fb_addr(x as usize, y as usize);
+        memory.store(addr, 4, color);
+
+        let mut pd = pd.borrow_mut();
+        pd.commit(&memory.fb_data, memory.fb_width).unwrap();
     });
 }
 
