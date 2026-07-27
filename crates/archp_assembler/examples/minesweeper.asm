@@ -19,6 +19,8 @@ const arg_x r16
 const arg_y r17
 const mine_num r18
 
+const BASE_ADDR 0x00100000
+
 const SCREEN_WIDTH 128
 const SCREEN_HEIGHT 72
 
@@ -132,6 +134,7 @@ init_mines:
     mul addr y GRID_COLS
     add addr addr x
     mul addr addr 4
+    add addr addr BASE_ADDR
 
     lw t1 addr
     beq t1 MINE_MASK init_mines_loop
@@ -147,7 +150,7 @@ init_mines:
 init_mine_counts:
   clr x
   clr y
-  clr addr
+  li addr BASE_ADDR
   init_mine_counts_loop:
     call count_around_mines
     lw t1 addr
@@ -184,6 +187,7 @@ count_around_mines:
     mul t1 ny GRID_COLS
     add t1 t1 nx
     mul t1 t1 4
+    add t1 t1 BASE_ADDR
 
     # 读取格子值
     lw t2 t1
@@ -284,6 +288,8 @@ reveal_tile:
   mul addr cursor_y GRID_COLS
   add addr addr cursor_x
   mul addr addr 4
+  add addr addr BASE_ADDR
+
   lw t1 addr
 
   and t2 t1 REVEAL_MASK
@@ -326,6 +332,7 @@ reveal_around:
     mul addr ny GRID_COLS
     add addr addr nx
     mul addr addr 4
+    add addr addr BASE_ADDR
 
     # 读取格子值
     lw t1 addr
@@ -382,6 +389,8 @@ toggle_flag:
   mul addr cursor_y GRID_COLS
   add addr addr cursor_x
   mul addr addr 4
+  add addr addr BASE_ADDR
+
   lw t1 addr
 
   and t2 t1 REVEAL_MASK
@@ -710,7 +719,7 @@ main:
     call draw_mine
 
     clr ny
-    clr addr
+    li addr BASE_ADDR
     lose_row_loop:
       clr nx
     lose_col_loop:

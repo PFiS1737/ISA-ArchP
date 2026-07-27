@@ -5,41 +5,48 @@ input_file: crates/archp_assembler/examples/trapping-rain-water.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x010C0010 # addi t0 r0 16       [li t0 16]           <label: main>
-0xFE900000 # in t3                                    <label: input>
-0x11C07008 # sb t1 t3 0          [sb t3 t1]
-0x010E7001 # addi t1 t1 1        [inc t1]
-0x014C6001 # subi t0 t0 1        [dec t0]
-0x12BE0F06 # blt r0 t0 input     [bgtz t0 input]
-0xFA000004 # call solve
-0xFEC09000 # out a0
-0x01020000 # addi l r0 0         [li l 0]             <label: solve>
-0x0104000F # addi r r0 15        [li r 15]
-0x11061000 # lbu lmax l 0        [lbu lmax l]
-0x11082000 # lbu rmax r 0        [lbu rmax r]
-0x12C01502 # bge l r endwhile                         <label: while>
-0x12C03284 # bge lmax rmax else
-0x01021001 # addi l l 1          [inc l]
-0x110C1000 # lbu t0 l 0          [lbu t0 l]
-0x01126000 # addi a0 t0 0        [mv a0 t0]
-0x01143000 # addi a1 lmax 0      [mv a1 lmax]
+0xFE820000 # in len                                   <label: main>
+0x010E1000 # addi t0 len 0       [mv t0 len]
+0x16100100 # lui t1 0x100        [li t1 BASE_ADDR]
+0x01108000 # addi t1 t1 0        [li t1 BASE_ADDR]
+0xFE920000 # in t3                                    <label: input>
+0x11C08009 # sb t1 t3 0          [sb t3 t1]
+0x01108001 # addi t1 t1 1        [inc t1]
+0x014E7001 # subi t0 t0 1        [dec t0]
+0x12BE0F07 # blt r0 t0 input     [bgtz t0 input]
+0xFA000006 # call solve
+0xFEC0A000 # out a0
+0x14000040 # jal r0 halt         [j halt]
+0x16040100 # lui l 0x100         [li l BASE_ADDR]     <label: solve>
+0x01042000 # addi l l 0          [li l BASE_ADDR]
+0x00062001 # add r l len
+0x01463001 # subi r r 1          [dec r]
+0x11082000 # lbu lmax l 0        [lbu lmax l]
+0x110A3000 # lbu rmax r 0        [lbu rmax r]
+0x12C02503 # bge l r endwhile                         <label: while>
+0x12C04285 # bge lmax rmax else
+0x01042001 # addi l l 1          [inc l]
+0x110E2000 # lbu t0 l 0          [lbu t0 l]
+0x01147000 # addi a0 t0 0        [mv a0 t0]
+0x01164000 # addi a1 lmax 0      [mv a1 lmax]
 0xFA000020 # call max
-0x01069000 # addi lmax a0 0      [mv lmax a0]
-0x004E3006 # sub t1 lmax t0
-0x000A5007 # add water water t1
+0x0108A000 # addi lmax a0 0      [mv lmax a0]
+0x00504007 # sub t1 lmax t0
+0x000C6008 # add water water t1
 0x14000012 # jal r0 endif        [j endif]
-0x01442001 # subi r r 1          [dec r]              <label: else>
-0x110C2000 # lbu t0 r 0          [lbu t0 r]
-0x01126000 # addi a0 t0 0        [mv a0 t0]
-0x01144000 # addi a1 rmax 0      [mv a1 rmax]
+0x01463001 # subi r r 1          [dec r]              <label: else>
+0x110E3000 # lbu t0 r 0          [lbu t0 r]
+0x01147000 # addi a0 t0 0        [mv a0 t0]
+0x01165000 # addi a1 rmax 0      [mv a1 rmax]
 0xFA00000E # call max
-0x01089000 # addi rmax a0 0      [mv rmax a0]
-0x004E4006 # sub t1 rmax t0
-0x000A5007 # add water water t1
+0x010AA000 # addi rmax a0 0      [mv rmax a0]
+0x00505007 # sub t1 rmax t0
+0x000C6008 # add water water t1
 0x15C1FFDA # jal r0 while        [j while]            <label: endif>
-0x01125000 # addi a0 water 0     [mv a0 water]        <label: endwhile>
+0x01146000 # addi a0 water 0     [mv a0 water]        <label: endwhile>
 0xFC800000 # ret
-0x1280A089 # blt a1 a0 max_ret   [bgt a0 a1 max_ret]  <label: max>
-0x0112A000 # addi a0 a1 0        [mv a0 a1]
+0x1280B08A # blt a1 a0 max_ret   [bgt a0 a1 max_ret]  <label: max>
+0x0114B000 # addi a0 a1 0        [mv a0 a1]
 0xFC800000 # ret                                      <label: max_ret>
+0x14000000 # jal r0 halt         [j halt]             <label: halt>
 ----- stderr -----

@@ -7,7 +7,7 @@ module Top (
     var pcwdata: bit<32>;
     inst PC_: PC ( clk, rst, we: pcwe, wdata: pcwdata, pc );
 
-    let instr: bit<32> = $sv::get_instruction(pc);
+    let instr: bit<32> = $sv::mem_load(pc, 4);
 
     // TODO: remove this
     always_comb {

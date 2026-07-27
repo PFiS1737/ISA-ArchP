@@ -19,6 +19,9 @@ const que_val r16
 const que_tmp r17
 const que_i r18
 const que_cur r19
+const que_addr r20
+
+const BASE_ADDR 0x00100000
 
 const SCREEN_WIDTH 64
 const SCREEN_HEIGHT 36
@@ -204,6 +207,7 @@ queue_push:
   beq que_len QUEUE_SIZE queue_push_full
 
   mul que_tmp que_head 2
+  add que_tmp que_tmp BASE_ADDR
   sh que_val que_tmp
 
   inc que_head
@@ -231,6 +235,7 @@ queue_pop:
   rem que_tmp que_tmp QUEUE_SIZE
 
   mul que_tmp que_tmp 2
+  add que_tmp que_tmp BASE_ADDR
   lhu que_val que_tmp
 
   dec que_len
@@ -260,9 +265,10 @@ queue_contains:
   queue_contains_loop:
     beq que_i que_len queue_contains_not_found
 
-    mul que_tmp que_tmp 2
-    lhu que_cur que_tmp
-    div que_tmp que_tmp 2
+    mul que_addr que_tmp 2
+    add que_addr que_addr BASE_ADDR
+    lhu que_cur que_addr
+
     beq que_cur que_val queue_contains_found
 
     inc que_tmp

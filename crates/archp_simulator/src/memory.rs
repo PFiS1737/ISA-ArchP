@@ -1,5 +1,7 @@
 use std::fmt::Debug;
 
+use anyhow::{Result, bail};
+
 use crate::devices::{Device, FrameBuffer, Ram};
 
 #[derive(Debug)]
@@ -26,11 +28,15 @@ impl Memory {
         }
     }
 
-    pub fn with_config(ram_size: usize, (fb_width, fb_height): (usize, usize)) -> Self {
+    pub fn with_config(
+        ram_size: usize,
+        (fb_width, fb_height): (usize, usize),
+        program_path: &str,
+    ) -> Result<Self> {
         let mut mem = Memory::new();
 
         if ram_size > /* 2G */ 2 * 1024 * 1024 * 1024 {
-            panic!(
+            bail!(
                 "RAM size too large: {} bytes. Maximum allowed is 2GB.",
                 ram_size
             );
@@ -39,12 +45,12 @@ impl Memory {
         mem.add_region(Region {
             start: 0x0000_0000,
             size: ram_size,
-            dev: Device::Ram(Ram::new(ram_size)),
+            dev: Device::Ram(Ram::new(ram_size, program_path)?),
         });
 
         let fb_size = fb_width * fb_height * 4;
         if fb_size > /* 16M */ 16 * 1024 * 1024 {
-            panic!(
+            bail!(
                 "Framebuffer size too large: {} bytes. Maximum allowed is 16MB.",
                 fb_size
             );
@@ -56,7 +62,7 @@ impl Memory {
             dev: Device::FrameBuffer(FrameBuffer::new(fb_width, fb_height)),
         });
 
-        mem
+        Ok(mem)
     }
 
     pub fn add_region(&mut self, region: Region) {

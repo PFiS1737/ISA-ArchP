@@ -17,7 +17,7 @@ use clap_complete::CompleteEnv;
 
 use crate::{
     command::Cli,
-    dpi::{memory::MEMORY, pixel_display::PIXEL_DISPLAY, program::PROGRAM},
+    dpi::{memory::MEMORY, pixel_display::PIXEL_DISPLAY},
     memory::Memory,
 };
 
@@ -43,10 +43,10 @@ fn main() -> Result<()> {
         .set(Mutex::new(Memory::with_config(
             cli.ram_size,
             cli.framebuffer_size,
-        )))
+            &cli.file,
+        )?))
         .expect("'MEMORY' has already been initialized.");
     PIXEL_DISPLAY.with(|pd| pd.borrow_mut().init(cli.framebuffer_size, 6))?;
-    PROGRAM.lock().unwrap().open(&cli.file)?;
 
     let cpu_top = cpu::ffi::create_cpu();
 

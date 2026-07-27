@@ -1,21 +1,27 @@
 # leetcode: trapping-rain-water
 # solutions/5126477
 
-const l r1
-const r r2
-const lmax r3
-const rmax r4
-const water r5
+const len r1
+const l r2
+const r r3
+const lmax r4
+const rmax r5
+const water r6
 
-const t0 r6
-const t1 r7
-const t3 r8
+const t0 r7
+const t1 r8
+const t3 r9
 
-const a0 r9
-const a1 r10
+const a0 r10
+const a1 r11
+
+const BASE_ADDR 0x00100000
 
 main:
-  li t0 16
+  in len
+
+  mv t0 len
+  li t1 BASE_ADDR
   input:
     in t3
     sb t3 t1
@@ -27,11 +33,14 @@ main:
 
   out a0
 
+  j halt
+
 solve:
   # l = 0
-  li l 0
-  # r = len - 1 = 15
-  li r 15
+  li l BASE_ADDR
+  # r = len - 1
+  add r l len
+  dec r
   # lmax = ht[l]
   lbu lmax l
   # rmax = ht[r]
@@ -80,3 +89,6 @@ max:
   mv a0 a1
   max_ret:
   ret
+
+halt:
+  j halt
