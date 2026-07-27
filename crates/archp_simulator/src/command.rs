@@ -8,9 +8,9 @@ pub struct Cli {
     #[arg(value_hint = FilePath)]
     pub file: String,
 
-    /// Memory size in byte for the simulator, optional unit is supported.
-    #[arg(short, long, value_parser = parse_united_size, default_value = "64M")]
-    pub memory_size: usize,
+    /// RAM size in byte for the simulator, optional unit is supported.
+    #[arg(short = 'm', long, value_parser = parse_united_size, default_value = "64M")]
+    pub ram_size: usize,
 
     /// Framebuffer size in WIDTHxHEIGHT format for the simulator.
     #[arg(short, long, value_parser = parse_framebuffer_size, default_value = "128x96")]

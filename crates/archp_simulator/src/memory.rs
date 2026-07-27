@@ -1,25 +1,49 @@
+use std::fmt::Debug;
+
+use crate::devices::{Device, FrameBuffer, Ram};
+
 #[derive(Debug)]
 pub struct Memory {
-    // Max: 2G [0x0000_0000 - 0x7FFF_FFFF]
-    pub data: Vec<u8>,
-    pub size: usize,
+    regions: Vec<Region>,
+}
 
-    // Max: 16M [0x8000_0000 - 0x80FF_FFFF]
-    pub fb_data: Vec<u8>,
-    pub fb_width: usize,
-    pub fb_height: usize,
+#[derive(Debug)]
+pub struct Region {
+    pub start: usize,
+    pub size: usize,
+    pub dev: Device,
+}
+
+pub trait MemDevice: Debug + Send + Sync {
+    fn reset(&mut self);
+    fn load(&self, addr: usize, width: usize) -> u32;
+    fn store(&mut self, addr: usize, width: usize, value: u32);
 }
 
 impl Memory {
-    pub fn new(memory_size: usize, framebuffer_size: (usize, usize)) -> Self {
-        if memory_size > /* 2G */ 2 * 1024 * 1024 * 1024 {
+    pub fn new() -> Self {
+        Self {
+            regions: Vec::new(),
+        }
+    }
+
+    pub fn with_config(ram_size: usize, (fb_width, fb_height): (usize, usize)) -> Self {
+        let mut mem = Memory::new();
+
+        if ram_size > /* 2G */ 2 * 1024 * 1024 * 1024 {
             panic!(
-                "Memory size too large: {} bytes. Maximum allowed is 2GB.",
-                memory_size
+                "RAM size too large: {} bytes. Maximum allowed is 2GB.",
+                ram_size
             );
         }
 
-        let fb_size = framebuffer_size.0 * framebuffer_size.1 * 4;
+        mem.add_region(Region {
+            start: 0x0000_0000,
+            size: ram_size,
+            dev: Device::Ram(Ram::new(ram_size)),
+        });
+
+        let fb_size = fb_width * fb_height * 4;
         if fb_size > /* 16M */ 16 * 1024 * 1024 {
             panic!(
                 "Framebuffer size too large: {} bytes. Maximum allowed is 16MB.",
@@ -27,82 +51,79 @@ impl Memory {
             );
         }
 
-        let mut memory = Self {
-            size: memory_size,
-            data: Vec::new(),
+        mem.add_region(Region {
+            start: 0x8000_0000,
+            size: fb_size,
+            dev: Device::FrameBuffer(FrameBuffer::new(fb_width, fb_height)),
+        });
 
-            fb_data: Vec::new(),
-            fb_width: framebuffer_size.0,
-            fb_height: framebuffer_size.1,
-        };
-
-        memory.reset();
-
-        memory
+        mem
     }
 
+    pub fn add_region(&mut self, region: Region) {
+        self.regions.push(region);
+    }
+
+    fn find_region(&self, addr: usize) -> &Region {
+        self.regions
+            .iter()
+            .find(|r| r.contains(addr))
+            .unwrap_or_else(|| panic!("Invalid addr: 0x{:08X}", addr))
+    }
+
+    fn find_region_mut(&mut self, addr: usize) -> &mut Region {
+        self.regions
+            .iter_mut()
+            .find(|r| r.contains(addr))
+            .unwrap_or_else(|| panic!("Invalid addr: 0x{:08X}", addr))
+    }
+
+    #[inline]
     pub fn reset(&mut self) {
-        self.data = vec![0; self.size];
-
-        let v: Vec<u32> = vec![0x404040FF; self.fb_width * self.fb_height];
-        self.fb_data = {
-            let len = v.len() * 4;
-            let cap = v.capacity() * 4;
-            let ptr = v.as_ptr() as *mut u8;
-            std::mem::forget(v);
-            unsafe { Vec::from_raw_parts(ptr, len, cap) }
-        };
+        for r in &mut self.regions {
+            r.dev.reset();
+        }
     }
 
+    #[inline]
     pub fn load(&self, addr: usize, width: usize) -> u32 {
-        let src = get_src!(self, addr);
-        let addr = get_addr!(self, addr);
-
-        match width {
-            1 => src[addr] as u32,
-            2 => u16::from_le_bytes(src[addr..addr + 2].try_into().unwrap()) as u32,
-            4 => u32::from_le_bytes(src[addr..addr + 4].try_into().unwrap()),
-            _ => panic!("Invalid width: {}", width),
-        }
+        let r = self.find_region(addr);
+        r.dev.load(r.offset(addr), width)
     }
 
+    #[inline]
     pub fn store(&mut self, addr: usize, width: usize, value: u32) {
-        let dst = get_dst!(self, addr);
-        let addr = get_addr!(self, addr);
-
-        match width {
-            1 => dst[addr] = value as u8,
-            2 => dst[addr..addr + 2].copy_from_slice(&(value as u16).to_le_bytes()),
-            4 => dst[addr..addr + 4].copy_from_slice(&value.to_le_bytes()),
-            _ => panic!("Invalid width: {}", width),
-        }
+        let r = self.find_region_mut(addr);
+        r.dev.store(r.offset(addr), width, value);
     }
 
-    pub fn to_fb_addr(&self, x: usize, y: usize) -> usize {
-        if x >= self.fb_width || y >= self.fb_height {
-            panic!("Framebuffer coordinates out of bounds: ({}, {})", x, y);
+    pub fn get_fb(&mut self) -> &mut FrameBuffer {
+        let r = self
+            .regions
+            .iter_mut()
+            .find(|r| matches!(r.dev, Device::FrameBuffer(..)))
+            .unwrap_or_else(|| panic!("Framebuffer region not found"));
+
+        match &mut r.dev {
+            Device::FrameBuffer(fb) => fb,
+            _ => unreachable!(),
         }
-        0x8000_0000 + (y * self.fb_width + x) * 4
     }
 }
 
-macro get_src($self:expr, $addr:expr) {
-    switch!($self, $addr, [&$self.data, &$self.fb_data])
-}
+impl Region {
+    #[inline]
+    pub fn end(&self) -> usize {
+        self.start + self.size - 1
+    }
 
-macro get_dst($self:expr, $addr:expr) {
-    switch!($self, $addr, [&mut $self.data, &mut $self.fb_data])
-}
+    #[inline]
+    pub fn contains(&self, addr: usize) -> bool {
+        addr >= self.start && addr <= self.end()
+    }
 
-macro get_addr($self:expr, $addr:expr) {
-    switch!($self, $addr, [$addr, $addr - 0x8000_0000])
-}
-
-// TODO: make memory layout structural
-macro switch($self:expr, $addr:expr,[$ram:expr, $fb:expr]) {
-    match $addr {
-        0x0000_0000..=0x7FFF_FFFF => $ram,
-        0x8000_0000..=0x80FF_FFFF => $fb,
-        _ => panic!("Address out of bounds: 0x{:08X}", $addr),
+    #[inline]
+    pub fn offset(&self, addr: usize) -> usize {
+        addr - self.start
     }
 }

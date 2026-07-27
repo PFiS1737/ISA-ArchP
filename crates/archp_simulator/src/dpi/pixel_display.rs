@@ -34,19 +34,17 @@ impl PixelDisplay {
         }
     }
 
-    pub fn init(&mut self, scale: usize) -> Result<()> {
+    pub fn init(&mut self, (fb_width, fb_height): (usize, usize), scale: usize) -> Result<()> {
         self.scale = scale;
 
         let sdl = sdl3::init()?;
         let video = sdl.video()?;
 
-        let memory = MEMORY.get().unwrap().lock().unwrap();
-
         let window = video
             .window(
                 "PixelDisplay",
-                (memory.fb_width * scale) as u32,
-                (memory.fb_height * scale) as u32,
+                (fb_width * scale) as u32,
+                (fb_height * scale) as u32,
             )
             .position_centered()
             .build()?;
@@ -59,8 +57,8 @@ impl PixelDisplay {
                 .texture_creator()
                 .create_texture_target(
                     Some(PixelFormat::RGBA8888),
-                    memory.fb_width as u32,
-                    memory.fb_height as u32,
+                    fb_width as u32,
+                    fb_height as u32,
                 )?,
         );
         self.texture
@@ -125,11 +123,11 @@ extern "C" fn pixel_display_set(x: u32, y: u32, color: u32) {
     PIXEL_DISPLAY.with(|pd| {
         let mut memory = MEMORY.get().unwrap().lock().unwrap();
 
-        let addr = memory.to_fb_addr(x as usize, y as usize);
-        memory.store(addr, 4, color);
+        let fb = memory.get_fb();
+        fb.set_pixel(x as usize, y as usize, color);
 
         let mut pd = pd.borrow_mut();
-        pd.commit(&memory.fb_data, memory.fb_width).unwrap();
+        pd.commit(&fb.data, fb.width).unwrap();
     });
 }
 
