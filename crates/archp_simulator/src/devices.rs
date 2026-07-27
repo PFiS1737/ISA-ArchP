@@ -18,10 +18,6 @@ macro match_self($self:expr, $( $field:ident ),+ ()) {
 }
 
 impl MemDevice for Device {
-    fn reset(&mut self) {
-        match_self!(self, reset());
-    }
-
     fn load(&self, addr: usize, width: usize) -> u32 {
         let data = match_self!(self, data, as_slice());
 

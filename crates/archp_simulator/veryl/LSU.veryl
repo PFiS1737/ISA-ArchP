@@ -95,9 +95,7 @@ module LSU (
     }
 
     always_ff {
-        if_reset {
-            $sv::mem_reset();
-        } else {
+        if_reset {} else {
             if en && funct3 >= 'b101 {
                 $sv::mem_store(addr, width, rdata2);
             }

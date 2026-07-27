@@ -26,10 +26,7 @@ module CSU (
     let pc_callr: bit<32> = (rdata1 + imm_callr) & ~1;
 
     always_ff {
-        if_reset {
-            $sv::call_stack_reset();
-            $sv::data_stack_reset();
-        } else {
+        if_reset {} else {
             if /* CALL */ opcode == 'b1111101 {
                 $sv::call_stack_push(pc + 4);
             } else if opcode == 'b1111110 {

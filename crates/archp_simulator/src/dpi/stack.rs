@@ -9,10 +9,6 @@ impl Stack {
         Self { data: vec![] }
     }
 
-    pub fn reset(&mut self) {
-        self.data.clear();
-    }
-
     pub fn push(&mut self, value: u32) {
         self.data.push(value);
     }
@@ -27,11 +23,6 @@ impl Stack {
 }
 
 static CALL_STACK: LazyLock<Mutex<Stack>> = LazyLock::new(|| Mutex::new(Stack::new()));
-
-#[unsafe(no_mangle)]
-extern "C" fn call_stack_reset() {
-    CALL_STACK.lock().unwrap().reset();
-}
 
 #[unsafe(no_mangle)]
 extern "C" fn call_stack_pop() {
@@ -49,11 +40,6 @@ extern "C" fn call_stack_peek() -> u32 {
 }
 
 static DATA_STACK: LazyLock<Mutex<Stack>> = LazyLock::new(|| Mutex::new(Stack::new()));
-
-#[unsafe(no_mangle)]
-extern "C" fn data_stack_reset() {
-    DATA_STACK.lock().unwrap().reset();
-}
 
 #[unsafe(no_mangle)]
 extern "C" fn data_stack_pop() {

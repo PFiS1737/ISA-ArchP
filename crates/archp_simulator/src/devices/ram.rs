@@ -9,8 +9,4 @@ impl Ram {
             data: vec![0; size],
         }
     }
-
-    pub fn reset(&mut self) {
-        self.data.fill(0);
-    }
 }

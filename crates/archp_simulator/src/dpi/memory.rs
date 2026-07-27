@@ -5,11 +5,6 @@ use crate::memory::Memory;
 pub static MEMORY: OnceLock<Mutex<Memory>> = OnceLock::new();
 
 #[unsafe(no_mangle)]
-extern "C" fn mem_reset() {
-    MEMORY.get().unwrap().lock().unwrap().reset();
-}
-
-#[unsafe(no_mangle)]
 extern "C" fn mem_load(addr: u32, width: *const u32) -> u32 {
     MEMORY
         .get()

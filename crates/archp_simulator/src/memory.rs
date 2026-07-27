@@ -15,7 +15,6 @@ pub struct Region {
 }
 
 pub trait MemDevice: Debug + Send + Sync {
-    fn reset(&mut self);
     fn load(&self, addr: usize, width: usize) -> u32;
     fn store(&mut self, addr: usize, width: usize, value: u32);
 }
@@ -76,13 +75,6 @@ impl Memory {
             .iter_mut()
             .find(|r| r.contains(addr))
             .unwrap_or_else(|| panic!("Invalid addr: 0x{:08X}", addr))
-    }
-
-    #[inline]
-    pub fn reset(&mut self) {
-        for r in &mut self.regions {
-            r.dev.reset();
-        }
     }
 
     #[inline]
