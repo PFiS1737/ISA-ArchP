@@ -176,5 +176,4 @@ In this section:
 - `spx rs1 rs2`: set the `(rs1, rs2)` position to the color specified by the last `col` instruction.
 - `in rd`: read a 32-bit value to `rd`.
 - `out rs1`: write the 32-bit value of `rs1` to the output.
-- `kbget rd`: read a key press to `rd`. (TODO:  define a key code specification)
 - `rand rd`: generate a random 32-bit number and write it to `rd`.

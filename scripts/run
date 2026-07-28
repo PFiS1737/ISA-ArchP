@@ -26,6 +26,8 @@ if not test -f "$file"
     return 1
 end
 
+set -e argv[1]
+
 trap "rm -rf output.bin" EXIT INT QUIT TERM
 
 if set -q _flag_asm
@@ -42,5 +44,8 @@ if set -q _flag_asm
 end
 
 echo_h1 "Running..."
-cargo run -p archp_simulator -- $file
+if test "$argv[1]" = --
+    set argv $argv[2..-1]
+end
+cargo run -p archp_simulator -- $file $argv
 echo

@@ -40,16 +40,6 @@ instruction! {
 }
 
 instruction! {
-    pub Kbget {
-        name: "kbget",
-        opcode: 0b1111111,
-        funct3: 0b100,
-        itype: I,
-        operands_format: [ RegD, _, _ ],
-    }
-}
-
-instruction! {
     pub Rand {
         name: "rand",
         opcode: 0b1111111,

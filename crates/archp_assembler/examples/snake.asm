@@ -22,6 +22,7 @@ const que_cur r19
 const que_addr r20
 
 const BASE_ADDR 0x00100000
+const KBD_BASE 0x90000000
 
 const SCREEN_WIDTH 64
 const SCREEN_HEIGHT 36
@@ -34,11 +35,11 @@ const COLOR_BODY 0xFFFFFFFF
 const COLOR_HEAD 0xFF0000FF
 const COLOR_FOOD 0xFFFF00FF
 
-# SDL3 scancode
-const KEY_UP 82
-const KEY_DOWN 81
-const KEY_LEFT 80
-const KEY_RIGHT 79
+# linux input-event-codes
+const KEY_UP 103
+const KEY_DOWN 108
+const KEY_LEFT 105
+const KEY_RIGHT 106
 
 const INIT_X 5
 const INIT_Y 18
@@ -287,7 +288,8 @@ queue_contains:
 
 
 read_key:
-  kbget t0
+  li t0 KBD_BASE
+  lw t0 t0
 
   beq t0 KEY_UP read_key_ok
   beq t0 KEY_DOWN read_key_ok

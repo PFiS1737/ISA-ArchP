@@ -182,5 +182,4 @@ xxxxxxx   xxx   xxxxx   xxxxxxxxxxxxxxxxx
 | 1111111 | 001    | R    | spx         |
 | 1111111 | 010    | I    | in          |
 | 1111111 | 011    | I    | out         |
-| 1111111 | 100    | I    | kbget       |
 | 1111111 | 101    | I    | rand        |

@@ -41,10 +41,6 @@ void CPU::set_rst(bool rst) const {
   top->rst = rst;
 }
 
-bool CPU::posedge_clk() const {
-  return top->clk;
-}
-
 void CPU::eval() const {
   top->eval();
 }

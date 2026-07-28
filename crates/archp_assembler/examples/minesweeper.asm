@@ -4,22 +4,24 @@ const x r1
 const y r2
 const i r3
 const j r4
-const t1 r5
-const t2 r6
-const cursor_x r7
-const cursor_y r8
-const addr r9
-const tx r10
-const ty r11
-const nx r12
-const ny r13
-const cnt r14
-const key_code r15
-const arg_x r16
-const arg_y r17
-const mine_num r18
+const t0 r5
+const t1 r6
+const t2 r7
+const cursor_x r8
+const cursor_y r9
+const addr r10
+const tx r11
+const ty r12
+const nx r13
+const ny r14
+const cnt r15
+const key_code r16
+const arg_x r17
+const arg_y r18
+const mine_num r19
 
 const BASE_ADDR 0x00100000
+const KBD_BASE 0x90000000
 
 const SCREEN_WIDTH 128
 const SCREEN_HEIGHT 72
@@ -53,13 +55,13 @@ const MINE_MASK 8
 const REVEAL_MASK 16
 const FLAG_MASK 32
 
-# SDL3 scancode
-const KEY_UP 82
-const KEY_DOWN 81
-const KEY_LEFT 80
-const KEY_RIGHT 79
-const KEY_REVEAL 29 # 'z'
-const KEY_FLAG 27 # 'x'
+# linux input-event-codes
+const KEY_UP 103
+const KEY_DOWN 108
+const KEY_LEFT 105
+const KEY_RIGHT 106
+const KEY_REVEAL 44 # 'z'
+const KEY_FLAG 45 # 'x'
 
 
 j main
@@ -674,10 +676,11 @@ draw_num5:
 
 
 read_key:
-  kbget key_code
+  li t0 KBD_BASE
+  lw key_code t0
   beqz key_code read_key
   read_key_wait_release:
-    kbget t1
+    lw t1 t0
     bnez t1 read_key_wait_release
   ret
 

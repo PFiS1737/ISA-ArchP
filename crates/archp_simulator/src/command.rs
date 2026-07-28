@@ -15,6 +15,10 @@ pub struct Cli {
     /// Framebuffer size in WIDTHxHEIGHT format for the simulator.
     #[arg(short, long, value_parser = parse_framebuffer_size, default_value = "128x96")]
     pub framebuffer_size: (usize, usize),
+
+    /// Whether to grab the keyboard input for the simulator.
+    #[arg(short, long, default_value_t = false)]
+    pub grab_keyboard: bool,
 }
 
 fn parse_united_size(size_str: &str) -> Result<usize> {

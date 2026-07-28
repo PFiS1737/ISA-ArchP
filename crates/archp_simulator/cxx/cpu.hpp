@@ -14,7 +14,6 @@ public:
 
   void flip_clk() const;
   void set_rst(bool rst) const;
-  bool posedge_clk() const;
 
   void eval() const;
 

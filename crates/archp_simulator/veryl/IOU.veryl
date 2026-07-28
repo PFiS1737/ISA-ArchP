@@ -22,10 +22,6 @@ module IOU (
                     rfwe = 1;
                     wdata = $sv::simple_input();
                 }
-                'b100 /* KBGET */: {
-                    rfwe = 1;
-                    wdata = $sv::keyboard_get();
-                }
                 'b101 /* RAND */: {
                     rfwe = 1;
                     wdata = $urandom();

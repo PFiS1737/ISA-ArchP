@@ -1,8 +1,11 @@
-use std::fmt::Debug;
+use std::{fmt::Debug, sync::mpsc};
 
 use anyhow::{Result, bail};
 
-use crate::devices::{Device, FrameBuffer, Ram};
+use crate::{
+    command::Cli,
+    devices::{Device, FrameBuffer, Keyboard, Ram},
+};
 
 #[derive(Debug)]
 pub struct Memory {
@@ -28,12 +31,16 @@ impl Memory {
         }
     }
 
-    pub fn with_config(
-        ram_size: usize,
-        (fb_width, fb_height): (usize, usize),
-        program_path: &str,
-    ) -> Result<Self> {
+    pub fn with_config(tx: mpsc::Sender<bool>, config: &Cli) -> Result<Self> {
         let mut mem = Memory::new();
+
+        let &Cli {
+            ram_size,
+            file: ref program_path,
+            framebuffer_size: (fb_width, fb_height),
+            grab_keyboard,
+            ..
+        } = config;
 
         if ram_size > /* 2G */ 2 * 1024 * 1024 * 1024 {
             bail!(
@@ -60,6 +67,12 @@ impl Memory {
             start: 0x8000_0000,
             size: fb_size,
             dev: Device::FrameBuffer(FrameBuffer::new(fb_width, fb_height)),
+        });
+
+        mem.add_region(Region {
+            start: 0x9000_0000,
+            size: 8,
+            dev: Device::Keyboard(Keyboard::new(tx, grab_keyboard)),
         });
 
         Ok(mem)

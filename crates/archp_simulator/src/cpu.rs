@@ -12,7 +12,6 @@ pub mod ffi {
         fn increase_time(&self, add: u64);
         fn flip_clk(&self);
         fn set_rst(&self, rst: bool);
-        fn posedge_clk(&self) -> bool;
         fn eval(&self);
     }
 }

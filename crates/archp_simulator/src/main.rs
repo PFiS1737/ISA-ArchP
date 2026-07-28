@@ -1,5 +1,3 @@
-#![feature(decl_macro)]
-
 mod command;
 mod cpu;
 mod devices;
@@ -29,19 +27,8 @@ fn main() -> Result<()> {
 
     let (tx, rx) = mpsc::channel::<bool>();
 
-    {
-        let tx = tx.clone();
-        ctrlc::set_handler(move || {
-            tx.send(true).expect("Failed to send stop signal.");
-        })?;
-    }
-
     MEMORY
-        .set(Mutex::new(Memory::with_config(
-            cli.ram_size,
-            cli.framebuffer_size,
-            &cli.file,
-        )?))
+        .set(Mutex::new(Memory::with_config(tx, &cli)?))
         .expect("'MEMORY' has already been initialized.");
     PIXEL_DISPLAY.with(|pd| pd.borrow_mut().init(cli.framebuffer_size, 6))?;
 
@@ -55,13 +42,6 @@ fn main() -> Result<()> {
         }
 
         cpu_top.flip_clk();
-
-        if cpu_top.posedge_clk() {
-            stopped.fetch_or(
-                !PIXEL_DISPLAY.with(|pd| pd.borrow_mut().handle_event()),
-                atomic::Ordering::SeqCst,
-            );
-        }
 
         if let Ok(stopped) = rx.try_recv()
             && stopped

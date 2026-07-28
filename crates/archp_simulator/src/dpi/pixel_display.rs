@@ -2,9 +2,6 @@ use std::cell::RefCell;
 
 use anyhow::Result;
 use sdl3::{
-    EventPump,
-    event::{Event, WindowEvent},
-    keyboard::Scancode,
     pixels::PixelFormat,
     render::{Canvas, ScaleMode, Texture},
     video::Window,
@@ -17,10 +14,6 @@ pub struct PixelDisplay {
 
     canvas: Option<Canvas<Window>>,
     texture: Option<Texture>,
-
-    event_pump: Option<EventPump>,
-
-    scancode: Scancode,
 }
 
 impl PixelDisplay {
@@ -29,8 +22,6 @@ impl PixelDisplay {
             scale: 0,
             canvas: None,
             texture: None,
-            event_pump: None,
-            scancode: Scancode::Unknown,
         }
     }
 
@@ -66,8 +57,6 @@ impl PixelDisplay {
             .unwrap()
             .set_scale_mode(ScaleMode::Nearest);
 
-        self.event_pump = Some(sdl.event_pump()?);
-
         Ok(())
     }
 
@@ -82,35 +71,6 @@ impl PixelDisplay {
         canvas.present();
 
         Ok(())
-    }
-
-    pub fn handle_event(&mut self) -> bool {
-        let event_pump = self.event_pump.as_mut().unwrap();
-
-        for e in event_pump.poll_iter() {
-            match e {
-                Event::Quit { .. } => return false,
-                Event::Window {
-                    win_event: WindowEvent::CloseRequested,
-                    ..
-                } => {
-                    return false;
-                },
-                Event::KeyDown {
-                    scancode: Some(sc), ..
-                } => {
-                    if sc == Scancode::Q {
-                        return false;
-                    }
-                    self.scancode = sc;
-                },
-                Event::KeyUp { .. } => {
-                    self.scancode = Scancode::Unknown;
-                },
-                _ => {},
-            }
-        }
-        true
     }
 }
 
@@ -129,9 +89,4 @@ extern "C" fn pixel_display_set(x: u32, y: u32, color: u32) {
         let mut pd = pd.borrow_mut();
         pd.commit(&fb.data, fb.width).unwrap();
     });
-}
-
-#[unsafe(no_mangle)]
-extern "C" fn keyboard_get() -> u32 {
-    PIXEL_DISPLAY.with(|pd| pd.borrow_mut().scancode as i32 as u32)
 }
