@@ -6,10 +6,7 @@ mod devices;
 mod dpi;
 mod memory;
 
-use std::sync::{
-    Arc, Mutex,
-    atomic::{self, AtomicBool},
-};
+use std::sync::{Mutex, mpsc};
 
 use anyhow::{Result, bail};
 use clap::{CommandFactory, Parser};
@@ -30,12 +27,12 @@ fn main() -> Result<()> {
 
     let cli = Cli::parse();
 
-    let stopped = Arc::new(AtomicBool::new(false));
+    let (tx, rx) = mpsc::channel::<bool>();
 
     {
-        let stopped = Arc::clone(&stopped);
+        let tx = tx.clone();
         ctrlc::set_handler(move || {
-            stopped.store(true, atomic::Ordering::SeqCst);
+            tx.send(true).expect("Failed to send stop signal.");
         })?;
     }
 
@@ -66,7 +63,9 @@ fn main() -> Result<()> {
             );
         }
 
-        if stopped.load(atomic::Ordering::SeqCst) {
+        if let Ok(stopped) = rx.try_recv()
+            && stopped
+        {
             bail!("Simulation interrupted by user.");
         }
 
