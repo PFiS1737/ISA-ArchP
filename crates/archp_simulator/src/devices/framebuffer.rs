@@ -7,17 +7,17 @@ pub struct FrameBuffer {
 
 impl FrameBuffer {
     pub fn new(w: usize, h: usize) -> Self {
-        let mut fb = Self {
-            data: vec![0u8; w * h * 4],
-            width: w,
-            height: h,
-        };
+        let mut data = vec![0u8; w * h * 4];
 
-        for px in fb.data.as_chunks_mut::<4>().0 {
+        for px in data.as_chunks_mut::<4>().0 {
             px.copy_from_slice(&0x404040FF_u32.to_le_bytes());
         }
 
-        fb
+        Self {
+            data,
+            width: w,
+            height: h,
+        }
     }
 
     pub fn set_pixel(&mut self, x: usize, y: usize, color: u32) {

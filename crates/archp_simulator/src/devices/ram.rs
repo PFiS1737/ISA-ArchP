@@ -30,13 +30,11 @@ impl Ram {
             );
         }
 
-        let mut ram = Self {
-            data: vec![0; size],
-        };
+        let mut data = vec![0; size];
 
-        file.read_exact(&mut ram.data[..file_len])
+        file.read_exact(&mut data[..file_len])
             .map_err(|err| anyhow!("Failed to read file '{}': {}", program_path, err))?;
 
-        Ok(ram)
+        Ok(Self { data })
     }
 }
