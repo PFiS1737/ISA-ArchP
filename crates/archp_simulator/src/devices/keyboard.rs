@@ -11,7 +11,6 @@ use std::{
 use anyhow::Result;
 use evdev::{Device, EventSummary, KeyCode};
 
-#[derive(Debug)]
 pub struct Keyboard {
     //  low 32 bits: keycode (16 bits actually, 0 == none)
     // high 32 bits: value   (unused)

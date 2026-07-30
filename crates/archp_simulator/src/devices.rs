@@ -10,7 +10,6 @@ use std::sync::{
 pub use crate::devices::{framebuffer::FrameBuffer, keyboard::Keyboard, ram::Ram};
 use crate::memory::MemDevice;
 
-#[derive(Debug)]
 pub enum Device {
     Ram(Ram),
     FrameBuffer(FrameBuffer),

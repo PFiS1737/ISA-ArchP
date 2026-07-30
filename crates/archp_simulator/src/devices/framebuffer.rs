@@ -1,4 +1,3 @@
-#[derive(Debug)]
 pub struct FrameBuffer {
     pub data: Vec<u8>,
     pub width: usize,

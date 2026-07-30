@@ -2,7 +2,6 @@ use std::{fs::File, io::Read};
 
 use anyhow::{Result, anyhow, bail};
 
-#[derive(Debug)]
 pub struct Ram {
     pub data: Vec<u8>,
 }

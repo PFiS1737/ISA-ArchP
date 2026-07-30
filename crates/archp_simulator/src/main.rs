@@ -6,7 +6,7 @@ mod memory;
 
 use std::sync::{Mutex, mpsc};
 
-use anyhow::{Result, bail};
+use anyhow::{Result, anyhow, bail};
 use clap::{CommandFactory, Parser};
 use clap_complete::CompleteEnv;
 
@@ -29,7 +29,7 @@ fn main() -> Result<()> {
 
     MEMORY
         .set(Mutex::new(Memory::with_config(tx, &cli)?))
-        .expect("'MEMORY' has already been initialized.");
+        .map_err(|_| anyhow!("'MEMORY' has already been initialized."))?;
     PIXEL_DISPLAY.with(|pd| pd.borrow_mut().init(cli.framebuffer_size, 6))?;
 
     let cpu_top = cpu::ffi::create_cpu();

@@ -1,4 +1,4 @@
-use std::{fmt::Debug, sync::mpsc};
+use std::sync::mpsc;
 
 use anyhow::{Result, bail};
 
@@ -7,19 +7,17 @@ use crate::{
     devices::{Device, FrameBuffer, Keyboard, Ram},
 };
 
-#[derive(Debug)]
 pub struct Memory {
     regions: Vec<Region>,
 }
 
-#[derive(Debug)]
 pub struct Region {
     pub start: usize,
     pub size: usize,
     pub dev: Device,
 }
 
-pub trait MemDevice: Debug + Send + Sync {
+pub trait MemDevice: Send + Sync {
     fn load(&self, addr: usize, width: usize) -> u32;
     fn store(&mut self, addr: usize, width: usize, value: u32);
 }
