@@ -4,7 +4,11 @@ mod devices;
 mod dpi;
 mod memory;
 
-use std::sync::{Mutex, mpsc};
+use std::{
+    sync::{Mutex, mpsc},
+    thread,
+    time::{Duration, Instant},
+};
 
 use anyhow::{Result, anyhow, bail};
 use clap::{CommandFactory, Parser};
@@ -29,6 +33,8 @@ fn main() -> Result<()> {
 
     let cpu_top = cpu::ffi::create_cpu();
 
+    let mut last_time = Instant::now();
+
     while !cpu_top.got_finish() {
         cpu_top.increase_time(1);
 
@@ -45,6 +51,15 @@ fn main() -> Result<()> {
         }
 
         cpu_top.eval();
+
+        if let Some(hz) = cli.hz {
+            let elapsed = last_time.elapsed();
+            let duration = Duration::from_secs_f64(1.0 / hz);
+            if elapsed < duration {
+                thread::sleep(duration - elapsed);
+            }
+            last_time = Instant::now();
+        }
     }
 
     Ok(())

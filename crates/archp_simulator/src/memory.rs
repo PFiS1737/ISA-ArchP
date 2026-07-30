@@ -44,7 +44,7 @@ impl<'a> Memory<'a> {
 
         regions.push(Region {
             start: 0x0000_0000,
-            dev: Device::Ram(Ram::new(ram_size, program_path)?),
+            dev: Device::Ram(Ram::new(ram_size as usize, program_path)?),
         });
 
         if let Some(fb_device) = fb_device {
