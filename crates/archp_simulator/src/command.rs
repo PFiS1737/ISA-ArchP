@@ -12,9 +12,13 @@ pub struct Cli {
     #[arg(short = 'm', long, value_parser = parse_united_size, default_value = "64M")]
     pub ram_size: usize,
 
+    /// DRI device path for the framebuffer output, e.g. /dev/dri/card0.
+    #[arg(short = 'f', long, value_hint = FilePath)]
+    pub dri_device: Option<String>,
+
     /// Framebuffer size in WIDTHxHEIGHT format for the simulator.
     #[arg(short, long, value_parser = parse_framebuffer_size, default_value = "128x96")]
-    pub framebuffer_size: (usize, usize),
+    pub resolution: (usize, usize),
 
     /// Whether to grab the keyboard input for the simulator.
     #[arg(short, long, default_value_t = false)]

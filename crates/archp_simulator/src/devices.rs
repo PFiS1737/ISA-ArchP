@@ -10,13 +10,13 @@ use std::sync::{
 pub use crate::devices::{framebuffer::FrameBuffer, keyboard::Keyboard, ram::Ram};
 use crate::memory::MemDevice;
 
-pub enum Device {
+pub enum Device<'a> {
     Ram(Ram),
-    FrameBuffer(FrameBuffer),
+    FrameBuffer(FrameBuffer<'a>),
     Keyboard(Keyboard),
 }
 
-impl MemDevice for Device {
+impl MemDevice for Device<'_> {
     fn size(&self) -> usize {
         match self {
             Device::Ram(dev) => dev.size,
@@ -46,7 +46,7 @@ trait Load {
     fn load(&self, addr: usize, width: usize) -> u32;
 }
 
-impl Load for Vec<u8> {
+impl Load for [u8] {
     fn load(&self, addr: usize, width: usize) -> u32 {
         match width {
             1 => self[addr] as u32,
@@ -80,7 +80,7 @@ trait Store {
     fn store(&mut self, addr: usize, width: usize, value: u32);
 }
 
-impl Store for Vec<u8> {
+impl Store for [u8] {
     fn store(&mut self, addr: usize, width: usize, value: u32) {
         match width {
             1 => self[addr] = value as u8,

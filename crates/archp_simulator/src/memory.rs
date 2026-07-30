@@ -7,13 +7,13 @@ use crate::{
     devices::{Device, FrameBuffer, Keyboard, Ram},
 };
 
-pub struct Memory {
-    regions: Vec<Region>,
+pub struct Memory<'a> {
+    regions: Vec<Region<'a>>,
 }
 
-pub struct Region {
+pub struct Region<'a> {
     pub start: usize,
-    pub dev: Device,
+    pub dev: Device<'a>,
 }
 
 pub trait MemDevice: Send + Sync {
@@ -22,20 +22,15 @@ pub trait MemDevice: Send + Sync {
     fn store(&mut self, addr: usize, width: usize, value: u32);
 }
 
-impl Memory {
-    pub fn new() -> Self {
-        Self {
-            regions: Vec::new(),
-        }
-    }
-
+impl<'a> Memory<'a> {
     pub fn with_config(tx: mpsc::Sender<bool>, config: &Cli) -> Result<Self> {
-        let mut mem = Memory::new();
+        let mut regions = Vec::new();
 
         let &Cli {
             ram_size,
             file: ref program_path,
-            framebuffer_size: (fb_width, fb_height),
+            dri_device: ref fb_device,
+            resolution: (fb_width, fb_height),
             grab_keyboard,
             ..
         } = config;
@@ -47,44 +42,34 @@ impl Memory {
             );
         }
 
-        mem.add_region(Region {
+        regions.push(Region {
             start: 0x0000_0000,
             dev: Device::Ram(Ram::new(ram_size, program_path)?),
         });
 
-        let fb_size = fb_width * fb_height * 4;
-        if fb_size > /* 16M */ 16 * 1024 * 1024 {
-            bail!(
-                "Framebuffer size too large: {} bytes. Maximum allowed is 16MB.",
-                fb_size
-            );
+        if let Some(fb_device) = fb_device {
+            regions.push(Region {
+                start: 0x8000_0000,
+                dev: Device::FrameBuffer(FrameBuffer::new(fb_device, fb_width, fb_height)?),
+            });
         }
 
-        mem.add_region(Region {
-            start: 0x8000_0000,
-            dev: Device::FrameBuffer(FrameBuffer::new(fb_width, fb_height)),
-        });
-
-        mem.add_region(Region {
+        regions.push(Region {
             start: 0x9000_0000,
             dev: Device::Keyboard(Keyboard::new(tx, grab_keyboard)),
         });
 
-        Ok(mem)
+        Ok(Memory { regions })
     }
 
-    pub fn add_region(&mut self, region: Region) {
-        self.regions.push(region);
-    }
-
-    fn find_region(&self, addr: usize) -> &Region {
+    fn find_region(&self, addr: usize) -> &Region<'a> {
         self.regions
             .iter()
             .find(|r| r.contains(addr))
             .unwrap_or_else(|| panic!("Invalid addr: 0x{:08X}", addr))
     }
 
-    fn find_region_mut(&mut self, addr: usize) -> &mut Region {
+    fn find_region_mut(&mut self, addr: usize) -> &mut Region<'a> {
         self.regions
             .iter_mut()
             .find(|r| r.contains(addr))
@@ -103,7 +88,7 @@ impl Memory {
         r.dev.store(r.offset(addr), width, value);
     }
 
-    pub fn get_fb(&mut self) -> &mut FrameBuffer {
+    pub fn get_fb(&mut self) -> &mut FrameBuffer<'a> {
         let r = self
             .regions
             .iter_mut()
@@ -117,7 +102,7 @@ impl Memory {
     }
 }
 
-impl Region {
+impl Region<'_> {
     #[inline]
     pub fn size(&self) -> usize {
         self.dev.size()

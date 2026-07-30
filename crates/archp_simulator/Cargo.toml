@@ -17,9 +17,9 @@ anyhow = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 clap_complete = { workspace = true, features = ["unstable-dynamic"] }
 cxx = "1.0"
+drm = "0.15.0"
 env_logger = { workspace = true }
 evdev = "0.13.2"
-sdl3 = { version = "0.18.4", features = ["unsafe_textures"] }
 
 [build-dependencies]
 cc = { version = "1.0", features = ["parallel"] }

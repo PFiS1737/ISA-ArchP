@@ -10,11 +10,7 @@ use anyhow::{Result, anyhow, bail};
 use clap::{CommandFactory, Parser};
 use clap_complete::CompleteEnv;
 
-use crate::{
-    command::Cli,
-    dpi::{memory::MEMORY, pixel_display::PIXEL_DISPLAY},
-    memory::Memory,
-};
+use crate::{command::Cli, dpi::memory::MEMORY, memory::Memory};
 
 fn main() -> Result<()> {
     CompleteEnv::with_factory(Cli::command)
@@ -30,7 +26,6 @@ fn main() -> Result<()> {
     MEMORY
         .set(Mutex::new(Memory::with_config(tx, &cli)?))
         .map_err(|_| anyhow!("'MEMORY' has already been initialized."))?;
-    PIXEL_DISPLAY.with(|pd| pd.borrow_mut().init(cli.framebuffer_size, 6))?;
 
     let cpu_top = cpu::ffi::create_cpu();
 

@@ -4,7 +4,7 @@ source ./scripts/common.fish
 
 # TODO: trace
 
-argparse h/help s/asm -- $argv
+argparse h/help s/asm c/console -- $argv
 or return 1
 
 if set -q _flag_help
@@ -13,6 +13,7 @@ if set -q _flag_help
     echo "Options:"
     echo "  -h, --help      Show this help message and exit"
     echo "  -s, --asm       <file> is an assembly file, assemble it before running"
+    echo "  -c, --console   Start program on a new virtual terminal"
     return 0
 end
 
@@ -30,13 +31,18 @@ set -e argv[1]
 
 trap "rm -rf output.bin" EXIT INT QUIT TERM
 
+echo_h1 "Running..."
+cargo build
+echo
+
 if set -q _flag_asm
     or string match -q "*.s" $file
     or string match -q "*.asm" $file
     echo_h1 "Assembling..."
 
-    cargo run -p archp_assembler_cli -- $file -o output.bin
+    ./target/debug/archp-as $file -o output.bin
     or return 1
+    and echo Done
 
     set file output.bin
 
@@ -44,8 +50,15 @@ if set -q _flag_asm
 end
 
 echo_h1 "Running..."
+
 if test "$argv[1]" = --
     set argv $argv[2..-1]
 end
-cargo run -p archp_simulator -- $file $argv
-echo
+
+if set -q _flag_console
+    sudo openvt -sw -- ./target/debug/archp $file $argv
+else
+    cargo run -p archp_simulator -- $file $argv
+end
+
+echo Done
