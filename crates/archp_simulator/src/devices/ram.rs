@@ -4,6 +4,7 @@ use anyhow::{Result, anyhow, bail};
 
 pub struct Ram {
     pub data: Vec<u8>,
+    pub size: usize,
 }
 
 impl Ram {
@@ -34,6 +35,6 @@ impl Ram {
         file.read_exact(&mut data[..file_len])
             .map_err(|err| anyhow!("Failed to read file '{}': {}", program_path, err))?;
 
-        Ok(Self { data })
+        Ok(Self { data, size })
     }
 }

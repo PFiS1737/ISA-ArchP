@@ -17,6 +17,14 @@ pub enum Device {
 }
 
 impl MemDevice for Device {
+    fn size(&self) -> usize {
+        match self {
+            Device::Ram(dev) => dev.size,
+            Device::FrameBuffer(dev) => dev.data.len(),
+            Device::Keyboard(dev) => dev.size,
+        }
+    }
+
     fn load(&self, addr: usize, width: usize) -> u32 {
         match self {
             Device::Ram(dev) => dev.data.load(addr, width),

@@ -13,11 +13,11 @@ pub struct Memory {
 
 pub struct Region {
     pub start: usize,
-    pub size: usize,
     pub dev: Device,
 }
 
 pub trait MemDevice: Send + Sync {
+    fn size(&self) -> usize;
     fn load(&self, addr: usize, width: usize) -> u32;
     fn store(&mut self, addr: usize, width: usize, value: u32);
 }
@@ -49,7 +49,6 @@ impl Memory {
 
         mem.add_region(Region {
             start: 0x0000_0000,
-            size: ram_size,
             dev: Device::Ram(Ram::new(ram_size, program_path)?),
         });
 
@@ -63,13 +62,11 @@ impl Memory {
 
         mem.add_region(Region {
             start: 0x8000_0000,
-            size: fb_size,
             dev: Device::FrameBuffer(FrameBuffer::new(fb_width, fb_height)),
         });
 
         mem.add_region(Region {
             start: 0x9000_0000,
-            size: 8,
             dev: Device::Keyboard(Keyboard::new(tx, grab_keyboard)),
         });
 
@@ -122,8 +119,13 @@ impl Memory {
 
 impl Region {
     #[inline]
+    pub fn size(&self) -> usize {
+        self.dev.size()
+    }
+
+    #[inline]
     pub fn end(&self) -> usize {
-        self.start + self.size - 1
+        self.start + self.size() - 1
     }
 
     #[inline]

@@ -17,6 +17,7 @@ pub struct Keyboard {
     //
     // TODO: event based
     pub data: Arc<AtomicU64>,
+    pub size: usize,
 }
 
 impl Keyboard {
@@ -91,7 +92,7 @@ impl Keyboard {
             });
         }
 
-        Self { data }
+        Self { data, size: 8 }
     }
 }
 
