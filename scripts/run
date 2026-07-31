@@ -56,7 +56,7 @@ if test "$argv[1]" = --
 end
 
 if set -q _flag_console
-    sudo openvt -sw -- ./target/debug/archp $file $argv
+    sudo openvt -sw -- ./target/debug/archp $file -fk $argv
 else
     cargo run -p archp_simulator -- $file $argv
 end

@@ -1,4 +1,4 @@
-use std::fs::OpenOptions;
+use std::{fs::OpenOptions, path::PathBuf};
 
 use anyhow::{Result, anyhow};
 use drm::{
@@ -21,7 +21,7 @@ pub struct FrameBuffer<'a> {
 }
 
 impl<'a> FrameBuffer<'a> {
-    pub fn new(dev: &str, w: usize, h: usize) -> Result<Self> {
+    pub fn new(dev: &PathBuf, w: usize, h: usize) -> Result<Self> {
         // TODO: other backends?
         let card = Card::open(dev)?;
 
@@ -103,7 +103,7 @@ impl drm::Device for Card {}
 impl Device for Card {}
 
 impl Card {
-    fn open(path: &str) -> Result<Self> {
+    fn open(path: &PathBuf) -> Result<Self> {
         Ok(Card(OpenOptions::new().read(true).write(true).open(path)?))
     }
 

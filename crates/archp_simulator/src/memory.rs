@@ -21,30 +21,40 @@ impl<'a> Memory<'a> {
         let mut regions = Vec::new();
 
         let &Cli {
-            ram_size,
             file: ref program_path,
-            dri_device: ref fb_device,
-            resolution: (fb_width, fb_height),
-            grab_keyboard,
-            ..
+            ram_size,
+            framebuffer,
+            framebuffer_start,
+            framebuffer_size: (fb_width, fb_height),
+            framebuffer_device: ref fb_device,
+            keyboard,
+            keyboard_start,
+            keyboard_grab: grab_keyboard,
+            hz: _,
         } = config;
 
         regions.push(Region {
-            start: 0x0000_0000,
+            start: 0,
             dev: Device::Ram(Ram::new(ram_size as usize, program_path)?),
         });
 
-        if let Some(fb_device) = fb_device {
+        if framebuffer {
             regions.push(Region {
-                start: 0x8000_0000,
-                dev: Device::FrameBuffer(FrameBuffer::new(fb_device, fb_width, fb_height)?),
+                start: framebuffer_start as usize,
+                dev: Device::FrameBuffer(FrameBuffer::new(
+                    fb_device,
+                    fb_width as usize,
+                    fb_height as usize,
+                )?),
             });
         }
 
-        regions.push(Region {
-            start: 0x9000_0000,
-            dev: Device::Keyboard(Keyboard::new(tx, grab_keyboard)),
-        });
+        if keyboard {
+            regions.push(Region {
+                start: keyboard_start as usize,
+                dev: Device::Keyboard(Keyboard::new(tx, grab_keyboard)),
+            });
+        }
 
         let memory = Memory { regions };
 
