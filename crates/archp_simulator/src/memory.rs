@@ -16,12 +16,6 @@ pub struct Region<'a> {
     pub dev: Device<'a>,
 }
 
-pub trait MemDevice: Send + Sync {
-    fn size(&self) -> usize;
-    fn load(&self, addr: usize, width: usize) -> u32;
-    fn store(&mut self, addr: usize, width: usize, value: u32);
-}
-
 impl<'a> Memory<'a> {
     pub fn with_config(tx: mpsc::Sender<bool>, config: &Cli) -> Result<Self> {
         let mut regions = Vec::new();
@@ -62,30 +56,20 @@ impl<'a> Memory<'a> {
         Ok(Memory { regions })
     }
 
-    fn find_region(&self, addr: usize) -> &Region<'a> {
+    pub fn load(&self, addr: usize, width: usize) -> u32 {
         self.regions
             .iter()
             .find(|r| r.contains(addr))
             .unwrap_or_else(|| panic!("Invalid addr: 0x{:08X}", addr))
+            .load(addr, width)
     }
 
-    fn find_region_mut(&mut self, addr: usize) -> &mut Region<'a> {
+    pub fn store(&mut self, addr: usize, width: usize, value: u32) {
         self.regions
             .iter_mut()
             .find(|r| r.contains(addr))
             .unwrap_or_else(|| panic!("Invalid addr: 0x{:08X}", addr))
-    }
-
-    #[inline]
-    pub fn load(&self, addr: usize, width: usize) -> u32 {
-        let r = self.find_region(addr);
-        r.dev.load(r.offset(addr), width)
-    }
-
-    #[inline]
-    pub fn store(&mut self, addr: usize, width: usize, value: u32) {
-        let r = self.find_region_mut(addr);
-        r.dev.store(r.offset(addr), width, value);
+            .store(addr, width, value);
     }
 
     pub fn get_fb(&mut self) -> &mut FrameBuffer<'a> {
@@ -103,23 +87,27 @@ impl<'a> Memory<'a> {
 }
 
 impl Region<'_> {
-    #[inline]
-    pub fn size(&self) -> usize {
+    fn load(&self, addr: usize, width: usize) -> u32 {
+        self.dev.load(self.offset(addr), width)
+    }
+
+    fn store(&mut self, addr: usize, width: usize, value: u32) {
+        self.dev.store(self.offset(addr), width, value);
+    }
+
+    fn offset(&self, addr: usize) -> usize {
+        addr - self.start
+    }
+
+    fn size(&self) -> usize {
         self.dev.size()
     }
 
-    #[inline]
-    pub fn end(&self) -> usize {
+    fn end(&self) -> usize {
         self.start + self.size() - 1
     }
 
-    #[inline]
-    pub fn contains(&self, addr: usize) -> bool {
+    fn contains(&self, addr: usize) -> bool {
         addr >= self.start && addr <= self.end()
-    }
-
-    #[inline]
-    pub fn offset(&self, addr: usize) -> usize {
-        addr - self.start
     }
 }

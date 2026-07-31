@@ -8,7 +8,6 @@ use std::sync::{
 };
 
 pub use crate::devices::{framebuffer::FrameBuffer, keyboard::Keyboard, ram::Ram};
-use crate::memory::MemDevice;
 
 pub enum Device<'a> {
     Ram(Ram),
@@ -16,8 +15,8 @@ pub enum Device<'a> {
     Keyboard(Keyboard),
 }
 
-impl MemDevice for Device<'_> {
-    fn size(&self) -> usize {
+impl Device<'_> {
+    pub fn size(&self) -> usize {
         match self {
             Device::Ram(dev) => dev.size,
             Device::FrameBuffer(dev) => dev.data.len(),
@@ -25,7 +24,7 @@ impl MemDevice for Device<'_> {
         }
     }
 
-    fn load(&self, addr: usize, width: usize) -> u32 {
+    pub fn load(&self, addr: usize, width: usize) -> u32 {
         match self {
             Device::Ram(dev) => dev.data.load(addr, width),
             Device::FrameBuffer(dev) => dev.data.load(addr, width),
@@ -33,11 +32,11 @@ impl MemDevice for Device<'_> {
         }
     }
 
-    fn store(&mut self, addr: usize, width: usize, value: u32) {
+    pub fn store(&mut self, addr: usize, width: usize, value: u32) {
         match self {
             Device::Ram(dev) => dev.data.store(addr, width, value),
             Device::FrameBuffer(dev) => dev.data.store(addr, width, value),
-            Device::Keyboard(dev) => Store::store(&mut dev.data, addr, width, value),
+            Device::Keyboard(_) => panic!("{addr:#x} is read-only for keyboard device"),
         };
     }
 }
@@ -87,38 +86,6 @@ impl Store for [u8] {
             2 => self[addr..addr + 2].copy_from_slice(&(value as u16).to_le_bytes()),
             4 => self[addr..addr + 4].copy_from_slice(&value.to_le_bytes()),
             _ => panic!("invalid width"),
-        }
-    }
-}
-
-// TODO: remove this, can't write to it
-impl Store for Arc<AtomicU64> {
-    fn store(&mut self, addr: usize, width: usize, value: u32) {
-        if addr + width > 8 {
-            panic!("out of bounds");
-        }
-
-        let shift = (addr * 8) as u32;
-
-        let mask: u64 = match width {
-            1 => 0xFF,
-            2 => 0xFFFF,
-            4 => 0xFFFF_FFFF,
-            _ => panic!("invalid width"),
-        } << shift;
-
-        let value = (value as u64) << shift;
-
-        // CAS loop
-        let mut old = AtomicU64::load(self, Ordering::Relaxed);
-
-        loop {
-            let new = (old & !mask) | (value & mask);
-
-            match self.compare_exchange_weak(old, new, Ordering::Relaxed, Ordering::Relaxed) {
-                Ok(_) => break,
-                Err(v) => old = v,
-            }
         }
     }
 }

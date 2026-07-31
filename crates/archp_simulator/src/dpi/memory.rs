@@ -25,8 +25,11 @@ extern "C" fn mem_store(addr: u32, width: *const u32, value: i32) {
 
 #[unsafe(no_mangle)]
 extern "C" fn pixel_display_set(x: u32, y: u32, color: u32) {
-    let mut memory = MEMORY.get().unwrap().lock().unwrap();
-
-    let fb = memory.get_fb();
-    fb.set_pixel(x as usize, y as usize, color);
+    MEMORY
+        .get()
+        .unwrap()
+        .lock()
+        .unwrap()
+        .get_fb()
+        .set_pixel(x as usize, y as usize, color);
 }
