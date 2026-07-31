@@ -29,13 +29,6 @@ impl<'a> Memory<'a> {
             ..
         } = config;
 
-        if ram_size > /* 2G */ 2 * 1024 * 1024 * 1024 {
-            bail!(
-                "RAM size too large: {} bytes. Maximum allowed is 2GB.",
-                ram_size
-            );
-        }
-
         regions.push(Region {
             start: 0x0000_0000,
             dev: Device::Ram(Ram::new(ram_size as usize, program_path)?),
@@ -53,7 +46,27 @@ impl<'a> Memory<'a> {
             dev: Device::Keyboard(Keyboard::new(tx, grab_keyboard)),
         });
 
-        Ok(Memory { regions })
+        let memory = Memory { regions };
+
+        memory.validate_regions()?;
+
+        Ok(memory)
+    }
+
+    fn validate_regions(&self) -> Result<()> {
+        self.regions.windows(2).try_for_each(|pair| {
+            let (a, b) = (&pair[0], &pair[1]);
+            if a.end() >= b.start {
+                bail!(
+                    "Memory regions overlap: 0x{:08X}-0x{:08X} and 0x{:08X}-0x{:08X}",
+                    a.start,
+                    a.end(),
+                    b.start,
+                    b.end()
+                );
+            }
+            Ok(())
+        })
     }
 
     pub fn load(&self, addr: usize, width: usize) -> u32 {
