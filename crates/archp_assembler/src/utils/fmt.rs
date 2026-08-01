@@ -41,7 +41,7 @@ impl FormatHex for u32 {
         if self < &256 {
             self.to_string()
         } else {
-            format!("0x{:X}", self)
+            format!("{:#X}", self)
         }
     }
 }
@@ -53,7 +53,7 @@ impl FormatHex for i32 {
         if *self >= -256 && *self < 256 {
             self.to_string()
         } else {
-            format!("0x{:X}", *self)
+            format!("{:#X}", *self)
         }
     }
 }
@@ -63,7 +63,7 @@ impl FormatHex for u64 {
         if self < &256 {
             self.to_string()
         } else {
-            format!("0x{:X}", self)
+            format!("{:#X}", self)
         }
     }
 }
@@ -73,7 +73,7 @@ impl FormatHex for i64 {
         if *self >= -256 && *self < 256 {
             self.to_string()
         } else {
-            format!("0x{:X}", *self)
+            format!("{:#X}", *self)
         }
     }
 }

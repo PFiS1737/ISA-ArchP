@@ -63,7 +63,7 @@ fn main() -> Result<()> {
                 })
                 .collect::<Vec<String>>(),
         )) {
-            writeln!(out, "0x{:08X} # {}", code, display)?;
+            writeln!(out, "{:#010X} # {}", code, display)?;
         }
     } else {
         for code in codes {

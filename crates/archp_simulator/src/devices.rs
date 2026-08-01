@@ -36,7 +36,7 @@ impl Device<'_> {
         match self {
             Device::Ram(dev) => dev.data.store(addr, width, value),
             Device::FrameBuffer(dev) => dev.data.store(addr, width, value),
-            Device::Keyboard(_) => panic!("{addr:#x} is read-only for keyboard device"),
+            Device::Keyboard(_) => panic!("{:#010X} is read-only for keyboard device", addr),
         };
     }
 }

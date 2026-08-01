@@ -68,7 +68,7 @@ impl<'a> Memory<'a> {
             let (a, b) = (&pair[0], &pair[1]);
             if a.end() >= b.start {
                 bail!(
-                    "Memory regions overlap: 0x{:08X}-0x{:08X} and 0x{:08X}-0x{:08X}",
+                    "Memory regions overlap: {:#010X}-{:#010X} and {:#010X}-{:#010X}",
                     a.start,
                     a.end(),
                     b.start,
@@ -83,7 +83,7 @@ impl<'a> Memory<'a> {
         self.regions
             .iter()
             .find(|r| r.contains(addr))
-            .unwrap_or_else(|| panic!("Invalid addr: 0x{:08X}", addr))
+            .unwrap_or_else(|| panic!("Invalid addr: {:#010X}", addr))
             .load(addr, width)
     }
 
@@ -91,7 +91,7 @@ impl<'a> Memory<'a> {
         self.regions
             .iter()
             .find(|r| r.contains(addr))
-            .unwrap_or_else(|| panic!("Invalid addr: 0x{:08X}", addr))
+            .unwrap_or_else(|| panic!("Invalid addr: {:#010X}", addr))
             .store(addr, width, value);
     }
 
