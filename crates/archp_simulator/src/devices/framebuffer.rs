@@ -1,4 +1,4 @@
-use std::{fs::OpenOptions, path::PathBuf};
+use std::{fs::OpenOptions, path::PathBuf, sync::Mutex};
 
 use anyhow::{Result, anyhow};
 use drm::{
@@ -17,7 +17,7 @@ pub struct FrameBuffer<'a> {
 
     pub width: usize,
     pub height: usize,
-    pub data: DumbMapping<'a>,
+    pub data: Mutex<DumbMapping<'a>>,
 }
 
 impl<'a> FrameBuffer<'a> {
@@ -63,15 +63,19 @@ impl<'a> FrameBuffer<'a> {
 
         Ok(Self {
             card,
-            width: width as usize,
-            height: height as usize,
             db,
             fb,
-            data,
+            width: width as usize,
+            height: height as usize,
+            data: Mutex::new(data),
         })
     }
 
-    pub fn set_pixel(&mut self, x: usize, y: usize, color: u32) {
+    pub fn size(&self) -> usize {
+        self.width * self.height * 4
+    }
+
+    pub fn set_pixel(&self, x: usize, y: usize, color: u32) {
         if x >= self.width || y >= self.height {
             panic!(
                 "Pixel coordinates out of bounds: ({}, {}) for framebuffer size {}x{}",
@@ -80,7 +84,8 @@ impl<'a> FrameBuffer<'a> {
         }
 
         let offset = (y * self.width + x) * 4;
-        self.data[offset..offset + 4].copy_from_slice(&color.to_le_bytes());
+        let mut data = self.data.lock().unwrap();
+        data[offset..offset + 4].copy_from_slice(&color.to_le_bytes());
     }
 }
 

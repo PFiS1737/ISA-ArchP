@@ -1,9 +1,9 @@
-use std::{fs::File, io::Read, path::PathBuf};
+use std::{fs::File, io::Read, path::PathBuf, sync::Mutex};
 
 use anyhow::{Result, anyhow, bail};
 
 pub struct Ram {
-    pub data: Vec<u8>,
+    pub data: Mutex<Vec<u8>>,
     pub size: usize,
 }
 
@@ -35,6 +35,9 @@ impl Ram {
         file.read_exact(&mut data[..file_len])
             .map_err(|err| anyhow!("Failed to read file '{}': {}", program_path.display(), err))?;
 
-        Ok(Self { data, size })
+        Ok(Self {
+            data: Mutex::new(data),
+            size,
+        })
     }
 }

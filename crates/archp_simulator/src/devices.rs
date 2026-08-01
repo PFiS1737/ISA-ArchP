@@ -3,7 +3,7 @@ mod keyboard;
 mod ram;
 
 use std::sync::{
-    Arc,
+    Arc, Mutex,
     atomic::{AtomicU64, Ordering},
 };
 
@@ -19,7 +19,7 @@ impl Device<'_> {
     pub fn size(&self) -> usize {
         match self {
             Device::Ram(dev) => dev.size,
-            Device::FrameBuffer(dev) => dev.data.len(),
+            Device::FrameBuffer(dev) => dev.size(),
             Device::Keyboard(dev) => dev.size,
         }
     }
@@ -32,7 +32,7 @@ impl Device<'_> {
         }
     }
 
-    pub fn store(&mut self, addr: usize, width: usize, value: u32) {
+    pub fn store(&self, addr: usize, width: usize, value: u32) {
         match self {
             Device::Ram(dev) => dev.data.store(addr, width, value),
             Device::FrameBuffer(dev) => dev.data.store(addr, width, value),
@@ -45,12 +45,14 @@ trait Load {
     fn load(&self, addr: usize, width: usize) -> u32;
 }
 
-impl Load for [u8] {
+impl<T: AsRef<[u8]>> Load for Mutex<T> {
     fn load(&self, addr: usize, width: usize) -> u32 {
+        let data = self.lock().unwrap();
+        let data = data.as_ref();
         match width {
-            1 => self[addr] as u32,
-            2 => u16::from_le_bytes(self[addr..addr + 2].try_into().unwrap()) as u32,
-            4 => u32::from_le_bytes(self[addr..addr + 4].try_into().unwrap()),
+            1 => data[addr] as u32,
+            2 => u16::from_le_bytes(data[addr..addr + 2].try_into().unwrap()) as u32,
+            4 => u32::from_le_bytes(data[addr..addr + 4].try_into().unwrap()),
             _ => panic!("invalid width"),
         }
     }
@@ -76,15 +78,17 @@ impl Load for Arc<AtomicU64> {
 }
 
 trait Store {
-    fn store(&mut self, addr: usize, width: usize, value: u32);
+    fn store(&self, addr: usize, width: usize, value: u32);
 }
 
-impl Store for [u8] {
-    fn store(&mut self, addr: usize, width: usize, value: u32) {
+impl<T: AsMut<[u8]>> Store for Mutex<T> {
+    fn store(&self, addr: usize, width: usize, value: u32) {
+        let mut data = self.lock().unwrap();
+        let data = data.as_mut();
         match width {
-            1 => self[addr] = value as u8,
-            2 => self[addr..addr + 2].copy_from_slice(&(value as u16).to_le_bytes()),
-            4 => self[addr..addr + 4].copy_from_slice(&value.to_le_bytes()),
+            1 => data[addr] = value as u8,
+            2 => data[addr..addr + 2].copy_from_slice(&(value as u16).to_le_bytes()),
+            4 => data[addr..addr + 4].copy_from_slice(&value.to_le_bytes()),
             _ => panic!("invalid width"),
         }
     }

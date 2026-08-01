@@ -5,7 +5,7 @@ mod dpi;
 mod memory;
 
 use std::{
-    sync::{Mutex, mpsc},
+    sync::mpsc,
     thread,
     time::{Duration, Instant},
 };
@@ -28,7 +28,7 @@ fn main() -> Result<()> {
     let (tx, rx) = mpsc::channel::<bool>();
 
     MEMORY
-        .set(Mutex::new(Memory::with_config(tx, &cli)?))
+        .set(Memory::with_config(tx, &cli)?)
         .map_err(|_| anyhow!("'MEMORY' has already been initialized."))?;
 
     let cpu_top = cpu::ffi::create_cpu();

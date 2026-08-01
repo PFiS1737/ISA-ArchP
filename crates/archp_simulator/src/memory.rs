@@ -87,22 +87,22 @@ impl<'a> Memory<'a> {
             .load(addr, width)
     }
 
-    pub fn store(&mut self, addr: usize, width: usize, value: u32) {
+    pub fn store(&self, addr: usize, width: usize, value: u32) {
         self.regions
-            .iter_mut()
+            .iter()
             .find(|r| r.contains(addr))
             .unwrap_or_else(|| panic!("Invalid addr: 0x{:08X}", addr))
             .store(addr, width, value);
     }
 
-    pub fn get_fb(&mut self) -> &mut FrameBuffer<'a> {
+    pub fn get_fb(&self) -> &FrameBuffer<'a> {
         let r = self
             .regions
-            .iter_mut()
+            .iter()
             .find(|r| matches!(r.dev, Device::FrameBuffer(..)))
             .unwrap_or_else(|| panic!("Framebuffer region not found"));
 
-        match &mut r.dev {
+        match &r.dev {
             Device::FrameBuffer(fb) => fb,
             _ => unreachable!(),
         }
@@ -114,7 +114,7 @@ impl Region<'_> {
         self.dev.load(self.offset(addr), width)
     }
 
-    fn store(&mut self, addr: usize, width: usize, value: u32) {
+    fn store(&self, addr: usize, width: usize, value: u32) {
         self.dev.store(self.offset(addr), width, value);
     }
 
