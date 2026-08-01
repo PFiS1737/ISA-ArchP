@@ -1,4 +1,4 @@
-use crate::dpi::SYSTEM;
+use super::SYSTEM;
 
 #[unsafe(no_mangle)]
 extern "C" fn mem_load(addr: u32, width: *const u32) -> u32 {

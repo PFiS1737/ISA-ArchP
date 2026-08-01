@@ -3,6 +3,7 @@ mod cpu;
 mod devices;
 mod dpi;
 mod memory;
+mod register;
 mod system;
 
 use std::{

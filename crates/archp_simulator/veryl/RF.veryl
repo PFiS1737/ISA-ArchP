@@ -12,20 +12,14 @@ module RF (
     rdata1: output bit<32>,
     rdata2: output bit<32>,
 ) {
-    var regs: bit<32> [32];
-
     always_ff {
-        if_reset {
-            for i in 0..32 {
-                regs[i] = '0;
-            }
-        } else {
+        if_reset {} else {
             if we && rd != 0 {
-                regs[rd] = wdata;
+                $sv::write_regfile(rd, wdata);
             }
         }
     }
 
-    assign rdata1 = regs[rs1];
-    assign rdata2 = regs[rs2];
+    assign rdata1 = $sv::read_regfile(rs1);
+    assign rdata2 = $sv::read_regfile(rs2);
 }
