@@ -3,6 +3,7 @@ mod cpu;
 mod devices;
 mod dpi;
 mod memory;
+mod system;
 
 use std::{
     sync::mpsc,
@@ -10,11 +11,11 @@ use std::{
     time::{Duration, Instant},
 };
 
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Result, bail};
 use clap::{CommandFactory, Parser};
 use clap_complete::CompleteEnv;
 
-use crate::{command::Cli, dpi::memory::MEMORY, memory::Memory};
+use crate::{command::Cli, dpi::SYSTEM, system::System};
 
 fn main() -> Result<()> {
     CompleteEnv::with_factory(Cli::command)
@@ -27,9 +28,7 @@ fn main() -> Result<()> {
 
     let (tx, rx) = mpsc::channel::<bool>();
 
-    MEMORY
-        .set(Memory::with_config(tx, &cli)?)
-        .map_err(|_| anyhow!("'MEMORY' has already been initialized."))?;
+    let _ = SYSTEM.set(System::with_config(tx, &cli)?);
 
     let cpu_top = cpu::ffi::create_cpu();
 
