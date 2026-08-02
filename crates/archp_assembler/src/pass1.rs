@@ -39,20 +39,36 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                 continue;
             }
 
-            let tokens = raw_line.split_whitespace().collect::<Vec<_>>();
-            if tokens.is_empty() {
-                unreachable!()
-            }
+            let (name, remain) = match raw_line.split_once(char::is_whitespace) {
+                Some(pair) => pair,
+                None => (raw_line, ""),
+            };
 
-            if tokens[0] == "const" {
+            // TODO: remove this after implementing directive .eqv
+            if name == "const" {
                 if in_const_zone {
-                    if tokens.len() != 3 {
-                        bail!("Malformed const at line {}: '{}'", orig_idx + 1, raw_line);
-                    }
-                    let [name, value, ..] = tokens[1..] else {
-                        unreachable!()
+                    match remain.split_once('=') {
+                        Some((name, value)) => {
+                            let name = name.trim();
+                            let value = value.trim();
+
+                            if name.is_empty() || value.is_empty() {
+                                bail!(
+                                    "Invalid constant declaration at line {}: '{}'",
+                                    orig_idx + 1,
+                                    raw_line
+                                );
+                            }
+
+                            self.context.constants.insert(name, value);
+                        },
+                        None => bail!(
+                            "Invalid constant declaration at line {}: '{}'",
+                            orig_idx + 1,
+                            raw_line
+                        ),
                     };
-                    self.context.constants.insert(name, value);
+
                     continue;
                 }
 
@@ -69,38 +85,31 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
 
             let pc = processed.len() * 4;
 
-            let (raw_line, tokens) = match tokens[0].strip_suffix(':') {
+            let (raw_line, name, remain) = match name.strip_suffix(':') {
                 Some(label) => {
                     self.context.labels.insert(label, pc);
 
                     current_label = Some(label);
 
-                    if tokens.len() == 1 {
+                    if remain.is_empty() {
                         continue;
                     }
 
-                    (raw_line[label.len() + 1..].trim(), &tokens[1..])
+                    let line = raw_line[label.len() + 1..].trim();
+
+                    match line.split_once(char::is_whitespace) {
+                        Some(pair) => (line, pair.0, pair.1),
+                        None => (line, line, ""),
+                    }
                 },
-                None => (raw_line, tokens.as_ref()),
+                None => (raw_line, name, remain),
             };
 
-            // To support ',' separated operands
-            let mut new_tokens;
-            let tokens = if tokens.len() >= 2 && tokens[1].contains(',') {
-                let (name, remain) = raw_line.split_once(char::is_whitespace).unwrap(); // INFO: Safe because tokens.len() >= 2
-
-                new_tokens = Vec::with_capacity(5);
-                new_tokens.push(name);
-                new_tokens.extend(remain.split(',').map(str::trim));
-
-                &new_tokens
-            } else {
-                tokens
-            };
-
-            let name = tokens[0];
-
-            let ops = tokens[1..].iter().map(|e| (*e).into()).collect::<Vec<_>>();
+            let ops = remain
+                .split(',')
+                .filter(|e| !e.is_empty())
+                .map(|e| e.trim().into())
+                .collect::<Vec<_>>();
 
             let mut lines = Vec::new();
 
