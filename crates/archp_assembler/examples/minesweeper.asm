@@ -1,24 +1,26 @@
 # ref https://github.com/ESnake37/Turing-Complete-Minesweeper/blob/main/MINESWEEPER.asm
 
-const x r1
-const y r2
-const i r3
-const j r4
-const t0 r5
-const t1 r6
-const t2 r7
-const cursor_x r8
-const cursor_y r9
-const addr r10
-const tx r11
-const ty r12
-const nx r13
-const ny r14
-const cnt r15
-const key_code r16
-const arg_x r17
-const arg_y r18
-const mine_num r19
+const i r1
+const j r2
+const t0 r3
+const t1 r4
+const t2 r5
+const cursor_x r6
+const cursor_y r7
+const addr r8
+const cnt r9
+const x r10 ; a0
+const y r11
+const color r12
+const tx r13
+const ty r14
+const nx r15
+const ny r16
+; r17 is used for syscalls
+const key_code r18
+const arg_x r19
+const arg_y r20
+const mine_num r21
 
 const BASE_ADDR 0x00100000
 const KBD_BASE 0x90000000
@@ -71,9 +73,9 @@ init_screen:
   # 画背景
   clr x
   clr y
-  col COLOR_BACK
+  li color COLOR_BACK
   draw_back:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc x
     blt x SCREEN_WIDTH draw_back
     inc y
@@ -83,9 +85,9 @@ init_screen:
   # 画格子
   clr x
   clr y
-  col COLOR_HIDDEN
+  li color COLOR_HIDDEN
   draw_grid:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc x
     blt x GRID_WIDTH draw_grid
     inc y
@@ -95,9 +97,9 @@ init_screen:
   # 画分隔线
   clr x
   clr y
-  col COLOR_GRID_LINE
+  li color COLOR_GRID_LINE
   draw_grid_line_row:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc x
     blt x GRID_WIDTH draw_grid_line_row
     add y y TILE_SIZE
@@ -106,7 +108,7 @@ init_screen:
   clr x
   clr y
   draw_grid_line_col:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc y
     blt y GRID_HEIGHT draw_grid_line_col
     add x x TILE_SIZE
@@ -116,7 +118,7 @@ init_screen:
   # 画光标
   clr cursor_x
   clr cursor_y
-  col COLOR_CURSOR
+  li color COLOR_CURSOR
   call update_cursor
 
   ret
@@ -124,12 +126,17 @@ init_screen:
 
 init_mines:
   li mine_num MINE_NUM_MAX
-  out mine_num
+  mv r10 mine_num
+  ecall 1 ; print int
+  li r10 10 ; '\n'
+  ecall 11 ; putchar
   clr i
 
   init_mines_loop:
-    rand t1
-    rand t2
+    ecall 41 ; random int
+    mv t1 r10
+    ecall 41 ; random int
+    mv t2 r10
     rem x t1 GRID_COLS
     rem y t2 GRID_ROWS
 
@@ -209,7 +216,7 @@ count_around_mines:
 
 
 move_cursor:
-  col COLOR_GRID_LINE
+  li color COLOR_GRID_LINE
   call update_cursor
 
   bne key_code KEY_UP move_cursor_key_up_ne
@@ -246,7 +253,7 @@ move_cursor:
   li cursor_y 0
   move_cursor_y_lt_rows:
 
-  col COLOR_CURSOR
+  li color COLOR_CURSOR
   call update_cursor
 
   ret
@@ -259,7 +266,7 @@ update_cursor:
   mul y cursor_y TILE_SIZE
 
   update_cursor_loop1:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc x
     inc i
     ble i TILE_SIZE update_cursor_loop1
@@ -273,7 +280,7 @@ update_cursor:
   mul y cursor_y TILE_SIZE
 
   update_cursor_loop2:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc y
     inc i
     ble i TILE_SIZE update_cursor_loop2
@@ -357,7 +364,7 @@ reveal_around:
     mv arg_y ny
 
     bne t2 0 reveal_around_skip_draw_tile
-    col COLOR_REVEALED
+    li color COLOR_REVEALED
     call draw_tile
     reveal_around_skip_draw_tile:
 
@@ -413,12 +420,15 @@ toggle_flag:
     inc mine_num
     li t2 -33 ; not t2 FLAG_MASK
     and t1 t1 t2
-    col COLOR_HIDDEN
+    li color COLOR_HIDDEN
     call draw_tile
 
   toggle_flag_store:
     sw t1 addr
-    out mine_num
+    mv r10 mine_num
+    ecall 1 ; print int
+    li r10 10 ; '\n'
+    ecall 11 ; putchar
 
   toggle_flag_ret:
     ret
@@ -432,7 +442,7 @@ draw_tile:
   inc x
   inc y
   draw_tile_loop:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc x
     inc i
     blt i 7 draw_tile_loop
@@ -449,30 +459,30 @@ draw_tile:
 draw_flag:
   mul x arg_x TILE_SIZE
   mul y arg_y TILE_SIZE
-  col COLOR_FLAG
+  li color COLOR_FLAG
   add x x 4
   add y y 2
-  spx x y
+  ecall 0x10000000 ; set pixel
   inc y
-  spx x y
+  ecall 0x10000000 ; set pixel
   inc y
-  spx x y
+  ecall 0x10000000 ; set pixel
   dec x
-  spx x y
+  ecall 0x10000000 ; set pixel
   dec x
-  spx x y
+  ecall 0x10000000 ; set pixel
   inc x
   dec y
-  spx x y
+  ecall 0x10000000 ; set pixel
   inc x
   add y y 2
-  spx x y
+  ecall 0x10000000 ; set pixel
   sub x x 2
   inc y
-  col COLOR_POLE
+  li color COLOR_POLE
   clr i
   draw_pole:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc x
     inc i
     blt i 5 draw_pole
@@ -485,34 +495,34 @@ draw_mine:
   mul y arg_y TILE_SIZE
   add x x 4
   add y y 2
-  col COLOR_MINE
-  spx x y
+  li color COLOR_MINE
+  ecall 0x10000000 ; set pixel
   inc y
-  spx x y
+  ecall 0x10000000 ; set pixel
   dec x
-  spx x y
+  ecall 0x10000000 ; set pixel
   add x x 2
-  spx x y
+  ecall 0x10000000 ; set pixel
   inc y
-  spx x y
+  ecall 0x10000000 ; set pixel
   inc x
-  spx x y
+  ecall 0x10000000 ; set pixel
   sub x x 2
-  spx x y
+  ecall 0x10000000 ; set pixel
   dec x
-  spx x y
+  ecall 0x10000000 ; set pixel
   dec x
-  spx x y
+  ecall 0x10000000 ; set pixel
   inc x
   inc y
-  spx x y
+  ecall 0x10000000 ; set pixel
   inc x
-  spx x y
+  ecall 0x10000000 ; set pixel
   inc x
-  spx x y
+  ecall 0x10000000 ; set pixel
   dec x
   inc y
-  spx x y
+  ecall 0x10000000 ; set pixel
 
   ret
 
@@ -542,7 +552,7 @@ draw_num:
   ret
 
 draw_num1:
-  col COLOR_REVEALED
+  li color COLOR_REVEALED
   call draw_tile
   clr i
   clr j
@@ -550,9 +560,9 @@ draw_num1:
   mul y arg_y TILE_SIZE
   add x x 4
   add y y 2
-  col COLOR_NUM1
+  li color COLOR_NUM1
   draw_num1_loop:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc y
     inc i
     blt i 5 draw_num1_loop
@@ -561,7 +571,7 @@ draw_num1:
 
 
 draw_num2:
-  col COLOR_REVEALED
+  li color COLOR_REVEALED
   call draw_tile
   clr i
   clr j
@@ -569,9 +579,9 @@ draw_num2:
   mul y arg_y TILE_SIZE
   add x x 3
   add y y 2
-  col COLOR_NUM2
+  li color COLOR_NUM2
   draw_num2_loop:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc x
     inc i
     blt i 3 draw_num2_loop
@@ -581,16 +591,16 @@ draw_num2:
     inc j
     blt j 3 draw_num2_loop
     sub y y 3
-    spx x y
+    ecall 0x10000000 ; set pixel
     add x x 2
     sub y y 2
-    spx x y
+    ecall 0x10000000 ; set pixel
 
   ret
 
 
 draw_num3:
-  col COLOR_REVEALED
+  li color COLOR_REVEALED
   call draw_tile
   clr i
   clr j
@@ -598,9 +608,9 @@ draw_num3:
   mul y arg_y TILE_SIZE
   add x x 3
   add y y 2
-  col COLOR_NUM3
+  li color COLOR_NUM3
   draw_num3_loop:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc x
     inc i
     blt i 3 draw_num3_loop
@@ -611,34 +621,34 @@ draw_num3:
     blt j 3 draw_num3_loop
     add x x 2
     sub y y 3
-    spx x y
+    ecall 0x10000000 ; set pixel
     sub y y 2
-    spx x y
+    ecall 0x10000000 ; set pixel
 
   ret
 
 
 draw_num4:
-  col COLOR_REVEALED
+  li color COLOR_REVEALED
   call draw_tile
   clr i
   mul x arg_x TILE_SIZE
   mul y arg_y TILE_SIZE
   add x x 3
   add y y 2
-  col COLOR_NUM4
+  li color COLOR_NUM4
   draw_num4_loop1:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc y
     inc i
     blt i 3 draw_num4_loop1
   inc x
   dec y
-  spx x y
+  ecall 0x10000000 ; set pixel
   inc x
   sub y y 2
   draw_num4_loop2:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc y
     inc i
     blt i 8 draw_num4_loop2
@@ -647,7 +657,7 @@ draw_num4:
 
 
 draw_num5:
-  col COLOR_REVEALED
+  li color COLOR_REVEALED
   call draw_tile
   clr i
   clr j
@@ -655,9 +665,9 @@ draw_num5:
   mul y arg_y TILE_SIZE
   add x x 3
   add y y 2
-  col COLOR_NUM5
+  li color COLOR_NUM5
   draw_num5_loop:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc x
     inc i
     blt i 3 draw_num5_loop
@@ -667,10 +677,10 @@ draw_num5:
     inc j
     blt j 3 draw_num5_loop
     sub y y 5
-    spx x y
+    ecall 0x10000000 ; set pixel
     add x x 2
     add y y 2
-    spx x y
+    ecall 0x10000000 ; set pixel
 
   ret
 
@@ -717,7 +727,7 @@ main:
   lose_loop:
     mv arg_x cursor_x
     mv arg_y cursor_y
-    col COLOR_MINE_BACK
+    li color COLOR_MINE_BACK
     call draw_tile
     call draw_mine
 
@@ -735,7 +745,7 @@ main:
       beqz t2 lose_loop_skip_draw
       mv arg_x nx
       mv arg_y ny
-      col COLOR_REVEALED
+      li color COLOR_REVEALED
       call draw_tile
       call draw_mine
     lose_loop_skip_draw:

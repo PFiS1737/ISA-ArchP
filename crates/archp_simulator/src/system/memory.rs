@@ -1,11 +1,9 @@
+use core::panic;
 use std::sync::mpsc;
 
 use anyhow::{Result, bail};
 
-use crate::{
-    command::Cli,
-    devices::{Device, FrameBuffer, Keyboard, Ram},
-};
+use crate::{command::Cli, system::devices::*};
 
 pub struct Memory<'a> {
     regions: Vec<Region<'a>>,
@@ -95,7 +93,16 @@ impl<'a> Memory<'a> {
             .store(addr, width, value);
     }
 
-    pub fn get_fb(&self) -> &FrameBuffer<'a> {
+    pub fn get_ram(&self) -> &Ram {
+        let r = self.regions.first().unwrap();
+
+        match &r.dev {
+            Device::Ram(ram) => ram,
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn get_framebuffer(&self) -> &FrameBuffer<'a> {
         let r = self
             .regions
             .iter()

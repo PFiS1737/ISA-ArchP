@@ -1,9 +1,6 @@
 mod command;
 mod cpu;
-mod devices;
 mod dpi;
-mod memory;
-mod register;
 mod system;
 
 use std::{
@@ -12,7 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use anyhow::{Result, bail};
+use anyhow::Result;
 use clap::{CommandFactory, Parser};
 use clap_complete::CompleteEnv;
 
@@ -47,7 +44,7 @@ fn main() -> Result<()> {
         if let Ok(stopped) = rx.try_recv()
             && stopped
         {
-            bail!("Simulation interrupted by user.");
+            break;
         }
 
         cpu_top.eval();

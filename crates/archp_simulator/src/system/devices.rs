@@ -7,7 +7,7 @@ use std::sync::{
     atomic::{AtomicU64, Ordering},
 };
 
-pub use crate::devices::{framebuffer::FrameBuffer, keyboard::Keyboard, ram::Ram};
+pub use crate::system::devices::{framebuffer::FrameBuffer, keyboard::Keyboard, ram::Ram};
 
 pub enum Device<'a> {
     Ram(Ram),

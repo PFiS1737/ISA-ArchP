@@ -164,6 +164,12 @@ xxxxxxx   xxx   xxxxx   xxxxxxxxxxxxxxxxx
 | 0001011 | -      | U    | lui         |
 | 0001100 | -      | U    | auipc       |
 
+### System
+
+| Opcode  | Funct3 | Type | Instruction |
+| ------- | ------ | ---- | ----------- |
+| 0100000 | 000    | -    | ecall       |
+
 ### Stack / Call / Return
 
 | Opcode  | Funct3 | Type | Instruction |
@@ -173,13 +179,3 @@ xxxxxxx   xxx   xxxxx   xxxxxxxxxxxxxxxxx
 | 1111110 | 001    | I    | push        |
 | 1111110 | 010    | I    | ret         |
 | 1111110 | 011    | I    | callr       |
-
-### Misc
-
-| Opcode  | Funct3 | Type | Instruction |
-| ------- | ------ | ---- | ----------- |
-| 1111111 | 000    | I    | colr        |
-| 1111111 | 001    | R    | spx         |
-| 1111111 | 010    | I    | in          |
-| 1111111 | 011    | I    | out         |
-| 1111111 | 101    | I    | rand        |

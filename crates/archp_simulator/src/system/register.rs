@@ -1,8 +1,10 @@
-use std::sync::RwLock;
+use std::sync::{RwLock, RwLockWriteGuard};
 
 pub struct RegisterFile {
     regs: RwLock<[u32; 32]>,
 }
+
+pub type Regs<'a> = RwLockWriteGuard<'a, [u32; 32]>;
 
 impl RegisterFile {
     pub fn new() -> Self {
@@ -17,5 +19,9 @@ impl RegisterFile {
 
     pub fn write(&self, index: usize, value: u32) {
         self.regs.write().unwrap()[index] = value;
+    }
+
+    pub fn rw_args(&self) -> Regs<'_> {
+        self.regs.write().unwrap()
     }
 }

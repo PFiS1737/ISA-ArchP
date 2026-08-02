@@ -31,7 +31,7 @@ set -e argv[1]
 
 trap "rm -rf output.bin" EXIT INT QUIT TERM
 
-echo_h1 "Running..."
+echo_h1 "Building..."
 cargo build
 echo
 
@@ -60,5 +60,3 @@ if set -q _flag_console
 else
     cargo run -p archp_simulator -- $file $argv
 end
-
-echo Done

@@ -8,10 +8,3 @@ import "DPI-C" function void mem_store(
   input bit [2:0] width,
   input int data
 );
-
-// TODO: remove this
-import "DPI-C" function void pixel_display_set(
-  input int unsigned x,
-  input int unsigned y,
-  input int unsigned color
-);

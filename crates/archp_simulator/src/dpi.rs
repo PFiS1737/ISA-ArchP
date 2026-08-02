@@ -1,7 +1,7 @@
 mod memory;
 mod register;
-mod simple_io;
 mod stack;
+mod syscall;
 
 use std::sync::OnceLock;
 

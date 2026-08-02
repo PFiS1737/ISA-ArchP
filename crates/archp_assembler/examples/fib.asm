@@ -1,18 +1,18 @@
-const s0 r1
-const s1 r2
-const s2 r3
-
-const a0 r4
-const ra r5
-
-const sp r6
+const ra r1
+const sp r2
+const s0 r8
+const s1 r9
+const a0 r10
+const a7 r17
+const s2 r18
 
 li sp 4096
 
 main:
-  in a0
+  ecall 5 ; read int
   jal ra fib
-  out a0
+  ecall 1 ; print int
+  ecall 10 ; exit
 
 fib:
   bgt a0 2 .L0

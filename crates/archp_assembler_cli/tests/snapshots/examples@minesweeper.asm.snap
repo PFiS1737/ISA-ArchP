@@ -5,560 +5,656 @@ input_file: crates/archp_assembler/examples/minesweeper.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x140003EE # jal r0 main                                [j main]
-0x01020000 # addi x r0 0                                [clr x]                                            <label: init_screen>
-0x01040000 # addi y r0 0                                [clr y]
-0x163F81A2 # lui r31 0x181A2                            [col COLOR_BACK]
-0xFE01FBFF # colr r0 r31 0xFFFFFBFF                     [col COLOR_BACK]
-0xFE401002 # spx x y                                                                                       <label: draw_back>
-0x01021001 # addi x x 1                                 [inc x]
+0x140004AE # jal r0 main                                [j main]
+0x01140000 # addi x r0 0                                [clr x]                                            <label: init_screen>
+0x01160000 # addi y r0 0                                [clr y]
+0x16180182 # lui color 0x182                            [li color COLOR_BACK]
+0x0118CA1B # addi color color 0xFFFFFA1B                [li color COLOR_BACK]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: draw_back>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
 0x013E0080 # addi r31 r0 128                            [blt x SCREEN_WIDTH draw_back]
-0x12BE1F5F # blt x r31 draw_back                        [blt x SCREEN_WIDTH draw_back]
-0x01042001 # addi y y 1                                 [inc y]
-0x01020000 # addi x r0 0                                [clr x]
+0x12BEAEDF # blt x r31 draw_back                        [blt x SCREEN_WIDTH draw_back]
+0x0116B001 # addi y y 1                                 [inc y]
+0x01140000 # addi x r0 0                                [clr x]
 0x013E0048 # addi r31 r0 72                             [blt y SCREEN_HEIGHT draw_back]
-0x12BE2E5F # blt y r31 draw_back                        [blt y SCREEN_HEIGHT draw_back]
-0x01020000 # addi x r0 0                                [clr x]
-0x01040000 # addi y r0 0                                [clr y]
-0x16BEC546 # lui r31 0x4C546                            [col COLOR_HIDDEN]
-0xFE01FCFF # colr r0 r31 0xFFFFFCFF                     [col COLOR_HIDDEN]
-0xFE401002 # spx x y                                                                                       <label: draw_grid>
-0x01021001 # addi x x 1                                 [inc x]
+0x12BEBDDF # blt y r31 draw_back                        [blt y SCREEN_HEIGHT draw_back]
+0x01140000 # addi x r0 0                                [clr x]
+0x01160000 # addi y r0 0                                [clr y]
+0x161804C5 # lui color 0x4C5                            [li color COLOR_HIDDEN]
+0x0118C45C # addi color color 0x45C                     [li color COLOR_HIDDEN]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: draw_grid>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
 0x013E0079 # addi r31 r0 121                            [blt x GRID_WIDTH draw_grid]
-0x12BE1F5F # blt x r31 draw_grid                        [blt x GRID_WIDTH draw_grid]
-0x01042001 # addi y y 1                                 [inc y]
-0x01020000 # addi x r0 0                                [clr x]
+0x12BEAEDF # blt x r31 draw_grid                        [blt x GRID_WIDTH draw_grid]
+0x0116B001 # addi y y 1                                 [inc y]
+0x01140000 # addi x r0 0                                [clr x]
 0x013E0041 # addi r31 r0 65                             [blt y GRID_HEIGHT draw_grid]
-0x12BE2E5F # blt y r31 draw_grid                        [blt y GRID_HEIGHT draw_grid]
-0x01020000 # addi x r0 0                                [clr x]
-0x01040000 # addi y r0 0                                [clr y]
-0x167E2263 # lui r31 0x22263                            [col COLOR_GRID_LINE]
-0xFE01FEFF # colr r0 r31 0xFFFFFEFF                     [col COLOR_GRID_LINE]
-0xFE401002 # spx x y                                                                                       <label: draw_grid_line_row>
-0x01021001 # addi x x 1                                 [inc x]
+0x12BEBDDF # blt y r31 draw_grid                        [blt y GRID_HEIGHT draw_grid]
+0x01140000 # addi x r0 0                                [clr x]
+0x01160000 # addi y r0 0                                [clr y]
+0x16180222 # lui color 0x222                            [li color COLOR_GRID_LINE]
+0x0118C62E # addi color color 0x62E                     [li color COLOR_GRID_LINE]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: draw_grid_line_row>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
 0x013E0079 # addi r31 r0 121                            [blt x GRID_WIDTH draw_grid_line_row]
-0x12BE1F5F # blt x r31 draw_grid_line_row               [blt x GRID_WIDTH draw_grid_line_row]
-0x01042008 # addi y y 8                                 [add y y TILE_SIZE]
-0x01020000 # addi x r0 0                                [clr x]
+0x12BEAEDF # blt x r31 draw_grid_line_row               [blt x GRID_WIDTH draw_grid_line_row]
+0x0116B008 # addi y y 8                                 [add y y TILE_SIZE]
+0x01140000 # addi x r0 0                                [clr x]
 0x013E0041 # addi r31 r0 65                             [blt y GRID_HEIGHT draw_grid_line_row]
-0x12BE2E5F # blt y r31 draw_grid_line_row               [blt y GRID_HEIGHT draw_grid_line_row]
-0x01020000 # addi x r0 0                                [clr x]
-0x01040000 # addi y r0 0                                [clr y]
-0xFE401002 # spx x y                                                                                       <label: draw_grid_line_col>
-0x01042001 # addi y y 1                                 [inc y]
+0x12BEBDDF # blt y r31 draw_grid_line_row               [blt y GRID_HEIGHT draw_grid_line_row]
+0x01140000 # addi x r0 0                                [clr x]
+0x01160000 # addi y r0 0                                [clr y]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: draw_grid_line_col>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0116B001 # addi y y 1                                 [inc y]
 0x013E0041 # addi r31 r0 65                             [blt y GRID_HEIGHT draw_grid_line_col]
-0x12BE2F5F # blt y r31 draw_grid_line_col               [blt y GRID_HEIGHT draw_grid_line_col]
-0x01021008 # addi x x 8                                 [add x x TILE_SIZE]
-0x01040000 # addi y r0 0                                [clr y]
+0x12BEBEDF # blt y r31 draw_grid_line_col               [blt y GRID_HEIGHT draw_grid_line_col]
+0x0114A008 # addi x x 8                                 [add x x TILE_SIZE]
+0x01160000 # addi y r0 0                                [clr y]
 0x013E0079 # addi r31 r0 121                            [blt x GRID_WIDTH draw_grid_line_col]
-0x12BE1E5F # blt x r31 draw_grid_line_col               [blt x GRID_WIDTH draw_grid_line_col]
-0x01100000 # addi cursor_x r0 0                         [clr cursor_x]
-0x01120000 # addi cursor_y r0 0                         [clr cursor_y]
-0x17BF6BB1 # lui r31 0xD6BB1                            [col COLOR_CURSOR]
-0xFE01F5FF # colr r0 r31 0x5FF                          [col COLOR_CURSOR]
-0xFA0000C4 # call update_cursor
+0x12BEADDF # blt x r31 draw_grid_line_col               [blt x GRID_WIDTH draw_grid_line_col]
+0x010C0000 # addi cursor_x r0 0                         [clr cursor_x]
+0x010E0000 # addi cursor_y r0 0                         [clr cursor_y]
+0x17D9FD6C # lui color 0xFFD6C                          [li color COLOR_CURSOR]
+0x0118CB15 # addi color color 0xFFFFFB15                [li color COLOR_CURSOR]
+0xFA0000D6 # call update_cursor
 0xFC800000 # ret
-0x01260010 # addi mine_num r0 MINE_NUM_MAX              [li mine_num MINE_NUM_MAX]                         <label: init_mines>
-0xFEC13000 # out mine_num
-0x01060000 # addi i r0 0                                [clr i]
-0xFF4C0000 # rand t1                                                                                       <label: init_mines_loop>
-0xFF4E0000 # rand t2
-0x0742600F # remi x t1 15                               [rem x t1 GRID_COLS]
-0x07447008 # remi y t2 8                                [rem y t2 GRID_ROWS]
-0x0514200F # muli addr y 15                             [mul addr y GRID_COLS]
-0x0014A001 # add addr addr x
-0x0514A004 # muli addr addr 4                           [mul addr addr 4]
+0x012A0010 # addi mine_num r0 MINE_NUM_MAX              [li mine_num MINE_NUM_MAX]                         <label: init_mines>
+0x01155000 # addi r10 mine_num 0                        [mv r10 mine_num]
+0x01220001 # addi r17 r0 1                              [ecall 1]
+0x40000000 # ecall                                      [ecall 1]
+0x0114000A # addi r10 r0 10                             [li r10 10]
+0x0122000B # addi r17 r0 11                             [ecall 11]
+0x40000000 # ecall                                      [ecall 11]
+0x01020000 # addi i r0 0                                [clr i]
+0x01220029 # addi r17 r0 41                             [ecall 41]                                         <label: init_mines_loop>
+0x40000000 # ecall                                      [ecall 41]
+0x0108A000 # addi t1 r10 0                              [mv t1 r10]
+0x01220029 # addi r17 r0 41                             [ecall 41]
+0x40000000 # ecall                                      [ecall 41]
+0x010AA000 # addi t2 r10 0                              [mv t2 r10]
+0x0754400F # remi x t1 15                               [rem x t1 GRID_COLS]
+0x07565008 # remi y t2 8                                [rem y t2 GRID_ROWS]
+0x0510B00F # muli addr y 15                             [mul addr y GRID_COLS]
+0x0010800A # add addr addr x
+0x05108004 # muli addr addr 4                           [mul addr addr 4]
 0x163E0100 # lui r31 0x100                              [add addr addr BASE_ADDR]
 0x013FF000 # addi r31 r31 0                             [add addr addr BASE_ADDR]
-0x0014A01F # add addr addr r31                          [add addr addr BASE_ADDR]
-0x100CA000 # lw t1 addr 0                               [lw t1 addr]
+0x0010801F # add addr addr r31                          [add addr addr BASE_ADDR]
+0x10088000 # lw t1 addr 0                               [lw t1 addr]
 0x013E0008 # addi r31 r0 8                              [beq t1 MINE_MASK init_mines_loop]
-0x123E6D1F # beq t1 r31 init_mines_loop                 [beq t1 MINE_MASK init_mines_loop]
-0x010C0008 # addi t1 r0 MINE_MASK                       [li t1 MINE_MASK]
-0x1140A006 # sw addr t1 0                               [sw t1 addr]
-0x01063001 # addi i i 1                                 [inc i]
-0x12BE3C13 # blt i mine_num init_mines_loop
+0x123E4C1F # beq t1 r31 init_mines_loop                 [beq t1 MINE_MASK init_mines_loop]
+0x01080008 # addi t1 r0 MINE_MASK                       [li t1 MINE_MASK]
+0x11408004 # sw addr t1 0                               [sw t1 addr]
+0x01021001 # addi i i 1                                 [inc i]
+0x12BE1B15 # blt i mine_num init_mines_loop
 0xFC800000 # ret
-0x01020000 # addi x r0 0                                [clr x]                                            <label: init_mine_counts>
-0x01040000 # addi y r0 0                                [clr y]
-0x16140100 # lui addr 0x100                             [li addr BASE_ADDR]
-0x0114A000 # addi addr addr 0                           [li addr BASE_ADDR]
+0x01140000 # addi x r0 0                                [clr x]                                            <label: init_mine_counts>
+0x01160000 # addi y r0 0                                [clr y]
+0x16100100 # lui addr 0x100                             [li addr BASE_ADDR]
+0x01108000 # addi addr addr 0                           [li addr BASE_ADDR]
 0xFA00001A # call count_around_mines                                                                       <label: init_mine_counts_loop>
-0x100CA000 # lw t1 addr 0                               [lw t1 addr]
-0x000E600F # add t2 t1 cnt
-0x1140A007 # sw addr t2 0                               [sw t2 addr]
-0x01021001 # addi x x 1                                 [inc x]
-0x0114A004 # addi addr addr 4                           [add addr addr 4]
+0x10088000 # lw t1 addr 0                               [lw t1 addr]
+0x000A4009 # add t2 t1 cnt
+0x11408005 # sw addr t2 0                               [sw t2 addr]
+0x0114A001 # addi x x 1                                 [inc x]
+0x01108004 # addi addr addr 4                           [add addr addr 4]
 0x013E000F # addi r31 r0 15                             [blt x GRID_COLS init_mine_counts_loop]
-0x12BE1E5F # blt x r31 init_mine_counts_loop            [blt x GRID_COLS init_mine_counts_loop]
-0x01020000 # addi x r0 0                                [clr x]
-0x01042001 # addi y y 1                                 [inc y]
+0x12BEAE5F # blt x r31 init_mine_counts_loop            [blt x GRID_COLS init_mine_counts_loop]
+0x01140000 # addi x r0 0                                [clr x]
+0x0116B001 # addi y y 1                                 [inc y]
 0x013E0008 # addi r31 r0 8                              [blt y GRID_ROWS init_mine_counts_loop]
-0x12BE2D5F # blt y r31 init_mine_counts_loop            [blt y GRID_ROWS init_mine_counts_loop]
+0x12BEBD5F # blt y r31 init_mine_counts_loop            [blt y GRID_ROWS init_mine_counts_loop]
 0xFC800000 # ret
-0x011E0000 # addi cnt r0 0                              [clr cnt]                                          <label: count_around_mines>
-0x01180FFF # addi ty r0 -1                              [li ty -1]
-0x01160FFF # addi tx r0 -1                              [li tx -1]                                         <label: dy_loop>
-0x001A100B # add nx x tx                                                                                   <label: dx_loop>
-0x001C200C # add ny y ty
-0x1280D440 # blt nx r0 skip_this_neighbor               [bltz nx skip_this_neighbor]
+0x01120000 # addi cnt r0 0                              [clr cnt]                                          <label: count_around_mines>
+0x011C0FFF # addi ty r0 -1                              [li ty -1]
+0x011A0FFF # addi tx r0 -1                              [li tx -1]                                         <label: dy_loop>
+0x001EA00D # add nx x tx                                                                                   <label: dx_loop>
+0x0020B00E # add ny y ty
+0x1280F440 # blt nx r0 skip_this_neighbor               [bltz nx skip_this_neighbor]
 0x013E000F # addi r31 r0 15                             [bge nx GRID_COLS skip_this_neighbor]
-0x12C0D3DF # bge nx r31 skip_this_neighbor              [bge nx GRID_COLS skip_this_neighbor]
-0x1280E380 # blt ny r0 skip_this_neighbor               [bltz ny skip_this_neighbor]
+0x12C0F3DF # bge nx r31 skip_this_neighbor              [bge nx GRID_COLS skip_this_neighbor]
+0x12810380 # blt ny r0 skip_this_neighbor               [bltz ny skip_this_neighbor]
 0x013E0008 # addi r31 r0 8                              [bge ny GRID_ROWS skip_this_neighbor]
-0x12C0E31F # bge ny r31 skip_this_neighbor              [bge ny GRID_ROWS skip_this_neighbor]
-0x050CE00F # muli t1 ny 15                              [mul t1 ny GRID_COLS]
-0x000C600D # add t1 t1 nx
-0x050C6004 # muli t1 t1 4                               [mul t1 t1 4]
+0x12C1031F # bge ny r31 skip_this_neighbor              [bge ny GRID_ROWS skip_this_neighbor]
+0x0509000F # muli t1 ny 15                              [mul t1 ny GRID_COLS]
+0x0008400F # add t1 t1 nx
+0x05084004 # muli t1 t1 4                               [mul t1 t1 4]
 0x163E0100 # lui r31 0x100                              [add t1 t1 BASE_ADDR]
 0x013FF000 # addi r31 r31 0                             [add t1 t1 BASE_ADDR]
-0x000C601F # add t1 t1 r31                              [add t1 t1 BASE_ADDR]
-0x100E6000 # lw t2 t1 0                                 [lw t2 t1]
-0x018E7008 # andi t2 t2 8                               [and t2 t2 MINE_MASK]
+0x0008401F # add t1 t1 r31                              [add t1 t1 BASE_ADDR]
+0x100A4000 # lw t2 t1 0                                 [lw t2 t1]
+0x018A5008 # andi t2 t2 8                               [and t2 t2 MINE_MASK]
 0x013E0008 # addi r31 r0 8                              [bne t2 MINE_MASK skip_this_neighbor]
-0x1240709F # bne t2 r31 skip_this_neighbor              [bne t2 MINE_MASK skip_this_neighbor]
-0x011EF001 # addi cnt cnt 1                             [inc cnt]
-0x0116B001 # addi tx tx 1                               [inc tx]                                           <label: skip_this_neighbor>
+0x1240509F # bne t2 r31 skip_this_neighbor              [bne t2 MINE_MASK skip_this_neighbor]
+0x01129001 # addi cnt cnt 1                             [inc cnt]
+0x011AD001 # addi tx tx 1                               [inc tx]                                           <label: skip_this_neighbor>
 0x013E0001 # addi r31 r0 1                              [ble tx 1 dx_loop]
-0x12FFFACB # bge r31 tx dx_loop                         [ble tx 1 dx_loop]
-0x0118C001 # addi ty ty 1                               [inc ty]
+0x12FFFACD # bge r31 tx dx_loop                         [ble tx 1 dx_loop]
+0x011CE001 # addi ty ty 1                               [inc ty]
 0x013E0001 # addi r31 r0 1                              [ble ty 1 dy_loop]
-0x12FFF9CC # bge r31 ty dy_loop                         [ble ty 1 dy_loop]
+0x12FFF9CE # bge r31 ty dy_loop                         [ble ty 1 dy_loop]
 0xFC800000 # ret
-0x167E2263 # lui r31 0x22263                            [col COLOR_GRID_LINE]                              <label: move_cursor>
-0xFE01FEFF # colr r0 r31 0xFFFFFEFF                     [col COLOR_GRID_LINE]
+0x16180222 # lui color 0x222                            [li color COLOR_GRID_LINE]                         <label: move_cursor>
+0x0118C62E # addi color color 0x62E                     [li color COLOR_GRID_LINE]
 0xFA000036 # call update_cursor
 0x013E0067 # addi r31 r0 103                            [bne key_code KEY_UP move_cursor_key_up_ne]
-0x1241009F # bne key_code r31 move_cursor_key_up_ne     [bne key_code KEY_UP move_cursor_key_up_ne]
-0x01529001 # subi cursor_y cursor_y 1                   [dec cursor_y]
+0x1241209F # bne key_code r31 move_cursor_key_up_ne     [bne key_code KEY_UP move_cursor_key_up_ne]
+0x014E7001 # subi cursor_y cursor_y 1                   [dec cursor_y]
 0x013E006C # addi r31 r0 108                            [bne key_code KEY_DOWN move_cursor_key_down_ne]    <label: move_cursor_key_up_ne>
-0x1241009F # bne key_code r31 move_cursor_key_down_ne   [bne key_code KEY_DOWN move_cursor_key_down_ne]
-0x01129001 # addi cursor_y cursor_y 1                   [inc cursor_y]
+0x1241209F # bne key_code r31 move_cursor_key_down_ne   [bne key_code KEY_DOWN move_cursor_key_down_ne]
+0x010E7001 # addi cursor_y cursor_y 1                   [inc cursor_y]
 0x013E0069 # addi r31 r0 105                            [bne key_code KEY_LEFT move_cursor_key_left_ne]    <label: move_cursor_key_down_ne>
-0x1241009F # bne key_code r31 move_cursor_key_left_ne   [bne key_code KEY_LEFT move_cursor_key_left_ne]
-0x01508001 # subi cursor_x cursor_x 1                   [dec cursor_x]
+0x1241209F # bne key_code r31 move_cursor_key_left_ne   [bne key_code KEY_LEFT move_cursor_key_left_ne]
+0x014C6001 # subi cursor_x cursor_x 1                   [dec cursor_x]
 0x013E006A # addi r31 r0 106                            [bne key_code KEY_RIGHT move_cursor_key_right_ne]  <label: move_cursor_key_left_ne>
-0x1241009F # bne key_code r31 move_cursor_key_right_ne  [bne key_code KEY_RIGHT move_cursor_key_right_ne]
-0x01108001 # addi cursor_x cursor_x 1                   [inc cursor_x]
-0x12C08080 # bge cursor_x r0 move_cursor_x_ge_0         [bge cursor_x 0 move_cursor_x_ge_0]                <label: move_cursor_key_right_ne>
-0x0110000E # addi cursor_x r0 14                        [li cursor_x 14]
+0x1241209F # bne key_code r31 move_cursor_key_right_ne  [bne key_code KEY_RIGHT move_cursor_key_right_ne]
+0x010C6001 # addi cursor_x cursor_x 1                   [inc cursor_x]
+0x12C06080 # bge cursor_x r0 move_cursor_x_ge_0         [bge cursor_x 0 move_cursor_x_ge_0]                <label: move_cursor_key_right_ne>
+0x010C000E # addi cursor_x r0 14                        [li cursor_x 14]
 0x013E000F # addi r31 r0 15                             [blt cursor_x GRID_COLS move_cursor_x_lt_cols]     <label: move_cursor_x_ge_0>
-0x1280809F # blt cursor_x r31 move_cursor_x_lt_cols     [blt cursor_x GRID_COLS move_cursor_x_lt_cols]
-0x01100000 # addi cursor_x r0 0                         [li cursor_x 0]
-0x12C09080 # bge cursor_y r0 move_cursor_y_ge_0         [bge cursor_y 0 move_cursor_y_ge_0]                <label: move_cursor_x_lt_cols>
-0x01120007 # addi cursor_y r0 7                         [li cursor_y 7]
+0x1280609F # blt cursor_x r31 move_cursor_x_lt_cols     [blt cursor_x GRID_COLS move_cursor_x_lt_cols]
+0x010C0000 # addi cursor_x r0 0                         [li cursor_x 0]
+0x12C07080 # bge cursor_y r0 move_cursor_y_ge_0         [bge cursor_y 0 move_cursor_y_ge_0]                <label: move_cursor_x_lt_cols>
+0x010E0007 # addi cursor_y r0 7                         [li cursor_y 7]
 0x013E0008 # addi r31 r0 8                              [blt cursor_y GRID_ROWS move_cursor_y_lt_rows]     <label: move_cursor_y_ge_0>
-0x1280909F # blt cursor_y r31 move_cursor_y_lt_rows     [blt cursor_y GRID_ROWS move_cursor_y_lt_rows]
-0x01120000 # addi cursor_y r0 0                         [li cursor_y 0]
-0x17BF6BB1 # lui r31 0xD6BB1                            [col COLOR_CURSOR]                                 <label: move_cursor_y_lt_rows>
-0xFE01F5FF # colr r0 r31 0x5FF                          [col COLOR_CURSOR]
+0x1280709F # blt cursor_y r31 move_cursor_y_lt_rows     [blt cursor_y GRID_ROWS move_cursor_y_lt_rows]
+0x010E0000 # addi cursor_y r0 0                         [li cursor_y 0]
+0x17D9FD6C # lui color 0xFFD6C                          [li color COLOR_CURSOR]                            <label: move_cursor_y_lt_rows>
+0x0118CB15 # addi color color 0xFFFFFB15                [li color COLOR_CURSOR]
 0xFA000004 # call update_cursor
 0xFC800000 # ret
-0x01060000 # addi i r0 0                                [clr i]                                            <label: update_cursor>
-0x01080000 # addi j r0 0                                [clr j]
-0x05028008 # muli x cursor_x 8                          [mul x cursor_x TILE_SIZE]
-0x05049008 # muli y cursor_y 8                          [mul y cursor_y TILE_SIZE]
-0xFE401002 # spx x y                                                                                       <label: update_cursor_loop1>
-0x01021001 # addi x x 1                                 [inc x]
-0x01063001 # addi i i 1                                 [inc i]
+0x01020000 # addi i r0 0                                [clr i]                                            <label: update_cursor>
+0x01040000 # addi j r0 0                                [clr j]
+0x05146008 # muli x cursor_x 8                          [mul x cursor_x TILE_SIZE]
+0x05167008 # muli y cursor_y 8                          [mul y cursor_y TILE_SIZE]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: update_cursor_loop1>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x01021001 # addi i i 1                                 [inc i]
 0x013E0008 # addi r31 r0 8                              [ble i TILE_SIZE update_cursor_loop1]
-0x12FFFF03 # bge r31 i update_cursor_loop1              [ble i TILE_SIZE update_cursor_loop1]
-0x05028008 # muli x cursor_x 8                          [mul x cursor_x TILE_SIZE]
-0x01060000 # addi i r0 0                                [clr i]
-0x01042008 # addi y y 8                                 [add y y TILE_SIZE]
-0x01084001 # addi j j 1                                 [inc j]
+0x12FFFE81 # bge r31 i update_cursor_loop1              [ble i TILE_SIZE update_cursor_loop1]
+0x05146008 # muli x cursor_x 8                          [mul x cursor_x TILE_SIZE]
+0x01020000 # addi i r0 0                                [clr i]
+0x0116B008 # addi y y 8                                 [add y y TILE_SIZE]
+0x01042001 # addi j j 1                                 [inc j]
 0x013E0001 # addi r31 r0 1                              [beq j 1 update_cursor_loop1]
-0x123E4D9F # beq j r31 update_cursor_loop1              [beq j 1 update_cursor_loop1]
-0x05028008 # muli x cursor_x 8                          [mul x cursor_x TILE_SIZE]
-0x05049008 # muli y cursor_y 8                          [mul y cursor_y TILE_SIZE]
-0xFE401002 # spx x y                                                                                       <label: update_cursor_loop2>
-0x01042001 # addi y y 1                                 [inc y]
-0x01063001 # addi i i 1                                 [inc i]
+0x123E2D1F # beq j r31 update_cursor_loop1              [beq j 1 update_cursor_loop1]
+0x05146008 # muli x cursor_x 8                          [mul x cursor_x TILE_SIZE]
+0x05167008 # muli y cursor_y 8                          [mul y cursor_y TILE_SIZE]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: update_cursor_loop2>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0116B001 # addi y y 1                                 [inc y]
+0x01021001 # addi i i 1                                 [inc i]
 0x013E0008 # addi r31 r0 8                              [ble i TILE_SIZE update_cursor_loop2]
-0x12FFFF03 # bge r31 i update_cursor_loop2              [ble i TILE_SIZE update_cursor_loop2]
-0x05049008 # muli y cursor_y 8                          [mul y cursor_y TILE_SIZE]
-0x01060000 # addi i r0 0                                [clr i]
-0x01021008 # addi x x 8                                 [add x x TILE_SIZE]
-0x01084001 # addi j j 1                                 [inc j]
+0x12FFFE81 # bge r31 i update_cursor_loop2              [ble i TILE_SIZE update_cursor_loop2]
+0x05167008 # muli y cursor_y 8                          [mul y cursor_y TILE_SIZE]
+0x01020000 # addi i r0 0                                [clr i]
+0x0114A008 # addi x x 8                                 [add x x TILE_SIZE]
+0x01042001 # addi j j 1                                 [inc j]
 0x013E0003 # addi r31 r0 3                              [beq j 3 update_cursor_loop2]
-0x123E4D9F # beq j r31 update_cursor_loop2              [beq j 3 update_cursor_loop2]
+0x123E2D1F # beq j r31 update_cursor_loop2              [beq j 3 update_cursor_loop2]
 0xFC800000 # ret
-0x0514900F # muli addr cursor_y 15                      [mul addr cursor_y GRID_COLS]                      <label: reveal_tile>
-0x0014A008 # add addr addr cursor_x
-0x0514A004 # muli addr addr 4                           [mul addr addr 4]
+0x0510700F # muli addr cursor_y 15                      [mul addr cursor_y GRID_COLS]                      <label: reveal_tile>
+0x00108006 # add addr addr cursor_x
+0x05108004 # muli addr addr 4                           [mul addr addr 4]
 0x163E0100 # lui r31 0x100                              [add addr addr BASE_ADDR]
 0x013FF000 # addi r31 r31 0                             [add addr addr BASE_ADDR]
-0x0014A01F # add addr addr r31                          [add addr addr BASE_ADDR]
-0x100CA000 # lw t1 addr 0                               [lw t1 addr]
-0x018E6010 # andi t2 t1 16                              [and t2 t1 REVEAL_MASK]
-0x12407340 # bne t2 r0 reveal_tile_ret                  [bnez t2 reveal_tile_ret]
-0x018E6020 # andi t2 t1 32                              [and t2 t1 FLAG_MASK]
-0x124072C0 # bne t2 r0 reveal_tile_ret                  [bnez t2 reveal_tile_ret]
-0x018E6008 # andi t2 t1 8                               [and t2 t1 MINE_MASK]
-0x124A7400 # bne t2 r0 lose_loop                        [bnez t2 lose_loop]
-0x018E6007 # andi t2 t1 7                               [and t2 t1 AROUND_COUNT_MASK]
-0x01228000 # addi arg_x cursor_x 0                      [mv arg_x cursor_x]
-0x01249000 # addi arg_y cursor_y 0                      [mv arg_y cursor_y]
-0x12407080 # bne t2 r0 reveal_tile_skip_reveal_around   [bne t2 0 reveal_tile_skip_reveal_around]
+0x0010801F # add addr addr r31                          [add addr addr BASE_ADDR]
+0x10088000 # lw t1 addr 0                               [lw t1 addr]
+0x018A4010 # andi t2 t1 16                              [and t2 t1 REVEAL_MASK]
+0x12405340 # bne t2 r0 reveal_tile_ret                  [bnez t2 reveal_tile_ret]
+0x018A4020 # andi t2 t1 32                              [and t2 t1 FLAG_MASK]
+0x124052C0 # bne t2 r0 reveal_tile_ret                  [bnez t2 reveal_tile_ret]
+0x018A4008 # andi t2 t1 8                               [and t2 t1 MINE_MASK]
+0x124C56C0 # bne t2 r0 lose_loop                        [bnez t2 lose_loop]
+0x018A4007 # andi t2 t1 7                               [and t2 t1 AROUND_COUNT_MASK]
+0x01266000 # addi arg_x cursor_x 0                      [mv arg_x cursor_x]
+0x01287000 # addi arg_y cursor_y 0                      [mv arg_y cursor_y]
+0x12405080 # bne t2 r0 reveal_tile_skip_reveal_around   [bne t2 0 reveal_tile_skip_reveal_around]
 0xFA00000A # call reveal_around
-0x01CC6010 # ori t1 t1 16                               [or t1 t1 REVEAL_MASK]                             <label: reveal_tile_skip_reveal_around>
-0x1140A006 # sw addr t1 0                               [sw t1 addr]
-0xFA000136 # call draw_num
+0x01C84010 # ori t1 t1 16                               [or t1 t1 REVEAL_MASK]                             <label: reveal_tile_skip_reveal_around>
+0x11408004 # sw addr t1 0                               [sw t1 addr]
+0xFA000198 # call draw_num
 0xFC800000 # ret                                                                                           <label: reveal_tile_ret>
-0x011A8000 # addi nx cursor_x 0                         [mv nx cursor_x]                                   <label: reveal_around>
-0x011C9000 # addi ny cursor_y 0                         [mv ny cursor_y]
-0x1280DA00 # blt nx r0 reveal_around_ret                [bltz nx reveal_around_ret]                        <label: reveal_around_loop>
+0x011E6000 # addi nx cursor_x 0                         [mv nx cursor_x]                                   <label: reveal_around>
+0x01207000 # addi ny cursor_y 0                         [mv ny cursor_y]
+0x1280FA00 # blt nx r0 reveal_around_ret                [bltz nx reveal_around_ret]                        <label: reveal_around_loop>
 0x013E000F # addi r31 r0 15                             [bge nx GRID_COLS reveal_around_ret]
-0x12C0D99F # bge nx r31 reveal_around_ret               [bge nx GRID_COLS reveal_around_ret]
-0x1280E940 # blt ny r0 reveal_around_ret                [bltz ny reveal_around_ret]
+0x12C0F99F # bge nx r31 reveal_around_ret               [bge nx GRID_COLS reveal_around_ret]
+0x12810940 # blt ny r0 reveal_around_ret                [bltz ny reveal_around_ret]
 0x013E0008 # addi r31 r0 8                              [bge ny GRID_ROWS reveal_around_ret]
-0x12C0E8DF # bge ny r31 reveal_around_ret               [bge ny GRID_ROWS reveal_around_ret]
-0x0514E00F # muli addr ny 15                            [mul addr ny GRID_COLS]
-0x0014A00D # add addr addr nx
-0x0514A004 # muli addr addr 4                           [mul addr addr 4]
+0x12C108DF # bge ny r31 reveal_around_ret               [bge ny GRID_ROWS reveal_around_ret]
+0x0511000F # muli addr ny 15                            [mul addr ny GRID_COLS]
+0x0010800F # add addr addr nx
+0x05108004 # muli addr addr 4                           [mul addr addr 4]
 0x163E0100 # lui r31 0x100                              [add addr addr BASE_ADDR]
 0x013FF000 # addi r31 r31 0                             [add addr addr BASE_ADDR]
-0x0014A01F # add addr addr r31                          [add addr addr BASE_ADDR]
-0x100CA000 # lw t1 addr 0                               [lw t1 addr]
-0x018E6010 # andi t2 t1 16                              [and t2 t1 REVEAL_MASK]
-0x12407680 # bne t2 r0 reveal_around_ret                [bnez t2 reveal_around_ret]
-0x018E6020 # andi t2 t1 32                              [and t2 t1 FLAG_MASK]
-0x12407600 # bne t2 r0 reveal_around_ret                [bnez t2 reveal_around_ret]
-0x01CC6010 # ori t1 t1 16                               [or t1 t1 REVEAL_MASK]
-0x1140A006 # sw addr t1 0                               [sw t1 addr]
-0x018E6007 # andi t2 t1 7                               [and t2 t1 AROUND_COUNT_MASK]
-0x0122D000 # addi arg_x nx 0                            [mv arg_x nx]
-0x0124E000 # addi arg_y ny 0                            [mv arg_y ny]
-0x12407100 # bne t2 r0 reveal_around_skip_draw_tile     [bne t2 0 reveal_around_skip_draw_tile]
-0x167F8405 # lui r31 0x38405                            [col COLOR_REVEALED]
-0xFE01F8FF # colr r0 r31 0xFFFFF8FF                     [col COLOR_REVEALED]
-0xFA000054 # call draw_tile
-0xFA0000FA # call draw_num                                                                                 <label: reveal_around_skip_draw_tile>
-0x12407340 # bne t2 r0 reveal_around_ret                [bnez t2 reveal_around_ret]
-0x015CE001 # subi ny ny 1                               [dec ny]
+0x0010801F # add addr addr r31                          [add addr addr BASE_ADDR]
+0x10088000 # lw t1 addr 0                               [lw t1 addr]
+0x018A4010 # andi t2 t1 16                              [and t2 t1 REVEAL_MASK]
+0x12405680 # bne t2 r0 reveal_around_ret                [bnez t2 reveal_around_ret]
+0x018A4020 # andi t2 t1 32                              [and t2 t1 FLAG_MASK]
+0x12405600 # bne t2 r0 reveal_around_ret                [bnez t2 reveal_around_ret]
+0x01C84010 # ori t1 t1 16                               [or t1 t1 REVEAL_MASK]
+0x11408004 # sw addr t1 0                               [sw t1 addr]
+0x018A4007 # andi t2 t1 7                               [and t2 t1 AROUND_COUNT_MASK]
+0x0126F000 # addi arg_x nx 0                            [mv arg_x nx]
+0x01290000 # addi arg_y ny 0                            [mv arg_y ny]
+0x12405100 # bne t2 r0 reveal_around_skip_draw_tile     [bne t2 0 reveal_around_skip_draw_tile]
+0x16180384 # lui color 0x384                            [li color COLOR_REVEALED]
+0x0118C048 # addi color color 72                        [li color COLOR_REVEALED]
+0xFA00005E # call draw_tile
+0xFA00015C # call draw_num                                                                                 <label: reveal_around_skip_draw_tile>
+0x12405340 # bne t2 r0 reveal_around_ret                [bnez t2 reveal_around_ret]
+0x01610001 # subi ny ny 1                               [dec ny]
 0xFBC1FFC6 # call reveal_around_loop
-0x011CE001 # addi ny ny 1                               [inc ny]
-0x011CE001 # addi ny ny 1                               [inc ny]
+0x01210001 # addi ny ny 1                               [inc ny]
+0x01210001 # addi ny ny 1                               [inc ny]
 0xFBC1FFC0 # call reveal_around_loop
-0x015CE001 # subi ny ny 1                               [dec ny]
-0x015AD001 # subi nx nx 1                               [dec nx]
+0x01610001 # subi ny ny 1                               [dec ny]
+0x015EF001 # subi nx nx 1                               [dec nx]
 0xFBC1FFBA # call reveal_around_loop
-0x011AD001 # addi nx nx 1                               [inc nx]
-0x011AD001 # addi nx nx 1                               [inc nx]
+0x011EF001 # addi nx nx 1                               [inc nx]
+0x011EF001 # addi nx nx 1                               [inc nx]
 0xFBC1FFB4 # call reveal_around_loop
-0x015AD001 # subi nx nx 1                               [dec nx]
+0x015EF001 # subi nx nx 1                               [dec nx]
 0xFC800000 # ret                                                                                           <label: reveal_around_ret>
-0x0514900F # muli addr cursor_y 15                      [mul addr cursor_y GRID_COLS]                      <label: toggle_flag>
-0x0014A008 # add addr addr cursor_x
-0x0514A004 # muli addr addr 4                           [mul addr addr 4]
+0x0510700F # muli addr cursor_y 15                      [mul addr cursor_y GRID_COLS]                      <label: toggle_flag>
+0x00108006 # add addr addr cursor_x
+0x05108004 # muli addr addr 4                           [mul addr addr 4]
 0x163E0100 # lui r31 0x100                              [add addr addr BASE_ADDR]
 0x013FF000 # addi r31 r31 0                             [add addr addr BASE_ADDR]
-0x0014A01F # add addr addr r31                          [add addr addr BASE_ADDR]
-0x100CA000 # lw t1 addr 0                               [lw t1 addr]
-0x018E6010 # andi t2 t1 16                              [and t2 t1 REVEAL_MASK]
-0x12407440 # bne t2 r0 toggle_flag_ret                  [bnez t2 toggle_flag_ret]
-0x01228000 # addi arg_x cursor_x 0                      [mv arg_x cursor_x]
-0x01249000 # addi arg_y cursor_y 0                      [mv arg_y cursor_y]
-0x018E6020 # andi t2 t1 32                              [and t2 t1 FLAG_MASK]
-0x12407140 # bne t2 r0 toggle_flag_already_set          [bnez t2 toggle_flag_already_set]
-0x01673001 # subi mine_num mine_num 1                   [dec mine_num]
-0x01CC6020 # ori t1 t1 32                               [or t1 t1 FLAG_MASK]
-0xFA00003C # call draw_flag
+0x0010801F # add addr addr r31                          [add addr addr BASE_ADDR]
+0x10088000 # lw t1 addr 0                               [lw t1 addr]
+0x018A4010 # andi t2 t1 16                              [and t2 t1 REVEAL_MASK]
+0x12405580 # bne t2 r0 toggle_flag_ret                  [bnez t2 toggle_flag_ret]
+0x01266000 # addi arg_x cursor_x 0                      [mv arg_x cursor_x]
+0x01287000 # addi arg_y cursor_y 0                      [mv arg_y cursor_y]
+0x018A4020 # andi t2 t1 32                              [and t2 t1 FLAG_MASK]
+0x12405140 # bne t2 r0 toggle_flag_already_set          [bnez t2 toggle_flag_already_set]
+0x016B5001 # subi mine_num mine_num 1                   [dec mine_num]
+0x01C84020 # ori t1 t1 32                               [or t1 t1 FLAG_MASK]
+0xFA00004A # call draw_flag
 0x1400000E # jal r0 toggle_flag_store                   [j toggle_flag_store]
-0x01273001 # addi mine_num mine_num 1                   [inc mine_num]                                     <label: toggle_flag_already_set>
-0x010E0FDF # addi t2 r0 -33                             [li t2 -33]
-0x008C6007 # and t1 t1 t2
-0x16BEC546 # lui r31 0x4C546                            [col COLOR_HIDDEN]
-0xFE01FCFF # colr r0 r31 0xFFFFFCFF                     [col COLOR_HIDDEN]
-0xFA000008 # call draw_tile
-0x1140A006 # sw addr t1 0                               [sw t1 addr]                                       <label: toggle_flag_store>
-0xFEC13000 # out mine_num
+0x012B5001 # addi mine_num mine_num 1                   [inc mine_num]                                     <label: toggle_flag_already_set>
+0x010A0FDF # addi t2 r0 -33                             [li t2 -33]
+0x00884005 # and t1 t1 t2
+0x161804C5 # lui color 0x4C5                            [li color COLOR_HIDDEN]
+0x0118C45C # addi color color 0x45C                     [li color COLOR_HIDDEN]
+0xFA000012 # call draw_tile
+0x11408004 # sw addr t1 0                               [sw t1 addr]                                       <label: toggle_flag_store>
+0x01155000 # addi r10 mine_num 0                        [mv r10 mine_num]
+0x01220001 # addi r17 r0 1                              [ecall 1]
+0x40000000 # ecall                                      [ecall 1]
+0x0114000A # addi r10 r0 10                             [li r10 10]
+0x0122000B # addi r17 r0 11                             [ecall 11]
+0x40000000 # ecall                                      [ecall 11]
 0xFC800000 # ret                                                                                           <label: toggle_flag_ret>
-0x01060000 # addi i r0 0                                [clr i]                                            <label: draw_tile>
-0x01080000 # addi j r0 0                                [clr j]
-0x05031008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
-0x05052008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
-0x01021001 # addi x x 1                                 [inc x]
-0x01042001 # addi y y 1                                 [inc y]
-0xFE401002 # spx x y                                                                                       <label: draw_tile_loop>
-0x01021001 # addi x x 1                                 [inc x]
-0x01063001 # addi i i 1                                 [inc i]
+0x01020000 # addi i r0 0                                [clr i]                                            <label: draw_tile>
+0x01040000 # addi j r0 0                                [clr j]
+0x05153008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
+0x05174008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
+0x0114A001 # addi x x 1                                 [inc x]
+0x0116B001 # addi y y 1                                 [inc y]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: draw_tile_loop>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x01021001 # addi i i 1                                 [inc i]
 0x013E0007 # addi r31 r0 7                              [blt i 7 draw_tile_loop]
-0x12BE3F1F # blt i r31 draw_tile_loop                   [blt i 7 draw_tile_loop]
-0x05031008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
-0x01021001 # addi x x 1                                 [inc x]
-0x01042001 # addi y y 1                                 [inc y]
-0x01060000 # addi i r0 0                                [clr i]
-0x01084001 # addi j j 1                                 [inc j]
+0x12BE1E9F # blt i r31 draw_tile_loop                   [blt i 7 draw_tile_loop]
+0x05153008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
+0x0114A001 # addi x x 1                                 [inc x]
+0x0116B001 # addi y y 1                                 [inc y]
+0x01020000 # addi i r0 0                                [clr i]
+0x01042001 # addi j j 1                                 [inc j]
 0x013E0007 # addi r31 r0 7                              [blt j 7 draw_tile_loop]
-0x12BE4D5F # blt j r31 draw_tile_loop                   [blt j 7 draw_tile_loop]
+0x12BE2CDF # blt j r31 draw_tile_loop                   [blt j 7 draw_tile_loop]
 0xFC800000 # ret
-0x05031008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]                            <label: draw_flag>
-0x05052008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
-0x17FF7505 # lui r31 0xF7505                            [col COLOR_FLAG]
-0xFE01F0FF # colr r0 r31 255                            [col COLOR_FLAG]
-0x01021004 # addi x x 4                                 [add x x 4]
-0x01042002 # addi y y 2                                 [add y y 2]
-0xFE401002 # spx x y
-0x01042001 # addi y y 1                                 [inc y]
-0xFE401002 # spx x y
-0x01042001 # addi y y 1                                 [inc y]
-0xFE401002 # spx x y
-0x01421001 # subi x x 1                                 [dec x]
-0xFE401002 # spx x y
-0x01421001 # subi x x 1                                 [dec x]
-0xFE401002 # spx x y
-0x01021001 # addi x x 1                                 [inc x]
-0x01442001 # subi y y 1                                 [dec y]
-0xFE401002 # spx x y
-0x01021001 # addi x x 1                                 [inc x]
-0x01042002 # addi y y 2                                 [add y y 2]
-0xFE401002 # spx x y
-0x01421002 # subi x x 2                                 [sub x x 2]
-0x01042001 # addi y y 1                                 [inc y]
-0x17BF8E0F # lui r31 0xD8E0F                            [col COLOR_POLE]
-0xFE01F8FF # colr r0 r31 0xFFFFF8FF                     [col COLOR_POLE]
-0x01060000 # addi i r0 0                                [clr i]
-0xFE401002 # spx x y                                                                                       <label: draw_pole>
-0x01021001 # addi x x 1                                 [inc x]
-0x01063001 # addi i i 1                                 [inc i]
+0x05153008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]                            <label: draw_flag>
+0x05174008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
+0x17D9FF75 # lui color 0xFFF75                          [li color COLOR_FLAG]
+0x0118C050 # addi color color 80                        [li color COLOR_FLAG]
+0x0114A004 # addi x x 4                                 [add x x 4]
+0x0116B002 # addi y y 2                                 [add y y 2]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0116B001 # addi y y 1                                 [inc y]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0116B001 # addi y y 1                                 [inc y]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0154A001 # subi x x 1                                 [dec x]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0154A001 # subi x x 1                                 [dec x]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x0156B001 # subi y y 1                                 [dec y]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x0116B002 # addi y y 2                                 [add y y 2]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0154A002 # subi x x 2                                 [sub x x 2]
+0x0116B001 # addi y y 1                                 [inc y]
+0x17D9FD8E # lui color 0xFFD8E                          [li color COLOR_POLE]
+0x0118C0E8 # addi color color 232                       [li color COLOR_POLE]
+0x01020000 # addi i r0 0                                [clr i]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: draw_pole>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x01021001 # addi i i 1                                 [inc i]
 0x013E0005 # addi r31 r0 5                              [blt i 5 draw_pole]
-0x12BE3F1F # blt i r31 draw_pole                        [blt i 5 draw_pole]
+0x12BE1E9F # blt i r31 draw_pole                        [blt i 5 draw_pole]
 0xFC800000 # ret
-0x05031008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]                            <label: draw_mine>
-0x05052008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
-0x01021004 # addi x x 4                                 [add x x 4]
-0x01042002 # addi y y 2                                 [add y y 2]
-0xFE0000FF # colr r0 r0 COLOR_MINE                      [col COLOR_MINE]
-0xFE401002 # spx x y
-0x01042001 # addi y y 1                                 [inc y]
-0xFE401002 # spx x y
-0x01421001 # subi x x 1                                 [dec x]
-0xFE401002 # spx x y
-0x01021002 # addi x x 2                                 [add x x 2]
-0xFE401002 # spx x y
-0x01042001 # addi y y 1                                 [inc y]
-0xFE401002 # spx x y
-0x01021001 # addi x x 1                                 [inc x]
-0xFE401002 # spx x y
-0x01421002 # subi x x 2                                 [sub x x 2]
-0xFE401002 # spx x y
-0x01421001 # subi x x 1                                 [dec x]
-0xFE401002 # spx x y
-0x01421001 # subi x x 1                                 [dec x]
-0xFE401002 # spx x y
-0x01021001 # addi x x 1                                 [inc x]
-0x01042001 # addi y y 1                                 [inc y]
-0xFE401002 # spx x y
-0x01021001 # addi x x 1                                 [inc x]
-0xFE401002 # spx x y
-0x01021001 # addi x x 1                                 [inc x]
-0xFE401002 # spx x y
-0x01421001 # subi x x 1                                 [dec x]
-0x01042001 # addi y y 1                                 [inc y]
-0xFE401002 # spx x y
+0x05153008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]                            <label: draw_mine>
+0x05174008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
+0x0114A004 # addi x x 4                                 [add x x 4]
+0x0116B002 # addi y y 2                                 [add y y 2]
+0x01180000 # addi color r0 COLOR_MINE                   [li color COLOR_MINE]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0116B001 # addi y y 1                                 [inc y]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0154A001 # subi x x 1                                 [dec x]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A002 # addi x x 2                                 [add x x 2]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0116B001 # addi y y 1                                 [inc y]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0154A002 # subi x x 2                                 [sub x x 2]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0154A001 # subi x x 1                                 [dec x]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0154A001 # subi x x 1                                 [dec x]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x0116B001 # addi y y 1                                 [inc y]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0154A001 # subi x x 1                                 [dec x]
+0x0116B001 # addi y y 1                                 [inc y]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
 0xFC800000 # ret
 0x013E0001 # addi r31 r0 1                              [bne t2 1 skip_draw1]                              <label: draw_num>
-0x1240709F # bne t2 r31 skip_draw1                      [bne t2 1 skip_draw1]
+0x1240509F # bne t2 r31 skip_draw1                      [bne t2 1 skip_draw1]
 0xFA00001C # call draw_num1
 0x013E0002 # addi r31 r0 2                              [bne t2 2 skip_draw2]                              <label: skip_draw1>
-0x1240709F # bne t2 r31 skip_draw2                      [bne t2 2 skip_draw2]
-0xFA000038 # call draw_num2
+0x1240509F # bne t2 r31 skip_draw2                      [bne t2 2 skip_draw2]
+0xFA00003C # call draw_num2
 0x013E0003 # addi r31 r0 3                              [bne t2 3 skip_draw3]                              <label: skip_draw2>
-0x1240709F # bne t2 r31 skip_draw3                      [bne t2 3 skip_draw3]
-0xFA00006A # call draw_num3
+0x1240509F # bne t2 r31 skip_draw3                      [bne t2 3 skip_draw3]
+0xFA00007A # call draw_num3
 0x013E0004 # addi r31 r0 4                              [bne t2 4 skip_draw4]                              <label: skip_draw3>
-0x1240709F # bne t2 r31 skip_draw4                      [bne t2 4 skip_draw4]
-0xFA00009C # call draw_num4
+0x1240509F # bne t2 r31 skip_draw4                      [bne t2 4 skip_draw4]
+0xFA0000B8 # call draw_num4
 0x013E0005 # addi r31 r0 5                              [bne t2 5 skip_draw5]                              <label: skip_draw4>
-0x1240709F # bne t2 r31 skip_draw5                      [bne t2 5 skip_draw5]
-0xFA0000CA # call draw_num5
+0x1240509F # bne t2 r31 skip_draw5                      [bne t2 5 skip_draw5]
+0xFA0000F2 # call draw_num5
 0xFC800000 # ret                                                                                           <label: skip_draw5>
-0x167F8405 # lui r31 0x38405                            [col COLOR_REVEALED]                               <label: draw_num1>
-0xFE01F8FF # colr r0 r31 0xFFFFF8FF                     [col COLOR_REVEALED]
-0xFBC1FF34 # call draw_tile
-0x01060000 # addi i r0 0                                [clr i]
-0x01080000 # addi j r0 0                                [clr j]
-0x05031008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
-0x05052008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
-0x01021004 # addi x x 4                                 [add x x 4]
-0x01042002 # addi y y 2                                 [add y y 2]
-0x16FFCC80 # lui r31 0x7CC80                            [col COLOR_NUM1]
-0xFE01FFFF # colr r0 r31 0xFFFFFFFF                     [col COLOR_NUM1]
-0xFE401002 # spx x y                                                                                       <label: draw_num1_loop>
-0x01042001 # addi y y 1                                 [inc y]
-0x01063001 # addi i i 1                                 [inc i]
+0x16180384 # lui color 0x384                            [li color COLOR_REVEALED]                          <label: draw_num1>
+0x0118C048 # addi color color 72                        [li color COLOR_REVEALED]
+0xFBC1FEDC # call draw_tile
+0x01020000 # addi i r0 0                                [clr i]
+0x01040000 # addi j r0 0                                [clr j]
+0x05153008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
+0x05174008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
+0x0114A004 # addi x x 4                                 [add x x 4]
+0x0116B002 # addi y y 2                                 [add y y 2]
+0x161807CC # lui color 0x7CC                            [li color COLOR_NUM1]
+0x0118C7FF # addi color color 0x7FF                     [li color COLOR_NUM1]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: draw_num1_loop>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0116B001 # addi y y 1                                 [inc y]
+0x01021001 # addi i i 1                                 [inc i]
 0x013E0005 # addi r31 r0 5                              [blt i 5 draw_num1_loop]
-0x12BE3F1F # blt i r31 draw_num1_loop                   [blt i 5 draw_num1_loop]
+0x12BE1E9F # blt i r31 draw_num1_loop                   [blt i 5 draw_num1_loop]
 0xFC800000 # ret
-0x167F8405 # lui r31 0x38405                            [col COLOR_REVEALED]                               <label: draw_num2>
-0xFE01F8FF # colr r0 r31 0xFFFFF8FF                     [col COLOR_REVEALED]
-0xFBC1FF12 # call draw_tile
-0x01060000 # addi i r0 0                                [clr i]
-0x01080000 # addi j r0 0                                [clr j]
-0x05031008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
-0x05052008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
-0x01021003 # addi x x 3                                 [add x x 3]
-0x01042002 # addi y y 2                                 [add y y 2]
-0x16FE6C26 # lui r31 0x66C26                            [col COLOR_NUM2]
-0xFE01F6FF # colr r0 r31 0x6FF                          [col COLOR_NUM2]
-0xFE401002 # spx x y                                                                                       <label: draw_num2_loop>
-0x01021001 # addi x x 1                                 [inc x]
-0x01063001 # addi i i 1                                 [inc i]
+0x16180384 # lui color 0x384                            [li color COLOR_REVEALED]                          <label: draw_num2>
+0x0118C048 # addi color color 72                        [li color COLOR_REVEALED]
+0xFBC1FEB6 # call draw_tile
+0x01020000 # addi i r0 0                                [clr i]
+0x01040000 # addi j r0 0                                [clr j]
+0x05153008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
+0x05174008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
+0x0114A003 # addi x x 3                                 [add x x 3]
+0x0116B002 # addi y y 2                                 [add y y 2]
+0x1618066C # lui color 0x66C                            [li color COLOR_NUM2]
+0x0118C266 # addi color color 0x266                     [li color COLOR_NUM2]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: draw_num2_loop>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x01021001 # addi i i 1                                 [inc i]
 0x013E0003 # addi r31 r0 3                              [blt i 3 draw_num2_loop]
-0x12BE3F1F # blt i r31 draw_num2_loop                   [blt i 3 draw_num2_loop]
-0x01421003 # subi x x 3                                 [sub x x 3]
-0x01042002 # addi y y 2                                 [add y y 2]
-0x01060000 # addi i r0 0                                [clr i]
-0x01084001 # addi j j 1                                 [inc j]
+0x12BE1E9F # blt i r31 draw_num2_loop                   [blt i 3 draw_num2_loop]
+0x0154A003 # subi x x 3                                 [sub x x 3]
+0x0116B002 # addi y y 2                                 [add y y 2]
+0x01020000 # addi i r0 0                                [clr i]
+0x01042001 # addi j j 1                                 [inc j]
 0x013E0003 # addi r31 r0 3                              [blt j 3 draw_num2_loop]
-0x12BE4D9F # blt j r31 draw_num2_loop                   [blt j 3 draw_num2_loop]
-0x01442003 # subi y y 3                                 [sub y y 3]
-0xFE401002 # spx x y
-0x01021002 # addi x x 2                                 [add x x 2]
-0x01442002 # subi y y 2                                 [sub y y 2]
-0xFE401002 # spx x y
+0x12BE2D1F # blt j r31 draw_num2_loop                   [blt j 3 draw_num2_loop]
+0x0156B003 # subi y y 3                                 [sub y y 3]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A002 # addi x x 2                                 [add x x 2]
+0x0156B002 # subi y y 2                                 [sub y y 2]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
 0xFC800000 # ret
-0x167F8405 # lui r31 0x38405                            [col COLOR_REVEALED]                               <label: draw_num3>
-0xFE01F8FF # colr r0 r31 0xFFFFF8FF                     [col COLOR_REVEALED]
-0xFBC1FEDA # call draw_tile
-0x01060000 # addi i r0 0                                [clr i]
-0x01080000 # addi j r0 0                                [clr j]
-0x05031008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
-0x05052008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
-0x01021003 # addi x x 3                                 [add x x 3]
-0x01042002 # addi y y 2                                 [add y y 2]
-0x17FFF779 # lui r31 0xFF779                            [col COLOR_NUM3]
-0xFE01F8FF # colr r0 r31 0xFFFFF8FF                     [col COLOR_NUM3]
-0xFE401002 # spx x y                                                                                       <label: draw_num3_loop>
-0x01021001 # addi x x 1                                 [inc x]
-0x01063001 # addi i i 1                                 [inc i]
+0x16180384 # lui color 0x384                            [li color COLOR_REVEALED]                          <label: draw_num3>
+0x0118C048 # addi color color 72                        [li color COLOR_REVEALED]
+0xFBC1FE72 # call draw_tile
+0x01020000 # addi i r0 0                                [clr i]
+0x01040000 # addi j r0 0                                [clr j]
+0x05153008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
+0x05174008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
+0x0114A003 # addi x x 3                                 [add x x 3]
+0x0116B002 # addi y y 2                                 [add y y 2]
+0x17D9FFF7 # lui color 0xFFFF7                          [li color COLOR_NUM3]
+0x0118C788 # addi color color 0x788                     [li color COLOR_NUM3]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: draw_num3_loop>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x01021001 # addi i i 1                                 [inc i]
 0x013E0003 # addi r31 r0 3                              [blt i 3 draw_num3_loop]
-0x12BE3F1F # blt i r31 draw_num3_loop                   [blt i 3 draw_num3_loop]
-0x01421003 # subi x x 3                                 [sub x x 3]
-0x01042002 # addi y y 2                                 [add y y 2]
-0x01060000 # addi i r0 0                                [clr i]
-0x01084001 # addi j j 1                                 [inc j]
+0x12BE1E9F # blt i r31 draw_num3_loop                   [blt i 3 draw_num3_loop]
+0x0154A003 # subi x x 3                                 [sub x x 3]
+0x0116B002 # addi y y 2                                 [add y y 2]
+0x01020000 # addi i r0 0                                [clr i]
+0x01042001 # addi j j 1                                 [inc j]
 0x013E0003 # addi r31 r0 3                              [blt j 3 draw_num3_loop]
-0x12BE4D9F # blt j r31 draw_num3_loop                   [blt j 3 draw_num3_loop]
-0x01021002 # addi x x 2                                 [add x x 2]
-0x01442003 # subi y y 3                                 [sub y y 3]
-0xFE401002 # spx x y
-0x01442002 # subi y y 2                                 [sub y y 2]
-0xFE401002 # spx x y
+0x12BE2D1F # blt j r31 draw_num3_loop                   [blt j 3 draw_num3_loop]
+0x0114A002 # addi x x 2                                 [add x x 2]
+0x0156B003 # subi y y 3                                 [sub y y 3]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0156B002 # subi y y 2                                 [sub y y 2]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
 0xFC800000 # ret
-0x167F8405 # lui r31 0x38405                            [col COLOR_REVEALED]                               <label: draw_num4>
-0xFE01F8FF # colr r0 r31 0xFFFFF8FF                     [col COLOR_REVEALED]
-0xFBC1FEA2 # call draw_tile
-0x01060000 # addi i r0 0                                [clr i]
-0x05031008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
-0x05052008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
-0x01021003 # addi x x 3                                 [add x x 3]
-0x01042002 # addi y y 2                                 [add y y 2]
-0x17FEE890 # lui r31 0xEE890                            [col COLOR_NUM4]
-0xFE01FFFF # colr r0 r31 0xFFFFFFFF                     [col COLOR_NUM4]
-0xFE401002 # spx x y                                                                                       <label: draw_num4_loop1>
-0x01042001 # addi y y 1                                 [inc y]
-0x01063001 # addi i i 1                                 [inc i]
+0x16180384 # lui color 0x384                            [li color COLOR_REVEALED]                          <label: draw_num4>
+0x0118C048 # addi color color 72                        [li color COLOR_REVEALED]
+0xFBC1FE2E # call draw_tile
+0x01020000 # addi i r0 0                                [clr i]
+0x05153008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
+0x05174008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
+0x0114A003 # addi x x 3                                 [add x x 3]
+0x0116B002 # addi y y 2                                 [add y y 2]
+0x17D9FEE9 # lui color 0xFFEE9                          [li color COLOR_NUM4]
+0x0118C8FF # addi color color 0xFFFFF8FF                [li color COLOR_NUM4]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: draw_num4_loop1>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0116B001 # addi y y 1                                 [inc y]
+0x01021001 # addi i i 1                                 [inc i]
 0x013E0003 # addi r31 r0 3                              [blt i 3 draw_num4_loop1]
-0x12BE3F1F # blt i r31 draw_num4_loop1                  [blt i 3 draw_num4_loop1]
-0x01021001 # addi x x 1                                 [inc x]
-0x01442001 # subi y y 1                                 [dec y]
-0xFE401002 # spx x y
-0x01021001 # addi x x 1                                 [inc x]
-0x01442002 # subi y y 2                                 [sub y y 2]
-0xFE401002 # spx x y                                                                                       <label: draw_num4_loop2>
-0x01042001 # addi y y 1                                 [inc y]
-0x01063001 # addi i i 1                                 [inc i]
+0x12BE1E9F # blt i r31 draw_num4_loop1                  [blt i 3 draw_num4_loop1]
+0x0114A001 # addi x x 1                                 [inc x]
+0x0156B001 # subi y y 1                                 [dec y]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x0156B002 # subi y y 2                                 [sub y y 2]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: draw_num4_loop2>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0116B001 # addi y y 1                                 [inc y]
+0x01021001 # addi i i 1                                 [inc i]
 0x013E0008 # addi r31 r0 8                              [blt i 8 draw_num4_loop2]
-0x12BE3F1F # blt i r31 draw_num4_loop2                  [blt i 8 draw_num4_loop2]
+0x12BE1E9F # blt i r31 draw_num4_loop2                  [blt i 8 draw_num4_loop2]
 0xFC800000 # ret
-0x167F8405 # lui r31 0x38405                            [col COLOR_REVEALED]                               <label: draw_num5>
-0xFE01F8FF # colr r0 r31 0xFFFFF8FF                     [col COLOR_REVEALED]
-0xFBC1FE6E # call draw_tile
-0x01060000 # addi i r0 0                                [clr i]
-0x01080000 # addi j r0 0                                [clr j]
-0x05031008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
-0x05052008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
-0x01021003 # addi x x 3                                 [add x x 3]
-0x01042002 # addi y y 2                                 [add y y 2]
-0x17BFDAA2 # lui r31 0xDDAA2                            [col COLOR_NUM5]
-0xFE01F2FF # colr r0 r31 0x2FF                          [col COLOR_NUM5]
-0xFE401002 # spx x y                                                                                       <label: draw_num5_loop>
-0x01021001 # addi x x 1                                 [inc x]
-0x01063001 # addi i i 1                                 [inc i]
+0x16180384 # lui color 0x384                            [li color COLOR_REVEALED]                          <label: draw_num5>
+0x0118C048 # addi color color 72                        [li color COLOR_REVEALED]
+0xFBC1FDEE # call draw_tile
+0x01020000 # addi i r0 0                                [clr i]
+0x01040000 # addi j r0 0                                [clr j]
+0x05153008 # muli x arg_x 8                             [mul x arg_x TILE_SIZE]
+0x05174008 # muli y arg_y 8                             [mul y arg_y TILE_SIZE]
+0x0114A003 # addi x x 3                                 [add x x 3]
+0x0116B002 # addi y y 2                                 [add y y 2]
+0x17D9FDDB # lui color 0xFFDDB                          [li color COLOR_NUM5]
+0x0118CA22 # addi color color 0xFFFFFA22                [li color COLOR_NUM5]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                 <label: draw_num5_loop>
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A001 # addi x x 1                                 [inc x]
+0x01021001 # addi i i 1                                 [inc i]
 0x013E0003 # addi r31 r0 3                              [blt i 3 draw_num5_loop]
-0x12BE3F1F # blt i r31 draw_num5_loop                   [blt i 3 draw_num5_loop]
-0x01421003 # subi x x 3                                 [sub x x 3]
-0x01042002 # addi y y 2                                 [add y y 2]
-0x01060000 # addi i r0 0                                [clr i]
-0x01084001 # addi j j 1                                 [inc j]
+0x12BE1E9F # blt i r31 draw_num5_loop                   [blt i 3 draw_num5_loop]
+0x0154A003 # subi x x 3                                 [sub x x 3]
+0x0116B002 # addi y y 2                                 [add y y 2]
+0x01020000 # addi i r0 0                                [clr i]
+0x01042001 # addi j j 1                                 [inc j]
 0x013E0003 # addi r31 r0 3                              [blt j 3 draw_num5_loop]
-0x12BE4D9F # blt j r31 draw_num5_loop                   [blt j 3 draw_num5_loop]
-0x01442005 # subi y y 5                                 [sub y y 5]
-0xFE401002 # spx x y
-0x01021002 # addi x x 2                                 [add x x 2]
-0x01042002 # addi y y 2                                 [add y y 2]
-0xFE401002 # spx x y
+0x12BE2D1F # blt j r31 draw_num5_loop                   [blt j 3 draw_num5_loop]
+0x0156B005 # subi y y 5                                 [sub y y 5]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
+0x0114A002 # addi x x 2                                 [add x x 2]
+0x0116B002 # addi y y 2                                 [add y y 2]
+0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
+0x01231000 # addi r17 r17 0                             [ecall 0x10000000]
+0x40000000 # ecall                                      [ecall 0x10000000]
 0xFC800000 # ret
-0x170B0000 # lui t0 0x90000                             [li t0 KBD_BASE]                                   <label: read_key>
-0x010A5000 # addi t0 t0 0                               [li t0 KBD_BASE]
-0x10205000 # lw key_code t0 0                           [lw key_code t0]
-0x123F0F40 # beq key_code r0 read_key                   [beqz key_code read_key]
-0x100C5000 # lw t1 t0 0                                 [lw t1 t0]                                         <label: read_key_wait_release>
-0x127E6FC0 # bne t1 r0 read_key_wait_release            [bnez t1 read_key_wait_release]
+0x17070000 # lui t0 0x90000                             [li t0 KBD_BASE]                                   <label: read_key>
+0x01063000 # addi t0 t0 0                               [li t0 KBD_BASE]
+0x10243000 # lw key_code t0 0                           [lw key_code t0]
+0x123F2F40 # beq key_code r0 read_key                   [beqz key_code read_key]
+0x10083000 # lw t1 t0 0                                 [lw t1 t0]                                         <label: read_key_wait_release>
+0x127E4FC0 # bne t1 r0 read_key_wait_release            [bnez t1 read_key_wait_release]
 0xFC800000 # ret
-0xFBC1FC14 # call init_screen                                                                              <label: main>
-0xFBC1FC7A # call init_mines
-0xFBC1FCA2 # call init_mine_counts
+0xFBC1FB54 # call init_screen                                                                              <label: main>
+0xFBC1FBCA # call init_mines
+0xFBC1FC04 # call init_mine_counts
 0xFBC1FFEC # call read_key                                                                                 <label: main_loop>
 0x013E0067 # addi r31 r0 103                            [beq key_code KEY_UP main_loop_move_cursor]
-0x120102DF # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_UP main_loop_move_cursor]
+0x120122DF # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_UP main_loop_move_cursor]
 0x013E006C # addi r31 r0 108                            [beq key_code KEY_DOWN main_loop_move_cursor]
-0x1201025F # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_DOWN main_loop_move_cursor]
+0x1201225F # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_DOWN main_loop_move_cursor]
 0x013E0069 # addi r31 r0 105                            [beq key_code KEY_LEFT main_loop_move_cursor]
-0x120101DF # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_LEFT main_loop_move_cursor]
+0x120121DF # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_LEFT main_loop_move_cursor]
 0x013E006A # addi r31 r0 106                            [beq key_code KEY_RIGHT main_loop_move_cursor]
-0x1201015F # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_RIGHT main_loop_move_cursor]
+0x1201215F # beq key_code r31 main_loop_move_cursor     [beq key_code KEY_RIGHT main_loop_move_cursor]
 0x013E002C # addi r31 r0 44                             [beq key_code KEY_REVEAL main_loop_reveal_tile]
-0x1201015F # beq key_code r31 main_loop_reveal_tile     [beq key_code KEY_REVEAL main_loop_reveal_tile]
+0x1201215F # beq key_code r31 main_loop_reveal_tile     [beq key_code KEY_REVEAL main_loop_reveal_tile]
 0x013E002D # addi r31 r0 45                             [beq key_code KEY_FLAG main_loop_toggle_flag]
-0x1201015F # beq key_code r31 main_loop_toggle_flag     [beq key_code KEY_FLAG main_loop_toggle_flag]
-0xFBC1FCE2 # call move_cursor                                                                              <label: main_loop_move_cursor>
+0x1201215F # beq key_code r31 main_loop_toggle_flag     [beq key_code KEY_FLAG main_loop_toggle_flag]
+0xFBC1FC44 # call move_cursor                                                                              <label: main_loop_move_cursor>
 0x15C1FFE4 # jal r0 main_loop                           [j main_loop]
-0xFBC1FD52 # call reveal_tile                                                                              <label: main_loop_reveal_tile>
+0xFBC1FCBC # call reveal_tile                                                                              <label: main_loop_reveal_tile>
 0x15C1FFE0 # jal r0 main_loop                           [j main_loop]
-0xFBC1FDD0 # call toggle_flag                                                                              <label: main_loop_toggle_flag>
+0xFBC1FD3A # call toggle_flag                                                                              <label: main_loop_toggle_flag>
 0x15C1FFDC # jal r0 main_loop                           [j main_loop]
 0x14000000 # jal r0 win_loop                            [j win_loop]                                       <label: win_loop>
-0x01228000 # addi arg_x cursor_x 0                      [mv arg_x cursor_x]                                <label: lose_loop>
-0x01249000 # addi arg_y cursor_y 0                      [mv arg_y cursor_y]
-0x17FEE666 # lui r31 0xEE666                            [col COLOR_MINE_BACK]
-0xFE01F6FF # colr r0 r31 0x6FF                          [col COLOR_MINE_BACK]
-0xFBC1FDF6 # call draw_tile
-0xFBC1FE5A # call draw_mine
-0x011C0000 # addi ny r0 0                               [clr ny]
-0x16140100 # lui addr 0x100                             [li addr BASE_ADDR]
-0x0114A000 # addi addr addr 0                           [li addr BASE_ADDR]
-0x011A0000 # addi nx r0 0                               [clr nx]                                           <label: lose_row_loop>
-0x1240D0C8 # bne nx cursor_x lose_loop_cont                                                                <label: lose_col_loop>
-0x1240E089 # bne ny cursor_y lose_loop_cont
+0x01266000 # addi arg_x cursor_x 0                      [mv arg_x cursor_x]                                <label: lose_loop>
+0x01287000 # addi arg_y cursor_y 0                      [mv arg_y cursor_y]
+0x17D9FEE6 # lui color 0xFFEE6                          [li color COLOR_MINE_BACK]
+0x0118C666 # addi color color 0x666                     [li color COLOR_MINE_BACK]
+0xFBC1FD6A # call draw_tile
+0xFBC1FDF2 # call draw_mine
+0x01200000 # addi ny r0 0                               [clr ny]
+0x16100100 # lui addr 0x100                             [li addr BASE_ADDR]
+0x01108000 # addi addr addr 0                           [li addr BASE_ADDR]
+0x011E0000 # addi nx r0 0                               [clr nx]                                           <label: lose_row_loop>
+0x1240F0C6 # bne nx cursor_x lose_loop_cont                                                                <label: lose_col_loop>
+0x12410087 # bne ny cursor_y lose_loop_cont
 0x14000014 # jal r0 lose_loop_skip_draw                 [j lose_loop_skip_draw]
-0x100CA000 # lw t1 addr 0                               [lw t1 addr]                                       <label: lose_loop_cont>
-0x018E6008 # andi t2 t1 8                               [and t2 t1 MINE_MASK]
-0x120071C0 # beq t2 r0 lose_loop_skip_draw              [beqz t2 lose_loop_skip_draw]
-0x0122D000 # addi arg_x nx 0                            [mv arg_x nx]
-0x0124E000 # addi arg_y ny 0                            [mv arg_y ny]
-0x167F8405 # lui r31 0x38405                            [col COLOR_REVEALED]
-0xFE01F8FF # colr r0 r31 0xFFFFF8FF                     [col COLOR_REVEALED]
-0xFBC1FDD6 # call draw_tile
-0xFBC1FE3A # call draw_mine
-0x011AD001 # addi nx nx 1                               [inc nx]                                           <label: lose_loop_skip_draw>
-0x0114A004 # addi addr addr 4                           [add addr addr 4]
+0x10088000 # lw t1 addr 0                               [lw t1 addr]                                       <label: lose_loop_cont>
+0x018A4008 # andi t2 t1 8                               [and t2 t1 MINE_MASK]
+0x120051C0 # beq t2 r0 lose_loop_skip_draw              [beqz t2 lose_loop_skip_draw]
+0x0126F000 # addi arg_x nx 0                            [mv arg_x nx]
+0x01290000 # addi arg_y ny 0                            [mv arg_y ny]
+0x16180384 # lui color 0x384                            [li color COLOR_REVEALED]
+0x0118C048 # addi color color 72                        [li color COLOR_REVEALED]
+0xFBC1FD4A # call draw_tile
+0xFBC1FDD2 # call draw_mine
+0x011EF001 # addi nx nx 1                               [inc nx]                                           <label: lose_loop_skip_draw>
+0x01108004 # addi addr addr 4                           [add addr addr 4]
 0x013E000F # addi r31 r0 15                             [blt nx GRID_COLS lose_col_loop]
-0x12BEDC5F # blt nx r31 lose_col_loop                   [blt nx GRID_COLS lose_col_loop]
-0x011CE001 # addi ny ny 1                               [inc ny]
+0x12BEFC5F # blt nx r31 lose_col_loop                   [blt nx GRID_COLS lose_col_loop]
+0x01210001 # addi ny ny 1                               [inc ny]
 0x013E0008 # addi r31 r0 8                              [blt ny GRID_ROWS lose_row_loop]
-0x12BEEB5F # blt ny r31 lose_row_loop                   [blt ny GRID_ROWS lose_row_loop]
+0x12BF0B5F # blt ny r31 lose_row_loop                   [blt ny GRID_ROWS lose_row_loop]
 0x14000000 # jal r0 halt                                [j halt]                                           <label: halt>
 ----- stderr -----

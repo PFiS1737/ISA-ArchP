@@ -10,7 +10,6 @@ const water r6
 
 const t0 r7
 const t1 r8
-const t3 r9
 
 const a0 r10
 const a1 r11
@@ -18,20 +17,21 @@ const a1 r11
 const BASE_ADDR 0x00100000
 
 main:
-  in len
+  ecall 5 ; read int
+  mv len a0
 
   mv t0 len
   li t1 BASE_ADDR
   input:
-    in t3
-    sb t3 t1
+    ecall 5 ; read int
+    sb a0 t1
     inc t1
     dec t0
     bgtz t0 input
 
   call solve
 
-  out a0
+  ecall 1 ; print int
 
   j halt
 
@@ -91,4 +91,4 @@ max:
   ret
 
 halt:
-  j halt
+  ecall 10 ; exit

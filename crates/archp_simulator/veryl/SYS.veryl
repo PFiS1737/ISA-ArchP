@@ -1,0 +1,17 @@
+module SYS (
+    clk: input clock,
+    rst: input reset,
+
+    opcode: input bit<7>,
+    funct3: input bit<3>,
+) {
+    let en: logic = opcode == 'b0100000;
+
+    always_ff {
+        if_reset {} else if en {
+            if funct3 == 'b000 {
+                $sv::system_call();
+            }
+        }
+    }
+}

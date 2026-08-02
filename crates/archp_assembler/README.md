@@ -13,7 +13,7 @@
 ## ISA
 
 This section is intended for users.
-If you require detailed information on the encoding formats, please refer to [isa.md](./isa.md).
+If you require detailed information on the encoding formats, please refer to [isa.md](../../docs/isa.md).
 
 ### Registers
 
@@ -168,12 +168,6 @@ In this section:
 - note:
   - You may know how to use this instruction if you are familiar with the RISC-V architecture.
 
-#### Misc
+#### System
 
-- `colr rd rs imm12`: set the display color to `rs + imm12` (format: `0xRRGGBBAA`), also set it to `rd`.
-  - pseudo: `col imm12` => `colr r0 r0 imm12`
-  - macros: `col 0x1234` => `lui tmp 0x1; colr r0 tmp 0x234`
-- `spx rs1 rs2`: set the `(rs1, rs2)` position to the color specified by the last `col` instruction.
-- `in rd`: read a 32-bit value to `rd`.
-- `out rs1`: write the 32-bit value of `rs1` to the output.
-- `rand rd`: generate a random 32-bit number and write it to `rd`.
+- `ecall`: make a system call, see [syscall.md](../../docs/syscall.md).

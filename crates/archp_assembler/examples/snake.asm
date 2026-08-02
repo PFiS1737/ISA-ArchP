@@ -2,24 +2,24 @@ const head_x r1
 const head_y r2
 const food_x r3
 const food_y r4
-const x r5
-const y r6
+const t0 r5
+const t1 r6
 const nx r7
 const ny r8
 const key_code r9
-const t0 r10
-const t1 r11
-const i r12
-
-const rt r13
-
-const que_len r14
-const que_head r15
-const que_val r16
-const que_tmp r17
-const que_i r18
-const que_cur r19
-const que_addr r20
+const x r10 ; a0
+const y r11 ; a1
+const color r12 ; a2
+const i r13
+const rt r14
+const que_len r15
+const que_head r16
+; r17 is used for syscalls
+const que_val r18
+const que_tmp r19
+const que_i r20
+const que_cur r21
+const que_addr r22
 
 const BASE_ADDR 0x00100000
 const KBD_BASE 0x90000000
@@ -53,9 +53,9 @@ j main
 init_screen:
   clr x
   clr y
-  col COLOR_BACK
+  li color COLOR_BACK
   draw_back:
-    spx x y
+    ecall 0x10000000 ; set pixel
     inc x
     blt x SCREEN_WIDTH draw_back
     inc y
@@ -66,18 +66,21 @@ init_screen:
 
 
 init_snake:
-  col COLOR_HEAD
+  li color COLOR_HEAD
   li head_x INIT_X
   li head_y INIT_Y
-  spx head_x head_y
 
-  col COLOR_BODY
+  mv x head_x
+  mv y head_y
+  ecall 0x10000000 ; set pixel
+
+  li color COLOR_BODY
   li i 3
   init_body_loop:
     sub x head_x i
     mv y head_y
     call body_push
-    spx x y
+    ecall 0x10000000 ; set pixel
     dec i
     bge i 1 init_body_loop
 
@@ -117,8 +120,8 @@ move_snake:
     mv x head_x
     mv y head_y
     call body_push
-    col COLOR_BODY
-    spx x y
+    li color COLOR_BODY
+    ecall 0x10000000 ; set pixel
 
     # 允许环绕
     bge nx 0 move_snake_common_x_ge_0
@@ -140,12 +143,13 @@ move_snake:
     # 画新头
     mv head_x nx
     mv head_y ny
-    col COLOR_HEAD
-    spx head_x head_y
+    li color COLOR_HEAD
 
-    # 检查是否撞到自己
     mv x head_x
     mv y head_y
+    ecall 0x10000000 ; set pixel
+
+    # 检查是否撞到自己
     call body_contains
     beq rt 1 lose_loop
 
@@ -158,14 +162,15 @@ move_snake:
     # 未吃到则弹出尾巴
     move_snake_not_eat:
       call body_pop
-      col COLOR_BACK
-      spx x y
+      li color COLOR_BACK
+      ecall 0x10000000 ; set pixel
       ret
 
 
 gen_food:
-  rand x
-  rand y
+  ecall 41 ; random int
+  mv y x
+  ecall 41
   rem x x SCREEN_WIDTH
   rem y y SCREEN_HEIGHT
 
@@ -174,8 +179,8 @@ gen_food:
 
   mv food_x x
   mv food_y y
-  col COLOR_FOOD
-  spx food_x food_y
+  li color COLOR_FOOD
+  ecall 0x10000000 ; set pixel
 
   ret
 

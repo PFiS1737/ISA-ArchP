@@ -9,18 +9,13 @@ module Top (
 
     let instr: bit<32> = $sv::mem_load(pc, 4);
 
-    // TODO: remove this
-    always_comb {
-        if instr == 32'hffff_ffff {
-            $finish();
-        }
-    }
-
     let opcode: bit<7> = instr[31:25];
     let funct3: bit<3> = instr[24:22];
     let rd: bit<5> = instr[21:17];
     let rs1: bit<5> = instr[16:12];
     let imm12: signed bit<12> = instr[11:0];
+
+    inst SYS_: SYS ( clk, rst, opcode, funct3 );
 
     var rfwe: logic;
     var wdata: bit<32>;
@@ -117,36 +112,8 @@ module Top (
         pcwdata: pcwdata_csu,
     );
 
-    var rfwe_dcu: logic;
-    var wdata_dcu: bit<32>;
-    inst DCU_: DCU (
-        clk,
-        rst,
-        opcode,
-        funct3,
-        imm12,
-        rdata1,
-        rdata2,
-        rfwe: rfwe_dcu,
-        wdata: wdata_dcu,
-    );
-
-    var rfwe_iou: logic;
-    var wdata_iou: bit<32>;
-    inst IOU_: IOU (
-        clk,
-        rst,
-        opcode,
-        funct3,
-        rdata1,
-        rfwe: rfwe_iou,
-        wdata: wdata_iou,
-    );
-
-    assign rfwe = rfwe_alsu | rfwe_uiu | rfwe_bjlu | rfwe_lsu | rfwe_csu
-        | rfwe_dcu | rfwe_iou;
-    assign wdata = wdata_alsu | wdata_uiu | wdata_bjlu | wdata_lsu | wdata_csu
-        | wdata_dcu | wdata_iou;
+    assign rfwe = rfwe_alsu | rfwe_uiu | rfwe_bjlu | rfwe_lsu | rfwe_csu;
+    assign wdata = wdata_alsu | wdata_uiu | wdata_bjlu | wdata_lsu | wdata_csu;
 
     assign pcwe = pcwe_bjlu | pcwe_csu;
     assign pcwdata = pcwdata_bjlu | pcwdata_csu;

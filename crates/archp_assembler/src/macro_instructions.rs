@@ -1,6 +1,6 @@
 mod als_imm32;
+mod auto_ecall;
 mod auto_imm;
-mod col_imm32;
 mod load_imm32;
 mod riscv_offset;
 

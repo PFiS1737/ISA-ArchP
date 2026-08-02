@@ -2,11 +2,11 @@ mod arithmetic_logic;
 mod branch;
 mod jump_and_link;
 mod load_store;
-mod misc;
 mod mul_div;
 mod set;
 mod shift_rotate;
 mod stack_call_return;
+mod system;
 mod upper_imm;
 
 use std::{collections::HashMap, fmt::Display, sync::LazyLock};
@@ -374,10 +374,6 @@ mod tests {
 
         assert_snapshot!(cmd(&["r1", "r2", "32"]), @"Error: Immediate '32' out of range for u5 (0 ..= 31)");
         assert_snapshot!(cmd(&["r1", "r2", "31"]), @"0000 101 001 00001 00010 0000000 11111");
-
-        let cmd = instr("colr");
-
-        assert_snapshot!(cmd(&["r0", "r31", "0xB00"]), @"1111 111 000 00000 11111 1011000 00000");
     }
 
     #[test]

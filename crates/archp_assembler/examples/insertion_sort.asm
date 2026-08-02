@@ -1,24 +1,21 @@
 # The insertion sort algorithm implemented in assembly.
 
 const zero r0
-
-const sp r1
-
-const a0 r2
-const a1 r3
-const a2 r4
-const a3 r5
-const a4 r6
-const a5 r7
-
-const t0 r8
-const t1 r9
-const t2 r10
-const t3 r11
-const t4 r12
-const t5 r13
-
-const s0 r14
+const ra r1
+const sp r2
+const t0 r5
+const t1 r6
+const t2 r7
+const s0 r8
+const a0 r10
+const a1 r11
+const a2 r12
+const a3 r13
+const a4 r14
+const a5 r15
+const t3 r28
+const t4 r29
+const t5 r30
 
 li sp 8192
 
@@ -69,7 +66,8 @@ insertion_sort:
     ret
 
 main:
-  in a1  # length
+  ecall 5 ; read int
+  mv a1 a0 # length
 
   # malloc from stack frame
   sll s0 a1 2  # size = length * 4
@@ -81,7 +79,8 @@ main:
   .Lmain_input_loop:
     beqz t3 .Lmain_input_done
 
-    in t2
+    ecall 5 ; read int
+    mv t2 a0
 
     sw t2 0(t1)
     add t1 t1 4
@@ -92,13 +91,16 @@ main:
   .Lmain_input_done:
     mv a0 sp
     call insertion_sort
+    mv t0 a0
 
   .Lmain_output_loop:
     beq a1 zero .Lmain_output_done
 
-    lw t0 0(a0)
-    out t0
-    add a0 a0 4
+    lw a0 0(t0)
+    ecall 1 ; print int
+    li a0 10 ; '\n'
+    ecall 11 ; putchar
+    add t0 t0 4
 
     dec a1
     j .Lmain_output_loop
@@ -108,4 +110,4 @@ main:
     j halt
 
 halt:
-  j halt
+  ecall 10 ; exit
