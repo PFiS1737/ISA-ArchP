@@ -9,7 +9,7 @@ pub struct Cli {
     /// File path to the binary machine code file to be simulated.
     pub file: PathBuf,
 
-    // Max simulation frequency in Hz, optional unit is supported.
+    /// Max simulation frequency in Hz, optional unit is supported.
     #[arg(short = 'F', long, value_parser = parse_united::<f64>)]
     pub hz: Option<f64>,
 
