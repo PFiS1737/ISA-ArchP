@@ -10,7 +10,6 @@ exit_code: 0
 0x0102A000 # addi len a0 0       [mv len, a0]
 0x010E1000 # addi t0 len 0       [mv t0, len]
 0x16100100 # lui t1 0x100        [li t1, BASE_ADDR]
-0x01108000 # addi t1 t1 0        [li t1, BASE_ADDR]
 0x01220005 # addi r17 r0 5       [ecall 5]               <label: input>
 0x40000000 # ecall               [ecall 5]
 0x11C0800A # sb t1 a0 0          [sb a0, t1]
@@ -20,9 +19,8 @@ exit_code: 0
 0xFA000008 # call solve
 0x01220001 # addi r17 r0 1       [ecall 1]
 0x40000000 # ecall               [ecall 1]
-0x14000040 # jal r0 halt         [j halt]
+0x1400003E # jal r0 halt         [j halt]
 0x16040100 # lui l 0x100         [li l, BASE_ADDR]       <label: solve>
-0x01042000 # addi l l 0          [li l, BASE_ADDR]
 0x00062001 # add r l len         [add r, l, len]
 0x01463001 # subi r r 1          [dec r]
 0x11082000 # lbu lmax l 0        [lbu lmax, l]

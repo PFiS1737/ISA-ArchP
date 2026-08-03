@@ -17,10 +17,13 @@ const F: ExpandFn = |ctx, _, _, ops| {
     if let Ok((lo, hi)) = parse_imm(ctx, &ops[1]).map(|imm| imm.split(12, true))
         && hi != 0
     {
-        Some(vec![
-            ("lui", op_values![ops[0], hi]),
-            ("addi", op_values![ops[0], ops[0], sign_extend(lo, 12)]),
-        ])
+        let mut ret = vec![("lui", op_values![ops[0], hi])];
+
+        if lo != 0 {
+            ret.push(("addi", op_values![ops[0], ops[0], sign_extend(lo, 12)]))
+        }
+
+        Some(ret)
     } else {
         None
     }
@@ -41,6 +44,7 @@ mod tests {
         assert_snapshot!(li(&["r1", "0x123"]), @"");
         assert_snapshot!(li(&["r1", "0x1234"]), @"lui r1 1; addi r1 r1 0x234");
         assert_snapshot!(li(&["r1", "0x12345678"]), @"lui r1 0x12345; addi r1 r1 0x678");
+        assert_snapshot!(li(&["r1", "0x10000000"]), @"lui r1 0x10000");
         assert_snapshot!(li(&["r1", "0xFFFFFFFF"]), @"");
 
         assert_snapshot!(li(&["r1", "123"]), @"");

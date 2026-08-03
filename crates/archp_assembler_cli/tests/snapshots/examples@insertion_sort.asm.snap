@@ -6,7 +6,6 @@ success: true
 exit_code: 0
 ----- stdout -----
 0x16040002 # lui sp 2                             [li sp, 8192]
-0x01042000 # addi sp sp 0                         [li sp, 8192]
 0x1400002C # jal r0 main                          [j main]
 0x010A0001 # addi t0 r0 1                         [li t0, 1]                               <label: insertion_sort>
 0x12C054CB # bge t0 a1 .Linsertion_sort_done      [bge t0, a1, .Linsertion_sort_done]      <label: .Linsertion_sort_outer>

@@ -6,7 +6,6 @@ success: true
 exit_code: 0
 ----- stdout -----
 0x16020001 # lui r1 1        [li r1, 4096]
-0x01021000 # addi r1 r1 0    [li r1, 4096]
 0x01040048 # addi r2 r0 72   [li r2, 72]
 0x11C01002 # sb r1 r2 0      [sb r2, 0(r1)]
 0x01040065 # addi r2 r0 101  [li r2, 101]
