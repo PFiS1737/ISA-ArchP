@@ -3,7 +3,7 @@ resolver = "2"
 members = ["crates/*"]
 
 [workspace.package]
-version = "0.2.2"
+version = "1.0.0"
 edition = "2024"
 description = "Assembly implementation of the ArchP ISA"
 homepage = "https://github.cim/PFiS1737/ISA-ArchP#readme"
