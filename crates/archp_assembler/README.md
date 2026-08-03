@@ -3,9 +3,9 @@
 ## Assembly Syntax
 
 - Comments start with `#` or `;` and continue to the end of the line.
-- Definite constants using `const` directive: `const NAME VALUE` (only allowed at the beginning of the file).
+- Definite constants using `const` directive: `const NAME = VALUE` (only allowed at the beginning of the file).
 - Labels are defined by writing the label name followed by a colon (`:`) at the beginning of a line.
-- Operands are separated by spaces, tabs or commas.
+- Operands are separated by commas.
 - Instructions and labels are case-insensitive.
 - Only one instruction or label definition is allowed per line (label and instruction can be on the same line).
 - See [examples](./examples) for more details.
@@ -171,3 +171,5 @@ In this section:
 #### System
 
 - `ecall`: make a system call, see [syscall.md](../../docs/syscall.md).
+- macros:
+  - `syscall imm12` => `li r17 imm12; ecall`
