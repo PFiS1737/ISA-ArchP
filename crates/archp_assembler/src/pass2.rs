@@ -1,7 +1,7 @@
 use anyhow::{Result, anyhow};
 
 use crate::{
-    assembler::{Context, Line, LineWithInfo},
+    assembler::{Context, Instr, Line},
     instructions::INSTRUCTIONS,
     pseudo_instructions::PSEUDO_INSTRUCTIONS,
 };
@@ -19,17 +19,14 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
         Pass2 { context }
     }
 
-    pub fn run(
-        &self,
-        processed: Vec<LineWithInfo<'src>>,
-    ) -> Result<(Vec<u32>, Vec<LineWithInfo<'src>>)> {
+    pub fn run(&self, processed: Vec<Line<'src>>) -> Result<(Vec<u32>, Vec<Line<'src>>)> {
         let mut codes = Vec::with_capacity(processed.len());
         let mut lines = Vec::with_capacity(processed.len());
 
-        for (idx, (line, info)) in processed.into_iter().enumerate() {
+        for (idx, (instr, info)) in processed.into_iter().enumerate() {
             let (original_idx, original_line) = info.original_line;
 
-            let (code, line) = self.line_handler(idx, line).map_err(|e| {
+            let (code, instr) = self.line_handler(idx, instr).map_err(|e| {
                 anyhow!(
                     "Error encoding line {}: '{}' ({})",
                     original_idx + 1,
@@ -39,16 +36,16 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
             })?;
 
             codes.push(code);
-            lines.push((line, info));
+            lines.push((instr, info));
         }
 
         Ok((codes, lines))
     }
 
-    fn line_handler(&self, idx: usize, line: Line<'src>) -> Result<(u32, Line<'src>)> {
+    fn line_handler(&self, idx: usize, instr: Instr<'src>) -> Result<(u32, Instr<'src>)> {
         let pc = (idx * 4) as u32;
 
-        let (name, ops) = line;
+        let (name, ops) = instr;
 
         let (name, ops) = if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
             ps_instr

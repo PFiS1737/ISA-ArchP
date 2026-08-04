@@ -15,12 +15,12 @@ use std::{collections::HashMap, iter::successors, sync::LazyLock};
 use anyhow::{Result, bail};
 
 use crate::{
-    assembler::{Context, Line},
+    assembler::{Context, Instr},
     operand::{OperandType, OperandValue},
     parser::{address::parse_address, immediate::parse_imm_as, register::parse_reg},
 };
 
-type ExpandRet<'a> = Line<'a>;
+type ExpandRet<'a> = Instr<'a>;
 type ExpandFn = for<'a> fn(&'a str, &[OperandValue<'a>]) -> ExpandRet<'a>;
 
 inventory::collect!(&'static dyn PseudoInstruction);

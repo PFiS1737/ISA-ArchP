@@ -42,10 +42,10 @@ fn main() -> Result<()> {
         for (code, display) in codes.into_iter().zip(align_tabbed_lines(
             &lines
                 .into_iter()
-                .map(|((name, ops), instr_info)| {
+                .map(|((name, ops), info)| {
                     let mut display = fmt_line(name, &ops);
 
-                    let (_, original_line) = instr_info.original_line;
+                    let (_, original_line) = info.original_line;
 
                     if display != original_line {
                         display = format!("{display}\t[{original_line}]");
@@ -53,7 +53,7 @@ fn main() -> Result<()> {
                         display += "\t";
                     }
 
-                    if let Some(label_name) = instr_info.label_name {
+                    if let Some(label_name) = info.label_name {
                         display = format!("{display}\t<label: {label_name}>");
                     } else {
                         display += "\t";

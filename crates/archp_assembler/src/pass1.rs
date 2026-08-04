@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow, bail};
 use smallvec::SmallVec;
 
 use crate::{
-    assembler::{Context, InstrInfo, LineWithInfo},
+    assembler::{Context, Line, LineInfo},
     macro_instructions::MACRO_INSTRUCTIONS,
 };
 
@@ -23,7 +23,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
     pub fn run(
         &mut self,
         source_lines: impl IntoIterator<Item = &'src str>,
-    ) -> Result<Vec<LineWithInfo<'src>>> {
+    ) -> Result<Vec<Line<'src>>> {
         let mut processed = Vec::new();
 
         let mut in_const_zone = true;
@@ -125,8 +125,8 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                         )
                     })?
             {
-                for line in expanded {
-                    processed.push((line, InstrInfo {
+                for instr in expanded {
+                    processed.push((instr, LineInfo {
                         original_line: (orig_idx, raw_line),
                         label_name: current_label,
                     }));
@@ -134,7 +134,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                     current_label = None;
                 }
             } else {
-                processed.push(((name, ops), InstrInfo {
+                processed.push(((name, ops), LineInfo {
                     original_line: (orig_idx, raw_line),
                     label_name: current_label,
                 }));

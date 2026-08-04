@@ -12,11 +12,11 @@ use std::{
 use anyhow::{Result, bail};
 
 use crate::{
-    assembler::{Context, Line},
+    assembler::{Context, Instr},
     operand::OperandValue,
 };
 
-type ExpandRet<'a> = Option<Vec<Line<'a>>>;
+type ExpandRet<'a> = Option<Vec<Instr<'a>>>;
 type ExpandFn = for<'a> fn(&Context<'a>, u32, &'a str, &[OperandValue<'a>]) -> ExpandRet<'a>;
 
 inventory::collect!(&'static dyn MacroInstruction);
