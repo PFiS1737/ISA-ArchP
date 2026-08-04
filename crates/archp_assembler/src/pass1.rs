@@ -1,4 +1,5 @@
 use anyhow::{Result, anyhow, bail};
+use smallvec::SmallVec;
 
 use crate::{
     assembler::{Context, InstrInfo, Line},
@@ -109,11 +110,9 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                 .split(',')
                 .filter(|e| !e.is_empty())
                 .map(|e| e.trim().into())
-                .collect::<Vec<_>>();
+                .collect::<SmallVec<_>>();
 
-            let mut lines = Vec::new();
-
-            if !self.context.settings.disable_macro
+            let lines = if !self.context.settings.disable_macro
                 && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
                 && let Some(expanded) = mc_instr
                     .expand(self.context, pc as u32, name, &ops)
@@ -124,12 +123,11 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                             raw_line,
                             e
                         )
-                    })?
-            {
-                lines.extend(expanded);
+                    })? {
+                expanded
             } else {
-                lines.push((name, ops));
-            }
+                vec![(name, ops)]
+            };
 
             for line in lines {
                 self.context.instr_info.push(InstrInfo {

@@ -20,8 +20,8 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
     }
 
     pub fn run(&self, processed: Vec<Line<'src>>) -> Result<(Vec<u32>, Vec<LineWithInfo<'src>>)> {
-        let mut codes = Vec::new();
-        let mut lines = Vec::new();
+        let mut codes = Vec::with_capacity(processed.len());
+        let mut lines = Vec::with_capacity(processed.len());
 
         for (idx, line) in processed.into_iter().enumerate() {
             let instr_info = self.context.instr_info[idx];

@@ -11,6 +11,7 @@ publish = false
 [dependencies]
 anyhow = { workspace = true }
 inventory = { workspace = true }
+smallvec = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true }

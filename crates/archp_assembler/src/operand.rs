@@ -43,7 +43,7 @@ impl Display for OperandValue<'_> {
 
 pub macro op_values {
     ( $( $value:expr ),* $(,)? ) => {
-        vec![
+        smallvec::smallvec![
             $(
                 $crate::operand::OperandValue::from($value)
             ),*

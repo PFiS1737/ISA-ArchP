@@ -43,7 +43,7 @@ fn main() -> Result<()> {
             &lines
                 .into_iter()
                 .map(|((name, ops), instr_info)| {
-                    let mut display = fmt_line(name, ops);
+                    let mut display = fmt_line(name, &ops);
 
                     let (_, original_line) = instr_info.original_line;
 

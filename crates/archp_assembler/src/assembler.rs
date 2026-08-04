@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
+use smallvec::SmallVec;
 
 use crate::{operand::OperandValue, pass1::Pass1, pass2::Pass2};
 
@@ -55,7 +56,7 @@ impl<'src> Context<'src> {
     }
 }
 
-pub type Line<'src> = (&'src str, Vec<OperandValue<'src>>);
+pub type Line<'src> = (&'src str, SmallVec<[OperandValue<'src>; 3]>);
 pub type LineWithInfo<'src> = (Line<'src>, InstrInfo<'src>);
 
 impl Assembler {

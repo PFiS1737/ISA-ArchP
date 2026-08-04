@@ -32,7 +32,7 @@ pub fn mc_instr(cmd: &str) -> impl Fn(&[&str]) -> String {
         Ok(expanded) => match expanded {
             Some(expanded) => expanded
                 .into_iter()
-                .map(|(name, ops)| fmt_line(name, ops))
+                .map(|(name, ops)| fmt_line(name, &ops))
                 .collect::<Vec<_>>()
                 .join("; "),
             None => "".to_string(),

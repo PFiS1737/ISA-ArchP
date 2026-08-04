@@ -4,12 +4,12 @@ pub fn fmt_hex(n: impl FormatHex) -> String {
     n.fmt_hex()
 }
 
-pub fn fmt_line(name: &str, ops: Vec<OperandValue>) -> String {
+pub fn fmt_line(name: &str, ops: &[OperandValue]) -> String {
     let ops = ops
-        .into_iter()
+        .iter()
         .map(|e| match e {
             OperandValue::StringSlice(s) => s.to_string(),
-            OperandValue::Integer(n, _) => fmt_hex(n), // FIXME: 根据指令显示不同位数
+            OperandValue::Integer(n, _) => fmt_hex(*n), // FIXME: 根据指令显示不同位数
         })
         .collect::<Vec<_>>();
 
