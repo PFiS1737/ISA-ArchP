@@ -14,8 +14,8 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = { workspace = true }
-clap = { workspace = true, features = ["derive"] }
-clap_complete = { workspace = true, features = ["unstable-dynamic"] }
+clap = { workspace = true }
+clap_complete = { workspace = true }
 env_logger = { workspace = true }
 
 archp_assembler = { workspace = true }

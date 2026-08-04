@@ -14,4 +14,3 @@ inventory = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true }
-rand = { workspace = true }
