@@ -1,22 +1,5 @@
 # The insertion sort algorithm implemented in assembly.
 
-const zero = r0
-const ra = r1
-const sp = r2
-const t0 = r5
-const t1 = r6
-const t2 = r7
-const s0 = r8
-const a0 = r10
-const a1 = r11
-const a2 = r12
-const a3 = r13
-const a4 = r14
-const a5 = r15
-const t3 = r28
-const t4 = r29
-const t5 = r30
-
 li sp, 8192
 
 j main

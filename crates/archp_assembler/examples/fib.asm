@@ -1,11 +1,3 @@
-const ra = r1
-const sp = r2
-const s0 = r8
-const s1 = r9
-const a0 = r10
-const a7 = r17
-const s2 = r18
-
 li sp, 4096
 
 main:

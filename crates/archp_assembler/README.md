@@ -17,9 +17,10 @@ If you require detailed information on the encoding formats, please refer to [is
 
 ### Registers
 
-- 31 general-purpose registers: `r0` to `r30`.
-- `r0`: always contains 0, you can write to it but it has no effect.
-- `r31`: used by the assembler for expanding macro-instructions.
+- 32 general-purpose registers: `r0` to `r31`.
+  - `r0`: always contains 0, you can write to it but it has no effect.
+  - `r31`: used by the assembler for expanding macro-instructions.
+- Also support named registers which is the same as RISC-V, see [RISC-V Manual](https://github.com/riscv-non-isa/riscv-asm-manual/blob/main/src/asm-manual.adoc#general-registers).
 
 ### Instructions
 

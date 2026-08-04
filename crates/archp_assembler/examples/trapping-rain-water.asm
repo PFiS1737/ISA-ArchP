@@ -9,8 +9,6 @@ const rmax = r5
 const water = r6
 const t0 = r7
 const t1 = r8
-const a0 = r10
-const a1 = r11
 
 const BASE_ADDR = 0x00100000
 

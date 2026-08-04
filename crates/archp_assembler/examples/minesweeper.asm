@@ -126,17 +126,17 @@ init_screen:
 
 init_mines:
   li mine_num, MINE_NUM_MAX
-  mv r10, mine_num
+  mv a0, mine_num
   ecall 1 ; print int
-  li r10, 10 ; '\n'
+  li a0, 10 ; '\n'
   ecall 11 ; putchar
   clr i
 
   init_mines_loop:
     ecall 41 ; random int
-    mv t1, r10
+    mv t1, a0
     ecall 41 ; random int
-    mv t2, r10
+    mv t2, a0
     rem x, t1, GRID_COLS
     rem y, t2, GRID_ROWS
 
@@ -426,9 +426,9 @@ toggle_flag:
 
   toggle_flag_store:
     sw t1, addr
-    mv r10, mine_num
+    mv a0, mine_num
     ecall 1 ; print int
-    li r10, 10 ; '\n'
+    li a0, 10 ; '\n'
     ecall 11 ; putchar
 
   toggle_flag_ret:

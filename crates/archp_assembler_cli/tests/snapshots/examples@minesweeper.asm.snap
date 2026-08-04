@@ -63,19 +63,19 @@ exit_code: 0
 0xFA0000D0 # call update_cursor
 0xFC800000 # ret
 0x012A0010 # addi mine_num r0 MINE_NUM_MAX              [li mine_num, MINE_NUM_MAX]                          <label: init_mines>
-0x01155000 # addi r10 mine_num 0                        [mv r10, mine_num]
+0x01155000 # addi a0 mine_num 0                         [mv a0, mine_num]
 0x01220001 # addi r17 r0 1                              [ecall 1]
 0x40000000 # ecall                                      [ecall 1]
-0x0114000A # addi r10 r0 10                             [li r10, 10]
+0x0114000A # addi a0 r0 10                              [li a0, 10]
 0x0122000B # addi r17 r0 11                             [ecall 11]
 0x40000000 # ecall                                      [ecall 11]
 0x01020000 # addi i r0 0                                [clr i]
 0x01220029 # addi r17 r0 41                             [ecall 41]                                           <label: init_mines_loop>
 0x40000000 # ecall                                      [ecall 41]
-0x0108A000 # addi t1 r10 0                              [mv t1, r10]
+0x0108A000 # addi t1 a0 0                               [mv t1, a0]
 0x01220029 # addi r17 r0 41                             [ecall 41]
 0x40000000 # ecall                                      [ecall 41]
-0x010AA000 # addi t2 r10 0                              [mv t2, r10]
+0x010AA000 # addi t2 a0 0                               [mv t2, a0]
 0x0754400F # remi x t1 15                               [rem x, t1, GRID_COLS]
 0x07565008 # remi y t2 8                                [rem y, t2, GRID_ROWS]
 0x0510B00F # muli addr y 15                             [mul addr, y, GRID_COLS]
@@ -281,10 +281,10 @@ exit_code: 0
 0x0118C45C # addi color color 0x45C                     [li color, COLOR_HIDDEN]
 0xFA000012 # call draw_tile
 0x11408004 # sw addr t1 0                               [sw t1, addr]                                        <label: toggle_flag_store>
-0x01155000 # addi r10 mine_num 0                        [mv r10, mine_num]
+0x01155000 # addi a0 mine_num 0                         [mv a0, mine_num]
 0x01220001 # addi r17 r0 1                              [ecall 1]
 0x40000000 # ecall                                      [ecall 1]
-0x0114000A # addi r10 r0 10                             [li r10, 10]
+0x0114000A # addi a0 r0 10                              [li a0, 10]
 0x0122000B # addi r17 r0 11                             [ecall 11]
 0x40000000 # ecall                                      [ecall 11]
 0xFC800000 # ret                                                                                             <label: toggle_flag_ret>

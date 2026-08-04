@@ -8,15 +8,51 @@ pub fn parse_reg(ctx: &Context, op: &OperandValue) -> Result<u32> {
         OperandValue::Integer(n, _) => err_expect_reg!(n),
     };
 
-    match *reg {
+    Ok(match *reg {
         r if let Some(n) = r.strip_prefix("r")
             && let Ok(n) = n.parse::<u32>() =>
         {
             if n > 31 {
                 err_reg_out_of_range!(reg);
             }
-            Ok(n)
+
+            n
         },
+
+        "zero" => 0,
+        "ra" => 1,
+        "sp" => 2,
+        "gp" => 3,
+        "tp" => 4,
+        "t0" => 5,
+        "t1" => 6,
+        "t2" => 7,
+        "s0" => 8,
+        "s1" => 9,
+        "a0" => 10,
+        "a1" => 11,
+        "a2" => 12,
+        "a3" => 13,
+        "a4" => 14,
+        "a5" => 15,
+        "a6" => 16,
+        "a7" => 17,
+        "s2" => 18,
+        "s3" => 19,
+        "s4" => 20,
+        "s5" => 21,
+        "s6" => 22,
+        "s7" => 23,
+        "s8" => 24,
+        "s9" => 25,
+        "s10" => 26,
+        "s11" => 27,
+        "t3" => 28,
+        "t4" => 29,
+        "t5" => 30,
+        "t6" => 31,
+
+        "fp" => 8,
 
         _ => {
             if parse_imm(ctx, op).is_ok() {
@@ -25,7 +61,7 @@ pub fn parse_reg(ctx: &Context, op: &OperandValue) -> Result<u32> {
                 err_inval_reg!(reg)
             }
         },
-    }
+    })
 }
 
 macro err_expect_reg($e:expr) {
