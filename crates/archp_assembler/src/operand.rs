@@ -51,7 +51,7 @@ pub macro op_values {
     },
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum OperandType {
     RegD,
     RegS,

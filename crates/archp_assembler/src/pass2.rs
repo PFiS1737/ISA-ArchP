@@ -19,14 +19,15 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
         Pass2 { context }
     }
 
-    pub fn run(&self, processed: Vec<Line<'src>>) -> Result<(Vec<u32>, Vec<LineWithInfo<'src>>)> {
+    pub fn run(
+        &self,
+        processed: Vec<LineWithInfo<'src>>,
+    ) -> Result<(Vec<u32>, Vec<LineWithInfo<'src>>)> {
         let mut codes = Vec::with_capacity(processed.len());
         let mut lines = Vec::with_capacity(processed.len());
 
-        for (idx, line) in processed.into_iter().enumerate() {
-            let instr_info = self.context.instr_info[idx];
-
-            let (original_idx, original_line) = instr_info.original_line;
+        for (idx, (line, info)) in processed.into_iter().enumerate() {
+            let (original_idx, original_line) = info.original_line;
 
             let (code, line) = self.line_handler(idx, line).map_err(|e| {
                 anyhow!(
@@ -38,7 +39,7 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
             })?;
 
             codes.push(code);
-            lines.push((line, instr_info));
+            lines.push((line, info));
         }
 
         Ok((codes, lines))

@@ -14,17 +14,15 @@ pub struct AssemblerSettings {
     pub disable_macro: bool,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Default)]
 pub struct Context<'src> {
     pub settings: AssemblerSettings,
 
     pub constants: HashMap<&'src str, &'src str>,
     pub labels: HashMap<&'src str, usize>,
-
-    pub instr_info: Vec<InstrInfo<'src>>,
 }
 
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Default)]
 pub struct InstrInfo<'src> {
     pub original_line: (usize, &'src str),
     pub label_name: Option<&'src str>,
@@ -36,7 +34,6 @@ impl<'src> Context<'src> {
             settings,
             constants: HashMap::new(),
             labels: HashMap::new(),
-            instr_info: Vec::new(),
         }
     }
 
@@ -51,7 +48,6 @@ impl<'src> Context<'src> {
                 ("end", 4094),
                 ("over", 0x123456),
             ]),
-            instr_info: Vec::new(),
         }
     }
 }

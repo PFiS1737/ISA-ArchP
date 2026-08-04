@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow, bail};
 use smallvec::SmallVec;
 
 use crate::{
-    assembler::{Context, InstrInfo, Line},
+    assembler::{Context, InstrInfo, LineWithInfo},
     macro_instructions::MACRO_INSTRUCTIONS,
 };
 
@@ -23,7 +23,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
     pub fn run(
         &mut self,
         source_lines: impl IntoIterator<Item = &'src str>,
-    ) -> Result<Vec<Line<'src>>> {
+    ) -> Result<Vec<LineWithInfo<'src>>> {
         let mut processed = Vec::new();
 
         let mut in_const_zone = true;
@@ -112,7 +112,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                 .map(|e| e.trim().into())
                 .collect::<SmallVec<_>>();
 
-            let lines = if !self.context.settings.disable_macro
+            if !self.context.settings.disable_macro
                 && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
                 && let Some(expanded) = mc_instr
                     .expand(self.context, pc as u32, name, &ops)
@@ -123,22 +123,24 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                             raw_line,
                             e
                         )
-                    })? {
-                expanded
-            } else {
-                vec![(name, ops)]
-            };
+                    })?
+            {
+                for line in expanded {
+                    processed.push((line, InstrInfo {
+                        original_line: (orig_idx, raw_line),
+                        label_name: current_label,
+                    }));
 
-            for line in lines {
-                self.context.instr_info.push(InstrInfo {
+                    current_label = None;
+                }
+            } else {
+                processed.push(((name, ops), InstrInfo {
                     original_line: (orig_idx, raw_line),
                     label_name: current_label,
-                });
-
-                processed.push(line);
+                }));
 
                 current_label = None;
-            }
+            };
         }
 
         Ok(processed)
