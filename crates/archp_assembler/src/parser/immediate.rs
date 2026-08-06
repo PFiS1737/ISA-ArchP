@@ -11,13 +11,13 @@ pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<Immediate> {
 
             (|| {
                 if let Some(hex) = imm.strip_prefix("0x") {
-                    Ok(Immediate(u64::from_str_radix(hex, 16)? as u32))
+                    Ok(Immediate(i64::from_str_radix(hex, 16)?))
                 } else if let Some(bin) = imm.strip_prefix("0b") {
-                    Ok(Immediate(u64::from_str_radix(bin, 2)? as u32))
+                    Ok(Immediate(i64::from_str_radix(bin, 2)?))
                 } else if let Some(num) = imm.strip_prefix("-") {
-                    Ok(Immediate(-num.parse::<i64>()? as u32))
+                    Ok(Immediate(-num.parse::<i64>()?))
                 } else {
-                    Ok(Immediate(imm.parse::<i64>()? as u32))
+                    Ok(Immediate(imm.parse::<i64>()?))
                 }
             })()
             .map_err(|err: ParseIntError| {
@@ -31,7 +31,7 @@ pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<Immediate> {
                 }
             })
         },
-        OperandValue::Integer(n) => Ok(Immediate(*n)),
+        OperandValue::Integer(n) => Ok(Immediate(*n as i64)),
     }
 }
 
@@ -57,7 +57,7 @@ pub fn parse_imm_as(ctx: &Context, imm: &OperandValue, bits: u8, signed: bool) -
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Immediate(pub u32);
+pub struct Immediate(pub i64);
 
 impl Immediate {
     pub fn is_zero(&self) -> bool {
@@ -69,6 +69,8 @@ impl Immediate {
     pub fn split(&self, bits: u8, signed: bool) -> (u32, u32) {
         assert!(bits > 0 && bits <= 32);
 
+        let raw = self.0 as u32;
+
         let mask = if bits == 32 {
             u32::MAX
         } else {
@@ -76,12 +78,12 @@ impl Immediate {
         };
 
         if signed {
-            let low = self.0 & mask;
+            let low = raw & mask;
 
-            if self.0 == sign_extend(low, bits) {
+            if raw == sign_extend(low, bits) {
                 (low, 0)
             } else {
-                let mut hi = if bits == 32 { 0 } else { self.0 >> bits };
+                let mut hi = if bits == 32 { 0 } else { raw >> bits };
 
                 if bits < 32 && low >= (1u32 << (bits - 1)) {
                     hi = hi.wrapping_add(1);
@@ -89,9 +91,9 @@ impl Immediate {
                 (low, hi)
             }
         } else {
-            let low = self.0 & mask;
+            let low = raw & mask;
 
-            let hi = if bits == 32 { 0 } else { self.0 >> bits };
+            let hi = if bits == 32 { 0 } else { raw >> bits };
 
             (low, hi)
         }
@@ -112,7 +114,7 @@ mod tests {
                 ((hi << bits) as i32).wrapping_add(sign_extend(low, bits) as i32)
             )
         } else {
-            assert_eq!(imm.0, (hi << bits) + low)
+            assert_eq!(imm.0 as u32, (hi << bits) + low)
         }
 
         format!(
@@ -307,7 +309,7 @@ mod tests {
         ");
 
         assert_snapshot!(test("-123"), @"
-        0xFFFFFF85
+        -123
         (5, 0x7FFFFFC) - i5
         (5, 0x7FFFFFC) - u5
         (0xF85, 0) - i12
@@ -337,7 +339,7 @@ mod tests {
         ");
 
         assert_snapshot!(test("-2048"), @"
-        0xFFFFF800
+        0xFFFFFFFFFFFFF800
         (0, 0x7FFFFC0) - i5
         (0, 0x7FFFFC0) - u5
         (0x800, 0) - i12
@@ -347,7 +349,7 @@ mod tests {
         ");
 
         assert_snapshot!(test("-2049"), @"
-        0xFFFFF7FF
+        0xFFFFFFFFFFFFF7FF
         (31, 0x7FFFFC0) - i5
         (31, 0x7FFFFBF) - u5
         (0x7FF, 0xFFFFF) - i12
@@ -367,7 +369,7 @@ mod tests {
         ");
 
         assert_snapshot!(test("-123456"), @"
-        0xFFFE1DC0
+        0xFFFFFFFFFFFE1DC0
         (0, 0x7FFF0EE) - i5
         (0, 0x7FFF0EE) - u5
         (0xDC0, 0xFFFE2) - i12
@@ -387,7 +389,7 @@ mod tests {
         ");
 
         assert_snapshot!(test("-2147483647"), @"
-        0x80000001
+        0xFFFFFFFF80000001
         (1, 0x4000000) - i5
         (1, 0x4000000) - u5
         (1, 0x80000) - i12
@@ -407,7 +409,7 @@ mod tests {
         ");
 
         assert_snapshot!(test("-2147483648"), @"
-        0x80000000
+        0xFFFFFFFF80000000
         (0, 0x4000000) - i5
         (0, 0x4000000) - u5
         (0, 0x80000) - i12
@@ -427,7 +429,7 @@ mod tests {
         ");
 
         assert_snapshot!(test("-2147483649"), @"
-        0x7FFFFFFF
+        0xFFFFFFFF7FFFFFFF
         (31, 0x4000000) - i5
         (31, 0x3FFFFFF) - u5
         (0xFFF, 0x80000) - i12
@@ -447,7 +449,7 @@ mod tests {
         ");
 
         assert_snapshot!(test("-4294967295"), @"
-        1
+        0xFFFFFFFF00000001
         (1, 0) - i5
         (1, 0) - u5
         (1, 0) - i12
@@ -457,7 +459,7 @@ mod tests {
         ");
 
         assert_snapshot!(test("4294967296"), @"
-        0
+        0x100000000
         (0, 0) - i5
         (0, 0) - u5
         (0, 0) - i12
@@ -467,7 +469,7 @@ mod tests {
         ");
 
         assert_snapshot!(test("-4294967296"), @"
-        0
+        0xFFFFFFFF00000000
         (0, 0) - i5
         (0, 0) - u5
         (0, 0) - i12
@@ -477,7 +479,7 @@ mod tests {
         ");
 
         assert_snapshot!(test("4294967297"), @"
-        1
+        0x100000001
         (1, 0) - i5
         (1, 0) - u5
         (1, 0) - i12
@@ -487,7 +489,7 @@ mod tests {
         ");
 
         assert_snapshot!(test("-4294967297"), @"
-        0xFFFFFFFF
+        0xFFFFFFFEFFFFFFFF
         (31, 0) - i5
         (31, 0x7FFFFFF) - u5
         (0xFFF, 0) - i12

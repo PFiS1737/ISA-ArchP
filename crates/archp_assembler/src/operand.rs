@@ -28,7 +28,7 @@ impl From<i32> for OperandValue<'_> {
 
 impl From<Immediate> for OperandValue<'_> {
     fn from(n: Immediate) -> Self {
-        OperandValue::Integer(n.0)
+        OperandValue::Integer(n.0 as u32)
     }
 }
 
