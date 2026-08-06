@@ -11,25 +11,13 @@ pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<Immediate> {
 
             (|| {
                 if let Some(hex) = imm.strip_prefix("0x") {
-                    Ok(Immediate {
-                        raw: u64::from_str_radix(hex, 16)? as u32,
-                        bits: hex.len() as u8 * 4,
-                    })
+                    Ok(Immediate(u64::from_str_radix(hex, 16)? as u32))
                 } else if let Some(bin) = imm.strip_prefix("0b") {
-                    Ok(Immediate {
-                        raw: u64::from_str_radix(bin, 2)? as u32,
-                        bits: bin.len() as u8,
-                    })
+                    Ok(Immediate(u64::from_str_radix(bin, 2)? as u32))
                 } else if let Some(num) = imm.strip_prefix("-") {
-                    Ok(Immediate {
-                        raw: -num.parse::<i64>()? as u32,
-                        bits: 32,
-                    })
+                    Ok(Immediate(-num.parse::<i64>()? as u32))
                 } else {
-                    Ok(Immediate {
-                        raw: imm.parse::<i64>()? as u32,
-                        bits: 32,
-                    })
+                    Ok(Immediate(imm.parse::<i64>()? as u32))
                 }
             })()
             .map_err(|err: ParseIntError| {
@@ -43,10 +31,7 @@ pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<Immediate> {
                 }
             })
         },
-        OperandValue::Integer(n, bits) => Ok(Immediate {
-            raw: *n,
-            bits: *bits,
-        }),
+        OperandValue::Integer(n) => Ok(Immediate(*n)),
     }
 }
 
@@ -72,14 +57,11 @@ pub fn parse_imm_as(ctx: &Context, imm: &OperandValue, bits: u8, signed: bool) -
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Immediate {
-    pub raw: u32,
-    pub bits: u8,
-}
+pub struct Immediate(pub u32);
 
 impl Immediate {
     pub fn is_zero(&self) -> bool {
-        self.raw == 0
+        self.0 == 0
     }
 
     /// 'signed' 为 'true' 时，保证输出满足 'self.raw == (hi << bits) + sig_ext(low, bits)'
@@ -94,14 +76,12 @@ impl Immediate {
         };
 
         if signed {
-            let raw = sign_extend(self.raw, self.bits);
+            let low = self.0 & mask;
 
-            let low = raw & mask;
-
-            if raw == sign_extend(low, bits) {
+            if self.0 == sign_extend(low, bits) {
                 (low, 0)
             } else {
-                let mut hi = if bits == 32 { 0 } else { raw >> bits };
+                let mut hi = if bits == 32 { 0 } else { self.0 >> bits };
 
                 if bits < 32 && low >= (1u32 << (bits - 1)) {
                     hi = hi.wrapping_add(1);
@@ -109,9 +89,9 @@ impl Immediate {
                 (low, hi)
             }
         } else {
-            let low = self.raw & mask;
+            let low = self.0 & mask;
 
-            let hi = if bits == 32 { 0 } else { self.raw >> bits };
+            let hi = if bits == 32 { 0 } else { self.0 >> bits };
 
             (low, hi)
         }
@@ -128,11 +108,11 @@ mod tests {
 
         if signed {
             assert_eq!(
-                sign_extend(imm.raw, imm.bits) as i32,
+                imm.0 as i32,
                 ((hi << bits) as i32).wrapping_add(sign_extend(low, bits) as i32)
             )
         } else {
-            assert_eq!(imm.raw, (hi << bits) + low)
+            assert_eq!(imm.0, (hi << bits) + low)
         }
 
         format!(
@@ -151,7 +131,7 @@ mod tests {
         let imm = parse_imm(&Context::default(), &OperandValue::from(s)).unwrap();
         format!(
             "{}\n{}\n{}\n{}\n{}\n{}\n{}",
-            fmt_hex(imm.raw),
+            fmt_hex(imm.0),
             test_and_fmt(imm, 5, true),
             test_and_fmt(imm, 5, false),
             test_and_fmt(imm, 12, true),
@@ -518,22 +498,22 @@ mod tests {
 
         assert_snapshot!(test("0xFFF"), @"
         0xFFF
-        (31, 0) - i5
+        (31, 128) - i5
         (31, 127) - u5
-        (0xFFF, 0) - i12
+        (0xFFF, 1) - i12
         (0xFFF, 0) - u12
-        (0xFFFFF, 0) - i20
+        (0xFFF, 0) - i20
         (0xFFF, 0) - u20
         "
         );
 
         assert_snapshot!(test("0xFFFF"), @"
         0xFFFF
-        (31, 0) - i5
+        (31, 0x800) - i5
         (31, 0x7FF) - u5
-        (0xFFF, 0) - i12
+        (0xFFF, 16) - i12
         (0xFFF, 15) - u12
-        (0xFFFFF, 0) - i20
+        (0xFFFF, 0) - i20
         (0xFFFF, 0) - u20
         ");
 
@@ -569,31 +549,31 @@ mod tests {
 
         assert_snapshot!(test("0xABC"), @"
         0xABC
-        (28, 0x7FFFFD6) - i5
+        (28, 86) - i5
         (28, 85) - u5
-        (0xABC, 0) - i12
+        (0xABC, 1) - i12
         (0xABC, 0) - u12
-        (0xFFABC, 0) - i20
+        (0xABC, 0) - i20
         (0xABC, 0) - u20
         ");
 
         assert_snapshot!(test("0xABCDE"), @"
         0xABCDE
-        (30, 0x7FFD5E7) - i5
+        (30, 0x55E7) - i5
         (30, 0x55E6) - u5
-        (0xCDE, 0xFFFAC) - i12
+        (0xCDE, 172) - i12
         (0xCDE, 171) - u12
-        (0xABCDE, 0) - i20
+        (0xABCDE, 1) - i20
         (0xABCDE, 0) - u20
         ");
 
         assert_snapshot!(test("0b1000001"), @"
         65
-        (1, 0x7FFFFFE) - i5
+        (1, 2) - i5
         (1, 2) - u5
-        (0xFC1, 0) - i12
+        (65, 0) - i12
         (65, 0) - u12
-        (0xFFFC1, 0) - i20
+        (65, 0) - i20
         (65, 0) - u20
         ");
 

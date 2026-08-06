@@ -67,7 +67,7 @@ const F3: ExpandFn = |_, _, name, ops| {
 fn parse_offset<'a>(op: &OperandValue<'a>) -> Option<(&'a str, &'a str)> {
     let s = match op {
         OperandValue::StringSlice(s) => s,
-        OperandValue::Integer(_, _) => return None,
+        OperandValue::Integer(_) => return None,
     };
 
     if let Some(s) = s.strip_suffix(')') {

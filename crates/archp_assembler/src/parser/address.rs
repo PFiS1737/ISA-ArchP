@@ -12,7 +12,7 @@ pub fn parse_address(ctx: &Context, op: &OperandValue) -> Result<Address> {
                 bail!("Undefined label: {}", label)
             }
         },
-        OperandValue::Integer(n, _) => Ok(Address(*n)),
+        OperandValue::Integer(n) => Ok(Address(*n)),
     }
 }
 

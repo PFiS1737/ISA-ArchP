@@ -5,7 +5,7 @@ input_file: crates/archp_assembler/examples/snake.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x1400015C # jal r0 main                                 [j main]
+0x14000162 # jal r0 main                                 [j main]
 0x01140000 # addi x r0 0                                 [clr x]                                                 <label: init_screen>
 0x01160000 # addi y r0 0                                 [clr y]
 0x01180000 # addi color r0 COLOR_BACK                    [li color, COLOR_BACK]
@@ -19,18 +19,19 @@ exit_code: 0
 0x013E0024 # addi r31 r0 36                              [blt y, SCREEN_HEIGHT, draw_back]
 0x12BEBE1F # blt y r31 draw_back                         [blt y, SCREEN_HEIGHT, draw_back]
 0xFC800000 # ret
-0x17D9FFF0 # lui color 0xFFFF0                           [li color, COLOR_HEAD]                                  <label: init_snake>
+0x16180FF0 # lui color 0xFF0                             [li color, COLOR_HEAD]                                  <label: init_snake>
 0x01020005 # addi head_x r0 INIT_X                       [li head_x, INIT_X]
 0x01040012 # addi head_y r0 INIT_Y                       [li head_y, INIT_Y]
 0x01141000 # addi x head_x 0                             [mv x, head_x]
 0x01162000 # addi y head_y 0                             [mv y, head_y]
 0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
 0x40000000 # ecall                                       [ecall 0x10000000]
-0x01180FFF # addi color r0 COLOR_BODY                    [li color, COLOR_BODY]
+0x16181000 # lui color 0x1000                            [li color, COLOR_BODY]
+0x0118CFFF # addi color color 0xFFFFFFFF                 [li color, COLOR_BODY]
 0x011A0003 # addi i r0 3                                 [li i, 3]
 0x0054100D # sub x head_x i                              [sub x, head_x, i]                                      <label: init_body_loop>
 0x01162000 # addi y head_y 0                             [mv y, head_y]
-0xFA00009E # call body_push
+0xFA0000A2 # call body_push
 0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
 0x40000000 # ecall                                       [ecall 0x10000000]
 0x015AD001 # subi i i 1                                  [dec i]
@@ -60,8 +61,9 @@ exit_code: 0
 0x14000002 # jal r0 move_snake_common                    [j move_snake_common]
 0x01141000 # addi x head_x 0                             [mv x, head_x]                                          <label: move_snake_common>
 0x01162000 # addi y head_y 0                             [mv y, head_y]
-0xFA000062 # call body_push
-0x01180FFF # addi color r0 COLOR_BODY                    [li color, COLOR_BODY]
+0xFA000066 # call body_push
+0x16181000 # lui color 0x1000                            [li color, COLOR_BODY]
+0x0118CFFF # addi color color 0xFFFFFFFF                 [li color, COLOR_BODY]
 0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
 0x40000000 # ecall                                       [ecall 0x10000000]
 0x12C07080 # bge nx r0 move_snake_common_x_ge_0          [bge nx, 0, move_snake_common_x_ge_0]
@@ -76,19 +78,19 @@ exit_code: 0
 0x01100000 # addi ny r0 0                                [li ny, 0]
 0x01027000 # addi head_x nx 0                            [mv head_x, nx]                                         <label: move_snake_common_y_lt_height>
 0x01048000 # addi head_y ny 0                            [mv head_y, ny]
-0x17D9FFF0 # lui color 0xFFFF0                           [li color, COLOR_HEAD]
+0x16180FF0 # lui color 0xFF0                             [li color, COLOR_HEAD]
 0x01141000 # addi x head_x 0                             [mv x, head_x]
 0x01162000 # addi y head_y 0                             [mv y, head_y]
 0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
 0x40000000 # ecall                                       [ecall 0x10000000]
-0xFA000048 # call body_contains
+0xFA00004A # call body_contains
 0x013E0001 # addi r31 r0 1                               [beq rt, 1, lose_loop]
-0x1202E99F # beq rt r31 lose_loop                        [beq rt, 1, lose_loop]
+0x1202E9DF # beq rt r31 lose_loop                        [beq rt, 1, lose_loop]
 0x12401103 # bne head_x food_x move_snake_not_eat        [bne head_x, food_x, move_snake_not_eat]
 0x124020C4 # bne head_y food_y move_snake_not_eat        [bne head_y, food_y, move_snake_not_eat]
 0xFA00000E # call gen_food
 0xFC800000 # ret
-0xFA000032 # call body_pop                                                                                       <label: move_snake_not_eat>
+0xFA000034 # call body_pop                                                                                       <label: move_snake_not_eat>
 0x01180000 # addi color r0 COLOR_BACK                    [li color, COLOR_BACK]
 0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
 0x40000000 # ecall                                       [ecall 0x10000000]
@@ -100,12 +102,13 @@ exit_code: 0
 0x40000000 # ecall                                       [ecall 41]
 0x0754A040 # remi x x 64                                 [rem x, x, SCREEN_WIDTH]
 0x0756B024 # remi y y 36                                 [rem y, y, SCREEN_HEIGHT]
-0xFA000022 # call body_contains
+0xFA000024 # call body_contains
 0x013E0001 # addi r31 r0 1                               [beq rt, 1, gen_food]
 0x123EEDDF # beq rt r31 gen_food                         [beq rt, 1, gen_food]
 0x0106A000 # addi food_x x 0                             [mv food_x, x]
 0x0108B000 # addi food_y y 0                             [mv food_y, y]
-0x01180F00 # addi color r0 COLOR_FOOD                    [li color, COLOR_FOOD]
+0x16181000 # lui color 0x1000                            [li color, COLOR_FOOD]
+0x0118CF00 # addi color color 0xFFFFFF00                 [li color, COLOR_FOOD]
 0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
 0x40000000 # ecall                                       [ecall 0x10000000]
 0xFC800000 # ret
@@ -179,11 +182,11 @@ exit_code: 0
 0xFC800000 # ret
 0x01125000 # addi key_code t0 0                          [mv key_code, t0]                                       <label: read_key_ok>
 0xFC800000 # ret                                                                                                 <label: read_key_ret>
-0xFBC1FEA6 # call init_screen                                                                                    <label: main>
-0xFBC1FEBE # call init_snake
-0xFBC1FF50 # call gen_food
+0xFBC1FEA0 # call init_screen                                                                                    <label: main>
+0xFBC1FEB8 # call init_snake
+0xFBC1FF4E # call gen_food
 0xFBC1FFE0 # call read_key                                                                                       <label: main_loop>
-0xFBC1FEDC # call move_snake
+0xFBC1FED8 # call move_snake
 0x15C1FFFC # jal r0 main_loop                            [j main_loop]
 0x14000000 # jal r0 lose_loop                            [j lose_loop]                                           <label: lose_loop>
 ----- stderr -----
