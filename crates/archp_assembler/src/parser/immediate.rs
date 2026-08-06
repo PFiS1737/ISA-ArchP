@@ -11,25 +11,23 @@ pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<Immediate> {
 
             (|| {
                 if let Some(hex) = imm.strip_prefix("0x") {
-                    let raw = u32::from_str_radix(hex, 16)?;
                     Ok(Immediate {
-                        raw,
+                        raw: u64::from_str_radix(hex, 16)? as u32,
                         bits: hex.len() as u8 * 4,
                     })
                 } else if let Some(bin) = imm.strip_prefix("0b") {
-                    let raw = u32::from_str_radix(bin, 2)?;
                     Ok(Immediate {
-                        raw,
+                        raw: u64::from_str_radix(bin, 2)? as u32,
                         bits: bin.len() as u8,
                     })
-                } else if imm.starts_with("-") {
+                } else if let Some(num) = imm.strip_prefix("-") {
                     Ok(Immediate {
-                        raw: imm.parse::<i32>()? as u32,
+                        raw: -num.parse::<i64>()? as u32,
                         bits: 32,
                     })
                 } else {
                     Ok(Immediate {
-                        raw: imm.parse::<u32>()?,
+                        raw: imm.parse::<i64>()? as u32,
                         bits: 32,
                     })
                 }
@@ -39,7 +37,7 @@ pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<Immediate> {
                     err.kind(),
                     IntErrorKind::PosOverflow | IntErrorKind::NegOverflow
                 ) {
-                    anyhow!("Immediate '{}' out of range of 32-bit integer.", imm)
+                    anyhow!("Immediate '{}' out of range of 64-bit integer.", imm)
                 } else {
                     anyhow!("Invalid immediate: {}", imm)
                 }
@@ -408,6 +406,26 @@ mod tests {
         (0xFFFFF, 0x7FF) - u20
         ");
 
+        assert_snapshot!(test("-2147483647"), @"
+        0x80000001
+        (1, 0x4000000) - i5
+        (1, 0x4000000) - u5
+        (1, 0x80000) - i12
+        (1, 0x80000) - u12
+        (1, 0x800) - i20
+        (1, 0x800) - u20
+        ");
+
+        assert_snapshot!(test("2147483648"), @"
+        0x80000000
+        (0, 0x4000000) - i5
+        (0, 0x4000000) - u5
+        (0, 0x80000) - i12
+        (0, 0x80000) - u12
+        (0, 0x800) - i20
+        (0, 0x800) - u20
+        ");
+
         assert_snapshot!(test("-2147483648"), @"
         0x80000000
         (0, 0x4000000) - i5
@@ -418,7 +436,77 @@ mod tests {
         (0, 0x800) - u20
         ");
 
+        assert_snapshot!(test("2147483649"), @"
+        0x80000001
+        (1, 0x4000000) - i5
+        (1, 0x4000000) - u5
+        (1, 0x80000) - i12
+        (1, 0x80000) - u12
+        (1, 0x800) - i20
+        (1, 0x800) - u20
+        ");
+
+        assert_snapshot!(test("-2147483649"), @"
+        0x7FFFFFFF
+        (31, 0x4000000) - i5
+        (31, 0x3FFFFFF) - u5
+        (0xFFF, 0x80000) - i12
+        (0xFFF, 0x7FFFF) - u12
+        (0xFFFFF, 0x800) - i20
+        (0xFFFFF, 0x7FF) - u20
+        ");
+
         assert_snapshot!(test("4294967295"), @"
+        0xFFFFFFFF
+        (31, 0) - i5
+        (31, 0x7FFFFFF) - u5
+        (0xFFF, 0) - i12
+        (0xFFF, 0xFFFFF) - u12
+        (0xFFFFF, 0) - i20
+        (0xFFFFF, 0xFFF) - u20
+        ");
+
+        assert_snapshot!(test("-4294967295"), @"
+        1
+        (1, 0) - i5
+        (1, 0) - u5
+        (1, 0) - i12
+        (1, 0) - u12
+        (1, 0) - i20
+        (1, 0) - u20
+        ");
+
+        assert_snapshot!(test("4294967296"), @"
+        0
+        (0, 0) - i5
+        (0, 0) - u5
+        (0, 0) - i12
+        (0, 0) - u12
+        (0, 0) - i20
+        (0, 0) - u20
+        ");
+
+        assert_snapshot!(test("-4294967296"), @"
+        0
+        (0, 0) - i5
+        (0, 0) - u5
+        (0, 0) - i12
+        (0, 0) - u12
+        (0, 0) - i20
+        (0, 0) - u20
+        ");
+
+        assert_snapshot!(test("4294967297"), @"
+        1
+        (1, 0) - i5
+        (1, 0) - u5
+        (1, 0) - i12
+        (1, 0) - u12
+        (1, 0) - i20
+        (1, 0) - u20
+        ");
+
+        assert_snapshot!(test("-4294967297"), @"
         0xFFFFFFFF
         (31, 0) - i5
         (31, 0x7FFFFFF) - u5
