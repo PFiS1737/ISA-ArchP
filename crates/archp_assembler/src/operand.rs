@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::parser::immediate::Immediate;
+use crate::parser::types::immediate::Immediate;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum OperandValue<'a> {

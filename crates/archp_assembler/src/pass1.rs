@@ -61,6 +61,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                                 );
                             }
 
+                            // TODO: eval expression at here
                             self.context.constants.insert(name, value);
                         },
                         None => bail!(
