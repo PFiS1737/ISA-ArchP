@@ -1,50 +1,50 @@
-const head_x = r1
-const head_y = r2
-const food_x = r3
-const food_y = r4
-const t0 = r5
-const t1 = r6
-const nx = r7
-const ny = r8
-const key_code = r9
-const x = r10 ; a0
-const y = r11 ; a1
-const color = r12 ; a2
-const i = r13
-const rt = r14
-const que_len = r15
-const que_head = r16
+.const head_x, r1
+.const head_y, r2
+.const food_x, r3
+.const food_y, r4
+.const t0, r5
+.const t1, r6
+.const nx, r7
+.const ny, r8
+.const key_code, r9
+.const x, r10 ; a0
+.const y, r11 ; a1
+.const color, r12 ; a2
+.const i, r13
+.const rt, r14
+.const que_len, r15
+.const que_head, r16
 ; r17 is used for syscalls
-const que_val = r18
-const que_tmp = r19
-const que_i = r20
-const que_cur = r21
-const que_addr = r22
+.const que_val, r18
+.const que_tmp, r19
+.const que_i, r20
+.const que_cur, r21
+.const que_addr, r22
 
-const BASE_ADDR = 0x00100000
-const KBD_BASE = 0x90000000
+.const BASE_ADDR, 0x00100000
+.const KBD_BASE, 0x90000000
 
-const SCREEN_WIDTH = 64
-const SCREEN_HEIGHT = 36
+.const SCREEN_WIDTH, 64
+.const SCREEN_HEIGHT, 36
 
-const MAX_X = 63 # SCREEN_WIDTH - 1
-const MAX_Y = 35 # SCREEN_HEIGHT - 1
+.const MAX_X, 63 # SCREEN_WIDTH - 1
+.const MAX_Y, 35 # SCREEN_HEIGHT - 1
 
-const COLOR_BACK = 0x000000
-const COLOR_BODY = 0xFFFFFF
-const COLOR_HEAD = 0xFF0000
-const COLOR_FOOD = 0xFFFF00
+.const COLOR_BACK, 0x000000
+.const COLOR_BODY, 0xFFFFFF
+.const COLOR_HEAD, 0xFF0000
+.const COLOR_FOOD, 0xFFFF00
 
 # linux input-event-codes
-const KEY_UP = 103
-const KEY_DOWN = 108
-const KEY_LEFT = 105
-const KEY_RIGHT = 106
+.const KEY_UP, 103
+.const KEY_DOWN, 108
+.const KEY_LEFT, 105
+.const KEY_RIGHT, 106
 
-const INIT_X = 5
-const INIT_Y = 18
+.const INIT_X, 5
+.const INIT_Y, 18
 
-const QUEUE_SIZE = 100
+.const QUEUE_SIZE, 100
 
 
 j main

@@ -1,69 +1,69 @@
 # ref https://github.com/ESnake37/Turing-Complete-Minesweeper/blob/main/MINESWEEPER.asm
 
-const i = r1
-const j = r2
-const t0 = r3
-const t1 = r4
-const t2 = r5
-const cursor_x = r6
-const cursor_y = r7
-const addr = r8
-const cnt = r9
-const x = r10 ; a0
-const y = r11
-const color = r12
-const tx = r13
-const ty = r14
-const nx = r15
-const ny = r16
+.const i, r1
+.const j, r2
+.const t0, r3
+.const t1, r4
+.const t2, r5
+.const cursor_x, r6
+.const cursor_y, r7
+.const addr, r8
+.const cnt, r9
+.const x, r10 ; a0
+.const y, r11
+.const color, r12
+.const tx, r13
+.const ty, r14
+.const nx, r15
+.const ny, r16
 ; r17 is used for syscalls
-const key_code = r18
-const arg_x = r19
-const arg_y = r20
-const mine_num = r21
+.const key_code, r18
+.const arg_x, r19
+.const arg_y, r20
+.const mine_num, r21
 
-const BASE_ADDR = 0x00100000
-const KBD_BASE = 0x90000000
+.const BASE_ADDR, 0x00100000
+.const KBD_BASE, 0x90000000
 
-const SCREEN_WIDTH = 128
-const SCREEN_HEIGHT = 72
+.const SCREEN_WIDTH, 128
+.const SCREEN_HEIGHT, 72
 
-const GRID_WIDTH = 121
-const GRID_HEIGHT = 65
+.const GRID_WIDTH, 121
+.const GRID_HEIGHT, 65
 
-const GRID_COLS = 15
-const GRID_ROWS = 8
-const TILE_SIZE = 8
+.const GRID_COLS, 15
+.const GRID_ROWS, 8
+.const TILE_SIZE, 8
 
-const COLOR_BACK = 0x181A1B
-const COLOR_HIDDEN = 0x4C545C
-const COLOR_REVEALED = 0x384048
-const COLOR_GRID_LINE = 0x22262E
-const COLOR_CURSOR = 0xD6BB15
-const COLOR_MINE = 0x000000
-const COLOR_MINE_BACK = 0xEE6666
-const COLOR_FLAG = 0xF75050
-const COLOR_POLE = 0xD8E0E8
-const COLOR_NUM1 = 0x7CC7ff
-const COLOR_NUM2 = 0x66C266
-const COLOR_NUM3 = 0xFF7788
-const COLOR_NUM4 = 0xEE88FF
-const COLOR_NUM5 = 0xDDAA22
+.const COLOR_BACK, 0x181A1B
+.const COLOR_HIDDEN, 0x4C545C
+.const COLOR_REVEALED, 0x384048
+.const COLOR_GRID_LINE, 0x22262E
+.const COLOR_CURSOR, 0xD6BB15
+.const COLOR_MINE, 0x000000
+.const COLOR_MINE_BACK, 0xEE6666
+.const COLOR_FLAG, 0xF75050
+.const COLOR_POLE, 0xD8E0E8
+.const COLOR_NUM1, 0x7CC7ff
+.const COLOR_NUM2, 0x66C266
+.const COLOR_NUM3, 0xFF7788
+.const COLOR_NUM4, 0xEE88FF
+.const COLOR_NUM5, 0xDDAA22
 
-const MINE_NUM_MAX = 16
+.const MINE_NUM_MAX, 16
 
-const AROUND_COUNT_MASK = 7
-const MINE_MASK = 8
-const REVEAL_MASK = 16
-const FLAG_MASK = 32
+.const AROUND_COUNT_MASK, 7
+.const MINE_MASK, 8
+.const REVEAL_MASK, 16
+.const FLAG_MASK, 32
 
 # linux input-event-codes
-const KEY_UP = 103
-const KEY_DOWN = 108
-const KEY_LEFT = 105
-const KEY_RIGHT = 106
-const KEY_REVEAL = 44 # 'z'
-const KEY_FLAG = 45 # 'x'
+.const KEY_UP, 103
+.const KEY_DOWN, 108
+.const KEY_LEFT, 105
+.const KEY_RIGHT, 106
+.const KEY_REVEAL, 44 # 'z'
+.const KEY_FLAG, 45 # 'x'
 
 
 j main

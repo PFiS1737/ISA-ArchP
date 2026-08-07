@@ -18,9 +18,9 @@ exit_code: 0
 0x01140001 # addi a0 r0 1           [li a0, 1]
 0x13C01000 # jalr r0 ra 0           [jr ra]
 0x0144200C # subi sp sp 12          [sub sp, sp, 12]  <label: .L0>
-0x11402101 # sw sp ra 8             [sw ra, 8(sp)]
-0x11402088 # sw sp s0 4             [sw s0, 4(sp)]
-0x11402009 # sw sp s1 0             [sw s1, 0(sp)]
+0x11402101 # sw ra sp 8             [sw ra, 8(sp)]
+0x11402088 # sw s0 sp 4             [sw s0, 4(sp)]
+0x11402009 # sw s1 sp 0             [sw s1, 0(sp)]
 0x0110A000 # addi s0 a0 0           [mv s0, a0]
 0x0114AFFF # addi a0 a0 0xFFFFFFFF  [add a0, a0, -1]
 0x15C3FFEC # jal ra fib             [jal ra, fib]

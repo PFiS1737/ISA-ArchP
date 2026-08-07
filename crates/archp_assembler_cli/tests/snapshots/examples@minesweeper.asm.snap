@@ -87,7 +87,7 @@ exit_code: 0
 0x013E0008 # addi r31 r0 8                              [beq t1, MINE_MASK, init_mines_loop]
 0x123E4C5F # beq t1 r31 init_mines_loop                 [beq t1, MINE_MASK, init_mines_loop]
 0x01080008 # addi t1 r0 MINE_MASK                       [li t1, MINE_MASK]
-0x11408004 # sw addr t1 0                               [sw t1, addr]
+0x11408004 # sw t1 addr 0                               [sw t1, addr]
 0x01021001 # addi i i 1                                 [inc i]
 0x12BE1B55 # blt i mine_num init_mines_loop             [blt i, mine_num, init_mines_loop]
 0xFC800000 # ret
@@ -97,7 +97,7 @@ exit_code: 0
 0xFA00001A # call count_around_mines                                                                         <label: init_mine_counts_loop>
 0x10088000 # lw t1 addr 0                               [lw t1, addr]
 0x000A4009 # add t2 t1 cnt                              [add t2, t1, cnt]
-0x11408005 # sw addr t2 0                               [sw t2, addr]
+0x11408005 # sw t2 addr 0                               [sw t2, addr]
 0x0114A001 # addi x x 1                                 [inc x]
 0x01108004 # addi addr addr 4                           [add addr, addr, 4]
 0x013E000F # addi r31 r0 15                             [blt x, GRID_COLS, init_mine_counts_loop]
@@ -108,8 +108,8 @@ exit_code: 0
 0x12BEBD5F # blt y r31 init_mine_counts_loop            [blt y, GRID_ROWS, init_mine_counts_loop]
 0xFC800000 # ret
 0x01120000 # addi cnt r0 0                              [clr cnt]                                            <label: count_around_mines>
-0x011C0FFF # addi ty r0 -1                              [li ty, -1]
-0x011A0FFF # addi tx r0 -1                              [li tx, -1]                                          <label: dy_loop>
+0x011C0FFF # addi ty r0 0xFFFFFFFF                      [li ty, -1]
+0x011A0FFF # addi tx r0 0xFFFFFFFF                      [li tx, -1]                                          <label: dy_loop>
 0x001EA00D # add nx x tx                                [add nx, x, tx]                                      <label: dx_loop>
 0x0020B00E # add ny y ty                                [add ny, y, ty]
 0x1280F400 # blt nx r0 skip_this_neighbor               [bltz nx, skip_this_neighbor]
@@ -213,7 +213,7 @@ exit_code: 0
 0x12405080 # bne t2 r0 reveal_tile_skip_reveal_around   [bne t2, 0, reveal_tile_skip_reveal_around]
 0xFA00000A # call reveal_around
 0x01C84010 # ori t1 t1 16                               [or t1, t1, REVEAL_MASK]                             <label: reveal_tile_skip_reveal_around>
-0x11408004 # sw addr t1 0                               [sw t1, addr]
+0x11408004 # sw t1 addr 0                               [sw t1, addr]
 0xFA000168 # call draw_num
 0xFC800000 # ret                                                                                             <label: reveal_tile_ret>
 0x011E6000 # addi nx cursor_x 0                         [mv nx, cursor_x]                                    <label: reveal_around>
@@ -235,7 +235,7 @@ exit_code: 0
 0x018A4020 # andi t2 t1 32                              [and t2, t1, FLAG_MASK]
 0x12405600 # bne t2 r0 reveal_around_ret                [bnez t2, reveal_around_ret]
 0x01C84010 # ori t1 t1 16                               [or t1, t1, REVEAL_MASK]
-0x11408004 # sw addr t1 0                               [sw t1, addr]
+0x11408004 # sw t1 addr 0                               [sw t1, addr]
 0x018A4007 # andi t2 t1 7                               [and t2, t1, AROUND_COUNT_MASK]
 0x0126F000 # addi arg_x nx 0                            [mv arg_x, nx]
 0x01290000 # addi arg_y ny 0                            [mv arg_y, ny]
@@ -275,12 +275,12 @@ exit_code: 0
 0xFA000048 # call draw_flag
 0x1400000E # jal r0 toggle_flag_store                   [j toggle_flag_store]
 0x012B5001 # addi mine_num mine_num 1                   [inc mine_num]                                       <label: toggle_flag_already_set>
-0x010A0FDF # addi t2 r0 -33                             [li t2, -33]
+0x010A0FDF # addi t2 r0 0xFFFFFFDF                      [li t2, -33]
 0x00884005 # and t1 t1 t2                               [and t1, t1, t2]
 0x161804C5 # lui color 0x4C5                            [li color, COLOR_HIDDEN]
 0x0118C45C # addi color color 0x45C                     [li color, COLOR_HIDDEN]
 0xFA000012 # call draw_tile
-0x11408004 # sw addr t1 0                               [sw t1, addr]                                        <label: toggle_flag_store>
+0x11408004 # sw t1 addr 0                               [sw t1, addr]                                        <label: toggle_flag_store>
 0x01155000 # addi a0 mine_num 0                         [mv a0, mine_num]
 0x01220001 # addi r17 r0 1                              [ecall 1]
 0x40000000 # ecall                                      [ecall 1]

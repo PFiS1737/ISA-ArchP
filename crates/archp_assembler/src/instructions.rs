@@ -137,7 +137,7 @@ pub trait Instruction: Send + Sync {
     }
 
     fn encode_s(&self, ops: &[u32]) -> Result<u32> {
-        self.encode_b(ops)
+        self.encode_b(&[ops[1], ops[0], ops[2]])
     }
 
     fn encode_u(&self, ops: &[u32]) -> Result<u32> {
@@ -358,7 +358,7 @@ mod tests {
         assert_snapshot!(cmd(&["r1", "r2"]), @"Error: Instruction 'addi' requires 3 operands, got 2");
         assert_snapshot!(cmd(&["r1", "r2", "r3", "r4"]), @"Error: Instruction 'addi' requires 3 operands, got 4");
         assert_snapshot!(cmd(&["r1", "rrr", "123"]), @"Error: Invalid register: rrr");
-        assert_snapshot!(cmd(&["r1", "r2", "r3"]), @"Error: Invalid immediate: r3");
+        assert_snapshot!(cmd(&["r1", "r2", "r3"]), @"Error: Failed to evaluate immediate 'r3': unknown identifier: r3");
         assert_snapshot!(cmd(&["r1", "r2", "0xFFF"]), @"Error: Immediate '0xFFF' out of range for i12 (-2048 ..= 2047)");
         assert_snapshot!(cmd(&["r1", "r2", "0x7FF"]), @"0000 000 100 00001 00010 0111111 11111");
         assert_snapshot!(cmd(&["r1", "r2", "0xFFFF"]), @"Error: Immediate '0xFFFF' out of range for i12 (-2048 ..= 2047)");
@@ -387,11 +387,11 @@ mod tests {
 
         let cmd = instr("sw");
 
-        assert_snapshot!(cmd(&["r1", "r2", "3"]), @"0001 000 101 00000 00001 0000011 00010");
-        assert_snapshot!(cmd(&["r1", "r2", "2047"]), @"0001 000 101 01111 00001 1111111 00010");
+        assert_snapshot!(cmd(&["r1", "r2", "3"]), @"0001 000 101 00000 00010 0000011 00001");
+        assert_snapshot!(cmd(&["r1", "r2", "2047"]), @"0001 000 101 01111 00010 1111111 00001");
         assert_snapshot!(cmd(&["r1", "r2", "2048"]), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(cmd(&["r1", "r2", "-3"]), @"0001 000 101 11111 00001 1111101 00010");
-        assert_snapshot!(cmd(&["r1", "r2", "-2048"]), @"0001 000 101 10000 00001 0000000 00010");
+        assert_snapshot!(cmd(&["r1", "r2", "-3"]), @"0001 000 101 11111 00010 1111101 00001");
+        assert_snapshot!(cmd(&["r1", "r2", "-2048"]), @"0001 000 101 10000 00010 0000000 00001");
         assert_snapshot!(cmd(&["r1", "r2", "-2049"]), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
     }
 
@@ -401,7 +401,7 @@ mod tests {
 
         assert_snapshot!(cmd(&["r1"]), @"Error: Instruction 'lui' requires 2 operands, got 1");
         assert_snapshot!(cmd(&["r1", "r2", "r3"]), @"Error: Instruction 'lui' requires 2 operands, got 3");
-        assert_snapshot!(cmd(&["r1", "r2"]), @"Error: Invalid immediate: r2");
+        assert_snapshot!(cmd(&["r1", "r2"]), @"Error: Failed to evaluate immediate 'r2': unknown identifier: r2");
         assert_snapshot!(cmd(&["r3", "0x200000"]), @"Error: Immediate '0x200000' out of range for u20 (0 ..= 1048575)");
         assert_snapshot!(cmd(&["r3", "-123"]), @"Error: Immediate '-123' out of range for u20 (0 ..= 1048575)");
 

@@ -60,14 +60,11 @@ impl Assembler {
         Assembler { settings }
     }
 
-    pub fn assemble<'src, T: IntoIterator<Item = &'src str>>(
-        &self,
-        source_lines: T,
-    ) -> Result<(Vec<u32>, Vec<Line<'src>>)> {
+    pub fn assemble<'src>(&self, source: &'src str) -> Result<(Vec<u32>, Vec<Line<'src>>)> {
         let mut context = Context::default_with_settings(self.settings);
 
         let mut pass1 = Pass1::new(&mut context);
-        let processed = pass1.run(source_lines)?;
+        let processed = pass1.run(source)?;
 
         let pass2 = Pass2::new(&mut context);
         pass2.run(processed)

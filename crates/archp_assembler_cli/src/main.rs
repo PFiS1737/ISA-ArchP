@@ -30,7 +30,7 @@ fn main() -> Result<()> {
         .map_err(|e| anyhow!("Can't read source file '{}': {}", cli.src_file, e))?;
 
     let asmblr = Assembler::new(settings);
-    let (codes, lines) = asmblr.assemble(file_content.lines())?;
+    let (codes, lines) = asmblr.assemble(&file_content)?;
 
     let mut out = BufWriter::new(if cli.stdout {
         Box::new(stdout()) as Box<dyn Write>

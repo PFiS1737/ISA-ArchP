@@ -129,7 +129,7 @@ exit_code: 0
 0x05270002 # muli que_tmp que_head 2                     [mul que_tmp, que_head, 2]
 0x163E0100 # lui r31 0x100                               [add que_tmp, que_tmp, BASE_ADDR]
 0x0027301F # add que_tmp que_tmp r31                     [add que_tmp, que_tmp, BASE_ADDR]
-0x11813012 # sh que_tmp que_val 0                        [sh que_val, que_tmp]
+0x11813012 # sh que_val que_tmp 0                        [sh que_val, que_tmp]
 0x01210001 # addi que_head que_head 1                    [inc que_head]
 0x07610064 # remi que_head que_head 100                  [rem que_head, que_head, QUEUE_SIZE]
 0x011EF001 # addi que_len que_len 1                      [inc que_len]

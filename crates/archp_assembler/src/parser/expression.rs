@@ -2,15 +2,13 @@ use anyhow::{Result, anyhow};
 use nom::{
     IResult, Parser,
     branch::alt,
-    bytes::complete::{tag, take_while1},
+    bytes::complete::tag,
     character::complete::{bin_digit1, char, digit1, hex_digit1},
-    combinator::{map, map_res},
+    combinator::{map, map_res, opt},
     sequence::{delimited, preceded},
 };
 
-use crate::parser::{types::expression::*, ws};
-
-// ---------- parser ----------
+use crate::parser::{ident, types::expression::*, ws};
 
 fn number(input: &str) -> IResult<&str, Expr<'_>> {
     fn dec(input: &str) -> IResult<&str, i64> {
@@ -34,27 +32,16 @@ fn number(input: &str) -> IResult<&str, Expr<'_>> {
     map(ws(alt((hex, binary, dec))), Expr::Num).parse(input)
 }
 
-fn ident(input: &str) -> IResult<&str, Expr<'_>> {
-    map(
-        ws(take_while1(|c: char| c.is_alphabetic() || c == '_')),
-        Expr::Ident,
-    )
-    .parse(input)
-}
-
 fn parens(input: &str) -> IResult<&str, Expr<'_>> {
     delimited(ws(char('(')), expr, ws(char(')'))).parse(input)
 }
 
 fn primary(input: &str) -> IResult<&str, Expr<'_>> {
-    alt((number, ident, parens)).parse(input)
+    alt((number, map(ident, Expr::Ident), parens)).parse(input)
 }
 
-// ---------- unary ----------
-
 fn unary(input: &str) -> IResult<&str, Expr<'_>> {
-    let (input, opt_op) =
-        nom::combinator::opt(ws(alt((char('+'), char('-'), char('~'))))).parse(input)?;
+    let (input, opt_op) = opt(ws(alt((char('+'), char('-'), char('~'))))).parse(input)?;
 
     if let Some(op) = opt_op {
         let (input, rhs) = unary(input)?;
@@ -72,8 +59,6 @@ fn unary(input: &str) -> IResult<&str, Expr<'_>> {
         primary(input)
     }
 }
-
-// ---------- precedence（对齐 C / GAS） ----------
 
 fn precedence(op: BinaryOp) -> u8 {
     match op {
@@ -102,8 +87,6 @@ fn binary_op(input: &str) -> IResult<&str, BinaryOp> {
     .parse(input)
 }
 
-// ---------- Pratt ----------
-
 fn expr_bp(input: &str, min_bp: u8) -> IResult<&str, Expr<'_>> {
     let (mut input, mut lhs) = unary(input)?;
 
@@ -127,7 +110,7 @@ fn expr_bp(input: &str, min_bp: u8) -> IResult<&str, Expr<'_>> {
     Ok((input, lhs))
 }
 
-fn expr(input: &str) -> IResult<&str, Expr<'_>> {
+pub fn expr(input: &str) -> IResult<&str, Expr<'_>> {
     expr_bp(input, 0)
 }
 
@@ -158,9 +141,9 @@ mod tests {
 
     #[test]
     fn test_ident() {
-        assert_debug_snapshot!(parse_ok("abc"), @r#"
+        assert_debug_snapshot!(parse_ok("abc123"), @r#"
         Ident(
-            "abc",
+            "abc123",
         )
         "#);
     }

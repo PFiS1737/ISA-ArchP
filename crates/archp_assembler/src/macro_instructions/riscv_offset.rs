@@ -1,10 +1,9 @@
 use crate::{
     macro_instructions::{ExpandFn, macro_instruction},
-    operand::{OperandValue, op_values},
+    operand::op_values,
 };
 
-// INFO: We only do replacement here, the validity of the operands will
-//       be checked during encoding.
+// TODO: remove this
 
 macro_instruction! {
     pub RiscvLoad {
@@ -39,9 +38,7 @@ const F1: ExpandFn = |_, _, name, ops| {
         return None;
     }
 
-    let (imm, base) = parse_offset(&ops[1])?;
-
-    Some(vec![(name, op_values!(ops[0], base, imm))])
+    Some(vec![(name, op_values!(ops[0], ops[1], 0))])
 };
 
 const F2: ExpandFn = |_, _, name, ops| {
@@ -49,9 +46,7 @@ const F2: ExpandFn = |_, _, name, ops| {
         return None;
     }
 
-    let (imm, base) = parse_offset(&ops[0])?;
-
-    Some(vec![(name, op_values!(base, imm))])
+    Some(vec![(name, op_values!(ops[0], 0))])
 };
 
 const F3: ExpandFn = |_, _, name, ops| {
@@ -59,44 +54,12 @@ const F3: ExpandFn = |_, _, name, ops| {
         return None;
     }
 
-    let (imm, base) = parse_offset(&ops[1])?;
-
-    Some(vec![(name, op_values!(base, ops[0], imm))])
+    Some(vec![(name, op_values!(ops[0], ops[1], 0))])
 };
-
-fn parse_offset<'a>(op: &OperandValue<'a>) -> Option<(&'a str, &'a str)> {
-    let s = match op {
-        OperandValue::StringSlice(s) => s,
-        OperandValue::Integer(_) => return None,
-    };
-
-    if let Some(s) = s.strip_suffix(')') {
-        s.split_once('(')
-    } else if s.find('(').is_none() {
-        Some(("0", s))
-    } else {
-        None
-    }
-}
 
 #[cfg(test)]
 mod tests {
     use crate::testkit::*;
-
-    #[test]
-    fn parse_offset() {
-        use super::{OperandValue, parse_offset as f};
-
-        assert!(f(&OperandValue::StringSlice("100sp)")).is_none());
-        assert!(f(&OperandValue::StringSlice("100(sp")).is_none());
-
-        assert_eq!(f(&OperandValue::StringSlice("100")).unwrap(), ("0", "100"));
-        assert_eq!(f(&OperandValue::StringSlice("r1")).unwrap(), ("0", "r1"));
-        assert_eq!(
-            f(&OperandValue::StringSlice("100(sp)")).unwrap(),
-            ("100", "sp")
-        );
-    }
 
     #[test]
     fn load() {
@@ -105,14 +68,8 @@ mod tests {
         assert_snapshot!(lw(&["r1"]), @"");
         assert_snapshot!(lw(&["r1", "r2", "123"]), @"");
 
-        assert_snapshot!(lw(&["r1", "100sp)"]), @"");
-        assert_snapshot!(lw(&["r1", "100(sp"]), @"");
-
         assert_snapshot!(lw(&["r1", "100"]), @"lw r1 100 0");
         assert_snapshot!(lw(&["r1", "base"]), @"lw r1 base 0");
-
-        assert_snapshot!(lw(&["r0", "10(r1)"]), @"lw r0 r1 10");
-        assert_snapshot!(lw(&["r1", "100(sp)"]), @"lw r1 sp 100");
     }
 
     #[test]
@@ -122,13 +79,7 @@ mod tests {
         assert_snapshot!(sw(&["r1"]), @"");
         assert_snapshot!(sw(&["r1", "r2", "123"]), @"");
 
-        assert_snapshot!(sw(&["r1", "100sp)"]), @"");
-        assert_snapshot!(sw(&["r1", "100(sp"]), @"");
-
-        assert_snapshot!(sw(&["r1", "100"]), @"sw 100 r1 0");
-        assert_snapshot!(sw(&["r1", "base"]), @"sw base r1 0");
-
-        assert_snapshot!(sw(&["r2", "10(r1)"]), @"sw r1 r2 10");
-        assert_snapshot!(sw(&["r3", "100(sp)"]), @"sw sp r3 100");
+        assert_snapshot!(sw(&["r1", "100"]), @"sw r1 100 0");
+        assert_snapshot!(sw(&["r1", "base"]), @"sw r1 base 0");
     }
 }

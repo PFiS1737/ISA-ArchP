@@ -127,7 +127,6 @@ impl<'ctx, 'src: 'ctx> Expr<'src> {
         self.eval_with(&|s| env.get(s).copied())
     }
 
-    #[allow(unused)] // FIXME: unused
     pub fn partial_eval_with<F>(
         &self,
         resolve: &F,
