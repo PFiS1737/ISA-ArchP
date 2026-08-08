@@ -1,20 +1,18 @@
 use anyhow::{Result, anyhow, bail};
 use nom::{
     IResult, Parser,
-    bytes::complete::take_until,
     character::complete::{char, space1},
     combinator::opt,
-    multi::separated_list1,
-    sequence::{delimited, preceded, terminated},
+    sequence::{preceded, terminated},
 };
-use smallvec::{SmallVec, smallvec};
+use smallvec::SmallVec;
 
 use crate::parser::{
-    expression::expr,
     ident,
+    operand::operand,
     types::{
-        expression::Expr,
-        grammar::{Line, Operand, Source},
+        grammar::{Line, Source},
+        operand::Operand,
     },
     ws,
 };
@@ -23,48 +21,22 @@ fn label(input: &str) -> IResult<&str, &str> {
     terminated(ident, ws(char(':'))).parse(input)
 }
 
-fn string_literal(input: &str) -> IResult<&str, &str> {
-    delimited(char('"'), take_until("\""), char('"')).parse(input)
-}
-
-fn operand<'src>(input: &'src str) -> IResult<&'src str, SmallVec<[Operand<'src>; 2]>> {
-    // case 1: "string"
-    if let Ok((rest, s)) = string_literal(input) {
-        return Ok((rest, smallvec![Operand::String(s)]));
-    }
-
-    let mut parens = ws(delimited(char('('), ws(ident), char(')')));
-
-    // case 2: (ident)
-    if let Ok((input, ident)) = parens.parse(input) {
-        return Ok((input, smallvec![Operand::Ident(ident), Operand::Num(0)]));
-    }
-
-    // case 3: expr(ident)
-    let (input, expr) = expr(input)?;
-    if let Ok((rest, ident)) = parens.parse(input) {
-        return Ok((rest, smallvec![Operand::Ident(ident), unwrap_expr(expr)]));
-    }
-
-    // case 4: expr
-    Ok((input, smallvec![unwrap_expr(expr)]))
-}
-
-fn unwrap_expr<'src>(e: Expr<'src>) -> Operand<'src> {
-    match e {
-        Expr::Num(n) => Operand::Num(n),
-        Expr::Ident(s) => Operand::Ident(s),
-        _ => Operand::Expr(e), // TODO: eval constants
-    }
-}
-
 fn operands<'src>(input: &'src str) -> IResult<&'src str, SmallVec<[Operand<'src>; 3]>> {
-    let (input, list) = separated_list1(ws(char(',')), operand).parse(input)?;
-
     let mut out = SmallVec::new();
-    for group in list {
-        out.extend(group);
-    }
+
+    let (input, _) = operand(input, &mut out)?;
+
+    let (input, Some(_)) = opt(ws(char(','))).parse(input)? else {
+        return Ok((input, out));
+    };
+
+    let (input, _) = operand(input, &mut out)?;
+
+    let (input, Some(_)) = opt(ws(char(','))).parse(input)? else {
+        return Ok((input, out));
+    };
+
+    let (input, _) = operand(input, &mut out)?;
 
     Ok((input, out))
 }
@@ -264,6 +236,22 @@ mod tests {
                 },
             ],
         }
+        "#
+        );
+    }
+
+    #[test]
+    fn expect_more_operand() {
+        assert_debug_snapshot!(parse_source("addi x1,"), @r#"
+        Err(
+            "Error parsing line 1: 'addi x1,': Parsing requires more data",
+        )
+        "#
+        );
+        assert_debug_snapshot!(parse_source("addi x1, 123,"), @r#"
+        Err(
+            "Error parsing line 1: 'addi x1, 123,': Parsing requires more data",
+        )
         "#
         );
     }

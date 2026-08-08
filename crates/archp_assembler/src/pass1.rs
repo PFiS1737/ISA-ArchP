@@ -7,10 +7,7 @@ use crate::{
     operand::OperandValue,
     parser::{
         grammar::parse_source,
-        types::{
-            expression::Expr,
-            grammar::{Line, Operand},
-        },
+        types::{expression::Expr, grammar::Line, operand::Operand},
     },
 };
 

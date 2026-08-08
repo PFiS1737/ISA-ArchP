@@ -1,6 +1,6 @@
 use smallvec::SmallVec;
 
-use crate::parser::types::expression::Expr;
+use crate::parser::types::operand::Operand;
 
 #[derive(Debug)]
 pub struct Source<'src> {
@@ -15,14 +15,4 @@ pub enum Line<'src> {
         line: (usize, &'src str),
     },
     Label(&'src str),
-}
-
-#[derive(Debug)]
-pub enum Operand<'src> {
-    Num(i64),
-    Ident(&'src str),
-    #[allow(unused)] // FIXME: unused
-    String(&'src str),
-    #[allow(unused)] // FIXME: unused
-    Expr(Expr<'src>),
 }

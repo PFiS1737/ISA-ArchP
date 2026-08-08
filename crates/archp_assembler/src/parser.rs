@@ -2,13 +2,17 @@ pub mod address;
 pub mod expression;
 pub mod grammar;
 pub mod immediate;
+pub mod operand;
 pub mod register;
 pub mod types;
 
 use nom::{
     AsChar, IResult, Input, Parser,
     bytes::complete::take_while,
-    character::{complete::space0, satisfy},
+    character::{
+        complete::{char, space0},
+        satisfy,
+    },
     combinator::recognize,
     error::ParseError,
     sequence::delimited,
@@ -20,6 +24,14 @@ where
     I: Input<Item: AsChar>,
 {
     delimited(space0, inner, space0)
+}
+
+fn parens<I, O, E: ParseError<I>, F>(inner: F) -> impl Parser<I, Output = O, Error = E>
+where
+    F: Parser<I, Output = O, Error = E>,
+    I: Input<Item: AsChar>,
+{
+    delimited(ws(char('(')), inner, ws(char(')')))
 }
 
 fn ident(input: &str) -> IResult<&str, &str> {

@@ -5,10 +5,10 @@ use nom::{
     bytes::complete::tag,
     character::complete::{bin_digit1, char, digit1, hex_digit1},
     combinator::{map, map_res, opt},
-    sequence::{delimited, preceded},
+    sequence::preceded,
 };
 
-use crate::parser::{ident, types::expression::*, ws};
+use crate::parser::{ident, parens, types::expression::*, ws};
 
 fn number(input: &str) -> IResult<&str, Expr<'_>> {
     fn dec(input: &str) -> IResult<&str, i64> {
@@ -32,12 +32,8 @@ fn number(input: &str) -> IResult<&str, Expr<'_>> {
     map(ws(alt((hex, binary, dec))), Expr::Num).parse(input)
 }
 
-fn parens(input: &str) -> IResult<&str, Expr<'_>> {
-    delimited(ws(char('(')), expr, ws(char(')'))).parse(input)
-}
-
 fn primary(input: &str) -> IResult<&str, Expr<'_>> {
-    alt((number, map(ident, Expr::Ident), parens)).parse(input)
+    alt((number, map(ident, Expr::Ident), parens(expr))).parse(input)
 }
 
 fn unary(input: &str) -> IResult<&str, Expr<'_>> {
