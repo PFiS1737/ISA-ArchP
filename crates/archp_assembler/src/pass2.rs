@@ -1,15 +1,11 @@
 use anyhow::{Result, anyhow};
 
 use crate::{
-    assembler::{Context, Instr, Line},
+    assembler::{Context, Instr},
     instructions::INSTRUCTIONS,
     pseudo_instructions::PSEUDO_INSTRUCTIONS,
 };
 
-/// Pass 3
-///
-/// 1. Expand macro-instructions.
-/// 2. Encode assembly instructions into machine code.
 pub struct Pass2<'ctx, 'src> {
     context: &'ctx mut Context<'src>,
 }
@@ -19,12 +15,12 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
         Pass2 { context }
     }
 
-    pub fn run(&self, processed: Vec<Line<'src>>) -> Result<(Vec<u32>, Vec<Line<'src>>)> {
+    pub fn run(&self, processed: Vec<Instr<'src>>) -> Result<(Vec<u32>, Vec<Instr<'src>>)> {
         let mut codes = Vec::with_capacity(processed.len());
-        let mut lines = Vec::with_capacity(processed.len());
+        let mut instrs = Vec::with_capacity(processed.len());
 
-        for (idx, (instr, info)) in processed.into_iter().enumerate() {
-            let (original_idx, original_line) = info.original_line;
+        for (idx, instr) in processed.into_iter().enumerate() {
+            let (original_idx, original_line) = self.context.source_map[idx];
 
             let (code, instr) = self.line_handler(idx, instr).map_err(|e| {
                 anyhow!(
@@ -36,10 +32,10 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
             })?;
 
             codes.push(code);
-            lines.push((instr, info));
+            instrs.push(instr);
         }
 
-        Ok((codes, lines))
+        Ok((codes, instrs))
     }
 
     fn line_handler(&self, idx: usize, instr: Instr<'src>) -> Result<(u32, Instr<'src>)> {

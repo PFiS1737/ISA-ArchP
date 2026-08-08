@@ -20,12 +20,9 @@ pub struct Context<'src> {
 
     pub constants: HashMap<&'src str, &'src str>,
     pub labels: HashMap<&'src str, usize>,
-}
 
-#[derive(Default)]
-pub struct LineInfo<'src> {
-    pub original_line: (usize, &'src str),
-    pub label_name: Option<&'src str>,
+    /// Maps processed lines to the (original line number, original line content)
+    pub source_map: Vec<(usize, &'src str)>,
 }
 
 impl<'src> Context<'src> {
@@ -34,6 +31,7 @@ impl<'src> Context<'src> {
             settings,
             constants: HashMap::new(),
             labels: HashMap::new(),
+            source_map: Vec::new(),
         }
     }
 
@@ -41,32 +39,36 @@ impl<'src> Context<'src> {
     pub fn test() -> Self {
         Context {
             settings: AssemblerSettings::default(),
-            constants: HashMap::from([("FOO", "42"), ("R1", "r1"), ("R0", "r0")]),
+            constants: HashMap::from_iter([("FOO", "42"), ("R1", "r1"), ("R0", "r0")]),
             labels: HashMap::from_iter([
                 ("start", 0),
                 ("loop", 4),
                 ("end", 4094),
                 ("over", 0x123456),
             ]),
+            source_map: Vec::new(),
         }
     }
 }
 
 pub type Instr<'src> = (&'src str, SmallVec<[OperandValue<'src>; 3]>);
-pub type Line<'src> = (Instr<'src>, LineInfo<'src>);
+
+type AssemblerResult<'src> = Result<((Vec<u32>, Vec<Instr<'src>>), Context<'src>)>;
 
 impl Assembler {
     pub fn new(settings: AssemblerSettings) -> Self {
         Assembler { settings }
     }
 
-    pub fn assemble<'src>(&self, source: &'src str) -> Result<(Vec<u32>, Vec<Line<'src>>)> {
+    pub fn assemble<'src>(&self, source: &'src str) -> AssemblerResult<'src> {
         let mut context = Context::default_with_settings(self.settings);
 
         let mut pass1 = Pass1::new(&mut context);
         let processed = pass1.run(source)?;
 
         let pass2 = Pass2::new(&mut context);
-        pass2.run(processed)
+        let res = pass2.run(processed)?;
+
+        Ok((res, context))
     }
 }

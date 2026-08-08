@@ -2,6 +2,7 @@ mod command;
 mod utils;
 
 use std::{
+    collections::HashMap,
     fs::{File, read_to_string},
     io::{BufWriter, Write, stdout},
 };
@@ -30,7 +31,7 @@ fn main() -> Result<()> {
         .map_err(|e| anyhow!("Can't read source file '{}': {}", cli.src_file, e))?;
 
     let asmblr = Assembler::new(settings);
-    let (codes, lines) = asmblr.assemble(&file_content)?;
+    let ((codes, instrs), context) = asmblr.assemble(&file_content)?;
 
     let mut out = BufWriter::new(if cli.stdout {
         Box::new(stdout()) as Box<dyn Write>
@@ -39,13 +40,20 @@ fn main() -> Result<()> {
     });
 
     if cli.hex {
+        let labels = context
+            .labels
+            .iter()
+            .map(|(k, v)| (v, k))
+            .collect::<HashMap<_, _>>();
+
         for (code, display) in codes.into_iter().zip(align_tabbed_lines(
-            &lines
+            &instrs
                 .into_iter()
-                .map(|((name, ops), info)| {
+                .enumerate()
+                .map(|(idx, (name, ops))| {
                     let mut display = fmt_line(name, &ops);
 
-                    let (_, original_line) = info.original_line;
+                    let (_, original_line) = context.source_map[idx];
 
                     if display != original_line {
                         display = format!("{display}\t[{original_line}]");
@@ -53,8 +61,8 @@ fn main() -> Result<()> {
                         display += "\t";
                     }
 
-                    if let Some(label_name) = info.label_name {
-                        display = format!("{display}\t<label: {label_name}>");
+                    if let Some(label) = labels.get(&(idx * 4)) {
+                        display = format!("{display}\t<label: {label}>");
                     } else {
                         display += "\t";
                     }

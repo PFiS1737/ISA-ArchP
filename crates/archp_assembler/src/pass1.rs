@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow, bail};
 use smallvec::SmallVec;
 
 use crate::{
-    assembler::{Context, Line as ALine, LineInfo},
+    assembler::{Context, Instr},
     macro_instructions::MACRO_INSTRUCTIONS,
     operand::OperandValue,
     parser::{
@@ -14,11 +14,6 @@ use crate::{
     },
 };
 
-/// Pass 1
-///
-/// 1. Record constants and labels.
-/// 2. Expand macro-instructions.
-/// 3. Build a mapping between new lines and the original lines.
 pub struct Pass1<'ctx, 'src> {
     context: &'ctx mut Context<'src>,
 }
@@ -28,21 +23,17 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
         Self { context }
     }
 
-    pub fn run(&mut self, source: &'src str) -> Result<Vec<ALine<'src>>> {
+    pub fn run(&mut self, source: &'src str) -> Result<Vec<Instr<'src>>> {
         let mut processed = Vec::new();
 
-        let mut current_label = None;
+        let source = parse_source(source).map_err(|e| anyhow!("Error parsing source: {}", e))?;
 
-        let ast = parse_source(source).map_err(|e| anyhow!("Error parsing source: {}", e))?;
-
-        for line in ast.lines {
+        for line in source.lines {
             let pc = processed.len() * 4;
 
             match line {
                 Line::Label(label) => {
                     self.context.labels.insert(label, pc);
-
-                    current_label = Some(label);
                 },
                 Line::Instr {
                     name,
@@ -116,20 +107,12 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                             })?
                     {
                         for instr in expanded {
-                            processed.push((instr, LineInfo {
-                                original_line: line,
-                                label_name: current_label,
-                            }));
-
-                            current_label = None;
+                            processed.push(instr);
+                            self.context.source_map.push(line);
                         }
                     } else {
-                        processed.push(((name, ops), LineInfo {
-                            original_line: line,
-                            label_name: current_label,
-                        }));
-
-                        current_label = None;
+                        processed.push((name, ops));
+                        self.context.source_map.push(line);
                     };
                 },
             }
