@@ -9,7 +9,7 @@ main:
 fib:
   bgt a0, 2, .L0
   li a0, 1
-  jr ra
+  jr (ra) ; TODO: support 'jr ra'
 .L0:
   sub sp, sp, 12
   sw ra, 8(sp)
@@ -26,4 +26,4 @@ fib:
   lw s0, 4(sp)
   lw s1, 0(sp)
   add sp, sp, 12
-  jr ra
+  jr (ra)

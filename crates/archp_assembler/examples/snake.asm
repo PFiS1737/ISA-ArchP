@@ -214,7 +214,7 @@ queue_push:
 
   mul que_tmp, que_head, 2
   add que_tmp, que_tmp, BASE_ADDR
-  sh que_val, que_tmp
+  sh que_val, (que_tmp)
 
   inc que_head
   rem que_head, que_head, QUEUE_SIZE
@@ -242,7 +242,7 @@ queue_pop:
 
   mul que_tmp, que_tmp, 2
   add que_tmp, que_tmp, BASE_ADDR
-  lhu que_val, que_tmp
+  lhu que_val, (que_tmp)
 
   dec que_len
 
@@ -273,7 +273,7 @@ queue_contains:
 
     mul que_addr, que_tmp, 2
     add que_addr, que_addr, BASE_ADDR
-    lhu que_cur, que_addr
+    lhu que_cur, (que_addr)
 
     beq que_cur, que_val, queue_contains_found
 
@@ -294,7 +294,7 @@ queue_contains:
 
 read_key:
   li t0, KBD_BASE
-  lw t0, t0
+  lw t0, (t0)
 
   beq t0, KEY_UP, read_key_ok
   beq t0, KEY_DOWN, read_key_ok

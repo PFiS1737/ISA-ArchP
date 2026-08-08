@@ -145,11 +145,11 @@ init_mines:
     mul addr, addr, 4
     add addr, addr, BASE_ADDR
 
-    lw t1, addr
+    lw t1, (addr)
     beq t1, MINE_MASK, init_mines_loop
 
     li t1, MINE_MASK
-    sw t1, addr
+    sw t1, (addr)
     inc i
     blt i, mine_num, init_mines_loop
 
@@ -162,9 +162,9 @@ init_mine_counts:
   li addr, BASE_ADDR
   init_mine_counts_loop:
     call count_around_mines
-    lw t1, addr
+    lw t1, (addr)
     add t2, t1, cnt
-    sw t2, addr
+    sw t2, (addr)
     inc x
     add addr, addr, 4
     blt x, GRID_COLS, init_mine_counts_loop
@@ -199,7 +199,7 @@ count_around_mines:
     add t1, t1, BASE_ADDR
 
     # 读取格子值
-    lw t2, t1
+    lw t2, (t1)
 
     # 判断是否为地雷
     and t2, t2, MINE_MASK
@@ -300,7 +300,7 @@ reveal_tile:
   mul addr, addr, 4
   add addr, addr, BASE_ADDR
 
-  lw t1, addr
+  lw t1, (addr)
 
   and t2, t1, REVEAL_MASK
   bnez t2, reveal_tile_ret
@@ -318,7 +318,7 @@ reveal_tile:
   reveal_tile_skip_reveal_around:
 
   or t1, t1, REVEAL_MASK
-  sw t1, addr
+  sw t1, (addr)
 
   call draw_num
 
@@ -345,7 +345,7 @@ reveal_around:
     add addr, addr, BASE_ADDR
 
     # 读取格子值
-    lw t1, addr
+    lw t1, (addr)
 
     # 如果已揭示或有旗子，则返回
     and t2, t1, REVEAL_MASK
@@ -355,7 +355,7 @@ reveal_around:
 
     # 设置为已揭示
     or t1, t1, REVEAL_MASK
-    sw t1, addr
+    sw t1, (addr)
 
     # 获取周围雷数
     and t2, t1, AROUND_COUNT_MASK
@@ -401,7 +401,7 @@ toggle_flag:
   mul addr, addr, 4
   add addr, addr, BASE_ADDR
 
-  lw t1, addr
+  lw t1, (addr)
 
   and t2, t1, REVEAL_MASK
   bnez t2, toggle_flag_ret
@@ -425,7 +425,7 @@ toggle_flag:
     call draw_tile
 
   toggle_flag_store:
-    sw t1, addr
+    sw t1, (addr)
     mv a0, mine_num
     ecall 1 ; print int
     li a0, 10 ; '\n'
@@ -690,10 +690,10 @@ draw_num5:
 
 read_key:
   li t0, KBD_BASE
-  lw key_code, t0
+  lw key_code, (t0)
   beqz key_code, read_key
   read_key_wait_release:
-    lw t1, t0
+    lw t1, (t0)
     bnez t1, read_key_wait_release
   ret
 
@@ -743,7 +743,7 @@ main:
       bne ny, cursor_y, lose_loop_cont
       j lose_loop_skip_draw
     lose_loop_cont:
-      lw t1, addr
+      lw t1, (addr)
       and t2, t1, MINE_MASK
       beqz t2, lose_loop_skip_draw
       mv arg_x, nx

@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow, bail};
 use nom::{
     IResult, Parser,
     bytes::complete::take_until,
-    character::complete::{char, space0, space1},
+    character::complete::{char, space1},
     combinator::opt,
     multi::separated_list1,
     sequence::{delimited, preceded, terminated},
@@ -28,18 +28,25 @@ fn string_literal(input: &str) -> IResult<&str, &str> {
 }
 
 fn operand<'src>(input: &'src str) -> IResult<&'src str, SmallVec<[Operand<'src>; 2]>> {
+    // case 1: "string"
     if let Ok((rest, s)) = string_literal(input) {
         return Ok((rest, smallvec![Operand::String(s)]));
     }
 
-    let (input, expr) = expr(input)?;
+    let mut parens = ws(delimited(char('('), ws(ident), char(')')));
 
-    if let Ok((rest, (_, _, ident, _, _))) =
-        (space0, char('('), ident, space0, char(')')).parse(input)
-    {
+    // case 2: (ident)
+    if let Ok((input, ident)) = parens.parse(input) {
+        return Ok((input, smallvec![Operand::Ident(ident), Operand::Num(0)]));
+    }
+
+    // case 3: expr(ident)
+    let (input, expr) = expr(input)?;
+    if let Ok((rest, ident)) = parens.parse(input) {
         return Ok((rest, smallvec![Operand::Ident(ident), unwrap_expr(expr)]));
     }
 
+    // case 4: expr
     Ok((input, smallvec![unwrap_expr(expr)]))
 }
 
@@ -300,6 +307,31 @@ mod tests {
 
     #[test]
     fn offset_register_operand() {
+        assert_debug_snapshot!(parse_ok("lw x1, (sp)"), @r#"
+        Source {
+            lines: [
+                Instr {
+                    name: "lw",
+                    operands: [
+                        Ident(
+                            "x1",
+                        ),
+                        Ident(
+                            "sp",
+                        ),
+                        Num(
+                            0,
+                        ),
+                    ],
+                    line: (
+                        1,
+                        "lw x1, (sp)",
+                    ),
+                },
+            ],
+        }
+        "#
+        );
         assert_debug_snapshot!(parse_ok("lw x1, 8(sp)"), @r#"
         Source {
             lines: [

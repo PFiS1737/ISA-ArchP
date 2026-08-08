@@ -20,7 +20,7 @@ main:
   li t1, BASE_ADDR
   input:
     ecall 5 ; read int
-    sb a0, t1
+    sb a0, (t1)
     inc t1
     dec t0
     bgtz t0, input
@@ -38,9 +38,9 @@ solve:
   add r, l, len
   dec r
   # lmax = ht[l]
-  lbu lmax, l
+  lbu lmax, (l)
   # rmax = ht[r]
-  lbu rmax, r
+  lbu rmax, (r)
 
   # while l < r:
   while: bge l, r, endwhile
@@ -49,7 +49,7 @@ solve:
       # l++
       inc l
       # lmax = max(lmax, ht[l])
-      lbu t0, l
+      lbu t0, (l)
       mv a0, t0
       mv a1, lmax
       call max
@@ -64,7 +64,7 @@ solve:
       # r--
       dec r
       # rmax = max(rmax, ht[r])
-      lbu t0, r
+      lbu t0, (r)
       mv a0, t0
       mv a1, rmax
       call max

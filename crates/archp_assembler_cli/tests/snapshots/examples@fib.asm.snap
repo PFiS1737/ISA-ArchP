@@ -16,7 +16,7 @@ exit_code: 0
 0x013E0002 # addi r31 r0 2          [bgt a0, 2, .L0]  <label: fib>
 0x1281F0CA # blt r31 a0 .L0         [bgt a0, 2, .L0]
 0x01140001 # addi a0 r0 1           [li a0, 1]
-0x13C01000 # jalr r0 ra 0           [jr ra]
+0x13C01000 # jalr r0 ra 0           [jr (ra)]
 0x0144200C # subi sp sp 12          [sub sp, sp, 12]  <label: .L0>
 0x11402101 # sw ra sp 8             [sw ra, 8(sp)]
 0x11402088 # sw s0 sp 4             [sw s0, 4(sp)]
@@ -32,5 +32,5 @@ exit_code: 0
 0x10102004 # lw s0 sp 4             [lw s0, 4(sp)]
 0x10122000 # lw s1 sp 0             [lw s1, 0(sp)]
 0x0104200C # addi sp sp 12          [add sp, sp, 12]
-0x13C01000 # jalr r0 ra 0           [jr ra]
+0x13C01000 # jalr r0 ra 0           [jr (ra)]
 ----- stderr -----

@@ -2,7 +2,6 @@ mod als_imm32;
 mod auto_ecall;
 mod auto_imm;
 mod load_imm32;
-mod riscv_offset;
 
 use std::{
     collections::{HashMap, VecDeque},

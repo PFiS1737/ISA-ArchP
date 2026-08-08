@@ -129,7 +129,7 @@ exit_code: 0
 0x05270002 # muli que_tmp que_head 2                     [mul que_tmp, que_head, 2]
 0x163E0100 # lui r31 0x100                               [add que_tmp, que_tmp, BASE_ADDR]
 0x0027301F # add que_tmp que_tmp r31                     [add que_tmp, que_tmp, BASE_ADDR]
-0x11813012 # sh que_val que_tmp 0                        [sh que_val, que_tmp]
+0x11813012 # sh que_val que_tmp 0                        [sh que_val, (que_tmp)]
 0x01210001 # addi que_head que_head 1                    [inc que_head]
 0x07610064 # remi que_head que_head 100                  [rem que_head, que_head, QUEUE_SIZE]
 0x011EF001 # addi que_len que_len 1                      [inc que_len]
@@ -144,7 +144,7 @@ exit_code: 0
 0x05273002 # muli que_tmp que_tmp 2                      [mul que_tmp, que_tmp, 2]
 0x163E0100 # lui r31 0x100                               [add que_tmp, que_tmp, BASE_ADDR]
 0x0027301F # add que_tmp que_tmp r31                     [add que_tmp, que_tmp, BASE_ADDR]
-0x10A53000 # lhu que_val que_tmp 0                       [lhu que_val, que_tmp]
+0x10A53000 # lhu que_val que_tmp 0                       [lhu que_val, (que_tmp)]
 0x015EF001 # subi que_len que_len 1                      [dec que_len]
 0x011C0000 # addi rt r0 0                                [li rt, 0]
 0xFC800000 # ret
@@ -159,7 +159,7 @@ exit_code: 0
 0x052D3002 # muli que_addr que_tmp 2                     [mul que_addr, que_tmp, 2]
 0x163E0100 # lui r31 0x100                               [add que_addr, que_addr, BASE_ADDR]
 0x002D601F # add que_addr que_addr r31                   [add que_addr, que_addr, BASE_ADDR]
-0x10AB6000 # lhu que_cur que_addr 0                      [lhu que_cur, que_addr]
+0x10AB6000 # lhu que_cur que_addr 0                      [lhu que_cur, (que_addr)]
 0x12015152 # beq que_cur que_val queue_contains_found    [beq que_cur, que_val, queue_contains_found]
 0x01273001 # addi que_tmp que_tmp 1                      [inc que_tmp]
 0x07673064 # remi que_tmp que_tmp 100                    [rem que_tmp, que_tmp, QUEUE_SIZE]
@@ -170,7 +170,7 @@ exit_code: 0
 0x011C0000 # addi rt r0 0                                [li rt, 0]                                              <label: queue_contains_not_found>
 0xFC800000 # ret
 0x170B0000 # lui t0 0x90000                              [li t0, KBD_BASE]                                       <label: read_key>
-0x100A5000 # lw t0 t0 0                                  [lw t0, t0]
+0x100A5000 # lw t0 t0 0                                  [lw t0, (t0)]
 0x013E0067 # addi r31 r0 103                             [beq t0, KEY_UP, read_key_ok]
 0x1200521F # beq t0 r31 read_key_ok                      [beq t0, KEY_UP, read_key_ok]
 0x013E006C # addi r31 r0 108                             [beq t0, KEY_DOWN, read_key_ok]

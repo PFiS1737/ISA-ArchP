@@ -83,11 +83,11 @@ exit_code: 0
 0x05108004 # muli addr addr 4                           [mul addr, addr, 4]
 0x163E0100 # lui r31 0x100                              [add addr, addr, BASE_ADDR]
 0x0010801F # add addr addr r31                          [add addr, addr, BASE_ADDR]
-0x10088000 # lw t1 addr 0                               [lw t1, addr]
+0x10088000 # lw t1 addr 0                               [lw t1, (addr)]
 0x013E0008 # addi r31 r0 8                              [beq t1, MINE_MASK, init_mines_loop]
 0x123E4C5F # beq t1 r31 init_mines_loop                 [beq t1, MINE_MASK, init_mines_loop]
 0x01080008 # addi t1 r0 MINE_MASK                       [li t1, MINE_MASK]
-0x11408004 # sw t1 addr 0                               [sw t1, addr]
+0x11408004 # sw t1 addr 0                               [sw t1, (addr)]
 0x01021001 # addi i i 1                                 [inc i]
 0x12BE1B55 # blt i mine_num init_mines_loop             [blt i, mine_num, init_mines_loop]
 0xFC800000 # ret
@@ -95,9 +95,9 @@ exit_code: 0
 0x01160000 # addi y r0 0                                [clr y]
 0x16100100 # lui addr 0x100                             [li addr, BASE_ADDR]
 0xFA00001A # call count_around_mines                                                                         <label: init_mine_counts_loop>
-0x10088000 # lw t1 addr 0                               [lw t1, addr]
+0x10088000 # lw t1 addr 0                               [lw t1, (addr)]
 0x000A4009 # add t2 t1 cnt                              [add t2, t1, cnt]
-0x11408005 # sw t2 addr 0                               [sw t2, addr]
+0x11408005 # sw t2 addr 0                               [sw t2, (addr)]
 0x0114A001 # addi x x 1                                 [inc x]
 0x01108004 # addi addr addr 4                           [add addr, addr, 4]
 0x013E000F # addi r31 r0 15                             [blt x, GRID_COLS, init_mine_counts_loop]
@@ -123,7 +123,7 @@ exit_code: 0
 0x05084004 # muli t1 t1 4                               [mul t1, t1, 4]
 0x163E0100 # lui r31 0x100                              [add t1, t1, BASE_ADDR]
 0x0008401F # add t1 t1 r31                              [add t1, t1, BASE_ADDR]
-0x100A4000 # lw t2 t1 0                                 [lw t2, t1]
+0x100A4000 # lw t2 t1 0                                 [lw t2, (t1)]
 0x018A5008 # andi t2 t2 8                               [and t2, t2, MINE_MASK]
 0x013E0008 # addi r31 r0 8                              [bne t2, MINE_MASK, skip_this_neighbor]
 0x1240509F # bne t2 r31 skip_this_neighbor              [bne t2, MINE_MASK, skip_this_neighbor]
@@ -200,7 +200,7 @@ exit_code: 0
 0x05108004 # muli addr addr 4                           [mul addr, addr, 4]
 0x163E0100 # lui r31 0x100                              [add addr, addr, BASE_ADDR]
 0x0010801F # add addr addr r31                          [add addr, addr, BASE_ADDR]
-0x10088000 # lw t1 addr 0                               [lw t1, addr]
+0x10088000 # lw t1 addr 0                               [lw t1, (addr)]
 0x018A4010 # andi t2 t1 16                              [and t2, t1, REVEAL_MASK]
 0x12405340 # bne t2 r0 reveal_tile_ret                  [bnez t2, reveal_tile_ret]
 0x018A4020 # andi t2 t1 32                              [and t2, t1, FLAG_MASK]
@@ -213,7 +213,7 @@ exit_code: 0
 0x12405080 # bne t2 r0 reveal_tile_skip_reveal_around   [bne t2, 0, reveal_tile_skip_reveal_around]
 0xFA00000A # call reveal_around
 0x01C84010 # ori t1 t1 16                               [or t1, t1, REVEAL_MASK]                             <label: reveal_tile_skip_reveal_around>
-0x11408004 # sw t1 addr 0                               [sw t1, addr]
+0x11408004 # sw t1 addr 0                               [sw t1, (addr)]
 0xFA000168 # call draw_num
 0xFC800000 # ret                                                                                             <label: reveal_tile_ret>
 0x011E6000 # addi nx cursor_x 0                         [mv nx, cursor_x]                                    <label: reveal_around>
@@ -229,13 +229,13 @@ exit_code: 0
 0x05108004 # muli addr addr 4                           [mul addr, addr, 4]
 0x163E0100 # lui r31 0x100                              [add addr, addr, BASE_ADDR]
 0x0010801F # add addr addr r31                          [add addr, addr, BASE_ADDR]
-0x10088000 # lw t1 addr 0                               [lw t1, addr]
+0x10088000 # lw t1 addr 0                               [lw t1, (addr)]
 0x018A4010 # andi t2 t1 16                              [and t2, t1, REVEAL_MASK]
 0x12405680 # bne t2 r0 reveal_around_ret                [bnez t2, reveal_around_ret]
 0x018A4020 # andi t2 t1 32                              [and t2, t1, FLAG_MASK]
 0x12405600 # bne t2 r0 reveal_around_ret                [bnez t2, reveal_around_ret]
 0x01C84010 # ori t1 t1 16                               [or t1, t1, REVEAL_MASK]
-0x11408004 # sw t1 addr 0                               [sw t1, addr]
+0x11408004 # sw t1 addr 0                               [sw t1, (addr)]
 0x018A4007 # andi t2 t1 7                               [and t2, t1, AROUND_COUNT_MASK]
 0x0126F000 # addi arg_x nx 0                            [mv arg_x, nx]
 0x01290000 # addi arg_y ny 0                            [mv arg_y, ny]
@@ -263,7 +263,7 @@ exit_code: 0
 0x05108004 # muli addr addr 4                           [mul addr, addr, 4]
 0x163E0100 # lui r31 0x100                              [add addr, addr, BASE_ADDR]
 0x0010801F # add addr addr r31                          [add addr, addr, BASE_ADDR]
-0x10088000 # lw t1 addr 0                               [lw t1, addr]
+0x10088000 # lw t1 addr 0                               [lw t1, (addr)]
 0x018A4010 # andi t2 t1 16                              [and t2, t1, REVEAL_MASK]
 0x12405580 # bne t2 r0 toggle_flag_ret                  [bnez t2, toggle_flag_ret]
 0x01266000 # addi arg_x cursor_x 0                      [mv arg_x, cursor_x]
@@ -280,7 +280,7 @@ exit_code: 0
 0x161804C5 # lui color 0x4C5                            [li color, COLOR_HIDDEN]
 0x0118C45C # addi color color 0x45C                     [li color, COLOR_HIDDEN]
 0xFA000012 # call draw_tile
-0x11408004 # sw t1 addr 0                               [sw t1, addr]                                        <label: toggle_flag_store>
+0x11408004 # sw t1 addr 0                               [sw t1, (addr)]                                      <label: toggle_flag_store>
 0x01155000 # addi a0 mine_num 0                         [mv a0, mine_num]
 0x01220001 # addi r17 r0 1                              [ecall 1]
 0x40000000 # ecall                                      [ecall 1]
@@ -551,9 +551,9 @@ exit_code: 0
 0x40000000 # ecall                                      [ecall 0x10000000]
 0xFC800000 # ret
 0x17070000 # lui t0 0x90000                             [li t0, KBD_BASE]                                    <label: read_key>
-0x10243000 # lw key_code t0 0                           [lw key_code, t0]
+0x10243000 # lw key_code t0 0                           [lw key_code, (t0)]
 0x123F2F80 # beq key_code r0 read_key                   [beqz key_code, read_key]
-0x10083000 # lw t1 t0 0                                 [lw t1, t0]                                          <label: read_key_wait_release>
+0x10083000 # lw t1 t0 0                                 [lw t1, (t0)]                                        <label: read_key_wait_release>
 0x127E4FC0 # bne t1 r0 read_key_wait_release            [bnez t1, read_key_wait_release]
 0xFC800000 # ret
 0xFBC1FBB4 # call init_screen                                                                                <label: main>
@@ -591,7 +591,7 @@ exit_code: 0
 0x1240F0C6 # bne nx cursor_x lose_loop_cont             [bne nx, cursor_x, lose_loop_cont]                   <label: lose_col_loop>
 0x12410087 # bne ny cursor_y lose_loop_cont             [bne ny, cursor_y, lose_loop_cont]
 0x14000014 # jal r0 lose_loop_skip_draw                 [j lose_loop_skip_draw]
-0x10088000 # lw t1 addr 0                               [lw t1, addr]                                        <label: lose_loop_cont>
+0x10088000 # lw t1 addr 0                               [lw t1, (addr)]                                      <label: lose_loop_cont>
 0x018A4008 # andi t2 t1 8                               [and t2, t1, MINE_MASK]
 0x120051C0 # beq t2 r0 lose_loop_skip_draw              [beqz t2, lose_loop_skip_draw]
 0x0126F000 # addi arg_x nx 0                            [mv arg_x, nx]
