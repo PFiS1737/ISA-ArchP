@@ -5,7 +5,7 @@ use crate::parser::types::immediate::Immediate;
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum OperandValue<'a> {
     StringSlice(&'a str),
-    Integer(u32),
+    Integer(i64),
 }
 
 impl<'a> From<&'a str> for OperandValue<'a> {
@@ -16,19 +16,19 @@ impl<'a> From<&'a str> for OperandValue<'a> {
 
 impl From<u32> for OperandValue<'_> {
     fn from(n: u32) -> Self {
-        OperandValue::Integer(n)
+        OperandValue::Integer(n as i64)
     }
 }
 
 impl From<i32> for OperandValue<'_> {
     fn from(n: i32) -> Self {
-        OperandValue::Integer(n as u32)
+        OperandValue::Integer(n as i64)
     }
 }
 
 impl From<Immediate> for OperandValue<'_> {
     fn from(n: Immediate) -> Self {
-        OperandValue::Integer(n.0 as u32)
+        OperandValue::Integer(n.0)
     }
 }
 

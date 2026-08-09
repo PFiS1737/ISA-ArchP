@@ -108,8 +108,8 @@ exit_code: 0
 0x12BEBD5F # blt y r31 init_mine_counts_loop            [blt y, GRID_ROWS, init_mine_counts_loop]
 0xFC800000 # ret
 0x01120000 # addi cnt r0 0                              [li cnt, 0]                                          <label: count_around_mines>
-0x011C0FFF # addi ty r0 0xFFFFFFFF                      [li ty, -1]
-0x011A0FFF # addi tx r0 0xFFFFFFFF                      [li tx, -1]                                          <label: dy_loop>
+0x011C0FFF # addi ty r0 -1                              [li ty, -1]
+0x011A0FFF # addi tx r0 -1                              [li tx, -1]                                          <label: dy_loop>
 0x001EA00D # add nx x tx                                [add nx, x, tx]                                      <label: dx_loop>
 0x0020B00E # add ny y ty                                [add ny, y, ty]
 0x1280F400 # blt nx r0 skip_this_neighbor               [bltz nx, skip_this_neighbor]
@@ -275,7 +275,7 @@ exit_code: 0
 0xFA000048 # call draw_flag
 0x1400000E # jal r0 toggle_flag_store                   [j toggle_flag_store]
 0x012B5001 # addi mine_num mine_num 1                   [inc mine_num]                                       <label: toggle_flag_already_set>
-0x010A0FDF # addi t2 r0 0xFFFFFFDF                      [li t2, -33]
+0x010A0FDF # addi t2 r0 -33                             [li t2, -33]
 0x00884005 # and t1 t1 t2                               [and t1, t1, t2]
 0x161804C5 # lui color 0x4C5                            [li color, COLOR_HIDDEN]
 0x0118C45C # addi color color 0x45C                     [li color, COLOR_HIDDEN]

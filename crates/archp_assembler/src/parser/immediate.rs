@@ -27,7 +27,7 @@ pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<Immediate> {
 
             Ok(Immediate(imm))
         },
-        OperandValue::Integer(n) => Ok(Immediate(*n as i64)),
+        OperandValue::Integer(n) => Ok(Immediate(*n)),
     }
 }
 

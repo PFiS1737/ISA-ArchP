@@ -75,12 +75,12 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                     let ops = operands
                         .iter()
                         .map(|op| match op {
-                            Operand::Num(n) => OperandValue::Integer(*n as u32),
+                            Operand::Num(n) => OperandValue::Integer(*n),
                             Operand::Ident(s) => OperandValue::StringSlice(s),
                             Operand::String(_) => unimplemented!("string"),
                             Operand::Expr(expr) => {
                                 match expr.partial_eval_with(&|_| None).unwrap().0 {
-                                    Expr::Num(n) => OperandValue::Integer(n as u32),
+                                    Expr::Num(n) => OperandValue::Integer(n),
                                     Expr::Ident(s) => OperandValue::StringSlice(s),
                                     Expr::Unary { .. } | Expr::Binary { .. } => {
                                         unimplemented!("expression")
