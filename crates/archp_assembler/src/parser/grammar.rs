@@ -847,13 +847,8 @@ main:
                         Ident(
                             "sp",
                         ),
-                        Expr(
-                            Unary {
-                                op: Neg,
-                                rhs: Num(
-                                    4,
-                                ),
-                            },
+                        Num(
+                            -4,
                         ),
                     ],
                     line: (
@@ -870,13 +865,8 @@ main:
                         Ident(
                             "sp",
                         ),
-                        Expr(
-                            Unary {
-                                op: Neg,
-                                rhs: Num(
-                                    16,
-                                ),
-                            },
+                        Num(
+                            -16,
                         ),
                     ],
                     line: (
@@ -959,13 +949,8 @@ main:
                         Ident(
                             "sp",
                         ),
-                        Expr(
-                            Unary {
-                                op: Neg,
-                                rhs: Num(
-                                    4,
-                                ),
-                            },
+                        Num(
+                            -4,
                         ),
                     ],
                     line: (
@@ -993,13 +978,8 @@ main:
                         Ident(
                             "a0",
                         ),
-                        Expr(
-                            Unary {
-                                op: Neg,
-                                rhs: Num(
-                                    1,
-                                ),
-                            },
+                        Num(
+                            -1,
                         ),
                     ],
                     line: (
@@ -1094,13 +1074,8 @@ main:
                         Ident(
                             "a0",
                         ),
-                        Expr(
-                            Unary {
-                                op: Neg,
-                                rhs: Num(
-                                    2,
-                                ),
-                            },
+                        Num(
+                            -2,
                         ),
                     ],
                     line: (
@@ -1231,13 +1206,8 @@ main:
                         Ident(
                             "sp",
                         ),
-                        Expr(
-                            Unary {
-                                op: Neg,
-                                rhs: Num(
-                                    4,
-                                ),
-                            },
+                        Num(
+                            -4,
                         ),
                     ],
                     line: (
@@ -1292,13 +1262,8 @@ main:
                         Ident(
                             "sp",
                         ),
-                        Expr(
-                            Unary {
-                                op: Neg,
-                                rhs: Num(
-                                    4,
-                                ),
-                            },
+                        Num(
+                            -4,
                         ),
                     ],
                     line: (
@@ -1315,13 +1280,8 @@ main:
                         Ident(
                             "sp",
                         ),
-                        Expr(
-                            Unary {
-                                op: Neg,
-                                rhs: Num(
-                                    16,
-                                ),
-                            },
+                        Num(
+                            -16,
                         ),
                     ],
                     line: (
@@ -1419,13 +1379,8 @@ main:
                         Ident(
                             "sp",
                         ),
-                        Expr(
-                            Unary {
-                                op: Neg,
-                                rhs: Num(
-                                    4,
-                                ),
-                            },
+                        Num(
+                            -4,
                         ),
                     ],
                     line: (

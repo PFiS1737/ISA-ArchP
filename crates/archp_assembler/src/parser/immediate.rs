@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use anyhow::{Result, anyhow, bail};
 
 use crate::{
@@ -23,16 +21,12 @@ pub fn parse_imm(ctx: &Context, imm: &Operand) -> Result<Immediate> {
 
             // TODO: evaluate the expression with constants
             let imm = expr
-                .eval(&HashMap::new())
+                .eval_with(&|_| None)
                 .map_err(|e| anyhow!("Failed to evaluate immediate '{}': {}", s, e))?;
 
             Ok(Immediate(imm))
         },
 
-        // FIXME: workaround for something like '-1'
-        Operand::Expr(e) => Ok(Immediate(
-            e.eval_with(&|_| None).map_err(|e| anyhow!("{}", e))?,
-        )),
         // TODO: impl
         _ => unimplemented!("parse_imm: {}", imm),
     }

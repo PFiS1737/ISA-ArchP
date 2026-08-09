@@ -11,8 +11,6 @@ pub fn fmt_line(name: &str, ops: &[Operand]) -> String {
             Operand::Num(n) => fmt_hex(*n), // FIXME: 根据指令显示不同位数
             Operand::Ident(s) => s.to_string(),
 
-            // FIXME: workaround for something like '-1'
-            Operand::Expr(e) => e.eval_with(&|_| None).unwrap().to_string(),
             // TODO: impl
             _ => unimplemented!("fmt_line: {}", e),
         })

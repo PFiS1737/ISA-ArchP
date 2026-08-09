@@ -97,7 +97,7 @@ pub enum EvalError<'src> {
     DivByZero,
 }
 
-fn eval_unary<'a>(op: UnaryOp, rhs: i64) -> Result<i64, EvalError<'a>> {
+pub fn eval_unary<'a>(op: UnaryOp, rhs: i64) -> Result<i64, EvalError<'a>> {
     match op {
         UnaryOp::Pos => Ok(rhs),
         UnaryOp::Neg => Ok(rhs.wrapping_neg()),
@@ -105,7 +105,7 @@ fn eval_unary<'a>(op: UnaryOp, rhs: i64) -> Result<i64, EvalError<'a>> {
     }
 }
 
-fn eval_binary<'a>(op: BinaryOp, lhs: i64, rhs: i64) -> Result<i64, EvalError<'a>> {
+pub fn eval_binary<'a>(op: BinaryOp, lhs: i64, rhs: i64) -> Result<i64, EvalError<'a>> {
     match op {
         BinaryOp::Mul => Ok(lhs.wrapping_mul(rhs)),
         BinaryOp::Div => {
@@ -155,8 +155,8 @@ impl<'ctx, 'src: 'ctx> Expr<'src> {
             Expr::Ident(name) => resolve(name).ok_or(EvalError::UnknownIdent(name)),
 
             Expr::Unary { op, rhs } => {
-                let v = rhs.eval_with(resolve)?;
-                eval_unary(*op, v)
+                let r = rhs.eval_with(resolve)?;
+                eval_unary(*op, r)
             },
 
             Expr::Binary { lhs, op, rhs } => {
@@ -194,8 +194,8 @@ impl<'ctx, 'src: 'ctx> Expr<'src> {
             Expr::Unary { op, rhs } => {
                 let (r, undef) = rhs.partial_eval_with(resolve)?;
 
-                if let Expr::Num(r) = &r {
-                    Ok((Expr::Num(eval_unary(*op, *r)?), undef))
+                if let Expr::Num(r) = r {
+                    Ok((Expr::Num(eval_unary(*op, r)?), undef))
                 } else {
                     Ok((
                         Expr::Unary {
@@ -212,8 +212,10 @@ impl<'ctx, 'src: 'ctx> Expr<'src> {
                 let (r, undef_r) = rhs.partial_eval_with(resolve)?;
                 undef_l.extend(undef_r);
 
-                if let (Expr::Num(l), Expr::Num(r)) = (&l, &r) {
-                    Ok((Expr::Num(eval_binary(*op, *l, *r)?), undef_l))
+                if let Expr::Num(l) = l
+                    && let Expr::Num(r) = r
+                {
+                    Ok((Expr::Num(eval_binary(*op, l, r)?), undef_l))
                 } else {
                     Ok((
                         Expr::Binary {
@@ -228,7 +230,6 @@ impl<'ctx, 'src: 'ctx> Expr<'src> {
         }
     }
 
-    #[allow(unused)] // FIXME: unused
     pub fn partial_eval(
         &self,
         env: &'ctx HashMap<&'src str, i64>,
