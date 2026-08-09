@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use anyhow::Result;
 use smallvec::SmallVec;
 
-use crate::{operand::OperandValue, pass1::Pass1, pass2::Pass2};
+use crate::{operand::Operand, pass1::Pass1, pass2::Pass2};
 
 pub struct Assembler {
     settings: AssemblerSettings,
@@ -51,7 +51,7 @@ impl<'src> Context<'src> {
     }
 }
 
-pub type Instr<'src> = (&'src str, SmallVec<[OperandValue<'src>; 3]>);
+pub type Instr<'src> = (&'src str, SmallVec<[Operand<'src>; 3]>);
 
 type AssemblerResult<'src> = Result<((Vec<u32>, Vec<Instr<'src>>), Context<'src>)>;
 

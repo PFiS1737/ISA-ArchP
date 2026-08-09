@@ -15,7 +15,7 @@ use anyhow::{Result, bail};
 
 use crate::{
     assembler::Context,
-    operand::{OperandType, OperandValue, op_fmt},
+    operand::{Operand, OperandType, op_fmt},
     parser::{address::parse_address, immediate::parse_imm_as, register::parse_reg},
 };
 
@@ -47,7 +47,7 @@ pub trait Instruction: Send + Sync {
     fn itype(&self) -> InstrType;
     fn operands_format(&self) -> Option<&'static [Option<OperandType>]>;
 
-    fn encode(&self, ctx: &Context, pc: u32, operands: &[OperandValue]) -> Result<u32> {
+    fn encode(&self, ctx: &Context, pc: u32, operands: &[Operand]) -> Result<u32> {
         let operands = self.parse(ctx, pc, operands)?;
 
         match self.itype() {
@@ -60,7 +60,7 @@ pub trait Instruction: Send + Sync {
         }
     }
 
-    fn parse(&self, ctx: &Context, pc: u32, operands: &[OperandValue]) -> Result<Vec<u32>> {
+    fn parse(&self, ctx: &Context, pc: u32, operands: &[Operand]) -> Result<Vec<u32>> {
         let format = self.get_operands_format();
 
         let expected = format.iter().filter(|x| x.is_some()).count();

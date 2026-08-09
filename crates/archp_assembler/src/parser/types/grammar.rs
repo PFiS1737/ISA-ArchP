@@ -1,6 +1,6 @@
 use smallvec::SmallVec;
 
-use crate::parser::types::operand::Operand;
+use crate::operand::Operand;
 
 #[derive(Debug)]
 pub struct Source<'src> {
@@ -9,10 +9,10 @@ pub struct Source<'src> {
 
 #[derive(Debug)]
 pub enum Line<'src> {
+    Label(&'src str),
     Instr {
         name: &'src str,
         operands: SmallVec<[Operand<'src>; 3]>,
         line: (usize, &'src str),
     },
-    Label(&'src str),
 }

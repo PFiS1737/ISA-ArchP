@@ -1,10 +1,11 @@
 use anyhow::{Result, bail};
 
-use crate::{assembler::Context, operand::OperandValue};
+use crate::{assembler::Context, operand::Operand};
 
-pub fn parse_address(ctx: &Context, op: &OperandValue) -> Result<Address> {
+pub fn parse_address(ctx: &Context, op: &Operand) -> Result<Address> {
     match op {
-        OperandValue::StringSlice(s) => {
+        Operand::Num(n) => Ok(Address(*n as u32)),
+        Operand::Ident(s) => {
             let label = ctx.constants.get(s).unwrap_or(s);
             if let Some(&addr) = ctx.labels.get(label) {
                 Ok(Address(addr as u32))
@@ -12,7 +13,7 @@ pub fn parse_address(ctx: &Context, op: &OperandValue) -> Result<Address> {
                 bail!("Undefined label: {}", label)
             }
         },
-        OperandValue::Integer(n) => Ok(Address(*n as u32)),
+        _ => unimplemented!("parse_address: {}", op), // TODO: impl
     }
 }
 
@@ -82,10 +83,8 @@ mod tests {
         }
     }
 
-    fn test_parser(
-        func: fn(&Context, &OperandValue) -> Result<Address>,
-    ) -> impl Fn(&str) -> String {
-        move |s| match func(&Context::test(), &OperandValue::from(s)) {
+    fn test_parser(func: fn(&Context, &Operand) -> Result<Address>) -> impl Fn(&str) -> String {
+        move |s| match func(&Context::test(), &Operand::from(s)) {
             Ok(n) => {
                 let (hi, lo) = n.try_as_i12(12);
                 format!("({}, {})", fmt_hex(hi), fmt_hex(lo))

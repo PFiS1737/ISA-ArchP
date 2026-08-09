@@ -1,14 +1,9 @@
 use anyhow::{Result, anyhow, bail};
-use smallvec::SmallVec;
 
 use crate::{
     assembler::{Context, Instr},
     macro_instructions::MACRO_INSTRUCTIONS,
-    operand::OperandValue,
-    parser::{
-        grammar::parse_source,
-        types::{expression::Expr, grammar::Line, operand::Operand},
-    },
+    parser::{grammar::parse_source, types::grammar::Line},
 };
 
 pub struct Pass1<'ctx, 'src> {
@@ -37,7 +32,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                     operands,
                     line,
                 } => {
-                    // TODO: remove this after implementing directive .eqv
+                    // TODO: remove this
                     if name == ".const" {
                         match line
                             .1
@@ -71,29 +66,10 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                         continue;
                     }
 
-                    // TODO: pass-through operands
-                    let ops = operands
-                        .iter()
-                        .map(|op| match op {
-                            Operand::Num(n) => OperandValue::Integer(*n),
-                            Operand::Ident(s) => OperandValue::StringSlice(s),
-                            Operand::String(_) => unimplemented!("string"),
-                            Operand::Expr(expr) => {
-                                match expr.partial_eval_with(&|_| None).unwrap().0 {
-                                    Expr::Num(n) => OperandValue::Integer(n),
-                                    Expr::Ident(s) => OperandValue::StringSlice(s),
-                                    Expr::Unary { .. } | Expr::Binary { .. } => {
-                                        unimplemented!("expression")
-                                    },
-                                }
-                            },
-                        })
-                        .collect::<SmallVec<_>>();
-
                     if !self.context.settings.disable_macro
                         && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
                         && let Some(expanded) = mc_instr
-                            .expand(self.context, pc as u32, name, &ops)
+                            .expand(self.context, pc as u32, name, &operands)
                             .map_err(|e| {
                                 anyhow!(
                                     "Error expanding macro-instruction at line {}: '{}' ({})",
@@ -108,7 +84,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                             self.context.source_map.push(line);
                         }
                     } else {
-                        processed.push((name, ops));
+                        processed.push((name, operands));
                         self.context.source_map.push(line);
                     };
                 },

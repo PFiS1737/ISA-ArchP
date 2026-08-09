@@ -4,13 +4,14 @@ use anyhow::{Result, anyhow, bail};
 
 use crate::{
     assembler::Context,
-    operand::OperandValue,
+    operand::Operand,
     parser::{expression::parse_expr, types::immediate::Immediate},
 };
 
-pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<Immediate> {
+pub fn parse_imm(ctx: &Context, imm: &Operand) -> Result<Immediate> {
     match imm {
-        OperandValue::StringSlice(s) => {
+        Operand::Num(n) => Ok(Immediate(*n)),
+        Operand::Ident(s) => {
             let s = ctx.constants.get(s).unwrap_or(s);
 
             let (remain, expr) =
@@ -27,11 +28,17 @@ pub fn parse_imm(ctx: &Context, imm: &OperandValue) -> Result<Immediate> {
 
             Ok(Immediate(imm))
         },
-        OperandValue::Integer(n) => Ok(Immediate(*n)),
+
+        // FIXME: workaround for something like '-1'
+        Operand::Expr(e) => Ok(Immediate(
+            e.eval_with(&|_| None).map_err(|e| anyhow!("{}", e))?,
+        )),
+        // TODO: impl
+        _ => unimplemented!("parse_imm: {}", imm),
     }
 }
 
-pub fn parse_imm_as(ctx: &Context, imm: &OperandValue, bits: u8, signed: bool) -> Result<u32> {
+pub fn parse_imm_as(ctx: &Context, imm: &Operand, bits: u8, signed: bool) -> Result<u32> {
     let (low, hi) = parse_imm(ctx, imm)?.split(bits, signed);
 
     if hi != 0 {

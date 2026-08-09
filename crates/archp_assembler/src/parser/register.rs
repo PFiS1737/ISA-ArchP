@@ -1,9 +1,9 @@
 use anyhow::{Result, bail};
 
-use crate::{assembler::Context, operand::OperandValue};
+use crate::{assembler::Context, operand::Operand};
 
-pub fn parse_reg(ctx: &Context, op: &OperandValue) -> Result<u32> {
-    let OperandValue::StringSlice(reg) = op else {
+pub fn parse_reg(ctx: &Context, op: &Operand) -> Result<u32> {
+    let Operand::Ident(reg) = op else {
         bail!("Invalid register: {}", op)
     };
 
@@ -51,10 +51,10 @@ pub fn parse_reg(ctx: &Context, op: &OperandValue) -> Result<u32> {
 mod tests {
     use anyhow::Result;
 
-    use crate::{assembler::Context, operand::OperandValue, testkit::*};
+    use crate::{assembler::Context, operand::Operand, testkit::*};
 
-    fn test(func: fn(&Context, &OperandValue) -> Result<u32>) -> impl Fn(&str) -> String {
-        move |s| match func(&Context::test(), &OperandValue::from(s)) {
+    fn test(func: fn(&Context, &Operand) -> Result<u32>) -> impl Fn(&str) -> String {
+        move |s| match func(&Context::test(), &Operand::from(s)) {
             Ok(n) => format!("{n}"),
             Err(e) => format!("Error: {e}"),
         }

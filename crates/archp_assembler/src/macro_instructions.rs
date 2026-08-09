@@ -12,11 +12,11 @@ use anyhow::{Result, bail};
 
 use crate::{
     assembler::{Context, Instr},
-    operand::OperandValue,
+    operand::Operand,
 };
 
 type ExpandRet<'a> = Option<Vec<Instr<'a>>>;
-type ExpandFn = for<'a> fn(&Context<'a>, u32, &'a str, &[OperandValue<'a>]) -> ExpandRet<'a>;
+type ExpandFn = for<'a> fn(&Context<'a>, u32, &'a str, &[Operand<'a>]) -> ExpandRet<'a>;
 
 inventory::collect!(&'static dyn MacroInstruction);
 
@@ -41,7 +41,7 @@ pub trait MacroInstruction: Send + Sync {
         ctx: &Context<'a>,
         pc: u32,
         name: &'a str,
-        operands: &[OperandValue<'a>],
+        operands: &[Operand<'a>],
     ) -> Result<ExpandRet<'a>> {
         self.assert_operand_count(name, operands)?;
 
@@ -74,7 +74,7 @@ pub trait MacroInstruction: Send + Sync {
         Ok(Some(ret))
     }
 
-    fn assert_operand_count(&self, name: &str, operands: &[OperandValue]) -> Result<()> {
+    fn assert_operand_count(&self, name: &str, operands: &[Operand]) -> Result<()> {
         if let Some(count) = self.operand_count()
             && operands.len() != count
         {

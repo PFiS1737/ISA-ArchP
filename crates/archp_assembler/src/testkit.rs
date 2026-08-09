@@ -1,7 +1,7 @@
 pub use insta::assert_snapshot;
 
 use crate::{
-    assembler::Context, instructions::*, macro_instructions::*, operand::OperandValue,
+    assembler::Context, instructions::*, macro_instructions::*, operand::Operand,
     utils::fmt::fmt_line,
 };
 
@@ -10,9 +10,7 @@ pub fn instr(cmd: &str) -> impl Fn(&[&str]) -> String {
     move |ops| match instr.encode(
         &Context::test(),
         0,
-        &ops.iter()
-            .map(|e| OperandValue::from(*e))
-            .collect::<Vec<_>>(),
+        &ops.iter().map(|e| Operand::from(*e)).collect::<Vec<_>>(),
     ) {
         Ok(code) => fmt_bits(code),
         Err(e) => format!("Error: {}", e),
@@ -25,9 +23,7 @@ pub fn mc_instr(cmd: &str) -> impl Fn(&[&str]) -> String {
         &Context::test(),
         0,
         cmd,
-        &ops.iter()
-            .map(|e| OperandValue::from(*e))
-            .collect::<Vec<_>>(),
+        &ops.iter().map(|e| Operand::from(*e)).collect::<Vec<_>>(),
     ) {
         Ok(expanded) => match expanded {
             Some(expanded) => expanded

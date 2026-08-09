@@ -3,10 +3,9 @@ use nom::{
 };
 use smallvec::SmallVec;
 
-use crate::parser::{
-    expression::expr,
-    ident, parens,
-    types::{expression::Expr, operand::Operand},
+use crate::{
+    operand::Operand,
+    parser::{expression::expr, ident, parens, types::expression::Expr},
 };
 
 fn string_literal(input: &str) -> IResult<&str, &str> {

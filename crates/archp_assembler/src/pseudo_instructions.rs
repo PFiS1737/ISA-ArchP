@@ -13,11 +13,11 @@ use anyhow::{Result, bail};
 
 use crate::{
     assembler::{Context, Instr},
-    operand::{OperandType, OperandValue},
+    operand::{Operand, OperandType},
     parser::{address::parse_address, immediate::parse_imm_as, register::parse_reg},
 };
 
-type ExpandFn = for<'a> fn(&[OperandValue<'a>]) -> Instr<'a>;
+type ExpandFn = for<'a> fn(&[Operand<'a>]) -> Instr<'a>;
 
 inventory::collect!(&'static dyn PseudoInstruction);
 
@@ -35,23 +35,13 @@ pub trait PseudoInstruction: Send + Sync {
     fn operand_types(&self) -> &'static [OperandType];
     fn expander(&self) -> ExpandFn;
 
-    fn expand<'a>(
-        &self,
-        ctx: &Context,
-        pc: u32,
-        operands: &[OperandValue<'a>],
-    ) -> Result<Instr<'a>> {
+    fn expand<'a>(&self, ctx: &Context, pc: u32, operands: &[Operand<'a>]) -> Result<Instr<'a>> {
         self.assert_operand_format(ctx, pc, operands)?;
 
         Ok((self.expander())(operands))
     }
 
-    fn assert_operand_format(
-        &self,
-        ctx: &Context,
-        pc: u32,
-        operands: &[OperandValue],
-    ) -> Result<()> {
+    fn assert_operand_format(&self, ctx: &Context, pc: u32, operands: &[Operand]) -> Result<()> {
         if operands.len() != self.operand_types().len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",

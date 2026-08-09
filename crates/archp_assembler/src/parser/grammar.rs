@@ -7,14 +7,14 @@ use nom::{
 };
 use smallvec::SmallVec;
 
-use crate::parser::{
-    ident,
-    operand::operand,
-    types::{
-        grammar::{Line, Source},
-        operand::Operand,
+use crate::{
+    operand::Operand,
+    parser::{
+        ident,
+        operand::operand,
+        types::grammar::{Line, Source},
+        ws,
     },
-    ws,
 };
 
 fn label(input: &str) -> IResult<&str, &str> {

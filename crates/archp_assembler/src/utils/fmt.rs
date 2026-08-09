@@ -1,15 +1,20 @@
-use crate::operand::OperandValue;
+use crate::operand::Operand;
 
 pub fn fmt_hex(n: impl FormatHex) -> String {
     n.fmt_hex()
 }
 
-pub fn fmt_line(name: &str, ops: &[OperandValue]) -> String {
+pub fn fmt_line(name: &str, ops: &[Operand]) -> String {
     let ops = ops
         .iter()
         .map(|e| match e {
-            OperandValue::StringSlice(s) => s.to_string(),
-            OperandValue::Integer(n) => fmt_hex(*n), // FIXME: 根据指令显示不同位数
+            Operand::Num(n) => fmt_hex(*n), // FIXME: 根据指令显示不同位数
+            Operand::Ident(s) => s.to_string(),
+
+            // FIXME: workaround for something like '-1'
+            Operand::Expr(e) => e.eval_with(&|_| None).unwrap().to_string(),
+            // TODO: impl
+            _ => unimplemented!("fmt_line: {}", e),
         })
         .collect::<Vec<_>>();
 

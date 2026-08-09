@@ -1,42 +1,46 @@
 use std::fmt::Display;
 
-use crate::parser::types::immediate::Immediate;
+use crate::parser::types::{expression::Expr, immediate::Immediate};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum OperandValue<'a> {
-    StringSlice(&'a str),
-    Integer(i64),
+#[derive(Debug, Clone, PartialEq)]
+pub enum Operand<'src> {
+    Num(i64),
+    Ident(&'src str),
+    String(&'src str),
+    Expr(Expr<'src>),
 }
 
-impl<'a> From<&'a str> for OperandValue<'a> {
+impl<'a> From<&'a str> for Operand<'a> {
     fn from(s: &'a str) -> Self {
-        OperandValue::StringSlice(s)
+        Operand::Ident(s)
     }
 }
 
-impl From<u32> for OperandValue<'_> {
+impl From<u32> for Operand<'_> {
     fn from(n: u32) -> Self {
-        OperandValue::Integer(n as i64)
+        Operand::Num(n as i64)
     }
 }
 
-impl From<i32> for OperandValue<'_> {
+impl From<i32> for Operand<'_> {
     fn from(n: i32) -> Self {
-        OperandValue::Integer(n as i64)
+        Operand::Num(n as i64)
     }
 }
 
-impl From<Immediate> for OperandValue<'_> {
+impl From<Immediate> for Operand<'_> {
     fn from(n: Immediate) -> Self {
-        OperandValue::Integer(n.0)
+        Operand::Num(n.0)
     }
 }
 
-impl Display for OperandValue<'_> {
+impl Display for Operand<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            OperandValue::StringSlice(s) => write!(f, "{}", s),
-            OperandValue::Integer(n) => write!(f, "{}", n),
+            Operand::Num(n) => write!(f, "{}", n),
+            Operand::Ident(s) => write!(f, "{}", s),
+            Operand::String(s) => write!(f, "\"{}\"", s),
+            Operand::Expr(e) => write!(f, "{}", e),
         }
     }
 }
@@ -45,7 +49,7 @@ pub macro ops {
     ( $( $value:expr ),* $(,)? ) => {
         smallvec::smallvec![
             $(
-                $crate::operand::OperandValue::from($value)
+                $crate::operand::Operand::from($value.clone()) // TODO: can we optimize this '.clone()' ?
             ),*
         ]
     },
