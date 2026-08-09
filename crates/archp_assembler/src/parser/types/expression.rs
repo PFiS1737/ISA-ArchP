@@ -1,4 +1,7 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt::Display,
+};
 
 use thiserror::Error;
 
@@ -17,11 +20,32 @@ pub enum Expr<'src> {
     },
 }
 
+impl Display for Expr<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Expr::Num(n) => write!(f, "{}", n),
+            Expr::Ident(s) => write!(f, "{}", s),
+            Expr::Unary { op, rhs } => write!(f, "{}{}", op, rhs),
+            Expr::Binary { lhs, op, rhs } => write!(f, "({} {} {})", lhs, op, rhs),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnaryOp {
     Pos, // +
     Neg, // -
     Not, // ~
+}
+
+impl Display for UnaryOp {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self {
+            UnaryOp::Pos => "+",
+            UnaryOp::Neg => "-",
+            UnaryOp::Not => "~",
+        })
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -39,6 +63,26 @@ pub enum BinaryOp {
     And, // &
     Xor, // ^
     Or,  // |
+}
+
+impl Display for BinaryOp {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self {
+            BinaryOp::Mul => "*",
+            BinaryOp::Div => "/",
+            BinaryOp::Mod => "%",
+
+            BinaryOp::Add => "+",
+            BinaryOp::Sub => "-",
+
+            BinaryOp::Shl => "<<",
+            BinaryOp::Shr => ">>",
+
+            BinaryOp::And => "&",
+            BinaryOp::Xor => "^",
+            BinaryOp::Or => "|",
+        })
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
