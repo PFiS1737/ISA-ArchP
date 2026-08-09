@@ -57,13 +57,12 @@ fn unary(input: &str) -> IResult<&str, Expr<'_>> {
 }
 
 fn precedence(op: BinaryOp) -> u8 {
+    // NOTE: See https://git.sr.ht/~sourceware/binutils-gdb/tree/master/item/gas/expr.c
+    //       static operator_rankT op_rank[O_max] = { ... }
     match op {
-        BinaryOp::Mul | BinaryOp::Div | BinaryOp::Mod => 6,
-        BinaryOp::Add | BinaryOp::Sub => 5,
-        BinaryOp::Shl | BinaryOp::Shr => 4,
-        BinaryOp::And => 3,
-        BinaryOp::Xor => 2,
-        BinaryOp::Or => 1,
+        BinaryOp::Mul | BinaryOp::Div | BinaryOp::Mod | BinaryOp::Shl | BinaryOp::Shr => 3,
+        BinaryOp::And | BinaryOp::Xor | BinaryOp::Or => 2,
+        BinaryOp::Add | BinaryOp::Sub => 1,
     }
 }
 
@@ -210,22 +209,22 @@ mod tests {
 
     #[test]
     fn test_shift_precedence() {
-        // (1 + 2) << 3
+        // 1 + (2 << 3)
         assert_debug_snapshot!(parse_ok("1 + 2 << 3"), @"
         Binary {
-            lhs: Binary {
+            lhs: Num(
+                1,
+            ),
+            op: Add,
+            rhs: Binary {
                 lhs: Num(
-                    1,
-                ),
-                op: Add,
-                rhs: Num(
                     2,
                 ),
+                op: Shl,
+                rhs: Num(
+                    3,
+                ),
             },
-            op: Shl,
-            rhs: Num(
-                3,
-            ),
         }
         ");
     }
@@ -323,15 +322,15 @@ mod tests {
     fn test_complex_expression() {
         assert_debug_snapshot!(parse_ok("1 + 2 * 3 << 1 & 7 ^ 2 | ~4"), @"
         Binary {
-            lhs: Binary {
+            lhs: Num(
+                1,
+            ),
+            op: Add,
+            rhs: Binary {
                 lhs: Binary {
                     lhs: Binary {
                         lhs: Binary {
-                            lhs: Num(
-                                1,
-                            ),
-                            op: Add,
-                            rhs: Binary {
+                            lhs: Binary {
                                 lhs: Num(
                                     2,
                                 ),
@@ -340,28 +339,28 @@ mod tests {
                                     3,
                                 ),
                             },
+                            op: Shl,
+                            rhs: Num(
+                                1,
+                            ),
                         },
-                        op: Shl,
+                        op: And,
                         rhs: Num(
-                            1,
+                            7,
                         ),
                     },
-                    op: And,
+                    op: Xor,
                     rhs: Num(
-                        7,
+                        2,
                     ),
                 },
-                op: Xor,
-                rhs: Num(
-                    2,
-                ),
-            },
-            op: Or,
-            rhs: Unary {
-                op: Not,
-                rhs: Num(
-                    4,
-                ),
+                op: Or,
+                rhs: Unary {
+                    op: Not,
+                    rhs: Num(
+                        4,
+                    ),
+                },
             },
         }
         ");
