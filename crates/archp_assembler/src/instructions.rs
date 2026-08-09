@@ -347,7 +347,7 @@ mod tests {
         assert_snapshot!(cmd(&["r1", "r2"]), @"Error: Instruction 'add' requires 3 operands, got 2");
         assert_snapshot!(cmd(&["r1", "r2", "r3", "r4"]), @"Error: Instruction 'add' requires 3 operands, got 4");
         assert_snapshot!(cmd(&["r1", "r2", "rrr"]), @"Error: Invalid register: rrr");
-        assert_snapshot!(cmd(&["r1", "r2", "123"]), @"Error: Expected register, found immediate: 123");
+        assert_snapshot!(cmd(&["r1", "r2", "123"]), @"Error: Invalid register: 123");
 
         assert_snapshot!(cmd(&["r1", "r2", "r3"]), @"0000 000 000 00001 00010 0000000 00011");
     }

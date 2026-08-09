@@ -1,77 +1,50 @@
 use anyhow::{Result, bail};
 
-use crate::{assembler::Context, operand::OperandValue, parser::immediate::parse_imm};
+use crate::{assembler::Context, operand::OperandValue};
 
 pub fn parse_reg(ctx: &Context, op: &OperandValue) -> Result<u32> {
-    let reg = match op {
-        OperandValue::StringSlice(s) => ctx.constants.get(s).unwrap_or(s),
-        OperandValue::Integer(n) => err_expect_reg!(n),
+    let OperandValue::StringSlice(reg) = op else {
+        bail!("Invalid register: {}", op)
     };
 
+    let reg = ctx.constants.get(reg).unwrap_or(reg);
+
     Ok(match *reg {
-        r if let Some(n) = r.strip_prefix("r")
-            && let Ok(n) = n.parse::<u32>() =>
-        {
-            if n > 31 {
-                err_reg_out_of_range!(reg);
-            }
+        "r0" | "zero" => 0,
+        "r1" | "ra" => 1,
+        "r2" | "sp" => 2,
+        "r3" | "gp" => 3,
+        "r4" | "tp" => 4,
+        "r5" | "t0" => 5,
+        "r6" | "t1" => 6,
+        "r7" | "t2" => 7,
+        "r8" | "s0" | "fp" => 8,
+        "r9" | "s1" => 9,
+        "r10" | "a0" => 10,
+        "r11" | "a1" => 11,
+        "r12" | "a2" => 12,
+        "r13" | "a3" => 13,
+        "r14" | "a4" => 14,
+        "r15" | "a5" => 15,
+        "r16" | "a6" => 16,
+        "r17" | "a7" => 17,
+        "r18" | "s2" => 18,
+        "r19" | "s3" => 19,
+        "r20" | "s4" => 20,
+        "r21" | "s5" => 21,
+        "r22" | "s6" => 22,
+        "r23" | "s7" => 23,
+        "r24" | "s8" => 24,
+        "r25" | "s9" => 25,
+        "r26" | "s10" => 26,
+        "r27" | "s11" => 27,
+        "r28" | "t3" => 28,
+        "r29" | "t4" => 29,
+        "r30" | "t5" => 30,
+        "r31" | "t6" => 31,
 
-            n
-        },
-
-        "zero" => 0,
-        "ra" => 1,
-        "sp" => 2,
-        "gp" => 3,
-        "tp" => 4,
-        "t0" => 5,
-        "t1" => 6,
-        "t2" => 7,
-        "s0" => 8,
-        "s1" => 9,
-        "a0" => 10,
-        "a1" => 11,
-        "a2" => 12,
-        "a3" => 13,
-        "a4" => 14,
-        "a5" => 15,
-        "a6" => 16,
-        "a7" => 17,
-        "s2" => 18,
-        "s3" => 19,
-        "s4" => 20,
-        "s5" => 21,
-        "s6" => 22,
-        "s7" => 23,
-        "s8" => 24,
-        "s9" => 25,
-        "s10" => 26,
-        "s11" => 27,
-        "t3" => 28,
-        "t4" => 29,
-        "t5" => 30,
-        "t6" => 31,
-
-        "fp" => 8,
-
-        _ => {
-            if parse_imm(ctx, op).is_ok() {
-                err_expect_reg!(reg)
-            } else {
-                err_inval_reg!(reg)
-            }
-        },
+        _ => bail!("Invalid register: {}", reg),
     })
-}
-
-macro err_expect_reg($e:expr) {
-    bail!("Expected register, found immediate: {}", $e)
-}
-macro err_inval_reg($e:expr) {
-    bail!("Invalid register: {}", $e)
-}
-macro err_reg_out_of_range($e:expr) {
-    bail!("Register number out of range (0..=31): {}", $e)
 }
 
 #[cfg(test)]
@@ -94,7 +67,7 @@ mod tests {
         assert_snapshot!(f("r9"), @"9");
         assert_snapshot!(f("r27"), @"27");
         assert_snapshot!(f("invalid"), @"Error: Invalid register: invalid");
-        assert_snapshot!(f("FOO"), @"Error: Expected register, found immediate: 42");
+        assert_snapshot!(f("FOO"), @"Error: Invalid register: 42");
         assert_snapshot!(f("BAR"), @"Error: Invalid register: BAR");
         assert_snapshot!(f("R0"), @"0");
         assert_snapshot!(f("R1"), @"1");
