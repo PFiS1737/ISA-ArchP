@@ -1,5 +1,4 @@
 mod branch;
-mod branch_zero;
 mod inc_dec;
 mod jump;
 mod load_imm;
@@ -7,9 +6,8 @@ mod mv;
 mod negate;
 mod not;
 mod set;
-mod set_zero;
 
-use std::{collections::HashMap, iter::successors, sync::LazyLock};
+use std::{collections::HashMap, sync::LazyLock};
 
 use anyhow::{Result, bail};
 
@@ -19,8 +17,7 @@ use crate::{
     parser::{address::parse_address, immediate::parse_imm_as, register::parse_reg},
 };
 
-type ExpandRet<'a> = Instr<'a>;
-type ExpandFn = for<'a> fn(&'a str, &[OperandValue<'a>]) -> ExpandRet<'a>;
+type ExpandFn = for<'a> fn(&[OperandValue<'a>]) -> Instr<'a>;
 
 inventory::collect!(&'static dyn PseudoInstruction);
 
@@ -28,15 +25,13 @@ pub static PSEUDO_INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static dyn Pseu
     LazyLock::new(|| {
         let mut map = HashMap::new();
         for entry in inventory::iter::<&'static dyn PseudoInstruction> {
-            for name in entry.names() {
-                map.insert(*name, *entry);
-            }
+            map.insert(entry.name(), *entry);
         }
         map
     });
 
 pub trait PseudoInstruction: Send + Sync {
-    fn names(&self) -> &'static [&'static str];
+    fn name(&self) -> &'static str;
     fn operand_types(&self) -> &'static [OperandType];
     fn expander(&self) -> ExpandFn;
 
@@ -44,35 +39,23 @@ pub trait PseudoInstruction: Send + Sync {
         &self,
         ctx: &Context,
         pc: u32,
-        name: &'a str,
         operands: &[OperandValue<'a>],
-    ) -> Result<ExpandRet<'a>> {
-        self.assert_operand_format(ctx, pc, name, operands)?;
+    ) -> Result<Instr<'a>> {
+        self.assert_operand_format(ctx, pc, operands)?;
 
-        Ok(
-            successors(Some((self.expander())(name, operands)), |(name, ops)| {
-                let ps_instr = PSEUDO_INSTRUCTIONS.get(*name)?;
-
-                ps_instr.assert_operand_format(ctx, pc, name, ops).ok()?;
-
-                Some((ps_instr.expander())(name, ops))
-            })
-            .last()
-            .unwrap(), // INFO: Safe because at least the first expansion exists
-        )
+        Ok((self.expander())(operands))
     }
 
     fn assert_operand_format(
         &self,
         ctx: &Context,
         pc: u32,
-        name: &str,
         operands: &[OperandValue],
     ) -> Result<()> {
         if operands.len() != self.operand_types().len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",
-                name,
+                self.name(),
                 self.operand_types().len(),
                 operands.len()
             );
@@ -100,7 +83,7 @@ macro impl_pseudo_instruction {
     (
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
-            names: $names:tt,
+            name: $name:literal,
             operand_types: $types:tt,
             expander: $expander:expr,
         }
@@ -109,8 +92,8 @@ macro impl_pseudo_instruction {
         $vis struct $id;
 
         impl $crate::pseudo_instructions::PseudoInstruction for $id {
-            fn names(&self) -> &'static [&'static str] {
-                &$names
+            fn name(&self) -> &'static str {
+                $name
             }
             fn operand_types(&self) -> &'static [OperandType] {
                 $crate::operand::op_types! $types
@@ -138,25 +121,7 @@ macro pseudo_instruction {
         $crate::pseudo_instructions::impl_pseudo_instruction! {
             $( #[doc = $doc] )*
             $vis $id {
-                names: [ $name ],
-                operand_types: $types,
-                expander: $expander,
-            }
-        }
-    },
-
-    (
-        $( #[doc = $doc:literal] )*
-        $vis:vis $id:ident {
-            names: $names:tt,
-            operand_types: $types:tt,
-            expander: $expander:expr,
-        }
-    ) => {
-        $crate::pseudo_instructions::impl_pseudo_instruction! {
-            $( #[doc = $doc] )*
-            $vis $id {
-                names: $names,
+                name: $name,
                 operand_types: $types,
                 expander: $expander,
             }

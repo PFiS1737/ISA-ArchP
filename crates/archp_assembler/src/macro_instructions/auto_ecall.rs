@@ -1,6 +1,6 @@
 use crate::{
     macro_instructions::{ExpandFn, macro_instruction},
-    operand::op_values,
+    operand::ops,
 };
 
 macro_instruction! {
@@ -14,8 +14,5 @@ const F: ExpandFn = |_, _, _, ops| {
     if ops.len() != 1 {
         return None;
     }
-    Some(vec![
-        ("li", op_values!["r17", ops[0]]),
-        ("ecall", op_values![]),
-    ])
+    Some(vec![("li", ops!["r17", ops[0]]), ("ecall", ops![])])
 };

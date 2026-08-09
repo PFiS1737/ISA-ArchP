@@ -1,26 +1,21 @@
-use crate::{operand::op_values, pseudo_instructions::pseudo_instruction};
+use crate::{operand::ops, pseudo_instructions::pseudo_instruction};
 
-// inc rd  =>  addi rd rd 1
-// dec rd  =>  subi rd rd 1
 pseudo_instruction! {
-    pub IncDec {
-        names: [ "inc", "dec" ],
+    pub Inc {
+        name: "inc",
         operand_types: [ RegD ],
-        expander: |name, ops| {
-            let inst = match name {
-                "inc" => "addi",
-                "dec" => "subi",
-                _ => unreachable!(),
-            };
-
-            (
-                inst,
-                op_values![
-                    ops[0],
-                    ops[0],
-                    1,
-                ],
-            )
-        },
+        expander: F!("addi"),
     }
+}
+
+pseudo_instruction! {
+    pub Dec {
+        name: "dec",
+        operand_types: [ RegD ],
+        expander: F!("subi"),
+    }
+}
+
+macro F($instr:literal) {
+    |ops| ($instr, ops![ops[0], ops[0], 1])
 }

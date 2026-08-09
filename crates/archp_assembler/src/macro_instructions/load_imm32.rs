@@ -1,6 +1,6 @@
 use crate::{
     macro_instructions::{ExpandFn, macro_instruction},
-    operand::op_values,
+    operand::ops,
     parser::immediate::parse_imm,
     utils::sig_ext::sign_extend,
 };
@@ -17,10 +17,10 @@ const F: ExpandFn = |ctx, _, _, ops| {
     if let Ok((lo, hi)) = parse_imm(ctx, &ops[1]).map(|imm| imm.split(12, true))
         && hi != 0
     {
-        let mut ret = vec![("lui", op_values![ops[0], hi])];
+        let mut ret = vec![("lui", ops![ops[0], hi])];
 
         if lo != 0 {
-            ret.push(("addi", op_values![ops[0], ops[0], sign_extend(lo, 12)]))
+            ret.push(("addi", ops![ops[0], ops[0], sign_extend(lo, 12)]))
         }
 
         Some(ret)

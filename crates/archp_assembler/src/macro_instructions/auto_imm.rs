@@ -1,6 +1,6 @@
 use crate::{
     macro_instructions::{ExpandFn, macro_instruction},
-    operand::op_values,
+    operand::ops,
     parser::immediate::parse_imm,
 };
 
@@ -48,7 +48,7 @@ const F1: ExpandFn = |ctx, _, name, ops| {
     };
 
     if let Ok(imm) = parse_imm(ctx, &ops[2]) {
-        Some(vec![(inst, op_values![ops[0], ops[1], imm])])
+        Some(vec![(inst, ops![ops[0], ops[1], imm])])
     } else {
         None
     }
@@ -68,11 +68,11 @@ macro_instruction! {
 const F2: ExpandFn = |ctx, _, name, ops| {
     if let Ok(imm) = parse_imm(ctx, &ops[1]) {
         if imm.is_zero() {
-            Some(vec![(name, op_values![ops[0], "r0", ops[2]])])
+            Some(vec![(name, ops![ops[0], "r0", ops[2]])])
         } else {
             Some(vec![
-                ("li", op_values!["r31", imm]),
-                (name, op_values![ops[0], "r31", ops[2]]),
+                ("li", ops!["r31", imm]),
+                (name, ops![ops[0], "r31", ops[2]]),
             ])
         }
     } else {
@@ -91,11 +91,11 @@ macro_instruction! {
 const F3: ExpandFn = |ctx, _, name, ops| {
     if let Ok(imm) = parse_imm(ctx, &ops[2]) {
         if imm.is_zero() {
-            Some(vec![(name, op_values![ops[0], ops[1], "r0"])])
+            Some(vec![(name, ops![ops[0], ops[1], "r0"])])
         } else {
             Some(vec![
-                ("li", op_values!["r31", imm]),
-                (name, op_values![ops[0], ops[1], "r31"]),
+                ("li", ops!["r31", imm]),
+                (name, ops![ops[0], ops[1], "r31"]),
             ])
         }
     } else {

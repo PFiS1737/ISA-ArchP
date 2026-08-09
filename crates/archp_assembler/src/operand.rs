@@ -41,7 +41,7 @@ impl Display for OperandValue<'_> {
     }
 }
 
-pub macro op_values {
+pub macro ops {
     ( $( $value:expr ),* $(,)? ) => {
         smallvec::smallvec![
             $(

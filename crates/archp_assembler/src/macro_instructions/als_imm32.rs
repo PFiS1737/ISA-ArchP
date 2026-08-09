@@ -1,6 +1,6 @@
 use crate::{
     macro_instructions::{ExpandFn, macro_instruction},
-    operand::op_values,
+    operand::ops,
     parser::immediate::parse_imm,
 };
 
@@ -30,8 +30,8 @@ const F: ExpandFn = |ctx, _, name, ops| {
         && hi != 0
     {
         Some(vec![
-            ("li", op_values!["r31", ops[2]]),
-            (inst, op_values![ops[0], ops[1], "r31"]),
+            ("li", ops!["r31", ops[2]]),
+            (inst, ops![ops[0], ops[1], "r31"]),
         ])
     } else {
         None
