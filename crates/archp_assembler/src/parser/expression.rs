@@ -115,9 +115,8 @@ pub fn parse_expr(input: &str) -> Result<(&str, Expr<'_>)> {
 
 #[cfg(test)]
 mod tests {
-    use insta::assert_debug_snapshot;
-
     use super::*;
+    use crate::testkit::assert_snapshot;
 
     fn parse_ok(input: &str) -> Expr<'_> {
         let (rest, expr) = parse_expr(input).expect("parse failed");
@@ -127,282 +126,69 @@ mod tests {
 
     #[test]
     fn test_number() {
-        assert_debug_snapshot!(parse_ok("42"), @"
-        Num(
-            42,
-        )
-        ");
+        assert_snapshot!(parse_ok("42"), @"42");
     }
 
     #[test]
     fn test_ident() {
-        assert_debug_snapshot!(parse_ok("abc123"), @r#"
-        Ident(
-            "abc123",
-        )
-        "#);
+        assert_snapshot!(parse_ok("abc123"), @"abc123");
     }
 
     #[test]
     fn test_unary_all() {
-        assert_debug_snapshot!(parse_ok("+1"), @"
-        Unary {
-            op: Pos,
-            rhs: Num(
-                1,
-            ),
-        }
-        ");
-
-        assert_debug_snapshot!(parse_ok("-1"), @"
-        Unary {
-            op: Neg,
-            rhs: Num(
-                1,
-            ),
-        }
-        ");
-
-        assert_debug_snapshot!(parse_ok("~1"), @"
-        Unary {
-            op: Not,
-            rhs: Num(
-                1,
-            ),
-        }
-        ");
+        assert_snapshot!(parse_ok("+1"), @"+1");
+        assert_snapshot!(parse_ok("-1"), @"-1");
+        assert_snapshot!(parse_ok("~1"), @"~1");
     }
 
     #[test]
     fn test_mul_div_mod_precedence() {
-        // 1 + (2 * 3) / 2 % 2
-        assert_debug_snapshot!(parse_ok("1 + 2 * 3 / 2 % 2"), @"
-        Binary {
-            lhs: Num(
-                1,
-            ),
-            op: Add,
-            rhs: Binary {
-                lhs: Binary {
-                    lhs: Binary {
-                        lhs: Num(
-                            2,
-                        ),
-                        op: Mul,
-                        rhs: Num(
-                            3,
-                        ),
-                    },
-                    op: Div,
-                    rhs: Num(
-                        2,
-                    ),
-                },
-                op: Mod,
-                rhs: Num(
-                    2,
-                ),
-            },
-        }
-        ");
+        assert_snapshot!(parse_ok("1 + 2 * 3 / 2 % 2"), @"(1 + (((2 * 3) / 2) % 2))");
     }
 
     #[test]
     fn test_shift_precedence() {
-        // 1 + (2 << 3)
-        assert_debug_snapshot!(parse_ok("1 + 2 << 3"), @"
-        Binary {
-            lhs: Num(
-                1,
-            ),
-            op: Add,
-            rhs: Binary {
-                lhs: Num(
-                    2,
-                ),
-                op: Shl,
-                rhs: Num(
-                    3,
-                ),
-            },
-        }
-        ");
+        assert_snapshot!(parse_ok("1 + 2 << 3"), @"(1 + (2 << 3))");
     }
 
     #[test]
     fn test_and_xor_or_precedence() {
-        // ((1 & 2) ^ 3) | 4
-        assert_debug_snapshot!(parse_ok("1 & 2 ^ 3 | 4"), @"
-        Binary {
-            lhs: Binary {
-                lhs: Binary {
-                    lhs: Num(
-                        1,
-                    ),
-                    op: And,
-                    rhs: Num(
-                        2,
-                    ),
-                },
-                op: Xor,
-                rhs: Num(
-                    3,
-                ),
-            },
-            op: Or,
-            rhs: Num(
-                4,
-            ),
-        }
-        ");
+        assert_snapshot!(parse_ok("1 & 2 ^ 3 | 4"), @"(((1 & 2) ^ 3) | 4)");
     }
 
     #[test]
     fn test_left_associativity() {
-        // ((1 - 2) - 3)
-        assert_debug_snapshot!(parse_ok("1 - 2 - 3"), @"
-        Binary {
-            lhs: Binary {
-                lhs: Num(
-                    1,
-                ),
-                op: Sub,
-                rhs: Num(
-                    2,
-                ),
-            },
-            op: Sub,
-            rhs: Num(
-                3,
-            ),
-        }
-        ");
+        assert_snapshot!(parse_ok("1 - 2 - 3"), @"((1 - 2) - 3)");
     }
 
     #[test]
     fn test_parentheses() {
-        assert_debug_snapshot!(parse_ok("(1 + 2) * 3"), @"
-        Binary {
-            lhs: Binary {
-                lhs: Num(
-                    1,
-                ),
-                op: Add,
-                rhs: Num(
-                    2,
-                ),
-            },
-            op: Mul,
-            rhs: Num(
-                3,
-            ),
-        }
-        ");
+        assert_snapshot!(parse_ok("(1 + 2) * 3"), @"((1 + 2) * 3)");
     }
 
     #[test]
     fn test_unary_with_binary() {
-        assert_debug_snapshot!(parse_ok("-1 + 2"), @"
-        Binary {
-            lhs: Unary {
-                op: Neg,
-                rhs: Num(
-                    1,
-                ),
-            },
-            op: Add,
-            rhs: Num(
-                2,
-            ),
-        }
-        ");
+        assert_snapshot!(parse_ok("-1 + 2"), @"(-1 + 2)");
     }
 
     #[test]
     fn test_complex_expression() {
-        assert_debug_snapshot!(parse_ok("1 + 2 * 3 << 1 & 7 ^ 2 | ~4"), @"
-        Binary {
-            lhs: Num(
-                1,
-            ),
-            op: Add,
-            rhs: Binary {
-                lhs: Binary {
-                    lhs: Binary {
-                        lhs: Binary {
-                            lhs: Binary {
-                                lhs: Num(
-                                    2,
-                                ),
-                                op: Mul,
-                                rhs: Num(
-                                    3,
-                                ),
-                            },
-                            op: Shl,
-                            rhs: Num(
-                                1,
-                            ),
-                        },
-                        op: And,
-                        rhs: Num(
-                            7,
-                        ),
-                    },
-                    op: Xor,
-                    rhs: Num(
-                        2,
-                    ),
-                },
-                op: Or,
-                rhs: Unary {
-                    op: Not,
-                    rhs: Num(
-                        4,
-                    ),
-                },
-            },
-        }
-        ");
+        assert_snapshot!(parse_ok("1 + 2 * 3 << 1 & 7 ^ 2 | ~4"), @"(1 + (((((2 * 3) << 1) & 7) ^ 2) | ~4))");
     }
 
     #[test]
     fn test_whitespace() {
-        assert_debug_snapshot!(parse_ok(" 1  +   2 *  3 "), @"
-        Binary {
-            lhs: Num(
-                1,
-            ),
-            op: Add,
-            rhs: Binary {
-                lhs: Num(
-                    2,
-                ),
-                op: Mul,
-                rhs: Num(
-                    3,
-                ),
-            },
-        }
-        ");
+        assert_snapshot!(parse_ok(" 1  +   2 *  3 "), @"(1 + (2 * 3))");
     }
 
     #[test]
     fn test_number_hex() {
-        assert_debug_snapshot!(parse_ok("0x2A"), @"
-        Num(
-            42,
-        )
-        ");
+        assert_snapshot!(parse_ok("0x2A"), @"42");
     }
 
     #[test]
     fn test_number_binary() {
-        assert_debug_snapshot!(parse_ok("0b101010"), @"
-        Num(
-            42,
-        )
-        ");
+        assert_snapshot!(parse_ok("0b101010"), @"42");
     }
 
     #[test]
