@@ -1,6 +1,6 @@
-use anyhow::{Result, anyhow, bail};
+use anyhow::{anyhow, bail};
 use nom::{
-    IResult, Parser,
+    Parser,
     character::complete::{char, space1},
     combinator::opt,
     sequence::{preceded, terminated},
@@ -10,18 +10,18 @@ use smallvec::SmallVec;
 use crate::{
     operand::Operand,
     parser::{
-        ident,
+        Result, ident,
         operand::operand,
         types::grammar::{Line, Source},
         ws,
     },
 };
 
-fn label(input: &str) -> IResult<&str, &str> {
+fn label(input: &str) -> Result<'_, &str> {
     terminated(ident, ws(char(':'))).parse(input)
 }
 
-fn operands<'src>(input: &'src str) -> IResult<&'src str, SmallVec<[Operand<'src>; 3]>> {
+fn operands(input: &str) -> Result<'_, SmallVec<[Operand<'_>; 3]>> {
     let mut out = SmallVec::new();
 
     let (input, _) = operand(input, &mut out)?;
@@ -41,7 +41,7 @@ fn operands<'src>(input: &'src str) -> IResult<&'src str, SmallVec<[Operand<'src
     Ok((input, out))
 }
 
-fn instr<'src>(line_no: usize, input: &'src str) -> IResult<&'src str, Line<'src>> {
+fn instr(line_no: usize, input: &str) -> Result<'_, Line<'_>> {
     let raw = input;
 
     let (input, name) = ident(input)?;
@@ -66,7 +66,7 @@ fn strip_comment(input: &str) -> &str {
     &input[..end]
 }
 
-fn parse_line<'src>(line_no: usize, line: &'src str) -> Result<Vec<Line<'src>>> {
+fn parse_line(line_no: usize, line: &str) -> anyhow::Result<Vec<Line<'_>>> {
     let line = strip_comment(line).trim();
 
     if line.is_empty() {
@@ -97,7 +97,7 @@ fn parse_line<'src>(line_no: usize, line: &'src str) -> Result<Vec<Line<'src>>> 
     Ok(out)
 }
 
-pub fn parse_source<'src>(input: &'src str) -> Result<Source<'src>> {
+pub fn parse_source(input: &str) -> anyhow::Result<Source<'_>> {
     let mut lines = Vec::new();
 
     for (line_no, line) in input.lines().enumerate() {

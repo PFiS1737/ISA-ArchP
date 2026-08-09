@@ -1,43 +1,42 @@
-use anyhow::{Result, anyhow};
+use anyhow::anyhow;
 use nom::{
-    Err, IResult, Parser,
+    Parser,
     branch::alt,
     bytes::complete::tag,
     character::complete::{bin_digit1, char, digit1, hex_digit1},
     combinator::{map, map_res, opt},
-    error::{Error, ErrorKind, FromExternalError},
     sequence::preceded,
 };
 
-use crate::parser::{ident, parens, types::expression::*, ws};
+use crate::parser::{Result, ident, parens, types::expression::*, ws};
 
-fn number(input: &str) -> IResult<&str, Expr<'_>> {
-    fn dec(input: &str) -> IResult<&str, i64> {
-        map_res(digit1, |s: &str| s.parse::<i64>()).parse(input)
-    }
-
-    fn hex(input: &str) -> IResult<&str, i64> {
-        map_res(preceded(tag("0x"), hex_digit1), |s: &str| {
-            i64::from_str_radix(s, 16)
-        })
-        .parse(input)
-    }
-
-    fn binary(input: &str) -> IResult<&str, i64> {
-        map_res(preceded(tag("0b"), bin_digit1), |s: &str| {
-            i64::from_str_radix(s, 2)
-        })
-        .parse(input)
-    }
-
-    map(ws(alt((hex, binary, dec))), Expr::Num).parse(input)
+fn binary(input: &str) -> Result<'_, i64> {
+    map_res(preceded(tag("0b"), bin_digit1), |s: &str| {
+        i64::from_str_radix(s, 2)
+    })
+    .parse(input)
 }
 
-fn primary(input: &str) -> IResult<&str, Expr<'_>> {
+fn decimal(input: &str) -> Result<'_, i64> {
+    map_res(digit1, |s: &str| s.parse::<i64>()).parse(input)
+}
+
+fn hexadecimal(input: &str) -> Result<'_, i64> {
+    map_res(preceded(tag("0x"), hex_digit1), |s: &str| {
+        i64::from_str_radix(s, 16)
+    })
+    .parse(input)
+}
+
+fn number(input: &str) -> Result<'_, Expr<'_>> {
+    map(ws(alt((hexadecimal, binary, decimal))), Expr::Num).parse(input)
+}
+
+fn primary(input: &str) -> Result<'_, Expr<'_>> {
     alt((number, map(ident, Expr::Ident), parens(expr))).parse(input)
 }
 
-fn unary(input: &str) -> IResult<&str, Expr<'_>> {
+fn unary(input: &str) -> Result<'_, Expr<'_>> {
     let (input, opt_op) = opt(ws(alt((char('+'), char('-'), char('~'))))).parse(input)?;
 
     if let Some(op) = opt_op {
@@ -51,13 +50,7 @@ fn unary(input: &str) -> IResult<&str, Expr<'_>> {
         };
 
         if let Expr::Num(n) = rhs {
-            Ok((
-                input,
-                Expr::Num(eval_unary(op, n).map_err(|e| {
-                    // TODO: map EvalError
-                    Err::Failure(Error::from_external_error(input, ErrorKind::Fail, e))
-                })?),
-            ))
+            Ok((input, Expr::Num(eval_unary(op, n)?)))
         } else {
             Ok((input, Expr::Unary {
                 op,
@@ -79,7 +72,7 @@ fn precedence(op: BinaryOp) -> u8 {
     }
 }
 
-fn binary_op(input: &str) -> IResult<&str, BinaryOp> {
+fn binary_op(input: &str) -> Result<'_, BinaryOp> {
     ws(alt((
         map(tag("<<"), |_| BinaryOp::Shl),
         map(tag(">>"), |_| BinaryOp::Shr),
@@ -95,7 +88,7 @@ fn binary_op(input: &str) -> IResult<&str, BinaryOp> {
     .parse(input)
 }
 
-fn expr_bp(input: &str, min_bp: u8) -> IResult<&str, Expr<'_>> {
+fn expr_bp(input: &str, min_bp: u8) -> Result<'_, Expr<'_>> {
     let (mut input, mut lhs) = unary(input)?;
 
     while let Ok((next_input, op)) = binary_op(input) {
@@ -109,10 +102,7 @@ fn expr_bp(input: &str, min_bp: u8) -> IResult<&str, Expr<'_>> {
         if let Expr::Num(l) = lhs
             && let Expr::Num(r) = rhs
         {
-            lhs = Expr::Num(eval_binary(op, l, r).map_err(|e| {
-                // TODO: map EvalError
-                Err::Failure(Error::from_external_error(input, ErrorKind::Fail, e))
-            })?);
+            lhs = Expr::Num(eval_binary(op, l, r)?);
         } else {
             lhs = Expr::Binary {
                 lhs: Box::new(lhs),
@@ -127,11 +117,11 @@ fn expr_bp(input: &str, min_bp: u8) -> IResult<&str, Expr<'_>> {
     Ok((input, lhs))
 }
 
-pub fn expr(input: &str) -> IResult<&str, Expr<'_>> {
+pub fn expr(input: &str) -> Result<'_, Expr<'_>> {
     expr_bp(input, 0)
 }
 
-pub fn parse_expr(input: &str) -> Result<(&str, Expr<'_>)> {
+pub fn parse_expr(input: &str) -> anyhow::Result<(&str, Expr<'_>)> {
     expr(input).map_err(|e| anyhow!("Error parsing expression '{}': {}", input, e))
 }
 

@@ -1,18 +1,16 @@
-use nom::{
-    IResult, Parser, bytes::complete::take_until, character::complete::char, sequence::delimited,
-};
+use nom::{Parser, bytes::complete::take_until, character::complete::char, sequence::delimited};
 use smallvec::SmallVec;
 
 use crate::{
     operand::Operand,
-    parser::{expression::expr, ident, parens, types::expression::Expr},
+    parser::{Result, expression::expr, ident, parens, types::expression::Expr},
 };
 
-fn string_literal(input: &str) -> IResult<&str, &str> {
+fn string_literal(input: &str) -> Result<'_, &str> {
     delimited(char('"'), take_until("\""), char('"')).parse(input)
 }
 
-fn unwrap_expr<'src>(e: Expr<'src>) -> Operand<'src> {
+fn unwrap_expr(e: Expr) -> Operand {
     match e {
         Expr::Num(n) => Operand::Num(n),
         Expr::Ident(s) => Operand::Ident(s),
@@ -20,10 +18,7 @@ fn unwrap_expr<'src>(e: Expr<'src>) -> Operand<'src> {
     }
 }
 
-pub fn operand<'src>(
-    input: &'src str,
-    out: &mut SmallVec<[Operand<'src>; 3]>,
-) -> IResult<&'src str, ()> {
+pub fn operand<'a>(input: &'a str, out: &mut SmallVec<[Operand<'a>; 3]>) -> Result<'a, ()> {
     // case 1: "string"
     if let Ok((rest, s)) = string_literal(input) {
         out.push(Operand::String(s));
