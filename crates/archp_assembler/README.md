@@ -58,7 +58,6 @@ In this section:
   - `mv rd rs1` => `addi rd rs1 0`
   - `inc rd` => `addi rd rd 1`
   - `dec rd` => `subi rd rd 1`
-  - `clr rd` => `addi rd r0 0`
   - `neg rd rs1` => `sub rd r0 rs1`
 - macros:
   - When using register series instructions, if the third operand is a numeric literal, it will be automatically replaced with an immediate series instruction.

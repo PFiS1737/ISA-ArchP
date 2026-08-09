@@ -71,53 +71,53 @@ j main
 
 init_screen:
   # 画背景
-  clr x
-  clr y
+  li x, 0
+  li y, 0
   li color, COLOR_BACK
   draw_back:
     ecall 0x10000000 ; set pixel
     inc x
     blt x, SCREEN_WIDTH, draw_back
     inc y
-    clr x
+    li x, 0
     blt y, SCREEN_HEIGHT, draw_back
 
   # 画格子
-  clr x
-  clr y
+  li x, 0
+  li y, 0
   li color, COLOR_HIDDEN
   draw_grid:
     ecall 0x10000000 ; set pixel
     inc x
     blt x, GRID_WIDTH, draw_grid
     inc y
-    clr x
+    li x, 0
     blt y, GRID_HEIGHT, draw_grid
 
   # 画分隔线
-  clr x
-  clr y
+  li x, 0
+  li y, 0
   li color, COLOR_GRID_LINE
   draw_grid_line_row:
     ecall 0x10000000 ; set pixel
     inc x
     blt x, GRID_WIDTH, draw_grid_line_row
     add y, y, TILE_SIZE
-    clr x
+    li x, 0
     blt y, GRID_HEIGHT, draw_grid_line_row
-  clr x
-  clr y
+  li x, 0
+  li y, 0
   draw_grid_line_col:
     ecall 0x10000000 ; set pixel
     inc y
     blt y, GRID_HEIGHT, draw_grid_line_col
     add x, x, TILE_SIZE
-    clr y
+    li y, 0
     blt x, GRID_WIDTH, draw_grid_line_col
 
   # 画光标
-  clr cursor_x
-  clr cursor_y
+  li cursor_x, 0
+  li cursor_y, 0
   li color, COLOR_CURSOR
   call update_cursor
 
@@ -130,7 +130,7 @@ init_mines:
   ecall 1 ; print int
   li a0, 10 ; '\n'
   ecall 11 ; putchar
-  clr i
+  li i, 0
 
   init_mines_loop:
     ecall 41 ; random int
@@ -157,8 +157,8 @@ init_mines:
 
 
 init_mine_counts:
-  clr x
-  clr y
+  li x, 0
+  li y, 0
   li addr, BASE_ADDR
   init_mine_counts_loop:
     call count_around_mines
@@ -168,7 +168,7 @@ init_mine_counts:
     inc x
     add addr, addr, 4
     blt x, GRID_COLS, init_mine_counts_loop
-    clr x
+    li x, 0
     inc y
     blt y, GRID_ROWS, init_mine_counts_loop
 
@@ -176,7 +176,7 @@ init_mine_counts:
 
 
 count_around_mines:
-  clr cnt
+  li cnt, 0
   li ty, -1
 
   dy_loop:
@@ -260,8 +260,8 @@ move_cursor:
 
 
 update_cursor:
-  clr i
-  clr j
+  li i, 0
+  li j, 0
 
   mul x, cursor_x, TILE_SIZE
   mul y, cursor_y, TILE_SIZE
@@ -272,7 +272,7 @@ update_cursor:
     inc i
     ble i, TILE_SIZE, update_cursor_loop1
     mul x, cursor_x, TILE_SIZE
-    clr i
+    li i, 0
     add y, y, TILE_SIZE
     inc j
     beq j, 1, update_cursor_loop1
@@ -286,7 +286,7 @@ update_cursor:
     inc i
     ble i, TILE_SIZE, update_cursor_loop2
     mul y, cursor_y, TILE_SIZE
-    clr i
+    li i, 0
     add x, x, TILE_SIZE
     inc j
     beq j, 3, update_cursor_loop2
@@ -436,8 +436,8 @@ toggle_flag:
 
 
 draw_tile:
-  clr i
-  clr j
+  li i, 0
+  li j, 0
   mul x, arg_x, TILE_SIZE
   mul y, arg_y, TILE_SIZE
   inc x
@@ -450,7 +450,7 @@ draw_tile:
     mul x, arg_x, TILE_SIZE
     inc x
     inc y
-    clr i
+    li i, 0
     inc j
     blt j, 7, draw_tile_loop
 
@@ -481,7 +481,7 @@ draw_flag:
   sub x, x, 2
   inc y
   li color, COLOR_POLE
-  clr i
+  li i, 0
   draw_pole:
     ecall 0x10000000 ; set pixel
     inc x
@@ -557,8 +557,8 @@ draw_num:
 draw_num1:
   li color, COLOR_REVEALED
   call draw_tile
-  clr i
-  clr j
+  li i, 0
+  li j, 0
   mul x, arg_x, TILE_SIZE
   mul y, arg_y, TILE_SIZE
   add x, x, 4
@@ -576,8 +576,8 @@ draw_num1:
 draw_num2:
   li color, COLOR_REVEALED
   call draw_tile
-  clr i
-  clr j
+  li i, 0
+  li j, 0
   mul x, arg_x, TILE_SIZE
   mul y, arg_y, TILE_SIZE
   add x, x, 3
@@ -590,7 +590,7 @@ draw_num2:
     blt i, 3, draw_num2_loop
     sub x, x, 3
     add y, y, 2
-    clr i
+    li i, 0
     inc j
     blt j, 3, draw_num2_loop
     sub y, y, 3
@@ -605,8 +605,8 @@ draw_num2:
 draw_num3:
   li color, COLOR_REVEALED
   call draw_tile
-  clr i
-  clr j
+  li i, 0
+  li j, 0
   mul x, arg_x, TILE_SIZE
   mul y, arg_y, TILE_SIZE
   add x, x, 3
@@ -619,7 +619,7 @@ draw_num3:
     blt i, 3, draw_num3_loop
     sub x, x, 3
     add y, y, 2
-    clr i
+    li i, 0
     inc j
     blt j, 3, draw_num3_loop
     add x, x, 2
@@ -634,7 +634,7 @@ draw_num3:
 draw_num4:
   li color, COLOR_REVEALED
   call draw_tile
-  clr i
+  li i, 0
   mul x, arg_x, TILE_SIZE
   mul y, arg_y, TILE_SIZE
   add x, x, 3
@@ -662,8 +662,8 @@ draw_num4:
 draw_num5:
   li color, COLOR_REVEALED
   call draw_tile
-  clr i
-  clr j
+  li i, 0
+  li j, 0
   mul x, arg_x, TILE_SIZE
   mul y, arg_y, TILE_SIZE
   add x, x, 3
@@ -676,7 +676,7 @@ draw_num5:
     blt i, 3, draw_num5_loop
     sub x, x, 3
     add y, y, 2
-    clr i
+    li i, 0
     inc j
     blt j, 3, draw_num5_loop
     sub y, y, 5
@@ -734,10 +734,10 @@ main:
     call draw_tile
     call draw_mine
 
-    clr ny
+    li ny, 0
     li addr, BASE_ADDR
     lose_row_loop:
-      clr nx
+      li nx, 0
     lose_col_loop:
       bne nx, cursor_x, lose_loop_cont
       bne ny, cursor_y, lose_loop_cont

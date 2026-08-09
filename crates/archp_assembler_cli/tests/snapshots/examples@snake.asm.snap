@@ -6,8 +6,8 @@ success: true
 exit_code: 0
 ----- stdout -----
 0x14000162 # jal r0 main                                 [j main]
-0x01140000 # addi x r0 0                                 [clr x]                                                 <label: init_screen>
-0x01160000 # addi y r0 0                                 [clr y]
+0x01140000 # addi x r0 0                                 [li x, 0]                                               <label: init_screen>
+0x01160000 # addi y r0 0                                 [li y, 0]
 0x01180000 # addi color r0 COLOR_BACK                    [li color, COLOR_BACK]
 0x16230000 # lui r17 0x10000                             [ecall 0x10000000]                                      <label: draw_back>
 0x40000000 # ecall                                       [ecall 0x10000000]
@@ -15,7 +15,7 @@ exit_code: 0
 0x013E0040 # addi r31 r0 64                              [blt x, SCREEN_WIDTH, draw_back]
 0x12BEAF1F # blt x r31 draw_back                         [blt x, SCREEN_WIDTH, draw_back]
 0x0116B001 # addi y y 1                                  [inc y]
-0x01140000 # addi x r0 0                                 [clr x]
+0x01140000 # addi x r0 0                                 [li x, 0]
 0x013E0024 # addi r31 r0 36                              [blt y, SCREEN_HEIGHT, draw_back]
 0x12BEBE1F # blt y r31 draw_back                         [blt y, SCREEN_HEIGHT, draw_back]
 0xFC800000 # ret
@@ -154,7 +154,7 @@ exit_code: 0
 0x0067000F # sub que_tmp que_head que_len                [sub que_tmp, que_head, que_len]
 0x01273064 # addi que_tmp que_tmp 100                    [add que_tmp, que_tmp, QUEUE_SIZE]
 0x07673064 # remi que_tmp que_tmp 100                    [rem que_tmp, que_tmp, QUEUE_SIZE]
-0x01280000 # addi que_i r0 0                             [clr que_i]
+0x01280000 # addi que_i r0 0                             [li que_i, 0]
 0x1201430F # beq que_i que_len queue_contains_not_found  [beq que_i, que_len, queue_contains_not_found]          <label: queue_contains_loop>
 0x052D3002 # muli que_addr que_tmp 2                     [mul que_addr, que_tmp, 2]
 0x163E0100 # lui r31 0x100                               [add que_addr, que_addr, BASE_ADDR]

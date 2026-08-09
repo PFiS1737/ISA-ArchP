@@ -51,15 +51,15 @@ j main
 
 
 init_screen:
-  clr x
-  clr y
+  li x, 0
+  li y, 0
   li color, COLOR_BACK
   draw_back:
     ecall 0x10000000 ; set pixel
     inc x
     blt x, SCREEN_WIDTH, draw_back
     inc y
-    clr x
+    li x, 0
     blt y, SCREEN_HEIGHT, draw_back
 
   ret
@@ -266,7 +266,7 @@ queue_contains:
   add que_tmp, que_tmp, QUEUE_SIZE
   rem que_tmp, que_tmp, QUEUE_SIZE
 
-  clr que_i
+  li que_i, 0
 
   queue_contains_loop:
     beq que_i, que_len, queue_contains_not_found
