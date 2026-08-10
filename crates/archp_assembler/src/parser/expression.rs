@@ -38,7 +38,6 @@ fn primary(input: &str) -> Result<'_, Expr<'_>> {
 
 fn unary(input: &str) -> Result<'_, Expr<'_>> {
     let (input, opt_op) = opt(ws(alt((
-        map(char('+'), |_| UnaryOp::Pos),
         map(char('-'), |_| UnaryOp::Neg),
         map(char('~'), |_| UnaryOp::Not),
     ))))
@@ -54,27 +53,30 @@ fn unary(input: &str) -> Result<'_, Expr<'_>> {
 }
 
 fn precedence(op: BinaryOp) -> u8 {
+    // NOTE: See https://sourceware.org/binutils/docs/as/Infix-Ops.html
+    //
     // NOTE: See https://git.sr.ht/~sourceware/binutils-gdb/tree/master/item/gas/expr.c
     //       static operator_rankT op_rank[O_max] = { ... }
     match op {
         BinaryOp::Mul | BinaryOp::Div | BinaryOp::Mod | BinaryOp::Shl | BinaryOp::Shr => 3,
-        BinaryOp::And | BinaryOp::Xor | BinaryOp::Or => 2,
+        BinaryOp::And | BinaryOp::Xor | BinaryOp::Or | BinaryOp::OrNot => 2,
         BinaryOp::Add | BinaryOp::Sub => 1,
     }
 }
 
 fn binary_op(input: &str) -> Result<'_, BinaryOp> {
     ws(alt((
-        map(tag("<<"), |_| BinaryOp::Shl),
-        map(tag(">>"), |_| BinaryOp::Shr),
         map(tag("*"), |_| BinaryOp::Mul),
         map(tag("/"), |_| BinaryOp::Div),
         map(tag("%"), |_| BinaryOp::Mod),
-        map(tag("+"), |_| BinaryOp::Add),
-        map(tag("-"), |_| BinaryOp::Sub),
+        map(tag("<<"), |_| BinaryOp::Shl),
+        map(tag(">>"), |_| BinaryOp::Shr),
         map(tag("&"), |_| BinaryOp::And),
         map(tag("^"), |_| BinaryOp::Xor),
         map(tag("|"), |_| BinaryOp::Or),
+        map(tag("!"), |_| BinaryOp::OrNot),
+        map(tag("+"), |_| BinaryOp::Add),
+        map(tag("-"), |_| BinaryOp::Sub),
     )))
     .parse(input)
 }
@@ -129,7 +131,6 @@ mod tests {
 
     #[test]
     fn test_unary_all() {
-        assert_snapshot!(parse_ok("+1"), @"1");
         assert_snapshot!(parse_ok("-1"), @"-1");
         assert_snapshot!(parse_ok("~1"), @"-2");
     }
@@ -146,7 +147,7 @@ mod tests {
 
     #[test]
     fn test_and_xor_or_precedence() {
-        assert_snapshot!(parse_ok("1 & 2 ^ 3 | 4"), @"7");
+        assert_snapshot!(parse_ok("1 & 2 ^ 3 | 4 ! 5"), @"-1");
     }
 
     #[test]
@@ -166,7 +167,7 @@ mod tests {
 
     #[test]
     fn test_complex_expression() {
-        assert_snapshot!(parse_ok("1 + 2 * 3 << 1 & 7 ^ 2 | ~4"), @"0");
+        assert_snapshot!(parse_ok("1 + 2 ! 10 * 3 << 1 & 7 ^ 2 | ~4"), @"-4");
     }
 
     #[test]

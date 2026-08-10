@@ -30,7 +30,6 @@ impl Display for Expr<'_> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnaryOp {
-    Pos, // +
     Neg, // -
     Not, // ~
 }
@@ -38,7 +37,6 @@ pub enum UnaryOp {
 impl Display for UnaryOp {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", match self {
-            UnaryOp::Pos => "+",
             UnaryOp::Neg => "-",
             UnaryOp::Not => "~",
         })
@@ -50,16 +48,16 @@ pub enum BinaryOp {
     Mul, // *
     Div, // /
     Mod, // %
-
-    Add, // +
-    Sub, // -
-
     Shl, // <<
     Shr, // >>
 
-    And, // &
-    Xor, // ^
-    Or,  // |
+    And,   // &
+    Xor,   // ^
+    Or,    // |
+    OrNot, // !
+
+    Add, // +
+    Sub, // -
 }
 
 impl Display for BinaryOp {
@@ -68,16 +66,16 @@ impl Display for BinaryOp {
             BinaryOp::Mul => "*",
             BinaryOp::Div => "/",
             BinaryOp::Mod => "%",
-
-            BinaryOp::Add => "+",
-            BinaryOp::Sub => "-",
-
             BinaryOp::Shl => "<<",
             BinaryOp::Shr => ">>",
 
             BinaryOp::And => "&",
             BinaryOp::Xor => "^",
             BinaryOp::Or => "|",
+            BinaryOp::OrNot => "!",
+
+            BinaryOp::Add => "+",
+            BinaryOp::Sub => "-",
         })
     }
 }
@@ -96,7 +94,6 @@ pub enum EvalError<'src> {
 
 pub fn eval_unary<'a>(op: UnaryOp, rhs: i64) -> Result<i64, EvalError<'a>> {
     match op {
-        UnaryOp::Pos => Ok(rhs),
         UnaryOp::Neg => Ok(rhs.wrapping_neg()),
         UnaryOp::Not => Ok(!rhs),
     }
@@ -128,17 +125,12 @@ pub fn eval_binary<'a>(lhs: i64, op: BinaryOp, rhs: i64) -> Result<i64, EvalErro
             }
             Ok(lhs.wrapping_rem(rhs))
         },
-
-        BinaryOp::Add => Ok(lhs.wrapping_add(rhs)),
-        BinaryOp::Sub => Ok(lhs.wrapping_sub(rhs)),
-
         BinaryOp::Shl => {
             if !(0..32).contains(&rhs) {
                 return Err(EvalError::ShiftOutOfRange(rhs));
             }
             Ok(lhs.wrapping_shl(rhs as u32))
         },
-
         BinaryOp::Shr => {
             if !(0..32).contains(&rhs) {
                 return Err(EvalError::ShiftOutOfRange(rhs));
@@ -149,6 +141,10 @@ pub fn eval_binary<'a>(lhs: i64, op: BinaryOp, rhs: i64) -> Result<i64, EvalErro
         BinaryOp::And => Ok(lhs & rhs),
         BinaryOp::Xor => Ok(lhs ^ rhs),
         BinaryOp::Or => Ok(lhs | rhs),
+        BinaryOp::OrNot => Ok(lhs | !rhs),
+
+        BinaryOp::Add => Ok(lhs.wrapping_add(rhs)),
+        BinaryOp::Sub => Ok(lhs.wrapping_sub(rhs)),
     }
 }
 
@@ -283,14 +279,6 @@ mod tests {
     }
 
     #[test]
-    fn test_xor() {
-        assert_eq!(
-            eval_ok(bin(Expr::Num(6), BinaryOp::Xor, Expr::Num(3))),
-            6 ^ 3
-        );
-    }
-
-    #[test]
     fn test_shift() {
         assert_eq!(
             eval_ok(bin(Expr::Num(1), BinaryOp::Shl, Expr::Num(3))),
@@ -312,11 +300,18 @@ mod tests {
             eval_ok(bin(Expr::Num(4), BinaryOp::Or, Expr::Num(1))),
             4 | 1
         );
+        assert_eq!(
+            eval_ok(bin(Expr::Num(6), BinaryOp::Xor, Expr::Num(3))),
+            6 ^ 3
+        );
+        assert_eq!(
+            eval_ok(bin(Expr::Num(6), BinaryOp::OrNot, Expr::Num(3))),
+            6 | !3
+        );
     }
 
     #[test]
     fn test_unary_all() {
-        assert_eq!(eval_ok(unary(UnaryOp::Pos, Expr::Num(5))), 5);
         assert_eq!(eval_ok(unary(UnaryOp::Neg, Expr::Num(5))), -5);
         assert_eq!(eval_ok(unary(UnaryOp::Not, Expr::Num(0))), !0);
     }
