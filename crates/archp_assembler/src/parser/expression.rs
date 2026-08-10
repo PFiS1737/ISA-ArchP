@@ -58,25 +58,39 @@ fn precedence(op: BinaryOp) -> u8 {
     // NOTE: See https://git.sr.ht/~sourceware/binutils-gdb/tree/master/item/gas/expr.c
     //       static operator_rankT op_rank[O_max] = { ... }
     match op {
-        BinaryOp::Mul | BinaryOp::Div | BinaryOp::Mod | BinaryOp::Shl | BinaryOp::Shr => 3,
-        BinaryOp::And | BinaryOp::Xor | BinaryOp::Or | BinaryOp::OrNot => 2,
-        BinaryOp::Add | BinaryOp::Sub => 1,
+        BinaryOp::Mul | BinaryOp::Div | BinaryOp::Mod | BinaryOp::Shl | BinaryOp::Shr => 6,
+        BinaryOp::And | BinaryOp::Xor | BinaryOp::Or | BinaryOp::OrNot => 5,
+        BinaryOp::Add | BinaryOp::Sub => 4,
+        BinaryOp::Eq | BinaryOp::Ne | BinaryOp::Lt | BinaryOp::Le | BinaryOp::Gt | BinaryOp::Ge => {
+            3
+        },
+        BinaryOp::LogicalAnd => 2,
+        BinaryOp::LogicalOr => 1,
     }
 }
 
 fn binary_op(input: &str) -> Result<'_, BinaryOp> {
     ws(alt((
+        map(tag("<<"), |_| BinaryOp::Shl),
+        map(tag(">>"), |_| BinaryOp::Shr),
+        map(tag("=="), |_| BinaryOp::Eq),
+        map(tag("<>"), |_| BinaryOp::Ne),
+        map(tag("!="), |_| BinaryOp::Ne),
+        map(tag("<="), |_| BinaryOp::Le),
+        map(tag(">="), |_| BinaryOp::Ge),
+        map(tag("&&"), |_| BinaryOp::LogicalAnd),
+        map(tag("||"), |_| BinaryOp::LogicalOr),
         map(tag("*"), |_| BinaryOp::Mul),
         map(tag("/"), |_| BinaryOp::Div),
         map(tag("%"), |_| BinaryOp::Mod),
-        map(tag("<<"), |_| BinaryOp::Shl),
-        map(tag(">>"), |_| BinaryOp::Shr),
         map(tag("&"), |_| BinaryOp::And),
         map(tag("^"), |_| BinaryOp::Xor),
         map(tag("|"), |_| BinaryOp::Or),
         map(tag("!"), |_| BinaryOp::OrNot),
         map(tag("+"), |_| BinaryOp::Add),
         map(tag("-"), |_| BinaryOp::Sub),
+        map(tag("<"), |_| BinaryOp::Lt),
+        map(tag(">"), |_| BinaryOp::Gt),
     )))
     .parse(input)
 }
@@ -130,33 +144,18 @@ mod tests {
     }
 
     #[test]
-    fn test_unary_all() {
+    fn test_unary() {
         assert_snapshot!(parse_ok("-1"), @"-1");
         assert_snapshot!(parse_ok("~1"), @"-2");
     }
 
     #[test]
-    fn test_mul_div_mod_precedence() {
+    fn test_binary() {
         assert_snapshot!(parse_ok("1 + 2 * 3 / 2 % 2"), @"2");
-    }
-
-    #[test]
-    fn test_shift_precedence() {
         assert_snapshot!(parse_ok("1 + 2 << 3"), @"17");
-    }
-
-    #[test]
-    fn test_and_xor_or_precedence() {
         assert_snapshot!(parse_ok("1 & 2 ^ 3 | 4 ! 5"), @"-1");
-    }
-
-    #[test]
-    fn test_left_associativity() {
+        assert_snapshot!(parse_ok("1 == 2 && 3 != 4 || 5 < 6"), @"1");
         assert_snapshot!(parse_ok("1 - 2 - 3"), @"-4");
-    }
-
-    #[test]
-    fn test_parentheses() {
         assert_snapshot!(parse_ok("(1 + 2) * 3"), @"9");
     }
 

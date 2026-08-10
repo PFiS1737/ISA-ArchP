@@ -58,6 +58,17 @@ pub enum BinaryOp {
 
     Add, // +
     Sub, // -
+
+    Eq, // ==
+    Ne, // !=, <>
+    Lt, // <
+    Le, // <=
+    Gt, // >
+    Ge, // >=
+
+    LogicalAnd, // &&
+
+    LogicalOr, // ||
 }
 
 impl Display for BinaryOp {
@@ -76,6 +87,17 @@ impl Display for BinaryOp {
 
             BinaryOp::Add => "+",
             BinaryOp::Sub => "-",
+
+            BinaryOp::Eq => "==",
+            BinaryOp::Ne => "!=",
+            BinaryOp::Lt => "<",
+            BinaryOp::Le => "<=",
+            BinaryOp::Gt => ">",
+            BinaryOp::Ge => ">=",
+
+            BinaryOp::LogicalAnd => "&&",
+
+            BinaryOp::LogicalOr => "||",
         })
     }
 }
@@ -145,6 +167,17 @@ pub fn eval_binary<'a>(lhs: i64, op: BinaryOp, rhs: i64) -> Result<i64, EvalErro
 
         BinaryOp::Add => Ok(lhs.wrapping_add(rhs)),
         BinaryOp::Sub => Ok(lhs.wrapping_sub(rhs)),
+
+        BinaryOp::Eq => Ok(if lhs == rhs { -1 } else { 0 }),
+        BinaryOp::Ne => Ok(if lhs != rhs { -1 } else { 0 }),
+        BinaryOp::Lt => Ok(if lhs < rhs { -1 } else { 0 }),
+        BinaryOp::Le => Ok(if lhs <= rhs { -1 } else { 0 }),
+        BinaryOp::Gt => Ok(if lhs > rhs { -1 } else { 0 }),
+        BinaryOp::Ge => Ok(if lhs >= rhs { -1 } else { 0 }),
+
+        BinaryOp::LogicalAnd => Ok(if lhs != 0 && rhs != 0 { 1 } else { 0 }),
+
+        BinaryOp::LogicalOr => Ok(if lhs == 0 && rhs == 0 { 0 } else { 1 }),
     }
 }
 
@@ -311,7 +344,29 @@ mod tests {
     }
 
     #[test]
-    fn test_unary_all() {
+    fn test_comparison() {
+        assert_eq!(eval_ok(bin(Expr::Num(5), BinaryOp::Eq, Expr::Num(5))), -1);
+        assert_eq!(eval_ok(bin(Expr::Num(5), BinaryOp::Ne, Expr::Num(3))), -1);
+        assert_eq!(eval_ok(bin(Expr::Num(2), BinaryOp::Lt, Expr::Num(2))), 0);
+        assert_eq!(eval_ok(bin(Expr::Num(3), BinaryOp::Le, Expr::Num(3))), -1);
+        assert_eq!(eval_ok(bin(Expr::Num(1), BinaryOp::Gt, Expr::Num(2))), 0);
+        assert_eq!(eval_ok(bin(Expr::Num(4), BinaryOp::Ge, Expr::Num(4))), -1);
+    }
+
+    #[test]
+    fn test_logical() {
+        assert_eq!(
+            eval_ok(bin(Expr::Num(1), BinaryOp::LogicalAnd, Expr::Num(0))),
+            0
+        );
+        assert_eq!(
+            eval_ok(bin(Expr::Num(1), BinaryOp::LogicalOr, Expr::Num(0))),
+            1
+        );
+    }
+
+    #[test]
+    fn test_unary() {
         assert_eq!(eval_ok(unary(UnaryOp::Neg, Expr::Num(5))), -5);
         assert_eq!(eval_ok(unary(UnaryOp::Not, Expr::Num(0))), !0);
     }
