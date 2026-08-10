@@ -1,5 +1,5 @@
 pub mod expression;
-pub mod grammar;
+pub mod line;
 pub mod operand;
 pub mod types;
 
