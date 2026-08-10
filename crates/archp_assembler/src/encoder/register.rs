@@ -2,7 +2,7 @@ use anyhow::{Result, bail};
 
 use crate::{assembler::Context, operand::Operand};
 
-pub fn parse_reg(ctx: &Context, op: &Operand) -> Result<u32> {
+pub fn encode_register(ctx: &Context, op: &Operand) -> Result<u32> {
     let Operand::Ident(reg) = op else {
         bail!("Invalid register: {}", op)
     };
@@ -62,7 +62,7 @@ mod tests {
 
     #[test]
     fn parse_reg() {
-        let f = test(super::parse_reg);
+        let f = test(super::encode_register);
         assert_snapshot!(f("r0"), @"0");
         assert_snapshot!(f("r9"), @"9");
         assert_snapshot!(f("r27"), @"27");

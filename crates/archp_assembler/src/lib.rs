@@ -2,6 +2,7 @@
 #![allow(clippy::unusual_byte_groupings)]
 
 mod assembler;
+mod encoder;
 mod instructions;
 mod macro_instructions;
 mod operand;

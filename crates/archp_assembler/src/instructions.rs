@@ -15,8 +15,8 @@ use anyhow::{Result, bail};
 
 use crate::{
     assembler::Context,
+    encoder::{address::encode_address, immediate::encode_immediate_as, register::encode_register},
     operand::{Operand, OperandType, op_fmt},
-    parser::{address::parse_address, immediate::parse_imm_as, register::parse_reg},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -76,9 +76,11 @@ pub trait Instruction: Send + Sync {
                     op_idx += 1;
 
                     let val = match *op_ty {
-                        OperandType::RegD | OperandType::RegS => parse_reg(ctx, op)?,
-                        OperandType::Imm(bits, signed) => parse_imm_as(ctx, op, bits, signed)?,
-                        OperandType::Addr(bits) => parse_address(ctx, op)?.as_field(bits, pc)?,
+                        OperandType::RegD | OperandType::RegS => encode_register(ctx, op)?,
+                        OperandType::Imm(bits, signed) => {
+                            encode_immediate_as(ctx, op, bits, signed)?
+                        },
+                        OperandType::Addr(bits) => encode_address(ctx, op)?.as_field(bits, pc)?,
                     };
 
                     ret.push(val);

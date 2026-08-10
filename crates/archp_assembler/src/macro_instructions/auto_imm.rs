@@ -1,7 +1,7 @@
 use crate::{
+    encoder::immediate::encode_immediate,
     macro_instructions::{ExpandFn, macro_instruction},
     operand::ops,
-    parser::immediate::parse_imm,
 };
 
 macro_instruction! {
@@ -47,7 +47,7 @@ const F1: ExpandFn = |ctx, _, name, ops| {
         _ => unreachable!(),
     };
 
-    if let Ok(imm) = parse_imm(ctx, &ops[2]) {
+    if let Ok(imm) = encode_immediate(ctx, &ops[2]) {
         Some(vec![(inst, ops![ops[0], ops[1], imm])])
     } else {
         None
@@ -66,12 +66,12 @@ macro_instruction! {
 }
 
 const F2: ExpandFn = |ctx, _, name, ops| {
-    if let Ok(imm) = parse_imm(ctx, &ops[1]) {
-        if imm.is_zero() {
+    if let Ok(n) = encode_immediate(ctx, &ops[1]) {
+        if n == 0 {
             Some(vec![(name, ops![ops[0], "r0", ops[2]])])
         } else {
             Some(vec![
-                ("li", ops!["r31", imm]),
+                ("li", ops!["r31", n]),
                 (name, ops![ops[0], "r31", ops[2]]),
             ])
         }
@@ -89,12 +89,12 @@ macro_instruction! {
 }
 
 const F3: ExpandFn = |ctx, _, name, ops| {
-    if let Ok(imm) = parse_imm(ctx, &ops[2]) {
-        if imm.is_zero() {
+    if let Ok(n) = encode_immediate(ctx, &ops[2]) {
+        if n == 0 {
             Some(vec![(name, ops![ops[0], ops[1], "r0"])])
         } else {
             Some(vec![
-                ("li", ops!["r31", imm]),
+                ("li", ops!["r31", n]),
                 (name, ops![ops[0], ops[1], "r31"]),
             ])
         }

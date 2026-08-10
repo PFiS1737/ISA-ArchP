@@ -1,7 +1,7 @@
 use crate::{
+    encoder::immediate::{encode_immediate, split_hi_lo},
     macro_instructions::{ExpandFn, macro_instruction},
     operand::ops,
-    parser::immediate::parse_imm,
     utils::sig_ext::sign_extend,
 };
 
@@ -14,7 +14,8 @@ macro_instruction! {
 }
 
 const F: ExpandFn = |ctx, _, _, ops| {
-    if let Ok((lo, hi)) = parse_imm(ctx, &ops[1]).map(|imm| imm.split(12, true))
+    if let Ok(n) = encode_immediate(ctx, &ops[1])
+        && let (lo, hi) = split_hi_lo(n, 12, true)
         && hi != 0
     {
         let mut ret = vec![("lui", ops![ops[0], hi])];

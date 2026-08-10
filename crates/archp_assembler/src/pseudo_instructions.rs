@@ -13,8 +13,8 @@ use anyhow::{Result, bail};
 
 use crate::{
     assembler::{Context, Instr},
+    encoder::{address::encode_address, immediate::encode_immediate_as, register::encode_register},
     operand::{Operand, OperandType},
-    parser::{address::parse_address, immediate::parse_imm_as, register::parse_reg},
 };
 
 type ExpandFn = for<'a> fn(&[Operand<'a>]) -> Instr<'a>;
@@ -54,13 +54,13 @@ pub trait PseudoInstruction: Send + Sync {
         for (i, op) in operands.iter().enumerate() {
             match self.operand_types()[i] {
                 OperandType::RegD | OperandType::RegS => {
-                    parse_reg(ctx, op)?;
+                    encode_register(ctx, op)?;
                 },
                 OperandType::Imm(bits, signed) => {
-                    parse_imm_as(ctx, op, bits, signed)?;
+                    encode_immediate_as(ctx, op, bits, signed)?;
                 },
                 OperandType::Addr(bits) => {
-                    parse_address(ctx, op)?.as_field(bits, pc)?;
+                    encode_address(ctx, op)?.as_field(bits, pc)?;
                 },
             };
         }

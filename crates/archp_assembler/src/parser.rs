@@ -1,9 +1,6 @@
-pub mod address;
 pub mod expression;
 pub mod grammar;
-pub mod immediate;
 pub mod operand;
-pub mod register;
 pub mod types;
 
 use std::num::ParseIntError;

@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::parser::types::{expression::Expr, immediate::Immediate};
+use crate::parser::types::expression::Expr;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Operand<'src> {
@@ -28,9 +28,9 @@ impl From<i32> for Operand<'_> {
     }
 }
 
-impl From<Immediate> for Operand<'_> {
-    fn from(n: Immediate) -> Self {
-        Operand::Num(n.0)
+impl From<i64> for Operand<'_> {
+    fn from(n: i64) -> Self {
+        Operand::Num(n)
     }
 }
 

@@ -1,46 +1,89 @@
-use crate::utils::sig_ext::sign_extend;
+use anyhow::{Result, anyhow, bail};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Immediate(pub i64);
+use crate::{
+    assembler::Context, operand::Operand, parser::expression::parse_expr,
+    utils::sig_ext::sign_extend,
+};
 
-impl Immediate {
-    pub fn is_zero(&self) -> bool {
-        self.0 == 0
+pub fn encode_immediate(ctx: &Context, imm: &Operand) -> Result<i64> {
+    match imm {
+        Operand::Num(n) => Ok(*n),
+        Operand::Ident(s) => {
+            let s = ctx.constants.get(s).unwrap_or(s);
+
+            let (remain, expr) =
+                parse_expr(s).map_err(|e| anyhow!("Failed to parse immediate '{}': {}", s, e))?;
+
+            if !remain.trim().is_empty() {
+                bail!("Invalid immediate: {}", s);
+            }
+
+            // TODO: evaluate the expression with constants
+            let imm = expr
+                .eval_with(&|_| None)
+                .map_err(|e| anyhow!("Failed to evaluate immediate '{}': {}", s, e))?;
+
+            Ok(imm)
+        },
+
+        // TODO: impl
+        _ => unimplemented!("parse_imm: {}", imm),
+    }
+}
+
+pub fn encode_immediate_as(ctx: &Context, imm: &Operand, bits: u8, signed: bool) -> Result<u32> {
+    let (low, hi) = split_hi_lo(encode_immediate(ctx, imm)?, bits, signed);
+
+    if hi != 0 {
+        bail!(
+            "Immediate '{}' out of range for {}{} ({} ..= {})",
+            imm,
+            if signed { "i" } else { "u" },
+            bits,
+            if signed { i32::MIN >> (32 - bits) } else { 0 },
+            if signed {
+                (i32::MAX >> (32 - bits)) as u32
+            } else {
+                u32::MAX >> (32 - bits)
+            }
+        );
     }
 
-    /// 'signed' 为 'true' 时，保证输出满足 'self.raw == (hi << bits) + sig_ext(low, bits)'
-    /// 'signed' 为 'false' 时，保证输出满足 'self.raw == (hi << bits) + low'
-    pub fn split(&self, bits: u8, signed: bool) -> (u32, u32) {
-        assert!(bits > 0 && bits <= 32);
+    Ok(low)
+}
 
-        let raw = self.0 as u32;
+// 'signed' 为 'true' 时，保证输出满足 'self.raw == (hi << bits) + sig_ext(low, bits)'
+// 'signed' 为 'false' 时，保证输出满足 'self.raw == (hi << bits) + low'
+pub fn split_hi_lo(n: i64, bits: u8, signed: bool) -> (u32, u32) {
+    assert!(bits > 0 && bits <= 32);
 
-        let mask = if bits == 32 {
-            u32::MAX
+    let raw = n as u32;
+
+    let mask = if bits == 32 {
+        u32::MAX
+    } else {
+        (1u32 << bits) - 1
+    };
+
+    if signed {
+        let low = raw & mask;
+
+        if raw == sign_extend(low, bits) {
+            (low, 0)
         } else {
-            (1u32 << bits) - 1
-        };
+            let mut hi = if bits == 32 { 0 } else { raw >> bits };
 
-        if signed {
-            let low = raw & mask;
-
-            if raw == sign_extend(low, bits) {
-                (low, 0)
-            } else {
-                let mut hi = if bits == 32 { 0 } else { raw >> bits };
-
-                if bits < 32 && low >= (1u32 << (bits - 1)) {
-                    hi = hi.wrapping_add(1);
-                }
-                (low, hi)
+            if bits < 32 && low >= (1u32 << (bits - 1)) {
+                hi = hi.wrapping_add(1);
             }
-        } else {
-            let low = raw & mask;
-
-            let hi = if bits == 32 { 0 } else { raw >> bits };
-
             (low, hi)
         }
+    } else {
+        let low = raw & mask;
+
+        let hi = if bits == 32 { 0 } else { raw >> bits };
+
+        (low, hi)
     }
 }
 
@@ -52,16 +95,16 @@ mod tests {
         utils::{fmt::fmt_hex, sig_ext::sign_extend},
     };
 
-    fn test_and_fmt(imm: Immediate, bits: u8, signed: bool) -> String {
-        let (low, hi) = imm.split(bits, signed);
+    fn test_and_fmt(n: i64, bits: u8, signed: bool) -> String {
+        let (low, hi) = split_hi_lo(n, bits, signed);
 
         if signed {
             assert_eq!(
-                imm.0 as i32,
+                n as i32,
                 ((hi << bits) as i32).wrapping_add(sign_extend(low, bits) as i32)
             )
         } else {
-            assert_eq!(imm.0 as u32, (hi << bits) + low)
+            assert_eq!(n as u32, (hi << bits) + low)
         }
 
         format!(
@@ -73,17 +116,16 @@ mod tests {
         )
     }
 
-    fn test(s: i64) -> String {
-        let imm = Immediate(s);
+    fn test(n: i64) -> String {
         format!(
             "{}\n{}\n{}\n{}\n{}\n{}\n{}",
-            fmt_hex(imm.0),
-            test_and_fmt(imm, 5, true),
-            test_and_fmt(imm, 5, false),
-            test_and_fmt(imm, 12, true),
-            test_and_fmt(imm, 12, false),
-            test_and_fmt(imm, 20, true),
-            test_and_fmt(imm, 20, false),
+            fmt_hex(n),
+            test_and_fmt(n, 5, true),
+            test_and_fmt(n, 5, false),
+            test_and_fmt(n, 12, true),
+            test_and_fmt(n, 12, false),
+            test_and_fmt(n, 20, true),
+            test_and_fmt(n, 20, false),
         )
     }
 

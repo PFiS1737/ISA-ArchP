@@ -2,9 +2,8 @@ use anyhow::{Result, bail};
 
 use crate::{assembler::Context, operand::Operand};
 
-pub fn parse_address(ctx: &Context, op: &Operand) -> Result<Address> {
+pub fn encode_address(ctx: &Context, op: &Operand) -> Result<Address> {
     match op {
-        Operand::Num(n) => Ok(Address(*n as u32)),
         Operand::Ident(s) => {
             let label = ctx.constants.get(s).unwrap_or(s);
             if let Some(&addr) = ctx.labels.get(label) {
@@ -95,7 +94,7 @@ mod tests {
 
     #[test]
     fn parse_addr() {
-        let f = test_parser(super::parse_address);
+        let f = test_parser(super::encode_address);
         assert_snapshot!(f("start"), @"(0, -6)");
         assert_snapshot!(f("loop"), @"(0, -4)");
         assert_snapshot!(f("end"), @"(0, 0x7F9)");

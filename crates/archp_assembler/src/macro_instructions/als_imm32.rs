@@ -1,7 +1,7 @@
 use crate::{
+    encoder::immediate::{encode_immediate, split_hi_lo},
     macro_instructions::{ExpandFn, macro_instruction},
     operand::ops,
-    parser::immediate::parse_imm,
 };
 
 macro_instruction! {
@@ -26,7 +26,8 @@ const F: ExpandFn = |ctx, _, name, ops| {
         _ => &name[..name.len() - 1],
     };
 
-    if let Ok((_, hi)) = parse_imm(ctx, &ops[2]).map(|imm| imm.split(12, true))
+    if let Ok(n) = encode_immediate(ctx, &ops[2])
+        && let (_, hi) = split_hi_lo(n, 12, true)
         && hi != 0
     {
         Some(vec![
