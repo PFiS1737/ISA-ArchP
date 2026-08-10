@@ -37,26 +37,17 @@ fn primary(input: &str) -> Result<'_, Expr<'_>> {
 }
 
 fn unary(input: &str) -> Result<'_, Expr<'_>> {
-    let (input, opt_op) = opt(ws(alt((char('+'), char('-'), char('~'))))).parse(input)?;
+    let (input, opt_op) = opt(ws(alt((
+        map(char('+'), |_| UnaryOp::Pos),
+        map(char('-'), |_| UnaryOp::Neg),
+        map(char('~'), |_| UnaryOp::Not),
+    ))))
+    .parse(input)?;
 
     if let Some(op) = opt_op {
         let (input, rhs) = unary(input)?;
 
-        let op = match op {
-            '+' => UnaryOp::Pos,
-            '-' => UnaryOp::Neg,
-            '~' => UnaryOp::Not,
-            _ => unreachable!(),
-        };
-
-        if let Expr::Num(n) = rhs {
-            Ok((input, Expr::Num(eval_unary(op, n)?)))
-        } else {
-            Ok((input, Expr::Unary {
-                op,
-                rhs: Box::new(rhs),
-            }))
-        }
+        Ok((input, try_eval_unary(op, rhs)?))
     } else {
         primary(input)
     }
@@ -99,17 +90,7 @@ fn expr_bp(input: &str, min_bp: u8) -> Result<'_, Expr<'_>> {
 
         let (next_input, rhs) = expr_bp(next_input, prec + 1)?;
 
-        if let Expr::Num(l) = lhs
-            && let Expr::Num(r) = rhs
-        {
-            lhs = Expr::Num(eval_binary(op, l, r)?);
-        } else {
-            lhs = Expr::Binary {
-                lhs: Box::new(lhs),
-                op,
-                rhs: Box::new(rhs),
-            };
-        }
+        lhs = try_eval_binary(lhs, op, rhs)?;
 
         input = next_input;
     }

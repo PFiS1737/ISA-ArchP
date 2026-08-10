@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet},
-    fmt::Display,
-};
+use std::{collections::HashMap, fmt::Display};
 
 use thiserror::Error;
 
@@ -105,7 +102,18 @@ pub fn eval_unary<'a>(op: UnaryOp, rhs: i64) -> Result<i64, EvalError<'a>> {
     }
 }
 
-pub fn eval_binary<'a>(op: BinaryOp, lhs: i64, rhs: i64) -> Result<i64, EvalError<'a>> {
+pub fn try_eval_unary<'a>(op: UnaryOp, rhs: Expr<'a>) -> Result<Expr<'a>, EvalError<'a>> {
+    if let Expr::Num(r) = rhs {
+        Ok(Expr::Num(eval_unary(op, r)?))
+    } else {
+        Ok(Expr::Unary {
+            op,
+            rhs: Box::new(rhs),
+        })
+    }
+}
+
+pub fn eval_binary<'a>(lhs: i64, op: BinaryOp, rhs: i64) -> Result<i64, EvalError<'a>> {
     match op {
         BinaryOp::Mul => Ok(lhs.wrapping_mul(rhs)),
         BinaryOp::Div => {
@@ -144,6 +152,24 @@ pub fn eval_binary<'a>(op: BinaryOp, lhs: i64, rhs: i64) -> Result<i64, EvalErro
     }
 }
 
+pub fn try_eval_binary<'a>(
+    lhs: Expr<'a>,
+    op: BinaryOp,
+    rhs: Expr<'a>,
+) -> Result<Expr<'a>, EvalError<'a>> {
+    if let Expr::Num(l) = lhs
+        && let Expr::Num(r) = rhs
+    {
+        Ok(Expr::Num(eval_binary(l, op, r)?))
+    } else {
+        Ok(Expr::Binary {
+            lhs: Box::new(lhs),
+            op,
+            rhs: Box::new(rhs),
+        })
+    }
+}
+
 impl<'ctx, 'src: 'ctx> Expr<'src> {
     pub fn eval_with<F>(&self, resolve: &F) -> Result<i64, EvalError<'src>>
     where
@@ -162,7 +188,7 @@ impl<'ctx, 'src: 'ctx> Expr<'src> {
             Expr::Binary { lhs, op, rhs } => {
                 let l = lhs.eval_with(resolve)?;
                 let r = rhs.eval_with(resolve)?;
-                eval_binary(*op, l, r)
+                eval_binary(l, *op, r)
             },
         }
     }
@@ -171,61 +197,30 @@ impl<'ctx, 'src: 'ctx> Expr<'src> {
         self.eval_with(&|s| env.get(s).copied())
     }
 
-    pub fn partial_eval_with<F>(
-        &self,
-        resolve: &F,
-    ) -> Result<(Expr<'src>, HashSet<&'src str>), EvalError<'src>>
+    pub fn partial_eval_with<F>(&self, resolve: &F) -> Result<Expr<'src>, EvalError<'src>>
     where
         F: Fn(&'src str) -> Option<i64>,
     {
         match self {
-            Expr::Num(_) => Ok((self.clone(), HashSet::new())),
+            Expr::Num(_) => Ok(self.clone()),
 
             Expr::Ident(name) => {
                 if let Some(num) = resolve(name) {
-                    Ok((Expr::Num(num), HashSet::new()))
+                    Ok(Expr::Num(num))
                 } else {
-                    let mut set = HashSet::new();
-                    set.insert(*name);
-                    Ok((self.clone(), set))
+                    Ok(self.clone())
                 }
             },
 
             Expr::Unary { op, rhs } => {
-                let (r, undef) = rhs.partial_eval_with(resolve)?;
-
-                if let Expr::Num(r) = r {
-                    Ok((Expr::Num(eval_unary(*op, r)?), undef))
-                } else {
-                    Ok((
-                        Expr::Unary {
-                            op: *op,
-                            rhs: Box::new(r),
-                        },
-                        undef,
-                    ))
-                }
+                let r = rhs.partial_eval_with(resolve)?;
+                try_eval_unary(*op, r)
             },
 
             Expr::Binary { lhs, op, rhs } => {
-                let (l, mut undef_l) = lhs.partial_eval_with(resolve)?;
-                let (r, undef_r) = rhs.partial_eval_with(resolve)?;
-                undef_l.extend(undef_r);
-
-                if let Expr::Num(l) = l
-                    && let Expr::Num(r) = r
-                {
-                    Ok((Expr::Num(eval_binary(*op, l, r)?), undef_l))
-                } else {
-                    Ok((
-                        Expr::Binary {
-                            lhs: Box::new(l),
-                            op: *op,
-                            rhs: Box::new(r),
-                        },
-                        undef_l,
-                    ))
-                }
+                let l = lhs.partial_eval_with(resolve)?;
+                let r = rhs.partial_eval_with(resolve)?;
+                try_eval_binary(l, *op, r)
             },
         }
     }
@@ -233,7 +228,7 @@ impl<'ctx, 'src: 'ctx> Expr<'src> {
     pub fn partial_eval(
         &self,
         env: &'ctx HashMap<&'src str, i64>,
-    ) -> Result<(Expr<'src>, HashSet<&'src str>), EvalError<'src>> {
+    ) -> Result<Expr<'src>, EvalError<'src>> {
         self.partial_eval_with(&|s| env.get(s).copied())
     }
 }
@@ -401,11 +396,8 @@ mod tests {
 
         assert_debug_snapshot!(expr.partial_eval(&env), @"
         Ok(
-            (
-                Num(
-                    5,
-                ),
-                {},
+            Num(
+                5,
             ),
         )
         ");
@@ -430,32 +422,27 @@ mod tests {
 
         assert_debug_snapshot!(expr.partial_eval(&env), @r#"
         Ok(
-            (
-                Binary {
-                    lhs: Binary {
-                        lhs: Num(
-                            3,
-                        ),
-                        op: Add,
-                        rhs: Binary {
-                            lhs: Ident(
-                                "b",
-                            ),
-                            op: Mul,
-                            rhs: Num(
-                                2,
-                            ),
-                        },
-                    },
-                    op: Add,
-                    rhs: Num(
-                        5,
+            Binary {
+                lhs: Binary {
+                    lhs: Num(
+                        3,
                     ),
+                    op: Add,
+                    rhs: Binary {
+                        lhs: Ident(
+                            "b",
+                        ),
+                        op: Mul,
+                        rhs: Num(
+                            2,
+                        ),
+                    },
                 },
-                {
-                    "b",
-                },
-            ),
+                op: Add,
+                rhs: Num(
+                    5,
+                ),
+            },
         )
         "#);
     }
