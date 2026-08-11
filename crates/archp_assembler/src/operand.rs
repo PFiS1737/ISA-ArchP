@@ -76,26 +76,23 @@ pub macro op_fmt {
 
     (@one $type:tt $(( $v:literal $( , $s:tt )? ))?) => {
         Some(
-            $crate::operand::OperandType::$type $(( $v $( , $crate::operand::_sig!($s) )? ))?
+            $crate::operand::OperandType::$type $(( $v $( , crate::operand::op_fmt!(@sig $s) )? ))?
         )
     },
+
+    (@sig i) => { true },
+    (@sig u) => { false },
 }
 
 pub macro op_types {
     ( $( $type:ident $(( $v:literal $( , $s:tt )? ))? ),* ) => {
         &[
             $(
-                $crate::operand::OperandType::$type $(( $v $( , $crate::operand::_sig!($s) )? ))?
+                $crate::operand::OperandType::$type $(( $v $( , crate::operand::op_types!(@sig $s) )? ))?
             ),*
         ]
     },
-}
 
-pub macro _sig {
-    (i) => {
-        true
-    },
-    (u) => {
-        false
-    },
+    (@sig i) => { true },
+    (@sig u) => { false },
 }

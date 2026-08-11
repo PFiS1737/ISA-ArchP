@@ -16,11 +16,11 @@ use anyhow::{Result, bail};
 use crate::{
     assembler::Context,
     encoder::{address::encode_address, immediate::encode_immediate_as, register::encode_register},
-    operand::{Operand, OperandType, op_fmt},
+    operand::{Operand, OperandType},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum InstrType {
+enum InstrType {
     R,
     I,
     B,
@@ -29,28 +29,55 @@ pub enum InstrType {
     J,
 }
 
-inventory::collect!(&'static dyn Instruction);
-
-pub static INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static dyn Instruction>> =
-    LazyLock::new(|| {
-        let mut map = HashMap::new();
-        for entry in inventory::iter::<&'static dyn Instruction> {
-            map.insert(entry.name(), *entry);
+impl Display for InstrType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            InstrType::R => write!(f, "R"),
+            InstrType::I => write!(f, "I"),
+            InstrType::B => write!(f, "B"),
+            InstrType::S => write!(f, "S"),
+            InstrType::U => write!(f, "U"),
+            InstrType::J => write!(f, "J"),
         }
-        map
-    });
+    }
+}
 
-pub trait Instruction: Send + Sync {
-    fn name(&self) -> &'static str;
-    fn opcode(&self) -> u32;
-    fn funct3(&self) -> u32;
-    fn itype(&self) -> InstrType;
-    fn operands_format(&self) -> Option<&'static [Option<OperandType>]>;
+inventory::collect!(Entry);
 
-    fn encode(&self, ctx: &Context, pc: u32, operands: &[Operand]) -> Result<u32> {
+pub static INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static Entry>> =
+    LazyLock::new(|| HashMap::from_iter(inventory::iter::<Entry>.into_iter().map(|e| (e.name, e))));
+
+pub struct Entry {
+    name: &'static str,
+    opcode: u32,
+    funct3: u32,
+    itype: InstrType,
+    operands_format: &'static [Option<OperandType>],
+}
+
+trait Instruction: Send + Sync {
+    const NAME: &'static str;
+    const OPCODE: u32;
+    const FUNCT3: u32;
+    const ITYPE: InstrType;
+    const OPERANDS_FORMAT: &'static [Option<OperandType>];
+}
+
+impl Entry {
+    const fn of<T: Instruction>() -> Self {
+        Self {
+            name: T::NAME,
+            opcode: T::OPCODE,
+            funct3: T::FUNCT3,
+            itype: T::ITYPE,
+            operands_format: T::OPERANDS_FORMAT,
+        }
+    }
+
+    pub fn encode(&self, ctx: &Context, pc: u32, operands: &[Operand]) -> Result<u32> {
         let operands = self.parse(ctx, pc, operands)?;
 
-        match self.itype() {
+        match self.itype {
             InstrType::R => self.encode_r(&operands),
             InstrType::I => self.encode_i(&operands),
             InstrType::B => self.encode_b(&operands),
@@ -61,7 +88,7 @@ pub trait Instruction: Send + Sync {
     }
 
     fn parse(&self, ctx: &Context, pc: u32, operands: &[Operand]) -> Result<Vec<u32>> {
-        let format = self.get_operands_format();
+        let format = self.operands_format;
 
         let expected = format.iter().filter(|x| x.is_some()).count();
         self.assert_operand_count(operands.len(), expected)?;
@@ -100,8 +127,8 @@ pub trait Instruction: Send + Sync {
         let rs2 = ops[2];
 
         field! {
-            self.opcode(), 25, 7;
-            self.funct3(), 22, 3;
+            self.opcode, 25, 7;
+            self.funct3, 22, 3;
             rd, 17, 5;
             rs1, 12, 5;
             0, 5, 7;
@@ -115,8 +142,8 @@ pub trait Instruction: Send + Sync {
         let imm12 = ops[2];
 
         field! {
-            self.opcode(), 25, 7;
-            self.funct3(), 22, 3;
+            self.opcode, 25, 7;
+            self.funct3, 22, 3;
             rd, 17, 5;
             rs1, 12, 5;
             imm12, 0, 12;
@@ -129,8 +156,8 @@ pub trait Instruction: Send + Sync {
         let offset12 = ops[2];
 
         field! {
-            self.opcode(), 25, 7;
-            self.funct3(), 22, 3;
+            self.opcode, 25, 7;
+            self.funct3, 22, 3;
             (offset12 >> 7), 17, 5;
             rs1, 12, 5;
             (offset12 & 0x7F), 5, 7;
@@ -147,7 +174,7 @@ pub trait Instruction: Send + Sync {
         let imm20 = ops[1];
 
         field! {
-            self.opcode(), 25, 7;
+            self.opcode, 25, 7;
             (imm20 >> 17), 22, 3;
             rd, 17, 5;
             (imm20 & 0x1FFFF), 0, 17;
@@ -162,28 +189,13 @@ pub trait Instruction: Send + Sync {
         if count != expected {
             bail!(
                 "Instruction '{}' requires {} operands, got {}",
-                self.name(),
+                self.name,
                 expected,
                 count
             );
         }
 
         Ok(())
-    }
-
-    fn get_operands_format(&self) -> &'static [Option<OperandType>] {
-        if let Some(ops) = self.operands_format() {
-            ops
-        } else {
-            match self.itype() {
-                InstrType::R => op_fmt![RegD, RegS, RegS],
-                InstrType::I => op_fmt![RegD, RegS, Imm(12, i)],
-                InstrType::B => op_fmt![RegS, RegS, Addr(12)],
-                InstrType::S => op_fmt![RegS, RegS, Imm(12, i)],
-                InstrType::U => op_fmt![RegD, Imm(20, u)],
-                InstrType::J => op_fmt![RegD, Addr(20)],
-            }
-        }
     }
 }
 
@@ -201,45 +213,33 @@ macro field {
     }},
 }
 
-macro impl_instruction {
-    (
+macro instruction {
+    (@impl
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
             name: $name:literal,
             opcode: $opcode:literal,
             funct3: $funct3:literal,
             itype: $itype:ident,
-            operands_format: $opt:ident $( ($format:tt) )? ,
+            operands_format: $format:expr,
         }
     ) => {
         $( #[doc = $doc] )*
         $vis struct $id;
 
         impl $crate::instructions::Instruction for $id {
-            fn name(&self) -> &'static str {
-                $name
-            }
-            fn opcode(&self) -> u32 {
-                $opcode
-            }
-            fn funct3(&self) -> u32 {
-                $funct3
-            }
-            fn itype(&self) -> $crate::instructions::InstrType {
-                $crate::instructions::InstrType::$itype
-            }
-            fn operands_format(&self) -> Option<&'static [ Option<$crate::operand::OperandType> ]> {
-                $opt $( ( $crate::operand::op_fmt! $format ) )?
-            }
+            const NAME: &'static str = $name;
+            const OPCODE: u32 = $opcode;
+            const FUNCT3: u32 = $funct3;
+            const ITYPE: $crate::instructions::InstrType = $crate::instructions::InstrType::$itype;
+            const OPERANDS_FORMAT: &'static [Option<$crate::operand::OperandType>] = $format;
         }
 
         inventory::submit! {
-            &$id as &'static dyn $crate::instructions::Instruction
+            $crate::instructions::Entry::of::<$id>()
         }
     },
-}
 
-macro instruction {
     (
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
@@ -249,14 +249,14 @@ macro instruction {
             itype: $itype:ident,
         }
     ) => {
-        $crate::instructions::impl_instruction!{
+        instruction! {@impl
             $( #[doc = $doc] )*
             $vis $id {
                 name: $name,
                 opcode: $opcode,
                 funct3: $funct3,
                 itype: $itype,
-                operands_format: None,
+                operands_format: instruction!(@fmt $itype),
             }
         }
     },
@@ -269,14 +269,14 @@ macro instruction {
             itype: $itype:ident,
         }
     ) => {
-        $crate::instructions::impl_instruction!{
+        instruction! {@impl
             $( #[doc = $doc] )*
             $vis $id {
                 name: $name,
                 opcode: $opcode,
                 funct3: 0,
                 itype: $itype,
-                operands_format: None,
+                operands_format: instruction!(@fmt $itype),
             }
         }
     },
@@ -291,14 +291,14 @@ macro instruction {
             operands_format: $format:tt,
         }
     ) => {
-        $crate::instructions::impl_instruction!{
+        instruction! {@impl
             $( #[doc = $doc] )*
             $vis $id {
                 name: $name,
                 opcode: $opcode,
                 funct3: $funct3,
                 itype: $itype,
-                operands_format: Some($format),
+                operands_format: $crate::operand::op_fmt! $format,
             }
         }
     },
@@ -312,30 +312,24 @@ macro instruction {
             operands_format: $format:tt,
         }
     ) => {
-        $crate::instructions::impl_instruction!{
+        instruction! {@impl
             $( #[doc = $doc] )*
             $vis $id {
                 name: $name,
                 opcode: $opcode,
                 funct3: 0,
                 itype: $itype,
-                operands_format: Some($format),
+                operands_format: $crate::operand::op_fmt! $format,
             }
         }
     },
-}
 
-impl Display for InstrType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            InstrType::R => write!(f, "R"),
-            InstrType::I => write!(f, "I"),
-            InstrType::B => write!(f, "B"),
-            InstrType::S => write!(f, "S"),
-            InstrType::U => write!(f, "U"),
-            InstrType::J => write!(f, "J"),
-        }
-    }
+    (@fmt R) => { $crate::operand::op_fmt![RegD, RegS, RegS] },
+    (@fmt I) => { $crate::operand::op_fmt![RegD, RegS, Imm(12, i)] },
+    (@fmt B) => { $crate::operand::op_fmt![RegS, RegS, Addr(12)] },
+    (@fmt S) => { $crate::operand::op_fmt![RegS, RegS, Imm(12, i)] },
+    (@fmt U) => { $crate::operand::op_fmt![RegD, Imm(20, u)] },
+    (@fmt J) => { $crate::operand::op_fmt![RegD, Addr(20)] },
 }
 
 #[cfg(test)]

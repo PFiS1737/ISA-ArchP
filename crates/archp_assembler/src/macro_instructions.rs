@@ -18,25 +18,39 @@ use crate::{
 type ExpandRet<'a> = Option<Vec<Instr<'a>>>;
 type ExpandFn = for<'a> fn(&Context<'a>, u32, &'a str, &[Operand<'a>]) -> ExpandRet<'a>;
 
-inventory::collect!(&'static dyn MacroInstruction);
+inventory::collect!(Entry);
 
-pub static MACRO_INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static dyn MacroInstruction>> =
+pub static MACRO_INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static Entry>> =
     LazyLock::new(|| {
-        let mut map = HashMap::new();
-        for entry in inventory::iter::<&'static dyn MacroInstruction> {
-            for name in entry.names() {
-                map.insert(*name, *entry);
-            }
-        }
-        map
+        HashMap::from_iter(
+            inventory::iter::<Entry>
+                .into_iter()
+                .flat_map(|e| e.names.iter().map(move |&name| (name, e))),
+        )
     });
 
-pub trait MacroInstruction: Send + Sync {
-    fn names(&self) -> &'static [&'static str];
-    fn operand_count(&self) -> Option<usize>;
-    fn expander(&self) -> ExpandFn;
+pub struct Entry {
+    names: &'static [&'static str],
+    operand_count: Option<usize>,
+    expander: ExpandFn,
+}
 
-    fn expand<'a>(
+trait MacroInstruction: Send + Sync {
+    const NAMES: &'static [&'static str];
+    const OPERAND_COUNT: Option<usize>;
+    const EXPANDER: ExpandFn;
+}
+
+impl Entry {
+    const fn of<T: MacroInstruction>() -> Self {
+        Self {
+            names: T::NAMES,
+            operand_count: T::OPERAND_COUNT,
+            expander: T::EXPANDER,
+        }
+    }
+
+    pub fn expand<'a>(
         &self,
         ctx: &Context<'a>,
         pc: u32,
@@ -45,7 +59,7 @@ pub trait MacroInstruction: Send + Sync {
     ) -> Result<ExpandRet<'a>> {
         self.assert_operand_count(name, operands)?;
 
-        let mut deq: VecDeque<_> = match (self.expander())(ctx, pc, name, operands) {
+        let mut deq: VecDeque<_> = match (self.expander)(ctx, pc, name, operands) {
             None => return Ok(None),
             Some(v) => v.into(),
         };
@@ -56,7 +70,7 @@ pub trait MacroInstruction: Send + Sync {
             if let Some(mc) = MACRO_INSTRUCTIONS.get(name) {
                 mc.assert_operand_count(name, &ops)?;
 
-                match (mc.expander())(ctx, pc, name, &ops) {
+                match (mc.expander)(ctx, pc, name, &ops) {
                     None => {
                         ret.push((name, ops));
                     },
@@ -75,7 +89,7 @@ pub trait MacroInstruction: Send + Sync {
     }
 
     fn assert_operand_count(&self, name: &str, operands: &[Operand]) -> Result<()> {
-        if let Some(count) = self.operand_count()
+        if let Some(count) = self.operand_count
             && operands.len() != count
         {
             bail!(
@@ -90,8 +104,8 @@ pub trait MacroInstruction: Send + Sync {
     }
 }
 
-macro impl_macro_instruction {
-    (
+macro macro_instruction {
+    (@impl
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
             names: $names:tt,
@@ -103,24 +117,16 @@ macro impl_macro_instruction {
         $vis struct $id;
 
         impl $crate::macro_instructions::MacroInstruction for $id {
-            fn names(&self) -> &'static [&'static str] {
-                &$names
-            }
-            fn operand_count(&self) -> Option<usize> {
-                $count $( ( $value ) )?
-            }
-            fn expander(&self) -> $crate::macro_instructions::ExpandFn {
-                $expander
-            }
+            const NAMES: &'static [&'static str] = &$names;
+            const OPERAND_COUNT: Option<usize> = $count $( ( $value ) )?;
+            const EXPANDER: $crate::macro_instructions::ExpandFn = $expander;
         }
 
         inventory::submit! {
-            &$id as &'static dyn $crate::macro_instructions::MacroInstruction
+            $crate::macro_instructions::Entry::of::<$id>()
         }
     },
-}
 
-macro macro_instruction {
     (
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
@@ -129,7 +135,7 @@ macro macro_instruction {
             expander: $expander:expr,
         }
     ) => {
-        $crate::macro_instructions::impl_macro_instruction! {
+        macro_instruction! {@impl
             $( #[doc = $doc] )*
             $vis $id {
                 names: [ $name ],
@@ -146,7 +152,7 @@ macro macro_instruction {
             expander: $expander:expr,
         }
     ) => {
-        $crate::macro_instructions::impl_macro_instruction! {
+        macro_instruction! {@impl
             $( #[doc = $doc] )*
             $vis $id {
                 names: [ $name ],
@@ -164,7 +170,7 @@ macro macro_instruction {
             expander: $expander:expr,
         }
     ) => {
-        $crate::macro_instructions::impl_macro_instruction! {
+        macro_instruction! {@impl
             $( #[doc = $doc] )*
             $vis $id {
                 names: $names,
@@ -181,7 +187,7 @@ macro macro_instruction {
             expander: $expander:expr,
         }
     ) => {
-        $crate::macro_instructions::impl_macro_instruction! {
+        macro_instruction! {@impl
             $( #[doc = $doc] )*
             $vis $id {
                 names: $names,

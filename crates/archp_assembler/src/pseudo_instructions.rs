@@ -19,40 +19,55 @@ use crate::{
 
 type ExpandFn = for<'a> fn(&[Operand<'a>]) -> Instr<'a>;
 
-inventory::collect!(&'static dyn PseudoInstruction);
+inventory::collect!(Entry);
 
-pub static PSEUDO_INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static dyn PseudoInstruction>> =
-    LazyLock::new(|| {
-        let mut map = HashMap::new();
-        for entry in inventory::iter::<&'static dyn PseudoInstruction> {
-            map.insert(entry.name(), *entry);
+pub static PSEUDO_INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static Entry>> =
+    LazyLock::new(|| HashMap::from_iter(inventory::iter::<Entry>.into_iter().map(|e| (e.name, e))));
+
+pub struct Entry {
+    name: &'static str,
+    operand_types: &'static [OperandType],
+    expander: ExpandFn,
+}
+
+trait PseudoInstruction: Send + Sync {
+    const NAME: &'static str;
+    const OPERAND_TYPES: &'static [OperandType];
+    const EXPANDER: ExpandFn;
+}
+
+impl Entry {
+    const fn of<T: PseudoInstruction>() -> Self {
+        Self {
+            name: T::NAME,
+            operand_types: T::OPERAND_TYPES,
+            expander: T::EXPANDER,
         }
-        map
-    });
+    }
 
-pub trait PseudoInstruction: Send + Sync {
-    fn name(&self) -> &'static str;
-    fn operand_types(&self) -> &'static [OperandType];
-    fn expander(&self) -> ExpandFn;
-
-    fn expand<'a>(&self, ctx: &Context, pc: u32, operands: &[Operand<'a>]) -> Result<Instr<'a>> {
+    pub fn expand<'a>(
+        &self,
+        ctx: &Context,
+        pc: u32,
+        operands: &[Operand<'a>],
+    ) -> Result<Instr<'a>> {
         self.assert_operand_format(ctx, pc, operands)?;
 
-        Ok((self.expander())(operands))
+        Ok((self.expander)(operands))
     }
 
     fn assert_operand_format(&self, ctx: &Context, pc: u32, operands: &[Operand]) -> Result<()> {
-        if operands.len() != self.operand_types().len() {
+        if operands.len() != self.operand_types.len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",
-                self.name(),
-                self.operand_types().len(),
+                self.name,
+                self.operand_types.len(),
                 operands.len()
             );
         }
 
         for (i, op) in operands.iter().enumerate() {
-            match self.operand_types()[i] {
+            match self.operand_types[i] {
                 OperandType::RegD | OperandType::RegS => {
                     encode_register(ctx, op)?;
                 },
@@ -69,8 +84,8 @@ pub trait PseudoInstruction: Send + Sync {
     }
 }
 
-macro impl_pseudo_instruction {
-    (
+macro pseudo_instruction {
+    (@impl
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
             name: $name:literal,
@@ -82,24 +97,16 @@ macro impl_pseudo_instruction {
         $vis struct $id;
 
         impl $crate::pseudo_instructions::PseudoInstruction for $id {
-            fn name(&self) -> &'static str {
-                $name
-            }
-            fn operand_types(&self) -> &'static [OperandType] {
-                $crate::operand::op_types! $types
-            }
-            fn expander(&self) -> $crate::pseudo_instructions::ExpandFn {
-                $expander
-            }
+            const NAME: &'static str = $name;
+            const OPERAND_TYPES: &'static [ $crate::operand::OperandType] = $crate::operand::op_types! $types;
+            const EXPANDER: $crate::pseudo_instructions::ExpandFn = $expander;
         }
 
         inventory::submit! {
-            &$id as &'static dyn $crate::pseudo_instructions::PseudoInstruction
+            $crate::pseudo_instructions::Entry::of::<$id>()
         }
-    }
-}
+    },
 
-macro pseudo_instruction {
     (
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
@@ -108,7 +115,7 @@ macro pseudo_instruction {
             expander: $expander:expr,
         }
     ) => {
-        $crate::pseudo_instructions::impl_pseudo_instruction! {
+        pseudo_instruction! {@impl
             $( #[doc = $doc] )*
             $vis $id {
                 name: $name,
