@@ -53,8 +53,10 @@ impl Address {
 
 #[cfg(test)]
 mod tests {
+    use insta::assert_snapshot;
+
     use super::*;
-    use crate::{testkit::assert_snapshot, utils::fmt::fmt_hex};
+    use crate::utils::fmt::fmt_hex;
 
     impl Address {
         pub fn as_i12(&self, base: u32) -> Result<u32> {

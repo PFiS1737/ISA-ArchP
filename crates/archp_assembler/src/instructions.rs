@@ -334,6 +334,8 @@ macro instruction {
 
 #[cfg(test)]
 mod tests {
+    use insta::assert_snapshot;
+
     use crate::testkit::*;
 
     #[test]

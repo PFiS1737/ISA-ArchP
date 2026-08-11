@@ -89,11 +89,10 @@ pub fn split_hi_lo(n: i64, bits: u8, signed: bool) -> (u32, u32) {
 
 #[cfg(test)]
 mod tests {
+    use insta::assert_snapshot;
+
     use super::*;
-    use crate::{
-        testkit::assert_snapshot,
-        utils::{fmt::fmt_hex, sig_ext::sign_extend},
-    };
+    use crate::utils::{fmt::fmt_hex, sig_ext::sign_extend};
 
     fn test_and_fmt(n: i64, bits: u8, signed: bool) -> String {
         let (low, hi) = split_hi_lo(n, bits, signed);

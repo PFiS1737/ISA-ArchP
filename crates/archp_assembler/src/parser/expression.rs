@@ -124,8 +124,9 @@ pub fn parse_expr(input: &str) -> anyhow::Result<(&str, Expr<'_>)> {
 
 #[cfg(test)]
 mod tests {
+    use insta::assert_snapshot;
+
     use super::*;
-    use crate::testkit::assert_snapshot;
 
     fn parse_ok(input: &str) -> Expr<'_> {
         let (rest, expr) = parse_expr(input).expect("parse failed");

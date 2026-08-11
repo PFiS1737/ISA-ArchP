@@ -1,5 +1,3 @@
-pub use insta::assert_snapshot;
-
 use crate::{
     assembler::Context, instructions::*, macro_instructions::*, operand::Operand,
     utils::fmt::fmt_line,

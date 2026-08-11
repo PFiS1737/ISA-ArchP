@@ -105,6 +105,8 @@ const F3: ExpandFn = |ctx, _, name, ops| {
 
 #[cfg(test)]
 mod tests {
+    use insta::assert_snapshot;
+
     use crate::testkit::*;
 
     #[test]

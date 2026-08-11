@@ -50,8 +50,9 @@ pub fn encode_register(ctx: &Context, op: &Operand) -> Result<u32> {
 #[cfg(test)]
 mod tests {
     use anyhow::Result;
+    use insta::assert_snapshot;
 
-    use crate::{assembler::Context, operand::Operand, testkit::*};
+    use crate::{assembler::Context, operand::Operand};
 
     fn test(func: fn(&Context, &Operand) -> Result<u32>) -> impl Fn(&str) -> String {
         move |s| match func(&Context::test(), &Operand::from(s)) {
