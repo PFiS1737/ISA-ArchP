@@ -10,14 +10,14 @@ mod set;
 use std::{collections::HashMap, sync::LazyLock};
 
 use anyhow::{Result, bail};
+use smallvec::SmallVec;
 
 use crate::{
     assembler::{Context, Instr},
-    encoder::{address::encode_address, immediate::encode_immediate_as, register::encode_register},
     operand::{Operand, OperandType},
 };
 
-type ExpandFn = for<'a> fn(&[Operand<'a>]) -> Instr<'a>;
+type ExpandFn = for<'a> fn(&Context<'a>, &[Operand<'a>]) -> SmallVec<[Instr<'a>; 2]>;
 
 inventory::collect!(Entry);
 
@@ -47,16 +47,15 @@ impl Entry {
 
     pub fn expand<'a>(
         &self,
-        ctx: &Context,
-        pc: u32,
+        ctx: &Context<'a>,
         operands: &[Operand<'a>],
-    ) -> Result<Instr<'a>> {
-        self.assert_operand_format(ctx, pc, operands)?;
+    ) -> Result<SmallVec<[Instr<'a>; 2]>> {
+        self.assert_operand_format(operands)?;
 
-        Ok((self.expander)(operands))
+        Ok((self.expander)(ctx, operands))
     }
 
-    fn assert_operand_format(&self, ctx: &Context, pc: u32, operands: &[Operand]) -> Result<()> {
+    fn assert_operand_format(&self, operands: &[Operand]) -> Result<()> {
         if operands.len() != self.operand_types.len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",
@@ -66,16 +65,38 @@ impl Entry {
             );
         }
 
+        // TODO: change this
         for (i, op) in operands.iter().enumerate() {
             match self.operand_types[i] {
                 OperandType::RegD | OperandType::RegS => {
-                    encode_register(ctx, op)?;
+                    if !matches!(op, Operand::Ident(..)) {
+                        bail!(
+                            "Pseudo-instruction '{}' requires operand {} to be a register, got {}",
+                            self.name,
+                            i + 1,
+                            op
+                        );
+                    }
                 },
-                OperandType::Imm(bits, signed) => {
-                    encode_immediate_as(ctx, op, bits, signed)?;
+                OperandType::Imm(..) => {
+                    if !matches!(op, Operand::Num(..)) {
+                        bail!(
+                            "Pseudo-instruction '{}' requires operand {} to be an immediate, got {}",
+                            self.name,
+                            i + 1,
+                            op
+                        );
+                    }
                 },
-                OperandType::Addr(bits) => {
-                    encode_address(ctx, op)?.as_field(bits, pc)?;
+                OperandType::Addr(..) => {
+                    if !matches!(op, Operand::Ident(..) | Operand::Addition(..)) {
+                        bail!(
+                            "Pseudo-instruction '{}' requires operand {} to be an address, got {}",
+                            self.name,
+                            i + 1,
+                            op
+                        );
+                    }
                 },
             };
         }
@@ -85,7 +106,7 @@ impl Entry {
 }
 
 macro pseudo_instruction {
-    (@impl
+    (
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
             name: $name:literal,
@@ -104,24 +125,6 @@ macro pseudo_instruction {
 
         inventory::submit! {
             $crate::pseudo_instructions::Entry::of::<$id>()
-        }
-    },
-
-    (
-        $( #[doc = $doc:literal] )*
-        $vis:vis $id:ident {
-            name: $name:literal,
-            operand_types: $types:tt,
-            expander: $expander:expr,
-        }
-    ) => {
-        pseudo_instruction! {@impl
-            $( #[doc = $doc] )*
-            $vis $id {
-                name: $name,
-                operand_types: $types,
-                expander: $expander,
-            }
         }
     },
 }

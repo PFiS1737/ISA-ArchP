@@ -17,5 +17,5 @@ pseudo_instruction! {
 }
 
 macro F($instr:literal) {
-    |ops| ($instr, ops![ops[0], ops[0], 1])
+    |_, ops| smallvec::smallvec![($instr, ops![ops[0], ops[0], 1])]
 }

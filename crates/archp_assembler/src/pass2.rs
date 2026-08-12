@@ -3,7 +3,6 @@ use anyhow::{Result, anyhow};
 use crate::{
     assembler::{Context, Instr},
     instructions::INSTRUCTIONS,
-    pseudo_instructions::PSEUDO_INSTRUCTIONS,
 };
 
 pub struct Pass2<'ctx, 'src> {
@@ -42,14 +41,6 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
         let pc = (idx * 4) as u32;
 
         let (name, ops) = instr;
-
-        let (name, ops) = if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
-            ps_instr
-                .expand(self.context, pc, &ops)
-                .map_err(|e| anyhow!("Error expanding pseudo-instruction '{}': {}", name, e))?
-        } else {
-            (name, ops)
-        };
 
         let code = INSTRUCTIONS
             .get(name)

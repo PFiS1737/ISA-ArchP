@@ -4,6 +4,6 @@ pseudo_instruction! {
     pub Mv {
         name: "mv",
         operand_types: [ RegD, RegS ],
-        expander: |ops| ("addi", ops![ops[0], ops[1], 0]),
+        expander: |_, ops| smallvec::smallvec![("addi", ops![ops[0], ops[1], 0])],
     }
 }

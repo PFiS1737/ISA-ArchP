@@ -44,13 +44,14 @@ impl Display for Operand<'_> {
 }
 
 pub macro ops {
-    ( $( $value:expr ),* $(,)? ) => {
-        smallvec::smallvec![
+    ( $( $value:expr ),* $(,)? ) => {{
+        let v: smallvec::SmallVec<[$crate::operand::Operand<'_>; 3]> = smallvec::smallvec![
             $(
                 $crate::operand::Operand::from($value)
             ),*
-        ]
-    },
+        ];
+        v
+    }},
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

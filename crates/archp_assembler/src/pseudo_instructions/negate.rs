@@ -4,6 +4,6 @@ pseudo_instruction! {
     pub Neg {
         name: "neg",
         operand_types: [ RegD, RegS ],
-        expander: |ops| ("sub", ops![ops[0], "r0", ops[1]]),
+        expander: |_, ops| smallvec::smallvec![("sub", ops![ops[0], "r0", ops[1]])],
     }
 }

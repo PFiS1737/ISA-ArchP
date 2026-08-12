@@ -5,6 +5,7 @@ use crate::{
     directives::DIRECTIVES,
     macro_instructions::MACRO_INSTRUCTIONS,
     parser::{line::parse_line, types::line::Line},
+    pseudo_instructions::PSEUDO_INSTRUCTIONS,
 };
 
 pub struct Pass1<'ctx, 'src> {
@@ -44,7 +45,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                             continue;
                         }
 
-                        if !self.context.settings.disable_macro
+                        let instrs = if !self.context.settings.disable_macro
                             && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
                             && let Some(expanded) = mc_instr
                                 .expand(self.context, pc as u32, name, &operands)
@@ -55,16 +56,31 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                                         line.1,
                                         e
                                     )
-                                })?
-                        {
-                            for instr in expanded {
-                                processed.push(instr);
+                                })? {
+                            expanded
+                        } else {
+                            vec![(name, operands)]
+                        };
+
+                        for (name, ops) in instrs.into_iter() {
+                            if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
+                                let expanded =
+                                    ps_instr.expand(self.context, &ops).map_err(|e| {
+                                        anyhow!(
+                                            "Error expanding pseudo-instruction '{}': {}",
+                                            name,
+                                            e
+                                        )
+                                    })?;
+                                for instr in expanded {
+                                    processed.push(instr);
+                                    self.context.source_map.push(line);
+                                }
+                            } else {
+                                processed.push((name, ops));
                                 self.context.source_map.push(line);
                             }
-                        } else {
-                            processed.push((name, operands));
-                            self.context.source_map.push(line);
-                        };
+                        }
                     },
                 }
             }

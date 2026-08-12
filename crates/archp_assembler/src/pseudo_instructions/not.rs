@@ -4,6 +4,6 @@ pseudo_instruction! {
     pub Not {
         name: "not",
         operand_types: [ RegD, RegS ],
-        expander: |ops| ("xori", ops![ops[0], ops[1], -1]),
+        expander: |_, ops| smallvec::smallvec![("xori", ops![ops[0], ops[1], -1])],
     }
 }

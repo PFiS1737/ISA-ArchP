@@ -81,13 +81,13 @@ pseudo_instruction! {
 }
 
 macro F1($instr:literal) {
-    |ops| ($instr, ops![ops[1], ops[0], ops[2]])
+    |_, ops| smallvec::smallvec![($instr, ops![ops[1], ops[0], ops[2]])]
 }
 
 macro F2($instr:literal) {
-    |ops| ($instr, ops![ops[0], "r0", ops[1]])
+    |_, ops| smallvec::smallvec![($instr, ops![ops[0], "r0", ops[1]])]
 }
 
 macro F3($instr:literal) {
-    |ops| ($instr, ops!["r0", ops[0], ops[1]])
+    |_, ops| smallvec::smallvec![($instr, ops!["r0", ops[0], ops[1]])]
 }
