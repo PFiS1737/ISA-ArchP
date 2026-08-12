@@ -35,7 +35,7 @@ impl From<i64> for Operand<'_> {
 impl Display for Operand<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Operand::Num(n) => write!(f, "{}", n),
+            Operand::Num(n) => write!(f, "{}", n), // TODO: format as hex
             Operand::Ident(s) => write!(f, "{}", s),
             Operand::String(s) => write!(f, "\"{}\"", s),
             Operand::Addition(s, n) => write!(f, "{}{:+}", s, n),

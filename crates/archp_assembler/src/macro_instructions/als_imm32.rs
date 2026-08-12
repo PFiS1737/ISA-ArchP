@@ -63,7 +63,7 @@ mod tests {
         assert_snapshot!(addi(&["r1", "r2", "123"]), @"");
         assert_snapshot!(addi(&["r1", "r2", "3000"]), @"li r31 0xBB8; add r1 r2 r31");
         assert_snapshot!(addi(&["r1", "r2", "-123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "-3000"]), @"li r31 0xFFFFFFFFFFFFF448; add r1 r2 r31");
+        assert_snapshot!(addi(&["r1", "r2", "-3000"]), @"li r31 -3000; add r1 r2 r31");
 
         assert_snapshot!(addi(&["r1", "r2", "0x123"]), @"");
         assert_snapshot!(addi(&["r1", "r2", "0x1234"]), @"li r31 0x1234; add r1 r2 r31");

@@ -44,8 +44,8 @@ mod tests {
         assert_snapshot!(li(&["r1", "r2"]), @"Error: Pseudo-instruction 'li' requires operand 2 to be an immediate, got r2");
         assert_snapshot!(li(&["123", "456"]), @"Error: Pseudo-instruction 'li' requires operand 1 to be a register, got 123");
 
-        assert_snapshot!(li(&["r1", "0x123"]), @"addi r1 r0 0x123");
-        assert_snapshot!(li(&["r1", "0x1234"]), @"lui r1 1; addi r1 r1 0x234");
+        assert_snapshot!(li(&["r1", "0x123"]), @"addi r1 r0 291");
+        assert_snapshot!(li(&["r1", "0x1234"]), @"lui r1 1; addi r1 r1 564");
         assert_snapshot!(li(&["r1", "0x12345678"]), @"lui r1 0x12345; addi r1 r1 0x678");
         assert_snapshot!(li(&["r1", "0x10000000"]), @"lui r1 0x10000");
         assert_snapshot!(li(&["r1", "0xFFFFFFF"]), @"lui r1 0x10000; addi r1 r1 0xFFFFFFFF");

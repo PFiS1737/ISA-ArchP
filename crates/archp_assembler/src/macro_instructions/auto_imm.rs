@@ -115,16 +115,16 @@ mod tests {
 
         assert_snapshot!(add(&["r1", "r2", "r3"]), @"");
         assert_snapshot!(add(&["r1", "r2", "0"]), @"addi r1 r2 0");
-        assert_snapshot!(add(&["r1", "r2", "0x123"]), @"addi r1 r2 0x123");
+        assert_snapshot!(add(&["r1", "r2", "0x123"]), @"addi r1 r2 291");
         assert_snapshot!(add(&["r1", "r2", "0x1234"]), @"li r31 0x1234; add r1 r2 r31");
         assert_snapshot!(add(&["r1", "r2", "0x12345678"]), @"li r31 0x12345678; add r1 r2 r31");
 
         assert_snapshot!(add(&["r1", "r2", "123"]), @"addi r1 r2 123");
         assert_snapshot!(add(&["r1", "r2", "3000"]), @"li r31 0xBB8; add r1 r2 r31");
         assert_snapshot!(add(&["r1", "r2", "-123"]), @"addi r1 r2 -123");
-        assert_snapshot!(add(&["r1", "r2", "-3000"]), @"li r31 0xFFFFFFFFFFFFF448; add r1 r2 r31");
+        assert_snapshot!(add(&["r1", "r2", "-3000"]), @"li r31 -3000; add r1 r2 r31");
 
-        assert_snapshot!(add(&["r1", "r2", "0x123"]), @"addi r1 r2 0x123");
+        assert_snapshot!(add(&["r1", "r2", "0x123"]), @"addi r1 r2 291");
         assert_snapshot!(add(&["r1", "r2", "0x1234"]), @"li r31 0x1234; add r1 r2 r31");
     }
 
@@ -134,16 +134,16 @@ mod tests {
 
         assert_snapshot!(beq(&["r1", "r2", "0"]), @"");
         assert_snapshot!(beq(&["r1", "0", "0"]), @"beq r1 r0 0");
-        assert_snapshot!(beq(&["r1", "0x123", "0"]), @"li r31 0x123; beq r1 r31 0");
+        assert_snapshot!(beq(&["r1", "0x123", "0"]), @"li r31 291; beq r1 r31 0");
         assert_snapshot!(beq(&["r1", "0x1234", "0"]), @"li r31 0x1234; beq r1 r31 0");
         assert_snapshot!(beq(&["r1", "0x12345678", "0"]), @"li r31 0x12345678; beq r1 r31 0");
 
         assert_snapshot!(beq(&["r1", "123", "0"]), @"li r31 123; beq r1 r31 0");
         assert_snapshot!(beq(&["r1", "3000", "0"]), @"li r31 0xBB8; beq r1 r31 0");
         assert_snapshot!(beq(&["r1", "-123", "0"]), @"li r31 -123; beq r1 r31 0");
-        assert_snapshot!(beq(&["r1", "-3000", "0"]), @"li r31 0xFFFFFFFFFFFFF448; beq r1 r31 0");
+        assert_snapshot!(beq(&["r1", "-3000", "0"]), @"li r31 -3000; beq r1 r31 0");
 
-        assert_snapshot!(beq(&["r1", "0x123", "0"]), @"li r31 0x123; beq r1 r31 0");
+        assert_snapshot!(beq(&["r1", "0x123", "0"]), @"li r31 291; beq r1 r31 0");
         assert_snapshot!(beq(&["r1", "0x1234", "0"]), @"li r31 0x1234; beq r1 r31 0");
     }
 

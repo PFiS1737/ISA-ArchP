@@ -8,7 +8,7 @@ exit_code: 0
 0x1400044E # jal r0 main                                [j main]
 0x01140000 # addi x r0 0                                [li x, 0]                                            <label: init_screen>
 0x01160000 # addi y r0 0                                [li y, 0]
-0x16180182 # lui color 0x182                            [li color, COLOR_BACK]
+0x16180182 # lui color 386                              [li color, COLOR_BACK]
 0x0118CA1B # addi color color 0xFFFFFA1B                [li color, COLOR_BACK]
 0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                   <label: draw_back>
 0x40000000 # ecall                                      [ecall 0x10000000]
@@ -34,7 +34,7 @@ exit_code: 0
 0x12BEBE1F # blt y r31 draw_grid                        [blt y, GRID_HEIGHT, draw_grid]
 0x01140000 # addi x r0 0                                [li x, 0]
 0x01160000 # addi y r0 0                                [li y, 0]
-0x16180222 # lui color 0x222                            [li color, COLOR_GRID_LINE]
+0x16180222 # lui color 546                              [li color, COLOR_GRID_LINE]
 0x0118C62E # addi color color 0x62E                     [li color, COLOR_GRID_LINE]
 0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                   <label: draw_grid_line_row>
 0x40000000 # ecall                                      [ecall 0x10000000]
@@ -81,7 +81,7 @@ exit_code: 0
 0x0510B00F # muli addr y 15                             [mul addr, y, GRID_COLS]
 0x0010800A # add addr addr x                            [add addr, addr, x]
 0x05108004 # muli addr addr 4                           [mul addr, addr, 4]
-0x163E0100 # lui r31 0x100                              [add addr, addr, BASE_ADDR]
+0x163E0100 # lui r31 256                                [add addr, addr, BASE_ADDR]
 0x0010801F # add addr addr r31                          [add addr, addr, BASE_ADDR]
 0x10088000 # lw t1 addr 0                               [lw t1, (addr)]
 0x013E0008 # addi r31 r0 8                              [beq t1, MINE_MASK, init_mines_loop]
@@ -93,7 +93,7 @@ exit_code: 0
 0xFC800000 # ret
 0x01140000 # addi x r0 0                                [li x, 0]                                            <label: init_mine_counts>
 0x01160000 # addi y r0 0                                [li y, 0]
-0x16100100 # lui addr 0x100                             [li addr, BASE_ADDR]
+0x16100100 # lui addr 256                               [li addr, BASE_ADDR]
 0xFA00001A # call count_around_mines                                                                         <label: init_mine_counts_loop>
 0x10088000 # lw t1 addr 0                               [lw t1, (addr)]
 0x000A4009 # add t2 t1 cnt                              [add t2, t1, cnt]
@@ -121,7 +121,7 @@ exit_code: 0
 0x0509000F # muli t1 ny 15                              [mul t1, ny, GRID_COLS]
 0x0008400F # add t1 t1 nx                               [add t1, t1, nx]
 0x05084004 # muli t1 t1 4                               [mul t1, t1, 4]
-0x163E0100 # lui r31 0x100                              [add t1, t1, BASE_ADDR]
+0x163E0100 # lui r31 256                                [add t1, t1, BASE_ADDR]
 0x0008401F # add t1 t1 r31                              [add t1, t1, BASE_ADDR]
 0x100A4000 # lw t2 t1 0                                 [lw t2, (t1)]
 0x018A5008 # andi t2 t2 8                               [and t2, t2, MINE_MASK]
@@ -135,7 +135,7 @@ exit_code: 0
 0x013E0001 # addi r31 r0 1                              [ble ty, 1, dy_loop]
 0x12FFFA0E # bge r31 ty dy_loop                         [ble ty, 1, dy_loop]
 0xFC800000 # ret
-0x16180222 # lui color 0x222                            [li color, COLOR_GRID_LINE]                          <label: move_cursor>
+0x16180222 # lui color 546                              [li color, COLOR_GRID_LINE]                          <label: move_cursor>
 0x0118C62E # addi color color 0x62E                     [li color, COLOR_GRID_LINE]
 0xFA000036 # call update_cursor
 0x013E0067 # addi r31 r0 103                            [bne key_code, KEY_UP, move_cursor_key_up_ne]
@@ -198,7 +198,7 @@ exit_code: 0
 0x0510700F # muli addr cursor_y 15                      [mul addr, cursor_y, GRID_COLS]                      <label: reveal_tile>
 0x00108006 # add addr addr cursor_x                     [add addr, addr, cursor_x]
 0x05108004 # muli addr addr 4                           [mul addr, addr, 4]
-0x163E0100 # lui r31 0x100                              [add addr, addr, BASE_ADDR]
+0x163E0100 # lui r31 256                                [add addr, addr, BASE_ADDR]
 0x0010801F # add addr addr r31                          [add addr, addr, BASE_ADDR]
 0x10088000 # lw t1 addr 0                               [lw t1, (addr)]
 0x018A4010 # andi t2 t1 16                              [and t2, t1, REVEAL_MASK]
@@ -227,7 +227,7 @@ exit_code: 0
 0x0511000F # muli addr ny 15                            [mul addr, ny, GRID_COLS]
 0x0010800F # add addr addr nx                           [add addr, addr, nx]
 0x05108004 # muli addr addr 4                           [mul addr, addr, 4]
-0x163E0100 # lui r31 0x100                              [add addr, addr, BASE_ADDR]
+0x163E0100 # lui r31 256                                [add addr, addr, BASE_ADDR]
 0x0010801F # add addr addr r31                          [add addr, addr, BASE_ADDR]
 0x10088000 # lw t1 addr 0                               [lw t1, (addr)]
 0x018A4010 # andi t2 t1 16                              [and t2, t1, REVEAL_MASK]
@@ -240,7 +240,7 @@ exit_code: 0
 0x0126F000 # addi arg_x nx 0                            [mv arg_x, nx]
 0x01290000 # addi arg_y ny 0                            [mv arg_y, ny]
 0x12405100 # bne t2 r0 reveal_around_skip_draw_tile     [bne t2, 0, reveal_around_skip_draw_tile]
-0x16180384 # lui color 0x384                            [li color, COLOR_REVEALED]
+0x16180384 # lui color 900                              [li color, COLOR_REVEALED]
 0x0118C048 # addi color color 72                        [li color, COLOR_REVEALED]
 0xFA00005C # call draw_tile
 0xFA00012E # call draw_num                                                                                   <label: reveal_around_skip_draw_tile>
@@ -261,7 +261,7 @@ exit_code: 0
 0x0510700F # muli addr cursor_y 15                      [mul addr, cursor_y, GRID_COLS]                      <label: toggle_flag>
 0x00108006 # add addr addr cursor_x                     [add addr, addr, cursor_x]
 0x05108004 # muli addr addr 4                           [mul addr, addr, 4]
-0x163E0100 # lui r31 0x100                              [add addr, addr, BASE_ADDR]
+0x163E0100 # lui r31 256                                [add addr, addr, BASE_ADDR]
 0x0010801F # add addr addr r31                          [add addr, addr, BASE_ADDR]
 0x10088000 # lw t1 addr 0                               [lw t1, (addr)]
 0x018A4010 # andi t2 t1 16                              [and t2, t1, REVEAL_MASK]
@@ -410,7 +410,7 @@ exit_code: 0
 0x1240509F # bne t2 r31 skip_draw5                      [bne t2, 5, skip_draw5]
 0xFA0000DE # call draw_num5
 0xFC800000 # ret                                                                                             <label: skip_draw5>
-0x16180384 # lui color 0x384                            [li color, COLOR_REVEALED]                           <label: draw_num1>
+0x16180384 # lui color 900                              [li color, COLOR_REVEALED]                           <label: draw_num1>
 0x0118C048 # addi color color 72                        [li color, COLOR_REVEALED]
 0xFBC1FF08 # call draw_tile
 0x01020000 # addi i r0 0                                [li i, 0]
@@ -428,7 +428,7 @@ exit_code: 0
 0x013E0005 # addi r31 r0 5                              [blt i, 5, draw_num1_loop]
 0x12BE1EDF # blt i r31 draw_num1_loop                   [blt i, 5, draw_num1_loop]
 0xFC800000 # ret
-0x16180384 # lui color 0x384                            [li color, COLOR_REVEALED]                           <label: draw_num2>
+0x16180384 # lui color 900                              [li color, COLOR_REVEALED]                           <label: draw_num2>
 0x0118C048 # addi color color 72                        [li color, COLOR_REVEALED]
 0xFBC1FEE4 # call draw_tile
 0x01020000 # addi i r0 0                                [li i, 0]
@@ -438,7 +438,7 @@ exit_code: 0
 0x0114A003 # addi x x 3                                 [add x, x, 3]
 0x0116B002 # addi y y 2                                 [add y, y, 2]
 0x1618066C # lui color 0x66C                            [li color, COLOR_NUM2]
-0x0118C266 # addi color color 0x266                     [li color, COLOR_NUM2]
+0x0118C266 # addi color color 614                       [li color, COLOR_NUM2]
 0x16230000 # lui r17 0x10000                            [ecall 0x10000000]                                   <label: draw_num2_loop>
 0x40000000 # ecall                                      [ecall 0x10000000]
 0x0114A001 # addi x x 1                                 [inc x]
@@ -459,7 +459,7 @@ exit_code: 0
 0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
 0x40000000 # ecall                                      [ecall 0x10000000]
 0xFC800000 # ret
-0x16180384 # lui color 0x384                            [li color, COLOR_REVEALED]                           <label: draw_num3>
+0x16180384 # lui color 900                              [li color, COLOR_REVEALED]                           <label: draw_num3>
 0x0118C048 # addi color color 72                        [li color, COLOR_REVEALED]
 0xFBC1FEA6 # call draw_tile
 0x01020000 # addi i r0 0                                [li i, 0]
@@ -490,7 +490,7 @@ exit_code: 0
 0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
 0x40000000 # ecall                                      [ecall 0x10000000]
 0xFC800000 # ret
-0x16180384 # lui color 0x384                            [li color, COLOR_REVEALED]                           <label: draw_num4>
+0x16180384 # lui color 900                              [li color, COLOR_REVEALED]                           <label: draw_num4>
 0x0118C048 # addi color color 72                        [li color, COLOR_REVEALED]
 0xFBC1FE68 # call draw_tile
 0x01020000 # addi i r0 0                                [li i, 0]
@@ -519,7 +519,7 @@ exit_code: 0
 0x013E0008 # addi r31 r0 8                              [blt i, 8, draw_num4_loop2]
 0x12BE1EDF # blt i r31 draw_num4_loop2                  [blt i, 8, draw_num4_loop2]
 0xFC800000 # ret
-0x16180384 # lui color 0x384                            [li color, COLOR_REVEALED]                           <label: draw_num5>
+0x16180384 # lui color 900                              [li color, COLOR_REVEALED]                           <label: draw_num5>
 0x0118C048 # addi color color 72                        [li color, COLOR_REVEALED]
 0xFBC1FE2E # call draw_tile
 0x01020000 # addi i r0 0                                [li i, 0]
@@ -586,7 +586,7 @@ exit_code: 0
 0xFBC1FDB2 # call draw_tile
 0xFBC1FE28 # call draw_mine
 0x01200000 # addi ny r0 0                               [li ny, 0]
-0x16100100 # lui addr 0x100                             [li addr, BASE_ADDR]
+0x16100100 # lui addr 256                               [li addr, BASE_ADDR]
 0x011E0000 # addi nx r0 0                               [li nx, 0]                                           <label: lose_row_loop>
 0x1240F0C6 # bne nx cursor_x lose_loop_cont             [bne nx, cursor_x, lose_loop_cont]                   <label: lose_col_loop>
 0x12410087 # bne ny cursor_y lose_loop_cont             [bne ny, cursor_y, lose_loop_cont]
@@ -596,7 +596,7 @@ exit_code: 0
 0x120051C0 # beq t2 r0 lose_loop_skip_draw              [beqz t2, lose_loop_skip_draw]
 0x0126F000 # addi arg_x nx 0                            [mv arg_x, nx]
 0x01290000 # addi arg_y ny 0                            [mv arg_y, ny]
-0x16180384 # lui color 0x384                            [li color, COLOR_REVEALED]
+0x16180384 # lui color 900                              [li color, COLOR_REVEALED]
 0x0118C048 # addi color color 72                        [li color, COLOR_REVEALED]
 0xFBC1FD94 # call draw_tile
 0xFBC1FE0A # call draw_mine

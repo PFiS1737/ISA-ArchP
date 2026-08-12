@@ -100,7 +100,7 @@ mod tests {
         assert_snapshot!(f("start"), @"(0, -6)");
         assert_snapshot!(f("loop"), @"(0, -4)");
         assert_snapshot!(f("end"), @"(0, 0x7F9)");
-        assert_snapshot!(f("over"), @"(0x123, 0x44A)");
+        assert_snapshot!(f("over"), @"(291, 0x44A)");
         assert_snapshot!(f("123"), @"Error: Undefined label: 123");
     }
 

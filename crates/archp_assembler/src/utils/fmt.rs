@@ -7,12 +7,12 @@ pub fn fmt_hex(n: impl FormatHex) -> String {
 pub fn fmt_line(name: &str, ops: &[Operand]) -> String {
     let ops = ops
         .iter()
+        // TODO: remove this
         .map(|e| match e {
-            Operand::Num(n) => fmt_hex(*n), // FIXME: 根据指令显示不同位数
+            Operand::Num(n) => fmt_hex(*n),
             Operand::Ident(s) => s.to_string(),
-
-            // TODO: impl
-            _ => unimplemented!("fmt_line: {}", e),
+            Operand::String(s) => format!("\"{}\"", s),
+            Operand::Addition(s, n) => format!("{}{:+}", s, n),
         })
         .collect::<Vec<_>>();
 
@@ -39,44 +39,23 @@ pub trait FormatHex {
     fn fmt_hex(&self) -> String;
 }
 
-impl FormatHex for u32 {
-    fn fmt_hex(&self) -> String {
-        if self < &256 {
-            self.to_string()
-        } else {
-            format!("{:#X}", self)
-        }
-    }
+macro impl_format_hex {
+    ($($t:ty),*) => {
+        $(
+            impl FormatHex for $t {
+                fn fmt_hex(&self) -> String {
+                    let str = self.to_string();
+                    let hex = format!("{:#X}", self);
+
+                    if self >= &0 {
+                        if str.len() > 3 { hex } else { str }
+                    } else {
+                        if str.len() > 5 { hex } else { str }
+                    }
+                }
+            }
+        )*
+    },
 }
 
-// FIXME: maybe better
-
-impl FormatHex for i32 {
-    fn fmt_hex(&self) -> String {
-        if *self >= -256 && *self < 256 {
-            self.to_string()
-        } else {
-            format!("{:#X}", *self)
-        }
-    }
-}
-
-impl FormatHex for u64 {
-    fn fmt_hex(&self) -> String {
-        if self < &256 {
-            self.to_string()
-        } else {
-            format!("{:#X}", self)
-        }
-    }
-}
-
-impl FormatHex for i64 {
-    fn fmt_hex(&self) -> String {
-        if *self >= -256 && *self < 256 {
-            self.to_string()
-        } else {
-            format!("{:#X}", *self)
-        }
-    }
-}
+impl_format_hex!(u32, i32, i64);

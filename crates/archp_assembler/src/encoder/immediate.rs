@@ -182,7 +182,7 @@ mod tests {
         ");
 
         assert_snapshot!(test(-2048), @"
-        0xFFFFFFFFFFFFF800
+        -2048
         (0, 0x7FFFFC0) - i5
         (0, 0x7FFFFC0) - u5
         (0x800, 0) - i12
@@ -192,7 +192,7 @@ mod tests {
         ");
 
         assert_snapshot!(test(-2049), @"
-        0xFFFFFFFFFFFFF7FF
+        -2049
         (31, 0x7FFFFC0) - i5
         (31, 0x7FFFFBF) - u5
         (0x7FF, 0xFFFFF) - i12
@@ -205,8 +205,8 @@ mod tests {
         0x1E240
         (0, 0xF12) - i5
         (0, 0xF12) - u5
-        (0x240, 30) - i12
-        (0x240, 30) - u12
+        (576, 30) - i12
+        (576, 30) - u12
         (0x1E240, 0) - i20
         (0x1E240, 0) - u20
         ");
@@ -386,8 +386,8 @@ mod tests {
         0x1234
         (20, 146) - i5
         (20, 145) - u5
-        (0x234, 1) - i12
-        (0x234, 1) - u12
+        (564, 1) - i12
+        (564, 1) - u12
         (0x1234, 0) - i20
         (0x1234, 0) - u20
         ");
