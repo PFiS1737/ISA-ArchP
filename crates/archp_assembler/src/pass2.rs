@@ -53,7 +53,7 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
 
         let code = INSTRUCTIONS
             .get(name)
-            .ok_or_else(|| anyhow!("Unknown instruction: '{}'", name))?
+            .ok_or(anyhow!("Unknown instruction: '{}'", name))?
             .encode(self.context, pc, &ops)?;
 
         Ok((code, (name, ops)))

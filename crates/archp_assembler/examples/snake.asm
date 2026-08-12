@@ -1,50 +1,50 @@
-.const head_x, r1
-.const head_y, r2
-.const food_x, r3
-.const food_y, r4
-.const t0, r5
-.const t1, r6
-.const nx, r7
-.const ny, r8
-.const key_code, r9
-.const x, r10 ; a0
-.const y, r11 ; a1
-.const color, r12 ; a2
-.const i, r13
-.const rt, r14
-.const que_len, r15
-.const que_head, r16
+.alias head_x, r1
+.alias head_y, r2
+.alias food_x, r3
+.alias food_y, r4
+.alias t0, r5
+.alias t1, r6
+.alias nx, r7
+.alias ny, r8
+.alias key_code, r9
+.alias x, r10 ; a0
+.alias y, r11 ; a1
+.alias color, r12 ; a2
+.alias i, r13
+.alias rt, r14
+.alias que_len, r15
+.alias que_head, r16
 ; r17 is used for syscalls
-.const que_val, r18
-.const que_tmp, r19
-.const que_i, r20
-.const que_cur, r21
-.const que_addr, r22
+.alias que_val, r18
+.alias que_tmp, r19
+.alias que_i, r20
+.alias que_cur, r21
+.alias que_addr, r22
 
-.const BASE_ADDR, 0x00100000
-.const KBD_BASE, 0x90000000
+.equ BASE_ADDR, 0x00100000
+.equ KBD_BASE, 0x90000000
 
-.const SCREEN_WIDTH, 64
-.const SCREEN_HEIGHT, 36
+.equ SCREEN_WIDTH, 64
+.equ SCREEN_HEIGHT, 36
 
-.const MAX_X, 63 # SCREEN_WIDTH - 1
-.const MAX_Y, 35 # SCREEN_HEIGHT - 1
+.equ MAX_X, 63 # SCREEN_WIDTH - 1
+.equ MAX_Y, 35 # SCREEN_HEIGHT - 1
 
-.const COLOR_BACK, 0x000000
-.const COLOR_BODY, 0xFFFFFF
-.const COLOR_HEAD, 0xFF0000
-.const COLOR_FOOD, 0xFFFF00
+.equ COLOR_BACK, 0x000000
+.equ COLOR_BODY, 0xFFFFFF
+.equ COLOR_HEAD, 0xFF0000
+.equ COLOR_FOOD, 0xFFFF00
 
 # linux input-event-codes
-.const KEY_UP, 103
-.const KEY_DOWN, 108
-.const KEY_LEFT, 105
-.const KEY_RIGHT, 106
+.equ KEY_UP, 103
+.equ KEY_DOWN, 108
+.equ KEY_LEFT, 105
+.equ KEY_RIGHT, 106
 
-.const INIT_X, 5
-.const INIT_Y, 18
+.equ INIT_X, 5
+.equ INIT_Y, 18
 
-.const QUEUE_SIZE, 100
+.equ QUEUE_SIZE, 100
 
 
 j main

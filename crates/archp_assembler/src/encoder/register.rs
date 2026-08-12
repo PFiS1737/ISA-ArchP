@@ -7,7 +7,7 @@ pub fn encode_register(ctx: &Context, op: &Operand) -> Result<u32> {
         bail!("Invalid register: {}", op)
     };
 
-    let reg = ctx.constants.get(reg).unwrap_or(reg);
+    let reg = ctx.aliases.get(reg).unwrap_or(reg);
 
     Ok(match *reg {
         "r0" | "zero" => 0,
@@ -68,7 +68,7 @@ mod tests {
         assert_snapshot!(f("r9"), @"9");
         assert_snapshot!(f("r27"), @"27");
         assert_snapshot!(f("invalid"), @"Error: Invalid register: invalid");
-        assert_snapshot!(f("FOO"), @"Error: Invalid register: 42");
+        assert_snapshot!(f("FOO"), @"Error: Invalid register: FOO");
         assert_snapshot!(f("BAR"), @"Error: Invalid register: BAR");
         assert_snapshot!(f("R0"), @"0");
         assert_snapshot!(f("R1"), @"1");

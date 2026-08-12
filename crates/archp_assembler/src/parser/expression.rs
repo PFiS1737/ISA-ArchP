@@ -1,4 +1,3 @@
-use anyhow::anyhow;
 use nom::{
     Parser,
     branch::alt,
@@ -118,10 +117,6 @@ pub fn expr(input: &str) -> Result<'_, Expr<'_>> {
     expr_bp(input, 0)
 }
 
-pub fn parse_expr(input: &str) -> anyhow::Result<(&str, Expr<'_>)> {
-    expr(input).map_err(|e| anyhow!("Error parsing expression '{}': {}", input, e))
-}
-
 #[cfg(test)]
 mod tests {
     use insta::assert_snapshot;
@@ -129,7 +124,7 @@ mod tests {
     use super::*;
 
     fn parse_ok(input: &str) -> Expr<'_> {
-        let (rest, expr) = parse_expr(input).expect("parse failed");
+        let (rest, expr) = expr(input).expect("parse failed");
         assert!(rest.trim().is_empty(), "unparsed input: {:?}", rest);
         expr
     }
@@ -187,7 +182,7 @@ mod tests {
 
     #[test]
     fn test_invalid_input() {
-        assert!(parse_expr("1 +").is_err());
-        assert!(parse_expr("<< 1").is_err());
+        assert!(expr("1 +").is_err());
+        assert!(expr("<< 1").is_err());
     }
 }

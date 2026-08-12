@@ -1,16 +1,16 @@
 # leetcode: trapping-rain-water
 # solutions/5126477
 
-.const len, r1
-.const l, r2
-.const r, r3
-.const lmax, r4
-.const rmax, r5
-.const water, r6
-.const t0, r7
-.const t1, r8
+.alias len, r1
+.alias l, r2
+.alias r, r3
+.alias lmax, r4
+.alias rmax, r5
+.alias water, r6
+.alias t0, r7
+.alias t1, r8
 
-.const BASE_ADDR, 0x00100000
+.equ BASE_ADDR, 0x00100000
 
 main:
   ecall 5 ; read int

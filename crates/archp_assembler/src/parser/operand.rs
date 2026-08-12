@@ -3,7 +3,7 @@ use smallvec::SmallVec;
 
 use crate::{
     operand::Operand,
-    parser::{Error, Result, expression::expr, ident, parens, types::expression::Expr},
+    parser::{Error, Result, expression::expr, ident, parens},
 };
 
 fn take_until_unescaped_quote(input: &str) -> Result<'_, &str> {
@@ -38,14 +38,6 @@ fn string_literal(input: &str) -> Result<'_, &str> {
     delimited(char('"'), take_until_unescaped_quote, char('"')).parse(input)
 }
 
-fn unwrap_expr(e: Expr) -> Operand {
-    match e {
-        Expr::Num(n) => Operand::Num(n),
-        Expr::Ident(s) => Operand::Ident(s),
-        _ => Operand::Expr(e), // TODO: eval constants
-    }
-}
-
 pub fn operand<'a>(input: &'a str, out: &mut SmallVec<[Operand<'a>; 3]>) -> Result<'a, ()> {
     // case 1: "string"
     if let Ok((rest, s)) = string_literal(input) {
@@ -62,7 +54,7 @@ pub fn operand<'a>(input: &'a str, out: &mut SmallVec<[Operand<'a>; 3]>) -> Resu
 
     // case 3: expr
     let (input, expr) = expr(input)?;
-    out.push(unwrap_expr(expr));
+    out.push(expr.into());
 
     // case 4: expr(ident)
     let Ok((input, ident)) = parens(ident).parse(input) else {

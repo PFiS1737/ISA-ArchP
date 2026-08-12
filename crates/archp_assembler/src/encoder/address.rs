@@ -5,11 +5,10 @@ use crate::{assembler::Context, operand::Operand};
 pub fn encode_address(ctx: &Context, op: &Operand) -> Result<Address> {
     match op {
         Operand::Ident(s) => {
-            let label = ctx.constants.get(s).unwrap_or(s);
-            if let Some(&addr) = ctx.labels.get(label) {
+            if let Some(&addr) = ctx.labels.get(s) {
                 Ok(Address(addr as u32))
             } else {
-                bail!("Undefined label: {}", label)
+                bail!("Undefined label: {}", s)
             }
         },
         _ => unimplemented!("parse_address: {}", op), // TODO: impl

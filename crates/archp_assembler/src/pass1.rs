@@ -1,7 +1,8 @@
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Result, anyhow};
 
 use crate::{
     assembler::{Context, Instr},
+    directives::DIRECTIVES,
     macro_instructions::MACRO_INSTRUCTIONS,
     parser::{line::parse_line, types::line::Line},
 };
@@ -31,37 +32,15 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                         operands,
                         line,
                     } => {
-                        // TODO: remove this
-                        if name == ".const" {
-                            match line
-                                .1
-                                .split_once(char::is_whitespace)
-                                .unwrap()
-                                .1
-                                .split_once(',')
-                            {
-                                Some((name, value)) => {
-                                    let name = name.trim();
-                                    let value = value.trim();
-
-                                    if name.is_empty() || value.is_empty() {
-                                        bail!(
-                                            "Invalid constant declaration at line {}: '{}'",
-                                            line.0,
-                                            line.1
-                                        );
-                                    }
-
-                                    // TODO: eval expression at here
-                                    self.context.constants.insert(name, value);
-                                },
-                                None => bail!(
-                                    "Invalid constant declaration at line {}: '{}'",
+                        if let Some(dire) = DIRECTIVES.get(name) {
+                            dire.handle(self.context, &operands).map_err(|e| {
+                                anyhow!(
+                                    "Error handling directive at line {}: '{}' ({})",
                                     line.0,
-                                    line.1
-                                ),
-                            };
-
+                                    line.1,
+                                    e
+                                )
+                            })?;
                             continue;
                         }
 

@@ -1,33 +1,19 @@
 use anyhow::{Result, anyhow, bail};
 
-use crate::{
-    assembler::Context, operand::Operand, parser::expression::parse_expr,
-    utils::sig_ext::sign_extend,
-};
+use crate::{assembler::Context, operand::Operand, utils::sig_ext::sign_extend};
 
 pub fn encode_immediate(ctx: &Context, imm: &Operand) -> Result<i64> {
     match imm {
         Operand::Num(n) => Ok(*n),
-        Operand::Ident(s) => {
-            let s = ctx.constants.get(s).unwrap_or(s);
-
-            let (remain, expr) =
-                parse_expr(s).map_err(|e| anyhow!("Failed to parse immediate '{}': {}", s, e))?;
-
-            if !remain.trim().is_empty() {
-                bail!("Invalid immediate: {}", s);
-            }
-
-            // TODO: evaluate the expression with constants
-            let imm = expr
-                .eval_with(&|_| None)
-                .map_err(|e| anyhow!("Failed to evaluate immediate '{}': {}", s, e))?;
-
-            Ok(imm)
-        },
-
-        // TODO: impl
-        _ => unimplemented!("parse_imm: {}", imm),
+        Operand::Ident(s) => ctx
+            .equates
+            .get(s)
+            .copied()
+            .ok_or(anyhow!("Expected immediate, undefined identifier: {}", s)),
+        Operand::Expr(expr) => expr
+            .eval(&ctx.equates)
+            .map_err(|e| anyhow!("Failed to evaluate immediate '{}': {}", expr, e)),
+        Operand::String(_) => bail!("Immediate cannot be a string: {}", imm),
     }
 }
 

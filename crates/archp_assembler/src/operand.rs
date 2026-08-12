@@ -34,6 +34,16 @@ impl From<i64> for Operand<'_> {
     }
 }
 
+impl<'a> From<Expr<'a>> for Operand<'a> {
+    fn from(e: Expr<'a>) -> Self {
+        match e {
+            Expr::Num(n) => Operand::Num(n),
+            Expr::Ident(s) => Operand::Ident(s),
+            _ => Operand::Expr(e), // TODO: eval constants
+        }
+    }
+}
+
 impl Display for Operand<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
