@@ -18,7 +18,6 @@ const F: HandlerFn = |ctx, ops| {
         bail!("expected identifier, got {}", ops[0]);
     };
 
-    // TODO: handle other types of operands, e.g., expressions
     let Operand::Num(value) = &ops[1] else {
         bail!("expected number, got {}", ops[1]);
     };

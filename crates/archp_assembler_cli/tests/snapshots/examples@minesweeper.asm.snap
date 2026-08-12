@@ -62,7 +62,7 @@ exit_code: 0
 0x0118CB15 # addi color color 0xFFFFFB15                [li color, COLOR_CURSOR]
 0xFA0000D0 # call update_cursor
 0xFC800000 # ret
-0x012A0010 # addi mine_num r0 MINE_NUM_MAX              [li mine_num, MINE_NUM_MAX]                          <label: init_mines>
+0x012A0010 # addi mine_num r0 16                        [li mine_num, MINE_NUM_MAX]                          <label: init_mines>
 0x01155000 # addi a0 mine_num 0                         [mv a0, mine_num]
 0x01220001 # addi r17 r0 1                              [ecall 1]
 0x40000000 # ecall                                      [ecall 1]
@@ -86,7 +86,7 @@ exit_code: 0
 0x10088000 # lw t1 addr 0                               [lw t1, (addr)]
 0x013E0008 # addi r31 r0 8                              [beq t1, MINE_MASK, init_mines_loop]
 0x123E4C5F # beq t1 r31 init_mines_loop                 [beq t1, MINE_MASK, init_mines_loop]
-0x01080008 # addi t1 r0 MINE_MASK                       [li t1, MINE_MASK]
+0x01080008 # addi t1 r0 8                               [li t1, MINE_MASK]
 0x11408004 # sw t1 addr 0                               [sw t1, (addr)]
 0x01021001 # addi i i 1                                 [inc i]
 0x12BE1B55 # blt i mine_num init_mines_loop             [blt i, mine_num, init_mines_loop]
@@ -275,7 +275,7 @@ exit_code: 0
 0xFA000048 # call draw_flag
 0x1400000E # jal r0 toggle_flag_store                   [j toggle_flag_store]
 0x012B5001 # addi mine_num mine_num 1                   [inc mine_num]                                       <label: toggle_flag_already_set>
-0x010A0FDF # addi t2 r0 -33                             [li t2, -33]
+0x010A0FDF # addi t2 r0 -33                             [li t2, ~FLAG_MASK]
 0x00884005 # and t1 t1 t2                               [and t1, t1, t2]
 0x161804C5 # lui color 0x4C5                            [li color, COLOR_HIDDEN]
 0x0118C45C # addi color color 0x45C                     [li color, COLOR_HIDDEN]
@@ -352,7 +352,7 @@ exit_code: 0
 0x05174008 # muli y arg_y 8                             [mul y, arg_y, TILE_SIZE]
 0x0114A004 # addi x x 4                                 [add x, x, 4]
 0x0116B002 # addi y y 2                                 [add y, y, 2]
-0x01180000 # addi color r0 COLOR_MINE                   [li color, COLOR_MINE]
+0x01180000 # addi color r0 0                            [li color, COLOR_MINE]
 0x16230000 # lui r17 0x10000                            [ecall 0x10000000]
 0x40000000 # ecall                                      [ecall 0x10000000]
 0x0116B001 # addi y y 1                                 [inc y]

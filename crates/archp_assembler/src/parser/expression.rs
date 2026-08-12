@@ -45,7 +45,10 @@ fn unary(input: &str) -> Result<'_, Expr<'_>> {
     if let Some(op) = opt_op {
         let (input, rhs) = unary(input)?;
 
-        Ok((input, try_eval_unary(op, rhs)?))
+        Ok((input, Expr::Unary {
+            op,
+            rhs: Box::new(rhs),
+        }))
     } else {
         primary(input)
     }
@@ -105,7 +108,11 @@ fn expr_bp(input: &str, min_bp: u8) -> Result<'_, Expr<'_>> {
 
         let (next_input, rhs) = expr_bp(next_input, prec + 1)?;
 
-        lhs = try_eval_binary(lhs, op, rhs)?;
+        lhs = Expr::Binary {
+            lhs: Box::new(lhs),
+            op,
+            rhs: Box::new(rhs),
+        };
 
         input = next_input;
     }
@@ -142,32 +149,32 @@ mod tests {
     #[test]
     fn test_unary() {
         assert_snapshot!(parse_ok("-1"), @"-1");
-        assert_snapshot!(parse_ok("~1"), @"-2");
+        assert_snapshot!(parse_ok("~1"), @"~1");
     }
 
     #[test]
     fn test_binary() {
-        assert_snapshot!(parse_ok("1 + 2 * 3 / 2 % 2"), @"2");
-        assert_snapshot!(parse_ok("1 + 2 << 3"), @"17");
-        assert_snapshot!(parse_ok("1 & 2 ^ 3 | 4 ! 5"), @"-1");
-        assert_snapshot!(parse_ok("1 == 2 && 3 != 4 || 5 < 6"), @"1");
-        assert_snapshot!(parse_ok("1 - 2 - 3"), @"-4");
-        assert_snapshot!(parse_ok("(1 + 2) * 3"), @"9");
+        assert_snapshot!(parse_ok("1 + 2 * 3 / 2 % 2"), @"(1 + (((2 * 3) / 2) % 2))");
+        assert_snapshot!(parse_ok("1 + 2 << 3"), @"(1 + (2 << 3))");
+        assert_snapshot!(parse_ok("1 & 2 ^ 3 | 4 ! 5"), @"((((1 & 2) ^ 3) | 4) ! 5)");
+        assert_snapshot!(parse_ok("1 == 2 && 3 != 4 || 5 < 6"), @"(((1 == 2) && (3 != 4)) || (5 < 6))");
+        assert_snapshot!(parse_ok("1 - 2 - 3"), @"((1 - 2) - 3)");
+        assert_snapshot!(parse_ok("(1 + 2) * 3"), @"((1 + 2) * 3)");
     }
 
     #[test]
     fn test_unary_with_binary() {
-        assert_snapshot!(parse_ok("-1 + 2"), @"1");
+        assert_snapshot!(parse_ok("-1 + 2"), @"(-1 + 2)");
     }
 
     #[test]
     fn test_complex_expression() {
-        assert_snapshot!(parse_ok("1 + 2 ! 10 * 3 << 1 & 7 ^ 2 | ~4"), @"-4");
+        assert_snapshot!(parse_ok("1 + 2 ! 10 * 3 << 1 & 7 ^ 2 | ~4"), @"(1 + ((((2 ! ((10 * 3) << 1)) & 7) ^ 2) | ~4))");
     }
 
     #[test]
     fn test_whitespace() {
-        assert_snapshot!(parse_ok(" 1  +   2 *  3 "), @"7");
+        assert_snapshot!(parse_ok(" 1  +   2 *  3 "), @"(1 + (2 * 3))");
     }
 
     #[test]

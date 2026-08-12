@@ -8,6 +8,7 @@ use nom::{
 use smallvec::SmallVec;
 
 use crate::{
+    assembler::Context,
     operand::Operand,
     parser::{Result, ident, operand::operand, types::line::Line, ws},
 };
@@ -16,32 +17,39 @@ fn label(input: &str) -> Result<'_, &str> {
     terminated(ident, ws(char(':'))).parse(input)
 }
 
-fn operands(input: &str) -> Result<'_, SmallVec<[Operand<'_>; 3]>> {
+fn operands<'ctx, 'src: 'ctx>(
+    ctx: &'ctx Context<'src>,
+    input: &'src str,
+) -> Result<'src, SmallVec<[Operand<'src>; 3]>> {
     let mut out = SmallVec::new();
 
-    let (input, _) = operand(input, &mut out)?;
+    let (input, _) = operand(ctx, input, &mut out)?;
 
     let (input, Some(_)) = opt(ws(char(','))).parse(input)? else {
         return Ok((input, out));
     };
 
-    let (input, _) = operand(input, &mut out)?;
+    let (input, _) = operand(ctx, input, &mut out)?;
 
     let (input, Some(_)) = opt(ws(char(','))).parse(input)? else {
         return Ok((input, out));
     };
 
-    let (input, _) = operand(input, &mut out)?;
+    let (input, _) = operand(ctx, input, &mut out)?;
 
     Ok((input, out))
 }
 
-fn instr(line_no: usize, input: &str) -> Result<'_, Line<'_>> {
+fn instr<'ctx, 'src: 'ctx>(
+    ctx: &'ctx Context<'src>,
+    line_no: usize,
+    input: &'src str,
+) -> Result<'src, Line<'src>> {
     let raw = input;
 
     let (input, name) = ident(input)?;
 
-    let (input, ops) = opt(preceded(space1, operands)).parse(input)?;
+    let (input, ops) = opt(preceded(space1, |input| operands(ctx, input))).parse(input)?;
 
     Ok((input, Line::Instr {
         name,
@@ -61,7 +69,11 @@ fn strip_comment(input: &str) -> &str {
     &input[..end]
 }
 
-pub fn parse_line(line_num: usize, line: &str) -> anyhow::Result<SmallVec<[Line<'_>; 2]>> {
+pub fn parse_line<'ctx, 'src: 'ctx>(
+    ctx: &'ctx Context<'src>,
+    line_num: usize,
+    line: &'src str,
+) -> anyhow::Result<SmallVec<[Line<'src>; 2]>> {
     let line = strip_comment(line).trim();
 
     if line.is_empty() {
@@ -80,7 +92,7 @@ pub fn parse_line(line_num: usize, line: &str) -> anyhow::Result<SmallVec<[Line<
         return Ok(out);
     }
 
-    let (remain, instr) = instr(line_num, rest)
+    let (remain, instr) = instr(ctx, line_num, rest)
         .map_err(|e| anyhow!("Error parsing line {}: '{}': {}", line_num, line, e))?;
 
     if !remain.is_empty() {
@@ -102,7 +114,7 @@ mod tests {
         let mut lines = Vec::new();
 
         for (line_no, line) in input.lines().enumerate() {
-            let parsed = parse_line(line_no + 1, line)?;
+            let parsed = parse_line(&Context::default(), line_no + 1, line)?;
 
             lines.extend(parsed);
         }
@@ -250,16 +262,9 @@ mod tests {
                     Ident(
                         "x2",
                     ),
-                    Expr(
-                        Binary {
-                            lhs: Ident(
-                                "label",
-                            ),
-                            op: Add,
-                            rhs: Num(
-                                4,
-                            ),
-                        },
+                    Addition(
+                        "label",
+                        4,
                     ),
                 ],
                 line: (
@@ -331,16 +336,9 @@ mod tests {
                     Ident(
                         "sp",
                     ),
-                    Expr(
-                        Binary {
-                            lhs: Ident(
-                                "label",
-                            ),
-                            op: Add,
-                            rhs: Num(
-                                8,
-                            ),
-                        },
+                    Addition(
+                        "label",
+                        8,
                     ),
                 ],
                 line: (
@@ -362,16 +360,9 @@ mod tests {
                     Ident(
                         "sp",
                     ),
-                    Expr(
-                        Binary {
-                            lhs: Ident(
-                                "label",
-                            ),
-                            op: Add,
-                            rhs: Num(
-                                8,
-                            ),
-                        },
+                    Addition(
+                        "label",
+                        8,
                     ),
                 ],
                 line: (

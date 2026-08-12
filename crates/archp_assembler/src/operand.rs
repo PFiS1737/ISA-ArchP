@@ -1,13 +1,11 @@
 use std::fmt::Display;
 
-use crate::parser::types::expression::Expr;
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Operand<'src> {
     Num(i64),
     Ident(&'src str),
     String(&'src str),
-    Expr(Expr<'src>),
+    Addition(&'src str, i64),
 }
 
 impl<'a> From<&'a str> for Operand<'a> {
@@ -34,23 +32,13 @@ impl From<i64> for Operand<'_> {
     }
 }
 
-impl<'a> From<Expr<'a>> for Operand<'a> {
-    fn from(e: Expr<'a>) -> Self {
-        match e {
-            Expr::Num(n) => Operand::Num(n),
-            Expr::Ident(s) => Operand::Ident(s),
-            _ => Operand::Expr(e), // TODO: eval constants
-        }
-    }
-}
-
 impl Display for Operand<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Operand::Num(n) => write!(f, "{}", n),
             Operand::Ident(s) => write!(f, "{}", s),
             Operand::String(s) => write!(f, "\"{}\"", s),
-            Operand::Expr(e) => write!(f, "{}", e),
+            Operand::Addition(s, n) => write!(f, "{}{:+}", s, n),
         }
     }
 }
@@ -59,7 +47,7 @@ pub macro ops {
     ( $( $value:expr ),* $(,)? ) => {
         smallvec::smallvec![
             $(
-                $crate::operand::Operand::from($value.clone()) // TODO: can we optimize this '.clone()' ?
+                $crate::operand::Operand::from($value)
             ),*
         ]
     },

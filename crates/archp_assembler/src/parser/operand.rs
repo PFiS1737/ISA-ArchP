@@ -2,6 +2,7 @@ use nom::{Parser, character::complete::char, sequence::delimited};
 use smallvec::SmallVec;
 
 use crate::{
+    assembler::Context,
     operand::Operand,
     parser::{Error, Result, expression::expr, ident, parens},
 };
@@ -38,7 +39,11 @@ fn string_literal(input: &str) -> Result<'_, &str> {
     delimited(char('"'), take_until_unescaped_quote, char('"')).parse(input)
 }
 
-pub fn operand<'a>(input: &'a str, out: &mut SmallVec<[Operand<'a>; 3]>) -> Result<'a, ()> {
+pub fn operand<'ctx, 'src: 'ctx>(
+    ctx: &'ctx Context<'src>,
+    input: &'src str,
+    out: &mut SmallVec<[Operand<'src>; 3]>,
+) -> Result<'src, ()> {
     // case 1: "string"
     if let Ok((rest, s)) = string_literal(input) {
         out.push(Operand::String(s));
@@ -54,7 +59,7 @@ pub fn operand<'a>(input: &'a str, out: &mut SmallVec<[Operand<'a>; 3]>) -> Resu
 
     // case 3: expr
     let (input, expr) = expr(input)?;
-    out.push(expr.into());
+    out.push(expr.eval_to_operand_with(&ctx.equates)?);
 
     // case 4: expr(ident)
     let Ok((input, ident)) = parens(ident).parse(input) else {
@@ -68,62 +73,74 @@ pub fn operand<'a>(input: &'a str, out: &mut SmallVec<[Operand<'a>; 3]>) -> Resu
 
 #[cfg(test)]
 mod tests {
-    use insta::assert_debug_snapshot;
+    use insta::assert_snapshot;
 
     use super::*;
 
-    fn parse_ok(input: &str) -> SmallVec<[Operand<'_>; 3]> {
+    fn test(input: &str) -> String {
         let mut out = SmallVec::new();
-        let (rest, _) = operand(input, &mut out).expect("parse failed");
-        assert!(rest.trim().is_empty(), "unparsed input: {:?}", rest);
-        out
+        match operand(&Context::default(), input, &mut out) {
+            Ok((rest, _)) => format!("unparsed input: {:?}\n{:#?}", rest, out),
+            Err(e) => format!("Error: {}", e),
+        }
     }
 
     #[test]
-    fn test_operand() {
-        assert_debug_snapshot!(parse_ok(r#""hello""#), @r#"
+    fn operand_string() {
+        assert_snapshot!(test(r#""hello""#), @r#"
+        unparsed input: ""
         [
             String(
                 "hello",
             ),
         ]
         "#);
-        assert_debug_snapshot!(parse_ok(r#""hello \"world\" !""#), @r#"
+        assert_snapshot!(test(r#""hello \"world\" !""#), @r#"
+        unparsed input: ""
         [
             String(
                 "hello \\\"world\\\" !",
             ),
         ]
         "#);
-        assert_debug_snapshot!(parse_ok(r#""hello \\""#), @r#"
+        assert_snapshot!(test(r#""hello \\""#), @r#"
+        unparsed input: ""
         [
             String(
                 "hello \\\\",
             ),
         ]
         "#);
-        assert_debug_snapshot!(parse_ok(r#""hello \\\"abc""#), @r#"
+        assert_snapshot!(test(r#""hello \\\"abc""#), @r#"
+        unparsed input: ""
         [
             String(
                 "hello \\\\\\\"abc",
             ),
         ]
         "#);
-        assert_debug_snapshot!(parse_ok("abc"), @r#"
+    }
+
+    #[test]
+    fn operand_ident_num() {
+        assert_snapshot!(test("abc"), @r#"
+        unparsed input: ""
         [
             Ident(
                 "abc",
             ),
         ]
         "#);
-        assert_debug_snapshot!(parse_ok("42"), @"
+        assert_snapshot!(test("42"), @r#"
+        unparsed input: ""
         [
             Num(
                 42,
             ),
         ]
-        ");
-        assert_debug_snapshot!(parse_ok("(abc)"), @r#"
+        "#);
+        assert_snapshot!(test("(abc)"), @r#"
+        unparsed input: ""
         [
             Ident(
                 "abc",
@@ -133,7 +150,8 @@ mod tests {
             ),
         ]
         "#);
-        assert_debug_snapshot!(parse_ok("3(abc)"), @r#"
+        assert_snapshot!(test("3(abc)"), @r#"
+        unparsed input: ""
         [
             Ident(
                 "abc",
@@ -143,5 +161,94 @@ mod tests {
             ),
         ]
         "#);
+    }
+
+    #[test]
+    fn operand_expr() {
+        assert_snapshot!(test("1 + 2"), @r#"
+        unparsed input: ""
+        [
+            Num(
+                3,
+            ),
+        ]
+        "#);
+        assert_snapshot!(test("1 + 2(abc)"), @r#"
+        unparsed input: ""
+        [
+            Ident(
+                "abc",
+            ),
+            Num(
+                3,
+            ),
+        ]
+        "#);
+        assert_snapshot!(test("5 + 2(abc) + 3"), @r#"
+        unparsed input: "+ 3"
+        [
+            Ident(
+                "abc",
+            ),
+            Num(
+                7,
+            ),
+        ]
+        "#);
+        assert_snapshot!(test("foo+1"), @r#"
+        unparsed input: ""
+        [
+            Addition(
+                "foo",
+                1,
+            ),
+        ]
+        "#);
+        assert_snapshot!(test("foo-1"), @r#"
+        unparsed input: ""
+        [
+            Addition(
+                "foo",
+                -1,
+            ),
+        ]
+        "#);
+        assert_snapshot!(test("1+foo"), @r#"
+        unparsed input: ""
+        [
+            Addition(
+                "foo",
+                1,
+            ),
+        ]
+        "#);
+        assert_snapshot!(test("1-foo"), @"Error: Parsing Failure: Eval(NotAbsolute)");
+        assert_snapshot!(test("(foo+1)+1"), @r#"
+        unparsed input: ""
+        [
+            Addition(
+                "foo",
+                2,
+            ),
+        ]
+        "#);
+        assert_snapshot!(test("(foo+1)-1"), @r#"
+        unparsed input: ""
+        [
+            Ident(
+                "foo",
+            ),
+        ]
+        "#);
+        assert_snapshot!(test("1+(foo+1)"), @r#"
+        unparsed input: ""
+        [
+            Addition(
+                "foo",
+                2,
+            ),
+        ]
+        "#);
+        assert_snapshot!(test("1-(foo+1)"), @"Error: Parsing Failure: Eval(NotAbsolute)");
     }
 }

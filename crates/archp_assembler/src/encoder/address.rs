@@ -3,20 +3,21 @@ use anyhow::{Result, bail};
 use crate::{assembler::Context, operand::Operand};
 
 pub fn encode_address(ctx: &Context, op: &Operand) -> Result<Address> {
-    match op {
-        Operand::Ident(s) => {
-            if let Some(&addr) = ctx.labels.get(s) {
-                Ok(Address(addr as u32))
-            } else {
-                bail!("Undefined label: {}", s)
-            }
-        },
-        _ => unimplemented!("parse_address: {}", op), // TODO: impl
+    let (label, addend) = match op {
+        Operand::Ident(s) => (s, 0),
+        Operand::Addition(s, n) => (s, *n),
+        _ => bail!("Expected address label, got: {}", op),
+    };
+
+    if let Some(&addr) = ctx.labels.get(label) {
+        Ok(Address((addr as i64).wrapping_add(addend)))
+    } else {
+        bail!("Undefined label: {}", label)
     }
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Address(pub u32);
+pub struct Address(pub i64);
 
 // TODO: refactor like imm
 impl Address {
@@ -31,7 +32,7 @@ impl Address {
             (1u32 << bits) - 1
         };
 
-        let v = ((self.0 as i64) - (base as i64)) >> 1;
+        let v = (self.0 - (base as i64)) >> 1;
 
         let min = -(1i64 << (bits - 1));
         let max = (1i64 << (bits - 1)) - 1;
@@ -103,7 +104,7 @@ mod tests {
         assert_snapshot!(f("123"), @"Error: Undefined label: 123");
     }
 
-    fn test_addr(addr: u32, base: u32) -> String {
+    fn test_addr(addr: i64, base: u32) -> String {
         let addr = Address(addr);
         let (hi, lo) = addr.try_as_i12(base);
         format!("({}, {})", fmt_hex(hi), fmt_hex(lo))

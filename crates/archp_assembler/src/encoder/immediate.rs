@@ -1,20 +1,15 @@
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Result, bail};
 
 use crate::{assembler::Context, operand::Operand, utils::sig_ext::sign_extend};
 
-pub fn encode_immediate(ctx: &Context, imm: &Operand) -> Result<i64> {
-    match imm {
-        Operand::Num(n) => Ok(*n),
-        Operand::Ident(s) => ctx
-            .equates
-            .get(s)
-            .copied()
-            .ok_or(anyhow!("Expected immediate, undefined identifier: {}", s)),
-        Operand::Expr(expr) => expr
-            .eval(&ctx.equates)
-            .map_err(|e| anyhow!("Failed to evaluate immediate '{}': {}", expr, e)),
-        Operand::String(_) => bail!("Immediate cannot be a string: {}", imm),
-    }
+pub fn encode_immediate(_ctx: &Context, imm: &Operand) -> Result<i64> {
+    // TODO: remove 'ctx' argument
+
+    let Operand::Num(n) = imm else {
+        bail!("Expected immediate, got: {}", imm);
+    };
+
+    Ok(*n)
 }
 
 pub fn encode_immediate_as(ctx: &Context, imm: &Operand, bits: u8, signed: bool) -> Result<u32> {

@@ -38,7 +38,7 @@ where
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub enum Error<'a> {
     #[error("Evaluation error: {0}")]
-    Eval(EvalError<'a>),
+    Eval(EvalError),
 
     #[error("Nom error: {0}")]
     Nom(nom::error::Error<&'a str>),
@@ -63,8 +63,8 @@ impl<'a> FromExternalError<&'a str, ParseIntError> for Error<'a> {
     }
 }
 
-impl<'a> From<EvalError<'a>> for nom::Err<Error<'a>> {
-    fn from(val: EvalError<'a>) -> Self {
+impl<'a> From<EvalError> for nom::Err<Error<'a>> {
+    fn from(val: EvalError) -> Self {
         nom::Err::Failure(Error::Eval(val))
     }
 }

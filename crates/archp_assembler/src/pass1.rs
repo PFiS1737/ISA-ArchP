@@ -20,7 +20,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
         let mut processed = Vec::new();
 
         for (line_idx, line) in source.lines().enumerate() {
-            for line in parse_line(line_idx + 1, line)? {
+            for line in parse_line(self.context, line_idx + 1, line)? {
                 let pc = processed.len() * 4;
 
                 match line {

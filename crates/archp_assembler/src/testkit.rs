@@ -10,7 +10,7 @@ pub fn instr(cmd: &str) -> impl Fn(&[&str]) -> String {
     move |ops| {
         let mut v = SmallVec::new();
         ops.iter().for_each(|op| {
-            operand(op, &mut v).unwrap();
+            operand(&Context::default(), op, &mut v).unwrap();
         });
         match instr.encode(&Context::test(), 0, &v) {
             Ok(code) => fmt_bits(code),
@@ -24,7 +24,7 @@ pub fn mc_instr(cmd: &str) -> impl Fn(&[&str]) -> String {
     |ops| {
         let mut v = SmallVec::new();
         ops.iter().for_each(|op| {
-            operand(op, &mut v).unwrap();
+            operand(&Context::default(), op, &mut v).unwrap();
         });
         match ps_instr.expand(&Context::test(), 0, cmd, &v) {
             Ok(expanded) => match expanded {

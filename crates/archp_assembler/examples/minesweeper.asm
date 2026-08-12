@@ -419,7 +419,7 @@ toggle_flag:
 
   toggle_flag_already_set:
     inc mine_num
-    li t2, -33 ; not t2 FLAG_MASK
+    li t2, ~FLAG_MASK
     and t1, t1, t2
     li color, COLOR_HIDDEN
     call draw_tile

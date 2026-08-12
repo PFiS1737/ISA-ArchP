@@ -2,6 +2,8 @@ use std::{collections::HashMap, fmt::Display};
 
 use thiserror::Error;
 
+use crate::operand::Operand;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr<'src> {
     Num(i64),
@@ -25,6 +27,59 @@ impl Display for Expr<'_> {
             Expr::Unary { op, rhs } => write!(f, "{}{}", op, rhs),
             Expr::Binary { lhs, op, rhs } => write!(f, "({} {} {})", lhs, op, rhs),
         }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Error)]
+pub enum EvalError {
+    #[error("shift amount out of range: {}", .0)]
+    ShiftOutOfRange(i64),
+
+    #[error("division by zero")]
+    DivByZero,
+
+    #[error("expression is not absolute")]
+    NotAbsolute,
+}
+
+impl<'ctx, 'src: 'ctx> Expr<'src> {
+    fn eval_to_operand<F>(&self, resolve: &F) -> Result<Operand<'src>, EvalError>
+    where
+        F: Fn(&'src str) -> Option<i64>,
+    {
+        match self {
+            Expr::Num(n) => Ok(Operand::Num(*n)),
+
+            Expr::Ident(name) => {
+                if let Some(num) = resolve(name) {
+                    Ok(Operand::Num(num))
+                } else {
+                    Ok(Operand::Ident(name))
+                }
+            },
+
+            Expr::Unary { op, rhs } => {
+                let r = rhs.eval_to_operand(resolve)?;
+                eval_unary_to_operand(*op, r)
+            },
+
+            Expr::Binary { lhs, op, rhs } => {
+                let l = lhs.eval_to_operand(resolve)?;
+                let r = rhs.eval_to_operand(resolve)?;
+                eval_binary_to_operand(l, *op, r)
+            },
+        }
+    }
+
+    pub fn eval_to_operand_with(
+        &self,
+        env: &'ctx HashMap<&'src str, i64>,
+    ) -> Result<Operand<'src>, EvalError> {
+        let op = self.eval_to_operand(&|s| env.get(s).copied())?;
+        Ok(match op {
+            Operand::Addition(ident, 0) => Operand::Ident(ident),
+            _ => op,
+        })
     }
 }
 
@@ -102,37 +157,22 @@ impl Display for BinaryOp {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Error)]
-pub enum EvalError<'src> {
-    #[error("unknown identifier: {}", .0)]
-    UnknownIdent(&'src str),
-
-    #[error("shift amount out of range: {}", .0)]
-    ShiftOutOfRange(i64),
-
-    #[error("division by zero")]
-    DivByZero,
-}
-
-pub fn eval_unary<'a>(op: UnaryOp, rhs: i64) -> Result<i64, EvalError<'a>> {
+fn eval_unary(op: UnaryOp, rhs: i64) -> Result<i64, EvalError> {
     match op {
         UnaryOp::Neg => Ok(rhs.wrapping_neg()),
         UnaryOp::Not => Ok(!rhs),
     }
 }
 
-pub fn try_eval_unary<'a>(op: UnaryOp, rhs: Expr<'a>) -> Result<Expr<'a>, EvalError<'a>> {
-    if let Expr::Num(r) = rhs {
-        Ok(Expr::Num(eval_unary(op, r)?))
-    } else {
-        Ok(Expr::Unary {
-            op,
-            rhs: Box::new(rhs),
-        })
+fn eval_unary_to_operand<'a>(op: UnaryOp, rhs: Operand<'a>) -> Result<Operand<'a>, EvalError> {
+    if let Operand::Num(r) = rhs {
+        return Ok(Operand::Num(eval_unary(op, r)?));
     }
+
+    Err(EvalError::NotAbsolute)
 }
 
-pub fn eval_binary<'a>(lhs: i64, op: BinaryOp, rhs: i64) -> Result<i64, EvalError<'a>> {
+fn eval_binary(lhs: i64, op: BinaryOp, rhs: i64) -> Result<i64, EvalError> {
     match op {
         BinaryOp::Mul => Ok(lhs.wrapping_mul(rhs)),
         BinaryOp::Div => {
@@ -181,319 +221,50 @@ pub fn eval_binary<'a>(lhs: i64, op: BinaryOp, rhs: i64) -> Result<i64, EvalErro
     }
 }
 
-pub fn try_eval_binary<'a>(
-    lhs: Expr<'a>,
+fn eval_binary_to_operand<'a>(
+    lhs: Operand<'a>,
     op: BinaryOp,
-    rhs: Expr<'a>,
-) -> Result<Expr<'a>, EvalError<'a>> {
-    if let Expr::Num(l) = lhs
-        && let Expr::Num(r) = rhs
+    rhs: Operand<'a>,
+) -> Result<Operand<'a>, EvalError> {
+    if let Operand::Num(l) = lhs
+        && let Operand::Num(r) = rhs
     {
-        Ok(Expr::Num(eval_binary(l, op, r)?))
-    } else {
-        Ok(Expr::Binary {
-            lhs: Box::new(lhs),
-            op,
-            rhs: Box::new(rhs),
-        })
+        return Ok(Operand::Num(eval_binary(l, op, r)?));
     }
-}
 
-impl<'ctx, 'src: 'ctx> Expr<'src> {
-    pub fn eval_with<F>(&self, resolve: &F) -> Result<i64, EvalError<'src>>
-    where
-        F: Fn(&'src str) -> Option<i64>,
+    if let Operand::Ident(l) = lhs
+        && let Operand::Num(r) = rhs
     {
-        match self {
-            Expr::Num(n) => Ok(*n),
-
-            Expr::Ident(name) => resolve(name).ok_or(EvalError::UnknownIdent(name)),
-
-            Expr::Unary { op, rhs } => {
-                let r = rhs.eval_with(resolve)?;
-                eval_unary(*op, r)
-            },
-
-            Expr::Binary { lhs, op, rhs } => {
-                let l = lhs.eval_with(resolve)?;
-                let r = rhs.eval_with(resolve)?;
-                eval_binary(l, *op, r)
-            },
-        }
+        return match op {
+            BinaryOp::Add => Ok(Operand::Addition(l, r)),
+            BinaryOp::Sub => Ok(Operand::Addition(l, -r)),
+            _ => Err(EvalError::NotAbsolute),
+        };
     }
 
-    pub fn eval(&self, env: &'ctx HashMap<&'src str, i64>) -> Result<i64, EvalError<'src>> {
-        self.eval_with(&|s| env.get(s).copied())
-    }
-
-    pub fn partial_eval_with<F>(&self, resolve: &F) -> Result<Expr<'src>, EvalError<'src>>
-    where
-        F: Fn(&'src str) -> Option<i64>,
+    if let Operand::Addition(l, add) = lhs
+        && let Operand::Num(r) = rhs
     {
-        match self {
-            Expr::Num(_) => Ok(self.clone()),
-
-            Expr::Ident(name) => {
-                if let Some(num) = resolve(name) {
-                    Ok(Expr::Num(num))
-                } else {
-                    Ok(self.clone())
-                }
-            },
-
-            Expr::Unary { op, rhs } => {
-                let r = rhs.partial_eval_with(resolve)?;
-                try_eval_unary(*op, r)
-            },
-
-            Expr::Binary { lhs, op, rhs } => {
-                let l = lhs.partial_eval_with(resolve)?;
-                let r = rhs.partial_eval_with(resolve)?;
-                try_eval_binary(l, *op, r)
-            },
-        }
+        return match op {
+            BinaryOp::Add => Ok(Operand::Addition(l, add + r)),
+            BinaryOp::Sub => Ok(Operand::Addition(l, add - r)),
+            _ => Err(EvalError::NotAbsolute),
+        };
     }
 
-    pub fn partial_eval(
-        &self,
-        env: &'ctx HashMap<&'src str, i64>,
-    ) -> Result<Expr<'src>, EvalError<'src>> {
-        self.partial_eval_with(&|s| env.get(s).copied())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use insta::assert_debug_snapshot;
-
-    use super::*;
-
-    fn eval_ok(expr: Expr<'_>) -> i64 {
-        expr.eval(&HashMap::new()).unwrap()
+    if let Operand::Num(l) = lhs
+        && let Operand::Ident(r) = rhs
+        && matches!(op, BinaryOp::Add)
+    {
+        return Ok(Operand::Addition(r, l));
     }
 
-    fn bin<'a>(lhs: Expr<'a>, op: BinaryOp, rhs: Expr<'a>) -> Expr<'a> {
-        Expr::Binary {
-            lhs: Box::new(lhs),
-            op,
-            rhs: Box::new(rhs),
-        }
+    if let Operand::Num(l) = lhs
+        && let Operand::Addition(r, add) = rhs
+        && matches!(op, BinaryOp::Add)
+    {
+        return Ok(Operand::Addition(r, add + l));
     }
 
-    fn unary(op: UnaryOp, rhs: Expr<'_>) -> Expr<'_> {
-        Expr::Unary {
-            op,
-            rhs: Box::new(rhs),
-        }
-    }
-
-    #[test]
-    fn test_basic_arith() {
-        // 1 + 2 * 3
-        let expr = bin(
-            Expr::Num(1),
-            BinaryOp::Add,
-            bin(Expr::Num(2), BinaryOp::Mul, Expr::Num(3)),
-        );
-
-        assert_eq!(eval_ok(expr), 1 + 2 * 3);
-    }
-
-    #[test]
-    fn test_div_mod() {
-        assert_eq!(
-            eval_ok(bin(Expr::Num(7), BinaryOp::Div, Expr::Num(2))),
-            7 / 2
-        );
-        assert_eq!(
-            eval_ok(bin(Expr::Num(7), BinaryOp::Mod, Expr::Num(2))),
-            7 % 2
-        );
-    }
-
-    #[test]
-    fn test_shift() {
-        assert_eq!(
-            eval_ok(bin(Expr::Num(1), BinaryOp::Shl, Expr::Num(3))),
-            1 << 3
-        );
-        assert_eq!(
-            eval_ok(bin(Expr::Num(8), BinaryOp::Shr, Expr::Num(2))),
-            8 >> 2
-        );
-    }
-
-    #[test]
-    fn test_bitwise() {
-        assert_eq!(
-            eval_ok(bin(Expr::Num(6), BinaryOp::And, Expr::Num(3))),
-            6 & 3
-        );
-        assert_eq!(
-            eval_ok(bin(Expr::Num(4), BinaryOp::Or, Expr::Num(1))),
-            4 | 1
-        );
-        assert_eq!(
-            eval_ok(bin(Expr::Num(6), BinaryOp::Xor, Expr::Num(3))),
-            6 ^ 3
-        );
-        assert_eq!(
-            eval_ok(bin(Expr::Num(6), BinaryOp::OrNot, Expr::Num(3))),
-            6 | !3
-        );
-    }
-
-    #[test]
-    fn test_comparison() {
-        assert_eq!(eval_ok(bin(Expr::Num(5), BinaryOp::Eq, Expr::Num(5))), -1);
-        assert_eq!(eval_ok(bin(Expr::Num(5), BinaryOp::Ne, Expr::Num(3))), -1);
-        assert_eq!(eval_ok(bin(Expr::Num(2), BinaryOp::Lt, Expr::Num(2))), 0);
-        assert_eq!(eval_ok(bin(Expr::Num(3), BinaryOp::Le, Expr::Num(3))), -1);
-        assert_eq!(eval_ok(bin(Expr::Num(1), BinaryOp::Gt, Expr::Num(2))), 0);
-        assert_eq!(eval_ok(bin(Expr::Num(4), BinaryOp::Ge, Expr::Num(4))), -1);
-    }
-
-    #[test]
-    fn test_logical() {
-        assert_eq!(
-            eval_ok(bin(Expr::Num(1), BinaryOp::LogicalAnd, Expr::Num(0))),
-            0
-        );
-        assert_eq!(
-            eval_ok(bin(Expr::Num(1), BinaryOp::LogicalOr, Expr::Num(0))),
-            1
-        );
-    }
-
-    #[test]
-    fn test_unary() {
-        assert_eq!(eval_ok(unary(UnaryOp::Neg, Expr::Num(5))), -5);
-        assert_eq!(eval_ok(unary(UnaryOp::Not, Expr::Num(0))), !0);
-    }
-
-    #[test]
-    fn test_combined() {
-        // (1 + 2 * 3) << 1 & 7 ^ 2 | ~4
-        let expr = bin(
-            bin(
-                bin(
-                    bin(
-                        Expr::Num(1),
-                        BinaryOp::Add,
-                        bin(Expr::Num(2), BinaryOp::Mul, Expr::Num(3)),
-                    ),
-                    BinaryOp::Shl,
-                    Expr::Num(1),
-                ),
-                BinaryOp::And,
-                Expr::Num(7),
-            ),
-            BinaryOp::Xor,
-            Expr::Num(2),
-        );
-
-        let expr = bin(expr, BinaryOp::Or, unary(UnaryOp::Not, Expr::Num(4)));
-
-        assert_eq!(eval_ok(expr), (1 + 2 * 3) << 1 & 7 ^ 2 | !4);
-    }
-
-    #[test]
-    fn test_variables() {
-        let expr = bin(
-            bin(Expr::Ident("a"), BinaryOp::Mul, Expr::Num(2)),
-            BinaryOp::Add,
-            Expr::Ident("b"),
-        );
-
-        let mut env = HashMap::new();
-        env.insert("a", 3);
-        env.insert("b", 5);
-
-        assert_eq!(expr.eval(&env).unwrap(), 11);
-    }
-
-    #[test]
-    fn test_unknown_ident() {
-        let expr = bin(Expr::Ident("x"), BinaryOp::Add, Expr::Num(1));
-
-        assert!(matches!(
-            expr.eval(&HashMap::new()),
-            Err(EvalError::UnknownIdent("x"))
-        ));
-    }
-
-    #[test]
-    fn test_div_by_zero() {
-        let expr = bin(Expr::Num(1), BinaryOp::Div, Expr::Num(0));
-
-        assert!(matches!(
-            expr.eval(&HashMap::new()),
-            Err(EvalError::DivByZero)
-        ));
-    }
-
-    #[test]
-    fn test_partial_eval() {
-        // a + 1 * 2
-        let expr = bin(
-            Expr::Ident("a"),
-            BinaryOp::Add,
-            bin(Expr::Num(1), BinaryOp::Mul, Expr::Num(2)),
-        );
-
-        let mut env = HashMap::new();
-        env.insert("a", 3);
-
-        assert_debug_snapshot!(expr.partial_eval(&env), @"
-        Ok(
-            Num(
-                5,
-            ),
-        )
-        ");
-    }
-
-    #[test]
-    fn test_partial_eval_unknown() {
-        // a + b * 2 + c
-        let expr = bin(
-            bin(
-                Expr::Ident("a"),
-                BinaryOp::Add,
-                bin(Expr::Ident("b"), BinaryOp::Mul, Expr::Num(2)),
-            ),
-            BinaryOp::Add,
-            Expr::Ident("c"),
-        );
-
-        let mut env = HashMap::new();
-        env.insert("a", 3);
-        env.insert("c", 5);
-
-        assert_debug_snapshot!(expr.partial_eval(&env), @r#"
-        Ok(
-            Binary {
-                lhs: Binary {
-                    lhs: Num(
-                        3,
-                    ),
-                    op: Add,
-                    rhs: Binary {
-                        lhs: Ident(
-                            "b",
-                        ),
-                        op: Mul,
-                        rhs: Num(
-                            2,
-                        ),
-                    },
-                },
-                op: Add,
-                rhs: Num(
-                    5,
-                ),
-            },
-        )
-        "#);
-    }
+    Err(EvalError::NotAbsolute)
 }

@@ -8,7 +8,7 @@ exit_code: 0
 0x14000162 # jal r0 main                                 [j main]
 0x01140000 # addi x r0 0                                 [li x, 0]                                               <label: init_screen>
 0x01160000 # addi y r0 0                                 [li y, 0]
-0x01180000 # addi color r0 COLOR_BACK                    [li color, COLOR_BACK]
+0x01180000 # addi color r0 0                             [li color, COLOR_BACK]
 0x16230000 # lui r17 0x10000                             [ecall 0x10000000]                                      <label: draw_back>
 0x40000000 # ecall                                       [ecall 0x10000000]
 0x0114A001 # addi x x 1                                  [inc x]
@@ -20,8 +20,8 @@ exit_code: 0
 0x12BEBE1F # blt y r31 draw_back                         [blt y, SCREEN_HEIGHT, draw_back]
 0xFC800000 # ret
 0x16180FF0 # lui color 0xFF0                             [li color, COLOR_HEAD]                                  <label: init_snake>
-0x01020005 # addi head_x r0 INIT_X                       [li head_x, INIT_X]
-0x01040012 # addi head_y r0 INIT_Y                       [li head_y, INIT_Y]
+0x01020005 # addi head_x r0 5                            [li head_x, INIT_X]
+0x01040012 # addi head_y r0 18                           [li head_y, INIT_Y]
 0x01141000 # addi x head_x 0                             [mv x, head_x]
 0x01162000 # addi y head_y 0                             [mv y, head_y]
 0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
@@ -67,12 +67,12 @@ exit_code: 0
 0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
 0x40000000 # ecall                                       [ecall 0x10000000]
 0x12C07080 # bge nx r0 move_snake_common_x_ge_0          [bge nx, 0, move_snake_common_x_ge_0]
-0x010E003F # addi nx r0 MAX_X                            [li nx, MAX_X]
+0x010E003F # addi nx r0 63                               [li nx, MAX_X]
 0x013E0040 # addi r31 r0 64                              [blt nx, SCREEN_WIDTH, move_snake_common_x_lt_width]    <label: move_snake_common_x_ge_0>
 0x1280709F # blt nx r31 move_snake_common_x_lt_width     [blt nx, SCREEN_WIDTH, move_snake_common_x_lt_width]
 0x010E0000 # addi nx r0 0                                [li nx, 0]
 0x12C08080 # bge ny r0 move_snake_common_y_ge_0          [bge ny, 0, move_snake_common_y_ge_0]                   <label: move_snake_common_x_lt_width>
-0x01100023 # addi ny r0 MAX_Y                            [li ny, MAX_Y]
+0x01100023 # addi ny r0 35                               [li ny, MAX_Y]
 0x013E0024 # addi r31 r0 36                              [blt ny, SCREEN_HEIGHT, move_snake_common_y_lt_height]  <label: move_snake_common_y_ge_0>
 0x1280809F # blt ny r31 move_snake_common_y_lt_height    [blt ny, SCREEN_HEIGHT, move_snake_common_y_lt_height]
 0x01100000 # addi ny r0 0                                [li ny, 0]
@@ -91,7 +91,7 @@ exit_code: 0
 0xFA00000E # call gen_food
 0xFC800000 # ret
 0xFA000034 # call body_pop                                                                                       <label: move_snake_not_eat>
-0x01180000 # addi color r0 COLOR_BACK                    [li color, COLOR_BACK]
+0x01180000 # addi color r0 0                             [li color, COLOR_BACK]
 0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
 0x40000000 # ecall                                       [ecall 0x10000000]
 0xFC800000 # ret
