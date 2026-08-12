@@ -56,16 +56,16 @@ mod tests {
         assert_snapshot!(addi(&["123", "r1", "456"]), @"");
 
         assert_snapshot!(addi(&["r1", "r2", "0x123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "0x1234"]), @"lui r31 1; addi r31 r31 0x234; add r1 r2 r31");
-        assert_snapshot!(addi(&["r1", "r2", "0x12345678"]), @"lui r31 0x12345; addi r31 r31 0x678; add r1 r2 r31");
+        assert_snapshot!(addi(&["r1", "r2", "0x1234"]), @"li r31 0x1234; add r1 r2 r31");
+        assert_snapshot!(addi(&["r1", "r2", "0x12345678"]), @"li r31 0x12345678; add r1 r2 r31");
         assert_snapshot!(addi(&["r1", "r2", "0xFFFFFFFF"]), @"");
 
         assert_snapshot!(addi(&["r1", "r2", "123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "3000"]), @"lui r31 1; addi r31 r31 0xFFFFFBB8; add r1 r2 r31");
+        assert_snapshot!(addi(&["r1", "r2", "3000"]), @"li r31 0xBB8; add r1 r2 r31");
         assert_snapshot!(addi(&["r1", "r2", "-123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "-3000"]), @"lui r31 0xFFFFF; addi r31 r31 0x448; add r1 r2 r31");
+        assert_snapshot!(addi(&["r1", "r2", "-3000"]), @"li r31 0xFFFFFFFFFFFFF448; add r1 r2 r31");
 
         assert_snapshot!(addi(&["r1", "r2", "0x123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "0x1234"]), @"lui r31 1; addi r31 r31 0x234; add r1 r2 r31");
+        assert_snapshot!(addi(&["r1", "r2", "0x1234"]), @"li r31 0x1234; add r1 r2 r31");
     }
 }
