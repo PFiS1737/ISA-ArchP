@@ -7,40 +7,19 @@ mod set;
 mod shift_rotate;
 mod stack_call_return;
 mod system;
+mod types;
 mod upper_imm;
 
-use std::{collections::HashMap, fmt::Display, sync::LazyLock};
+use std::{collections::HashMap, sync::LazyLock};
 
 use anyhow::{Result, bail};
 
 use crate::{
     assembler::Context,
     encoder::{address::encode_address, immediate::encode_immediate_as, register::encode_register},
+    instructions::types::InstrType,
     operand::{Operand, OperandType},
 };
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-enum InstrType {
-    R,
-    I,
-    B,
-    S,
-    U,
-    J,
-}
-
-impl Display for InstrType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            InstrType::R => write!(f, "R"),
-            InstrType::I => write!(f, "I"),
-            InstrType::B => write!(f, "B"),
-            InstrType::S => write!(f, "S"),
-            InstrType::U => write!(f, "U"),
-            InstrType::J => write!(f, "J"),
-        }
-    }
-}
 
 inventory::collect!(Entry);
 
@@ -77,14 +56,7 @@ impl Entry {
     pub fn encode(&self, ctx: &Context, pc: u32, operands: &[Operand]) -> Result<u32> {
         let operands = self.parse(ctx, pc, operands)?;
 
-        match self.itype {
-            InstrType::R => self.encode_r(&operands),
-            InstrType::I => self.encode_i(&operands),
-            InstrType::B => self.encode_b(&operands),
-            InstrType::S => self.encode_s(&operands),
-            InstrType::U => self.encode_u(&operands),
-            InstrType::J => self.encode_j(&operands),
-        }
+        Ok(self.itype.encode(self.opcode, self.funct3, &operands))
     }
 
     fn parse(&self, ctx: &Context, pc: u32, operands: &[Operand]) -> Result<Vec<u32>> {
@@ -121,70 +93,6 @@ impl Entry {
         Ok(ret)
     }
 
-    fn encode_r(&self, ops: &[u32]) -> Result<u32> {
-        let rd = ops[0];
-        let rs1 = ops[1];
-        let rs2 = ops[2];
-
-        field! {
-            self.opcode, 25, 7;
-            self.funct3, 22, 3;
-            rd, 17, 5;
-            rs1, 12, 5;
-            0, 5, 7;
-            rs2, 0, 5;
-        }
-    }
-
-    fn encode_i(&self, ops: &[u32]) -> Result<u32> {
-        let rd = ops[0];
-        let rs1 = ops[1];
-        let imm12 = ops[2];
-
-        field! {
-            self.opcode, 25, 7;
-            self.funct3, 22, 3;
-            rd, 17, 5;
-            rs1, 12, 5;
-            imm12, 0, 12;
-        }
-    }
-
-    fn encode_b(&self, ops: &[u32]) -> Result<u32> {
-        let rs1 = ops[0];
-        let rs2 = ops[1];
-        let offset12 = ops[2];
-
-        field! {
-            self.opcode, 25, 7;
-            self.funct3, 22, 3;
-            (offset12 >> 7), 17, 5;
-            rs1, 12, 5;
-            (offset12 & 0x7F), 5, 7;
-            rs2, 0, 5;
-        }
-    }
-
-    fn encode_s(&self, ops: &[u32]) -> Result<u32> {
-        self.encode_b(&[ops[1], ops[0], ops[2]])
-    }
-
-    fn encode_u(&self, ops: &[u32]) -> Result<u32> {
-        let rd = ops[0];
-        let imm20 = ops[1];
-
-        field! {
-            self.opcode, 25, 7;
-            (imm20 >> 17), 22, 3;
-            rd, 17, 5;
-            (imm20 & 0x1FFFF), 0, 17;
-        }
-    }
-
-    fn encode_j(&self, ops: &[u32]) -> Result<u32> {
-        self.encode_u(ops)
-    }
-
     fn assert_operand_count(&self, count: usize, expected: usize) -> Result<()> {
         if count != expected {
             bail!(
@@ -197,20 +105,6 @@ impl Entry {
 
         Ok(())
     }
-}
-
-macro field {
-    ( $( $value:expr, $shift:literal, $len:literal );* $(;)? ) => {
-        Ok(
-            $(
-                field!(@one, $value, $shift, $len)
-            )|*
-        )
-    },
-
-    (@one, $value:expr, $shift:literal, $len:literal) => {{
-        ((($value) as u32) & ((1u32 << $len) - 1)) << $shift
-    }},
 }
 
 macro instruction {
