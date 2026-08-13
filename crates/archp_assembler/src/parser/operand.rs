@@ -2,7 +2,7 @@ use nom::{Parser, character::complete::char, sequence::delimited};
 use smallvec::SmallVec;
 
 use crate::{
-    assembler::Context,
+    context::Context,
     operand::Operand,
     parser::{Error, Result, expression::expr, ident, parens},
 };

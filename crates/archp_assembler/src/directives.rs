@@ -5,7 +5,7 @@ use std::{collections::HashMap, sync::LazyLock};
 
 use anyhow::{Result, bail};
 
-use crate::{assembler::Context, operand::Operand};
+use crate::{context::Context, operand::Operand};
 
 type HandlerFn = for<'a> fn(&mut Context<'a>, &[Operand<'a>]) -> Result<()>;
 

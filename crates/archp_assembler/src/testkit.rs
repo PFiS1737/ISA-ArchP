@@ -1,7 +1,7 @@
 use smallvec::SmallVec;
 
 use crate::{
-    assembler::Context, instructions::*, macro_instructions::*, parser::operand::operand,
+    context::Context, instructions::*, macro_instructions::*, parser::operand::operand,
     pseudo_instructions::PSEUDO_INSTRUCTIONS, utils::fmt::fmt_line,
 };
 

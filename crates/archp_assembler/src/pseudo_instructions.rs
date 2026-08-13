@@ -13,7 +13,8 @@ use anyhow::{Result, bail};
 use smallvec::SmallVec;
 
 use crate::{
-    assembler::{Context, Instr},
+    assembler::Instr,
+    context::Context,
     operand::{Operand, OperandType},
 };
 

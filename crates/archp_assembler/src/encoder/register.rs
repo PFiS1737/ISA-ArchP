@@ -1,6 +1,6 @@
 use anyhow::{Result, bail};
 
-use crate::{assembler::Context, operand::Operand};
+use crate::{context::Context, operand::Operand};
 
 pub fn encode_register(ctx: &Context, op: &Operand) -> Result<u32> {
     let Operand::Ident(reg) = op else {
@@ -52,7 +52,7 @@ mod tests {
     use anyhow::Result;
     use insta::assert_snapshot;
 
-    use crate::{assembler::Context, operand::Operand};
+    use super::*;
 
     fn test(func: fn(&Context, &Operand) -> Result<u32>) -> impl Fn(&str) -> String {
         move |s| match func(&Context::test(), &Operand::from(s)) {

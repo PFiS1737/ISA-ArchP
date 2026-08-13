@@ -1,6 +1,7 @@
 #![feature(decl_macro)]
 
 mod assembler;
+mod context;
 mod directives;
 mod encoder;
 mod instructions;

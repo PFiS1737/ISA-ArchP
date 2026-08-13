@@ -1,7 +1,8 @@
 use anyhow::{Result, anyhow};
 
 use crate::{
-    assembler::{Context, Instr},
+    assembler::Instr,
+    context::Context,
     directives::DIRECTIVES,
     macro_instructions::MACRO_INSTRUCTIONS,
     parser::{line::parse_line, types::line::Line},

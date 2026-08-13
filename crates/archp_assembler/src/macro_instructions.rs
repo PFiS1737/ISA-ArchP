@@ -6,10 +6,7 @@ use std::{collections::HashMap, sync::LazyLock};
 
 use anyhow::{Result, bail};
 
-use crate::{
-    assembler::{Context, Instr},
-    operand::Operand,
-};
+use crate::{assembler::Instr, context::Context, operand::Operand};
 
 type ExpandRet<'a> = Option<Vec<Instr<'a>>>;
 type ExpandFn = for<'a> fn(&Context<'a>, u32, &'a str, &[Operand<'a>]) -> ExpandRet<'a>;

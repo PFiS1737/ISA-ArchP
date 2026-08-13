@@ -15,7 +15,7 @@ use std::{collections::HashMap, sync::LazyLock};
 use anyhow::{Result, bail};
 
 use crate::{
-    assembler::Context,
+    context::Context,
     encoder::{address::encode_address, immediate::encode_immediate_as, register::encode_register},
     instructions::types::InstrType,
     operand::{Operand, OperandType},

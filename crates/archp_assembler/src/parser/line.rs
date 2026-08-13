@@ -8,7 +8,7 @@ use nom::{
 use smallvec::SmallVec;
 
 use crate::{
-    assembler::Context,
+    context::Context,
     operand::Operand,
     parser::{Result, ident, operand::operand, types::line::Line, ws},
 };

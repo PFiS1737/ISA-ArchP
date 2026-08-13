@@ -1,6 +1,6 @@
 use anyhow::{Result, bail};
 
-use crate::{assembler::Context, operand::Operand};
+use crate::{context::Context, operand::Operand};
 
 pub fn encode_address(ctx: &Context, op: &Operand) -> Result<Address> {
     let (label, addend) = match op {
