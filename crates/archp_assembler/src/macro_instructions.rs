@@ -2,10 +2,7 @@ mod als_imm32;
 mod auto_ecall;
 mod auto_imm;
 
-use std::{
-    collections::{HashMap, VecDeque},
-    sync::LazyLock,
-};
+use std::{collections::HashMap, sync::LazyLock};
 
 use anyhow::{Result, bail};
 
@@ -58,33 +55,7 @@ impl Entry {
     ) -> Result<ExpandRet<'a>> {
         self.assert_operand_count(name, operands)?;
 
-        let mut deq: VecDeque<_> = match (self.expander)(ctx, pc, name, operands) {
-            None => return Ok(None),
-            Some(v) => v.into(),
-        };
-
-        let mut ret = Vec::new();
-
-        while let Some((name, ops)) = deq.pop_front() {
-            if let Some(mc) = MACRO_INSTRUCTIONS.get(name) {
-                mc.assert_operand_count(name, &ops)?;
-
-                match (mc.expander)(ctx, pc, name, &ops) {
-                    None => {
-                        ret.push((name, ops));
-                    },
-                    Some(v) => {
-                        let mut q: VecDeque<_> = v.into();
-                        q.append(&mut deq);
-                        deq = q;
-                    },
-                }
-            } else {
-                ret.push((name, ops));
-            }
-        }
-
-        Ok(Some(ret))
+        Ok((self.expander)(ctx, pc, name, operands))
     }
 
     fn assert_operand_count(&self, name: &str, operands: &[Operand]) -> Result<()> {

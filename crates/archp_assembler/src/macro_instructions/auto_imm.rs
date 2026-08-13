@@ -1,5 +1,5 @@
 use crate::{
-    encoder::immediate::encode_immediate,
+    encoder::immediate::{encode_immediate, split_hi_lo},
     macro_instructions::{ExpandFn, macro_instruction},
     operand::ops,
 };
@@ -47,8 +47,17 @@ const F1: ExpandFn = |ctx, _, name, ops| {
         _ => unreachable!(),
     };
 
-    if let Ok(imm) = encode_immediate(ctx, &ops[2]) {
-        Some(vec![(inst, ops![ops[0], ops[1], imm])])
+    if let Ok(n) = encode_immediate(ctx, &ops[2]) {
+        if let (_, hi) = split_hi_lo(n, 12, true)
+            && hi != 0
+        {
+            Some(vec![
+                ("li", ops!["r31", n]),
+                (name, ops![ops[0], ops[1], "r31"]),
+            ])
+        } else {
+            Some(vec![(inst, ops![ops[0], ops[1], n])])
+        }
     } else {
         None
     }
