@@ -32,8 +32,8 @@ impl InstrType {
             InstrType::I => self.encode_i(opcode, funct3, ops),
             InstrType::B => self.encode_b(opcode, funct3, ops),
             InstrType::S => self.encode_s(opcode, funct3, ops),
-            InstrType::U => self.encode_u(opcode, ops),
-            InstrType::J => self.encode_j(opcode, ops),
+            InstrType::U => self.encode_u(opcode, funct3, ops),
+            InstrType::J => self.encode_j(opcode, funct3, ops),
         }
     }
 
@@ -59,13 +59,9 @@ instr_codec!(
         rs2    => (0 , 5) => rs2;
     ]
 
-    encode_r(opcode: u32, funct3: u32, ops: &[u32]) [
-        ops[0] => rd;
-        ops[1] => rs1;
-        ops[2] => rs2;
-    ]
+    encode_r(opcode, funct3) [ rd, rs1, rs2 ]
 
-    decode_r [ rd, rs1, rs2 ]
+    decode_r() [ rd, rs1, rs2 ]
 );
 
 instr_codec!(
@@ -77,13 +73,9 @@ instr_codec!(
         imm12  => (0, 12) => imm12;
     ]
 
-    encode_i(opcode: u32, funct3: u32, ops: &[u32]) [
-        ops[0] => rd;
-        ops[1] => rs1;
-        ops[2] => imm12;
-    ]
+    encode_i(opcode, funct3) [ rd, rs1, imm12 ]
 
-    decode_i [ rd, rs1, imm12 ]
+    decode_i() [ rd, rs1, imm12 ]
 );
 
 instr_codec!(
@@ -96,17 +88,9 @@ instr_codec!(
         rs2               => (0 , 5) => rs2;
     ]
 
-    encode_b(opcode: u32, funct3: u32, ops: &[u32]) [
-        ops[0] => rs1;
-        ops[1] => rs2;
-        ops[2] => offset12;
-    ]
+    encode_b(opcode, funct3) [ rs1, rs2, offset12 ]
 
-    decode_b [
-        rs1,
-        rs2,
-        (offset12_hi << 7) | offset12_lo,
-    ]
+    decode_b() [ rs1, rs2, (offset12_hi << 7) | offset12_lo ]
 );
 
 instr_codec!(
@@ -119,17 +103,9 @@ instr_codec!(
         rs2               => (0 , 5) => rs2;
     ]
 
-    encode_s(opcode: u32, funct3: u32, ops: &[u32]) [
-        ops[0] => rs2;
-        ops[1] => rs1;
-        ops[2] => offset12;
-    ]
+    encode_s(opcode, funct3) [ rs2, rs1, offset12 ]
 
-    decode_s [
-        rs2,
-        rs1,
-        (offset12_hi << 7) | offset12_lo,
-    ]
+    decode_s() [ rs2, rs1, (offset12_hi << 7) | offset12_lo ]
 );
 
 instr_codec!(
@@ -140,15 +116,9 @@ instr_codec!(
         (imm20 & 0x1ffff) => (0, 17) => imm20_lo;
     ]
 
-    encode_u(opcode: u32, ops: &[u32]) [
-        ops[0] => rd;
-        ops[1] => imm20;
-    ]
+    encode_u(opcode, _) [ rd, imm20 ]
 
-    decode_u [
-        rd,
-        (imm20_hi << 17) | imm20_lo,
-    ]
+    decode_u() [ rd, (imm20_hi << 17) | imm20_lo ]
 );
 
 instr_codec!(
@@ -159,15 +129,9 @@ instr_codec!(
         (imm20 & 0x1ffff) => (0, 17) => imm20_lo;
     ]
 
-    encode_j(opcode: u32, ops: &[u32]) [
-        ops[0] => rd;
-        ops[1] => imm20;
-    ]
+    encode_j(opcode, _) [ rd, imm20 ]
 
-    decode_j [
-        rd,
-        (imm20_hi << 17) | imm20_lo,
-    ]
+    decode_j() [ rd, (imm20_hi << 17) | imm20_lo ]
 );
 
 macro instr_codec {
@@ -176,17 +140,17 @@ macro instr_codec {
             $( $enc_var:expr => ($shift:literal, $len:literal) => $dec_var:tt );+ $(;)?
         ]
 
-        $enc_fn:ident( $($enc_arg:ident : $enc_ty:ty),* $(,)? ) [
-            $($enc_op:expr => $enc_let:ident);* $(;)?
+        $enc_fn:ident ( $opcode:ident, $funct3:tt ) [
+            $( $in:ident ),* $(,)?
         ]
 
-        $dec_fn:ident [
+        $dec_fn:ident () [
             $( $out:expr ),* $(,)?
         ]
     ) => {
         impl InstrType {
-            fn $enc_fn(&self, $($enc_arg : $enc_ty),* ) -> u32 {
-                $( let $enc_let = $enc_op );* ;
+            fn $enc_fn(&self, $opcode: u32, $funct3: u32, ops: &[u32]) -> u32 {
+                let [ $($in),* ] = *ops else { unreachable!(); };
                 $( ((($enc_var) as u32) & ((1u32 << $len) - 1)) << $shift )|*
             }
 
