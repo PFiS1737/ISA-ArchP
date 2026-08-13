@@ -1,7 +1,12 @@
 use anyhow::Result;
 use smallvec::SmallVec;
 
-use crate::{context::Context, operand::Operand, pass1::Pass1, pass2::Pass2};
+use crate::{
+    context::Context,
+    operand::{DirectiveOperand, Operand},
+    pass1::Pass1,
+    pass2::Pass2,
+};
 
 pub struct Assembler {
     settings: AssemblerSettings,
@@ -17,7 +22,12 @@ pub type Instr<'src> = (&'src str, SmallVec<[Operand<'src>; 3]>);
 #[derive(Debug)]
 pub enum Line<'src> {
     Label(&'src str),
-    Instr {
+    Directive {
+        name: &'src str,
+        operands: Vec<DirectiveOperand<'src>>,
+        line: (usize, &'src str),
+    },
+    Instruction {
         name: &'src str,
         operands: SmallVec<[Operand<'src>; 3]>,
         line: (usize, &'src str),

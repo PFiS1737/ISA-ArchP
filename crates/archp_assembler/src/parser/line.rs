@@ -1,8 +1,10 @@
 use anyhow::{anyhow, bail};
 use nom::{
     Parser,
+    branch::alt,
     character::complete::{char, space1},
-    combinator::opt,
+    combinator::{map, opt},
+    multi::separated_list0,
     sequence::{preceded, terminated},
 };
 use smallvec::SmallVec;
@@ -10,8 +12,8 @@ use smallvec::SmallVec;
 use crate::{
     assembler::Line,
     context::Context,
-    operand::Operand,
-    parser::{Result, ident, operand::operand, ws},
+    operand::{DirectiveOperand, Operand},
+    parser::{Result, expression::expr, ident, operand::operand, string::string, ws},
 };
 
 fn label(input: &str) -> Result<'_, &str> {
@@ -24,7 +26,11 @@ fn operands<'ctx, 'src: 'ctx>(
 ) -> Result<'src, SmallVec<[Operand<'src>; 3]>> {
     let mut out = SmallVec::new();
 
-    let (input, _) = operand(ctx, input, &mut out)?;
+    let (input, o) = opt(preceded(space1, |input| operand(ctx, input, &mut out))).parse(input)?;
+
+    if o.is_none() {
+        return Ok((input, out));
+    }
 
     let (input, Some(_)) = opt(ws(char(','))).parse(input)? else {
         return Ok((input, out));
@@ -41,22 +47,50 @@ fn operands<'ctx, 'src: 'ctx>(
     Ok((input, out))
 }
 
-fn instr<'ctx, 'src: 'ctx>(
+fn directive_operands<'src>(input: &'src str) -> Result<'src, Vec<DirectiveOperand<'src>>> {
+    opt(preceded(
+        space1,
+        separated_list0(
+            ws(char(',')),
+            alt((
+                map(string, DirectiveOperand::String),
+                map(expr, DirectiveOperand::Expr),
+            )),
+        ),
+    ))
+    .parse(input)
+    .map(|(i, opt)| match opt {
+        Some(v) => (i, v),
+        None => (i, Vec::new()),
+    })
+}
+
+fn line<'ctx, 'src: 'ctx>(
     ctx: &'ctx Context<'src>,
-    line_no: usize,
+    line_num: usize,
     input: &'src str,
 ) -> Result<'src, Line<'src>> {
     let raw = input;
 
     let (input, name) = ident(input)?;
 
-    let (input, ops) = opt(preceded(space1, |input| operands(ctx, input))).parse(input)?;
+    if name.starts_with('.') {
+        let (input, ops) = directive_operands(input)?;
 
-    Ok((input, Line::Instr {
-        name,
-        operands: ops.unwrap_or_default(),
-        line: (line_no, raw),
-    }))
+        Ok((input, Line::Directive {
+            name,
+            operands: ops,
+            line: (line_num, raw),
+        }))
+    } else {
+        let (input, ops) = operands(ctx, input)?;
+
+        Ok((input, Line::Instruction {
+            name,
+            operands: ops,
+            line: (line_num, raw),
+        }))
+    }
 }
 
 fn strip_comment(input: &str) -> &str {
@@ -73,16 +107,16 @@ fn strip_comment(input: &str) -> &str {
 pub fn parse_line<'ctx, 'src: 'ctx>(
     ctx: &'ctx Context<'src>,
     line_num: usize,
-    line: &'src str,
+    input: &'src str,
 ) -> anyhow::Result<SmallVec<[Line<'src>; 2]>> {
-    let line = strip_comment(line).trim();
+    let input = strip_comment(input).trim();
 
-    if line.is_empty() {
+    if input.is_empty() {
         return Ok(SmallVec::new());
     }
 
     let mut out = SmallVec::new();
-    let mut rest = line;
+    let mut rest = input;
 
     while let Ok((r, l)) = label(rest) {
         out.push(Line::Label(l));
@@ -93,14 +127,14 @@ pub fn parse_line<'ctx, 'src: 'ctx>(
         return Ok(out);
     }
 
-    let (remain, instr) = instr(ctx, line_num, rest)
-        .map_err(|e| anyhow!("Error parsing line {}: '{}': {}", line_num, line, e))?;
+    let (remain, line) = line(ctx, line_num, rest)
+        .map_err(|e| anyhow!("Error parsing line {}: '{}': {}", line_num, input, e))?;
 
     if !remain.is_empty() {
         bail!("Unexpected content after line {}: '{}'", line_num, remain);
     }
 
-    out.push(instr);
+    out.push(line);
 
     Ok(out)
 }
@@ -137,7 +171,7 @@ mod tests {
     fn instruction_without_operand() {
         assert_debug_snapshot!(parse_ok("ecall"), @r#"
         [
-            Instr {
+            Instruction {
                 name: "ecall",
                 operands: [],
                 line: (
@@ -154,7 +188,7 @@ mod tests {
     fn instruction_with_basic_operands() {
         assert_debug_snapshot!(parse_ok("j .L1"), @r#"
         [
-            Instr {
+            Instruction {
                 name: "j",
                 operands: [
                     Ident(
@@ -171,7 +205,7 @@ mod tests {
         );
         assert_debug_snapshot!(parse_ok("la x1, hello"), @r#"
         [
-            Instr {
+            Instruction {
                 name: "la",
                 operands: [
                     Ident(
@@ -191,7 +225,7 @@ mod tests {
         );
         assert_debug_snapshot!(parse_ok("li x1, 123"), @r#"
         [
-            Instr {
+            Instruction {
                 name: "li",
                 operands: [
                     Ident(
@@ -211,7 +245,7 @@ mod tests {
         );
         assert_debug_snapshot!(parse_ok("addi x1, x2, 123"), @r#"
         [
-            Instr {
+            Instruction {
                 name: "addi",
                 operands: [
                     Ident(
@@ -254,7 +288,7 @@ mod tests {
     fn expression_operand() {
         assert_debug_snapshot!(parse_ok("addi ra, x2, label + 4"), @r#"
         [
-            Instr {
+            Instruction {
                 name: "addi",
                 operands: [
                     Ident(
@@ -282,7 +316,7 @@ mod tests {
     fn offset_register_operand() {
         assert_debug_snapshot!(parse_ok("lw x1, (sp)"), @r#"
         [
-            Instr {
+            Instruction {
                 name: "lw",
                 operands: [
                     Ident(
@@ -305,7 +339,7 @@ mod tests {
         );
         assert_debug_snapshot!(parse_ok("lw x1, 8(sp)"), @r#"
         [
-            Instr {
+            Instruction {
                 name: "lw",
                 operands: [
                     Ident(
@@ -328,7 +362,7 @@ mod tests {
         );
         assert_debug_snapshot!(parse_ok("lw x1, (label + 8)(sp)"), @r#"
         [
-            Instr {
+            Instruction {
                 name: "lw",
                 operands: [
                     Ident(
@@ -352,7 +386,7 @@ mod tests {
         );
         assert_debug_snapshot!(parse_ok("lw x1, label + 8(sp)"), @r#"
         [
-            Instr {
+            Instruction {
                 name: "lw",
                 operands: [
                     Ident(
@@ -380,7 +414,7 @@ mod tests {
     fn string_operand() {
         assert_debug_snapshot!(parse_ok(r#".string "hello world""#), @r#"
         [
-            Instr {
+            Directive {
                 name: ".string",
                 operands: [
                     String(
@@ -416,7 +450,7 @@ mod tests {
             Label(
                 "loop",
             ),
-            Instr {
+            Instruction {
                 name: "addi",
                 operands: [
                     Ident(
@@ -451,7 +485,7 @@ mod tests {
             ),
             @r#"
         [
-            Instr {
+            Instruction {
                 name: "addi",
                 operands: [
                     Ident(
@@ -469,7 +503,7 @@ mod tests {
                     "addi x1, x2, 1",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "lw",
                 operands: [
                     Ident(
@@ -502,7 +536,7 @@ mod tests {
             Label(
                 "bar",
             ),
-            Instr {
+            Instruction {
                 name: "nop",
                 operands: [],
                 line: (
@@ -516,9 +550,9 @@ mod tests {
     }
 
     #[test]
-    fn test_complex() {
+    fn test_complex_1() {
         assert_debug_snapshot!(
-            parse_ok(
+            parse_source(
                 r#"
   .data
 hello:
@@ -539,163 +573,170 @@ main:
                 "#
             ),
             @r#"
-        [
-            Instr {
-                name: ".data",
-                operands: [],
-                line: (
-                    2,
-                    ".data",
+        Ok(
+            [
+                Directive {
+                    name: ".data",
+                    operands: [],
+                    line: (
+                        2,
+                        ".data",
+                    ),
+                },
+                Label(
+                    "hello",
                 ),
-            },
-            Label(
-                "hello",
-            ),
-            Instr {
-                name: ".string",
-                operands: [
-                    String(
-                        "Hello, world!\\n",
+                Directive {
+                    name: ".string",
+                    operands: [
+                        String(
+                            "Hello, world!\\n",
+                        ),
+                    ],
+                    line: (
+                        4,
+                        ".string \"Hello, world!\\n\"",
                     ),
-                ],
-                line: (
-                    4,
-                    ".string \"Hello, world!\\n\"",
+                },
+                Directive {
+                    name: ".text",
+                    operands: [],
+                    line: (
+                        6,
+                        ".text",
+                    ),
+                },
+                Directive {
+                    name: ".global",
+                    operands: [
+                        Expr(
+                            Ident(
+                                "main",
+                            ),
+                        ),
+                    ],
+                    line: (
+                        7,
+                        ".global main",
+                    ),
+                },
+                Label(
+                    "main",
                 ),
-            },
-            Instr {
-                name: ".text",
-                operands: [],
-                line: (
-                    6,
-                    ".text",
-                ),
-            },
-            Instr {
-                name: ".global",
-                operands: [
-                    Ident(
-                        "main",
+                Instruction {
+                    name: "li",
+                    operands: [
+                        Ident(
+                            "a7",
+                        ),
+                        Num(
+                            64,
+                        ),
+                    ],
+                    line: (
+                        9,
+                        "li     a7, 64",
                     ),
-                ],
-                line: (
-                    7,
-                    ".global main",
-                ),
-            },
-            Label(
-                "main",
-            ),
-            Instr {
-                name: "li",
-                operands: [
-                    Ident(
-                        "a7",
+                },
+                Instruction {
+                    name: "li",
+                    operands: [
+                        Ident(
+                            "a0",
+                        ),
+                        Num(
+                            1,
+                        ),
+                    ],
+                    line: (
+                        10,
+                        "li     a0, 1",
                     ),
-                    Num(
-                        64,
+                },
+                Instruction {
+                    name: "la",
+                    operands: [
+                        Ident(
+                            "a1",
+                        ),
+                        Ident(
+                            "hello",
+                        ),
+                    ],
+                    line: (
+                        11,
+                        "la     a1, hello",
                     ),
-                ],
-                line: (
-                    9,
-                    "li     a7, 64",
-                ),
-            },
-            Instr {
-                name: "li",
-                operands: [
-                    Ident(
-                        "a0",
+                },
+                Instruction {
+                    name: "li",
+                    operands: [
+                        Ident(
+                            "a2",
+                        ),
+                        Num(
+                            14,
+                        ),
+                    ],
+                    line: (
+                        12,
+                        "li     a2, 14",
                     ),
-                    Num(
-                        1,
+                },
+                Instruction {
+                    name: "ecall",
+                    operands: [],
+                    line: (
+                        13,
+                        "ecall",
                     ),
-                ],
-                line: (
-                    10,
-                    "li     a0, 1",
-                ),
-            },
-            Instr {
-                name: "la",
-                operands: [
-                    Ident(
-                        "a1",
+                },
+                Instruction {
+                    name: "li",
+                    operands: [
+                        Ident(
+                            "a7",
+                        ),
+                        Num(
+                            93,
+                        ),
+                    ],
+                    line: (
+                        15,
+                        "li     a7, 93",
                     ),
-                    Ident(
-                        "hello",
+                },
+                Instruction {
+                    name: "li",
+                    operands: [
+                        Ident(
+                            "a0",
+                        ),
+                        Num(
+                            0,
+                        ),
+                    ],
+                    line: (
+                        16,
+                        "li     a0, 0",
                     ),
-                ],
-                line: (
-                    11,
-                    "la     a1, hello",
-                ),
-            },
-            Instr {
-                name: "li",
-                operands: [
-                    Ident(
-                        "a2",
+                },
+                Instruction {
+                    name: "ecall",
+                    operands: [],
+                    line: (
+                        17,
+                        "ecall",
                     ),
-                    Num(
-                        14,
-                    ),
-                ],
-                line: (
-                    12,
-                    "li     a2, 14",
-                ),
-            },
-            Instr {
-                name: "ecall",
-                operands: [],
-                line: (
-                    13,
-                    "ecall",
-                ),
-            },
-            Instr {
-                name: "li",
-                operands: [
-                    Ident(
-                        "a7",
-                    ),
-                    Num(
-                        93,
-                    ),
-                ],
-                line: (
-                    15,
-                    "li     a7, 93",
-                ),
-            },
-            Instr {
-                name: "li",
-                operands: [
-                    Ident(
-                        "a0",
-                    ),
-                    Num(
-                        0,
-                    ),
-                ],
-                line: (
-                    16,
-                    "li     a0, 0",
-                ),
-            },
-            Instr {
-                name: "ecall",
-                operands: [],
-                line: (
-                    17,
-                    "ecall",
-                ),
-            },
-        ]
+                },
+            ],
+        )
         "#
         );
+    }
 
+    #[test]
+    fn test_complex_2() {
         assert_debug_snapshot!(
             parse_ok(
                 r#"
@@ -753,7 +794,7 @@ main:
             ),
             @r#"
         [
-            Instr {
+            Directive {
                 name: ".text",
                 operands: [],
                 line: (
@@ -761,11 +802,13 @@ main:
                     ".text",
                 ),
             },
-            Instr {
+            Directive {
                 name: ".align",
                 operands: [
-                    Num(
-                        2,
+                    Expr(
+                        Num(
+                            2,
+                        ),
                     ),
                 ],
                 line: (
@@ -773,11 +816,13 @@ main:
                     ".align  2",
                 ),
             },
-            Instr {
+            Directive {
                 name: ".globl",
                 operands: [
-                    Ident(
-                        "fib",
+                    Expr(
+                        Ident(
+                            "fib",
+                        ),
                     ),
                 ],
                 line: (
@@ -788,7 +833,7 @@ main:
             Label(
                 "fib",
             ),
-            Instr {
+            Instruction {
                 name: "sw",
                 operands: [
                     Ident(
@@ -806,7 +851,7 @@ main:
                     "sw    ra, -4(sp)",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "addi",
                 operands: [
                     Ident(
@@ -824,7 +869,7 @@ main:
                     "addi  sp, sp, -16",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "li",
                 operands: [
                     Ident(
@@ -839,7 +884,7 @@ main:
                     "li    t1, 2",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "bgt",
                 operands: [
                     Ident(
@@ -857,7 +902,7 @@ main:
                     "bgt   a0, t1, .l0",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "li",
                 operands: [
                     Ident(
@@ -872,7 +917,7 @@ main:
                     "li    a0, 1",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "addi",
                 operands: [
                     Ident(
@@ -890,7 +935,7 @@ main:
                     "addi  sp, sp, 16",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "lw",
                 operands: [
                     Ident(
@@ -908,7 +953,7 @@ main:
                     "lw    ra, -4(sp)",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "ret",
                 operands: [],
                 line: (
@@ -919,7 +964,7 @@ main:
             Label(
                 ".l0",
             ),
-            Instr {
+            Instruction {
                 name: "addi",
                 operands: [
                     Ident(
@@ -937,7 +982,7 @@ main:
                     "addi  s4, a0, -1",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "sw",
                 operands: [
                     Ident(
@@ -955,7 +1000,7 @@ main:
                     "sw    a0, 0(sp)",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "mv",
                 operands: [
                     Ident(
@@ -970,7 +1015,7 @@ main:
                     "mv    a0, s4",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "call",
                 operands: [
                     Ident(
@@ -982,7 +1027,7 @@ main:
                     "call  fib",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "mv",
                 operands: [
                     Ident(
@@ -997,7 +1042,7 @@ main:
                     "mv    a3, a0",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "lw",
                 operands: [
                     Ident(
@@ -1015,7 +1060,7 @@ main:
                     "lw    a0, 0(sp)",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "addi",
                 operands: [
                     Ident(
@@ -1033,7 +1078,7 @@ main:
                     "addi  s4, a0, -2",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "sw",
                 operands: [
                     Ident(
@@ -1051,7 +1096,7 @@ main:
                     "sw    a3, 0(sp)",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "mv",
                 operands: [
                     Ident(
@@ -1066,7 +1111,7 @@ main:
                     "mv    a0, s4",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "call",
                 operands: [
                     Ident(
@@ -1078,7 +1123,7 @@ main:
                     "call  fib",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "mv",
                 operands: [
                     Ident(
@@ -1093,7 +1138,7 @@ main:
                     "mv    s4, a0",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "lw",
                 operands: [
                     Ident(
@@ -1111,7 +1156,7 @@ main:
                     "lw    a3, 0(sp)",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "add",
                 operands: [
                     Ident(
@@ -1129,7 +1174,7 @@ main:
                     "add   s4, a3, s4",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "addi",
                 operands: [
                     Ident(
@@ -1147,7 +1192,7 @@ main:
                     "addi  sp, sp, 16",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "lw",
                 operands: [
                     Ident(
@@ -1165,7 +1210,7 @@ main:
                     "lw    ra, -4(sp)",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "mv",
                 operands: [
                     Ident(
@@ -1180,7 +1225,7 @@ main:
                     "mv    a0, s4",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "ret",
                 operands: [],
                 line: (
@@ -1188,11 +1233,13 @@ main:
                     "ret",
                 ),
             },
-            Instr {
+            Directive {
                 name: ".globl",
                 operands: [
-                    Ident(
-                        "main",
+                    Expr(
+                        Ident(
+                            "main",
+                        ),
                     ),
                 ],
                 line: (
@@ -1203,7 +1250,7 @@ main:
             Label(
                 "main",
             ),
-            Instr {
+            Instruction {
                 name: "sw",
                 operands: [
                     Ident(
@@ -1221,7 +1268,7 @@ main:
                     "sw    ra, -4(sp)",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "addi",
                 operands: [
                     Ident(
@@ -1239,7 +1286,7 @@ main:
                     "addi  sp, sp, -16",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "call",
                 operands: [
                     Ident(
@@ -1251,7 +1298,7 @@ main:
                     "call  getint",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "call",
                 operands: [
                     Ident(
@@ -1263,7 +1310,7 @@ main:
                     "call  fib",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "call",
                 operands: [
                     Ident(
@@ -1275,7 +1322,7 @@ main:
                     "call  putint",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "li",
                 operands: [
                     Ident(
@@ -1290,7 +1337,7 @@ main:
                     "li    a0, 10",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "call",
                 operands: [
                     Ident(
@@ -1302,7 +1349,7 @@ main:
                     "call  putch",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "addi",
                 operands: [
                     Ident(
@@ -1320,7 +1367,7 @@ main:
                     "addi  sp, sp, 16",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "lw",
                 operands: [
                     Ident(
@@ -1338,7 +1385,7 @@ main:
                     "lw    ra, -4(sp)",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "li",
                 operands: [
                     Ident(
@@ -1353,7 +1400,7 @@ main:
                     "li    a0, 0",
                 ),
             },
-            Instr {
+            Instruction {
                 name: "ret",
                 operands: [],
                 line: (

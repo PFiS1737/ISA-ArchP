@@ -2,7 +2,8 @@ use anyhow::bail;
 
 use crate::{
     directives::{HandlerFn, directive},
-    operand::Operand,
+    expression::Expr,
+    operand::DirectiveOperand,
 };
 
 directive! {
@@ -14,11 +15,11 @@ directive! {
 }
 
 const F: HandlerFn = |ctx, ops| {
-    let Operand::Ident(op1) = ops[0] else {
+    let DirectiveOperand::Expr(Expr::Ident(op1)) = ops[0] else {
         bail!("expected identifier, got {}", ops[0]);
     };
 
-    let Operand::Ident(op2) = ops[1] else {
+    let DirectiveOperand::Expr(Expr::Ident(op2)) = ops[1] else {
         bail!("expected identifier, got {}", ops[1]);
     };
 

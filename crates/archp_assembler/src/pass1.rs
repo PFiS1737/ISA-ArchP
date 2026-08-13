@@ -6,7 +6,7 @@ use crate::{
     directives::DIRECTIVES,
     instructions::INSTRUCTIONS,
     macro_instructions::MACRO_INSTRUCTIONS,
-    parser::line::parse_line,
+    parser::parse_line,
     pseudo_instructions::PSEUDO_INSTRUCTIONS,
 };
 
@@ -35,7 +35,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                 let pc = self.context.codes.len() * 4;
                 self.context.labels.insert(label, pc);
             },
-            Line::Instr {
+            Line::Directive {
                 name,
                 operands,
                 line,
@@ -48,10 +48,14 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                             line.1,
                             e
                         )
-                    })?;
-                    return Ok(());
+                    })?
                 }
-
+            },
+            Line::Instruction {
+                name,
+                operands,
+                line,
+            } => {
                 let instrs = if !self.context.settings.disable_macro
                     && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
                     && let Some(expanded) =

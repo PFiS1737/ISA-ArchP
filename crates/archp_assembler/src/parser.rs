@@ -1,9 +1,11 @@
-pub mod expression;
-pub mod line;
-pub mod operand;
+mod expression;
+mod line;
+mod operand;
+mod string;
 
 use std::num::ParseIntError;
 
+pub use line::parse_line;
 use nom::{
     AsChar, Input, Parser,
     bytes::complete::take_while,

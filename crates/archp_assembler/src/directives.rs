@@ -5,9 +5,9 @@ use std::{collections::HashMap, sync::LazyLock};
 
 use anyhow::{Result, bail};
 
-use crate::{context::Context, operand::Operand};
+use crate::{context::Context, operand::DirectiveOperand};
 
-type HandlerFn = for<'a> fn(&mut Context<'a>, &[Operand<'a>]) -> Result<()>;
+type HandlerFn = for<'a> fn(&mut Context<'a>, &[DirectiveOperand<'a>]) -> Result<()>;
 
 inventory::collect!(Entry);
 
@@ -35,13 +35,17 @@ impl Entry {
         }
     }
 
-    pub fn handle<'a>(&self, ctx: &mut Context<'a>, operands: &[Operand<'a>]) -> Result<()> {
+    pub fn handle<'a>(
+        &self,
+        ctx: &mut Context<'a>,
+        operands: &[DirectiveOperand<'a>],
+    ) -> Result<()> {
         self.assert_operand_count(operands)?;
 
         (self.handler)(ctx, operands)
     }
 
-    fn assert_operand_count(&self, operands: &[Operand]) -> Result<()> {
+    fn assert_operand_count(&self, operands: &[DirectiveOperand]) -> Result<()> {
         if let Some(count) = self.operand_count
             && operands.len() != count
         {

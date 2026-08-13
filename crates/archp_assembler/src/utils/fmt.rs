@@ -11,7 +11,6 @@ pub fn fmt_line(name: &str, ops: &[Operand]) -> String {
         .map(|e| match e {
             Operand::Num(n) => fmt_hex(*n),
             Operand::Ident(s) => s.to_string(),
-            Operand::String(s) => format!("\"{}\"", s),
             Operand::Addition(s, n) => format!("{}{:+}", s, n),
         })
         .collect::<Vec<_>>();

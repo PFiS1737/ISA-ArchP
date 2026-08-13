@@ -1,10 +1,11 @@
 use std::fmt::Display;
 
+use crate::expression::Expr;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Operand<'src> {
     Num(i64),
     Ident(&'src str),
-    String(&'src str),
     Addition(&'src str, i64),
 }
 
@@ -37,8 +38,22 @@ impl Display for Operand<'_> {
         match self {
             Operand::Num(n) => write!(f, "{}", n), // TODO: format as hex
             Operand::Ident(s) => write!(f, "{}", s),
-            Operand::String(s) => write!(f, "\"{}\"", s),
             Operand::Addition(s, n) => write!(f, "{}{:+}", s, n),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum DirectiveOperand<'src> {
+    Expr(Expr<'src>),
+    String(&'src str),
+}
+
+impl Display for DirectiveOperand<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DirectiveOperand::Expr(expr) => write!(f, "{}", expr),
+            DirectiveOperand::String(s) => write!(f, "\"{}\"", s),
         }
     }
 }
