@@ -26,7 +26,7 @@ pub fn mc_instr(cmd: &str) -> impl Fn(&[&str]) -> String {
         ops.iter().for_each(|op| {
             operand(&Context::default(), op, &mut v).unwrap();
         });
-        match ps_instr.expand(&Context::test(), 0, cmd, &v) {
+        match ps_instr.expand(&Context::test(), cmd, &v) {
             Ok(expanded) => match expanded {
                 Some(expanded) => expanded
                     .into_iter()

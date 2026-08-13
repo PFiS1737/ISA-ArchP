@@ -10,7 +10,7 @@ macro_instruction! {
     }
 }
 
-const F: ExpandFn = |_, _, _, ops| {
+const F: ExpandFn = |_, _, ops| {
     if ops.len() != 1 {
         return None;
     }

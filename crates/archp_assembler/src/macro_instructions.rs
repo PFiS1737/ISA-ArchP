@@ -9,7 +9,7 @@ use anyhow::{Result, bail};
 use crate::{assembler::Instr, context::Context, operand::Operand};
 
 type ExpandRet<'a> = Option<Vec<Instr<'a>>>;
-type ExpandFn = for<'a> fn(&Context<'a>, u32, &'a str, &[Operand<'a>]) -> ExpandRet<'a>;
+type ExpandFn = for<'a> fn(&Context<'a>, &'a str, &[Operand<'a>]) -> ExpandRet<'a>;
 
 inventory::collect!(Entry);
 
@@ -46,13 +46,12 @@ impl Entry {
     pub fn expand<'a>(
         &self,
         ctx: &Context<'a>,
-        pc: u32,
         name: &'a str,
         operands: &[Operand<'a>],
     ) -> Result<ExpandRet<'a>> {
         self.assert_operand_count(name, operands)?;
 
-        Ok((self.expander)(ctx, pc, name, operands))
+        Ok((self.expander)(ctx, name, operands))
     }
 
     fn assert_operand_count(&self, name: &str, operands: &[Operand]) -> Result<()> {

@@ -17,7 +17,7 @@ macro_instruction! {
     }
 }
 
-const F1: ExpandFn = |_, _, name, ops| {
+const F1: ExpandFn = |_, name, ops| {
     let inst = match name {
         "add" => "addi",
         "sub" => "subi",
@@ -74,7 +74,7 @@ macro_instruction! {
     }
 }
 
-const F2: ExpandFn = |_, _, name, ops| {
+const F2: ExpandFn = |_, name, ops| {
     if let Ok(n) = encode_immediate(&ops[1]) {
         if n == 0 {
             Some(vec![(name, ops![ops[0], "r0", ops[2]])])
@@ -97,7 +97,7 @@ macro_instruction! {
     }
 }
 
-const F3: ExpandFn = |_, _, name, ops| {
+const F3: ExpandFn = |_, name, ops| {
     if let Ok(n) = encode_immediate(&ops[2]) {
         if n == 0 {
             Some(vec![(name, ops![ops[0], ops[1], "r0"])])

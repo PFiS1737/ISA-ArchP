@@ -30,10 +30,9 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
     }
 
     fn handle_line(&mut self, line: Line<'src>) -> Result<()> {
-        let pc = self.context.codes.len() * 4;
-
         match line {
             Line::Label(label) => {
+                let pc = self.context.codes.len() * 4;
                 self.context.labels.insert(label, pc);
             },
             Line::Instr {
@@ -55,16 +54,17 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
 
                 let instrs = if !self.context.settings.disable_macro
                     && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
-                    && let Some(expanded) = mc_instr
-                        .expand(self.context, pc as u32, name, &operands)
-                        .map_err(|e| {
-                            anyhow!(
-                                "Error expanding macro-instruction at line {}: '{}' ({})",
-                                line.0,
-                                line.1,
-                                e
-                            )
-                        })? {
+                    && let Some(expanded) =
+                        mc_instr
+                            .expand(self.context, name, &operands)
+                            .map_err(|e| {
+                                anyhow!(
+                                    "Error expanding macro-instruction at line {}: '{}' ({})",
+                                    line.0,
+                                    line.1,
+                                    e
+                                )
+                            })? {
                     expanded
                 } else {
                     vec![(name, operands)]

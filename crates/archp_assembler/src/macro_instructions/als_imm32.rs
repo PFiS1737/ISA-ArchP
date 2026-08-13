@@ -17,7 +17,7 @@ macro_instruction! {
     }
 }
 
-const F: ExpandFn = |_, _, name, ops| {
+const F: ExpandFn = |_, name, ops| {
     let inst = match name {
         "mulhiu" => "mulhu",
         "mulhisu" => "mulhsu",
