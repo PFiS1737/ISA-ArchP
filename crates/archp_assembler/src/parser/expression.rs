@@ -7,7 +7,10 @@ use nom::{
     sequence::preceded,
 };
 
-use crate::parser::{Result, ident, parens, types::expression::*, ws};
+use crate::{
+    expression::{BinaryOp, Expr, UnaryOp},
+    parser::{Result, ident, parens, ws},
+};
 
 fn binary(input: &str) -> Result<'_, i64> {
     map_res(preceded(tag("0b"), bin_digit1), |s: &str| {

@@ -1,12 +1,12 @@
 use anyhow::{Result, anyhow};
 
 use crate::{
-    assembler::Instr,
+    assembler::{Instr, Line},
     context::Context,
     directives::DIRECTIVES,
     instructions::INSTRUCTIONS,
     macro_instructions::MACRO_INSTRUCTIONS,
-    parser::{line::parse_line, types::line::Line},
+    parser::line::parse_line,
     pseudo_instructions::PSEUDO_INSTRUCTIONS,
 };
 

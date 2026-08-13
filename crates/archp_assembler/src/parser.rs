@@ -1,7 +1,6 @@
 pub mod expression;
 pub mod line;
 pub mod operand;
-pub mod types;
 
 use std::num::ParseIntError;
 
@@ -17,7 +16,7 @@ use nom::{
     sequence::delimited,
 };
 
-use crate::parser::types::expression::EvalError;
+use crate::expression::EvalError;
 
 fn ws<I, O, E: ParseError<I>, F>(inner: F) -> impl Parser<I, Output = O, Error = E>
 where

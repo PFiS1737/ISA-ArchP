@@ -8,9 +8,10 @@ use nom::{
 use smallvec::SmallVec;
 
 use crate::{
+    assembler::Line,
     context::Context,
     operand::Operand,
-    parser::{Result, ident, operand::operand, types::line::Line, ws},
+    parser::{Result, ident, operand::operand, ws},
 };
 
 fn label(input: &str) -> Result<'_, &str> {

@@ -14,6 +14,16 @@ pub struct AssemblerSettings {
 
 pub type Instr<'src> = (&'src str, SmallVec<[Operand<'src>; 3]>);
 
+#[derive(Debug)]
+pub enum Line<'src> {
+    Label(&'src str),
+    Instr {
+        name: &'src str,
+        operands: SmallVec<[Operand<'src>; 3]>,
+        line: (usize, &'src str),
+    },
+}
+
 impl Assembler {
     pub fn new(settings: AssemblerSettings) -> Self {
         Assembler { settings }

@@ -4,6 +4,7 @@ mod assembler;
 mod context;
 mod directives;
 mod encoder;
+mod expression;
 mod instructions;
 mod macro_instructions;
 mod operand;
