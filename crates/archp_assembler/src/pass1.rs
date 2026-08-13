@@ -4,6 +4,7 @@ use crate::{
     assembler::Instr,
     context::Context,
     directives::DIRECTIVES,
+    instructions::INSTRUCTIONS,
     macro_instructions::MACRO_INSTRUCTIONS,
     parser::{line::parse_line, types::line::Line},
     pseudo_instructions::PSEUDO_INSTRUCTIONS,
@@ -18,75 +19,89 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
         Self { context }
     }
 
-    pub fn run(&mut self, source: &'src str) -> Result<Vec<Instr<'src>>> {
-        let mut processed = Vec::new();
-
+    pub fn run(&mut self, source: &'src str) -> Result<()> {
         for (line_idx, line) in source.lines().enumerate() {
             for line in parse_line(self.context, line_idx + 1, line)? {
-                let pc = processed.len() * 4;
-
-                match line {
-                    Line::Label(label) => {
-                        self.context.labels.insert(label, pc);
-                    },
-                    Line::Instr {
-                        name,
-                        operands,
-                        line,
-                    } => {
-                        if let Some(dire) = DIRECTIVES.get(name) {
-                            dire.handle(self.context, &operands).map_err(|e| {
-                                anyhow!(
-                                    "Error handling directive at line {}: '{}' ({})",
-                                    line.0,
-                                    line.1,
-                                    e
-                                )
-                            })?;
-                            continue;
-                        }
-
-                        let instrs = if !self.context.settings.disable_macro
-                            && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
-                            && let Some(expanded) = mc_instr
-                                .expand(self.context, pc as u32, name, &operands)
-                                .map_err(|e| {
-                                    anyhow!(
-                                        "Error expanding macro-instruction at line {}: '{}' ({})",
-                                        line.0,
-                                        line.1,
-                                        e
-                                    )
-                                })? {
-                            expanded
-                        } else {
-                            vec![(name, operands)]
-                        };
-
-                        for (name, ops) in instrs.into_iter() {
-                            if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
-                                let expanded =
-                                    ps_instr.expand(self.context, &ops).map_err(|e| {
-                                        anyhow!(
-                                            "Error expanding pseudo-instruction '{}': {}",
-                                            name,
-                                            e
-                                        )
-                                    })?;
-                                for instr in expanded {
-                                    processed.push(instr);
-                                    self.context.source_map.push(line);
-                                }
-                            } else {
-                                processed.push((name, ops));
-                                self.context.source_map.push(line);
-                            }
-                        }
-                    },
-                }
+                self.handle_line(line)?;
             }
         }
 
-        Ok(processed)
+        Ok(())
+    }
+
+    fn handle_line(&mut self, line: Line<'src>) -> Result<()> {
+        let pc = self.context.codes.len() * 4;
+
+        match line {
+            Line::Label(label) => {
+                self.context.labels.insert(label, pc);
+            },
+            Line::Instr {
+                name,
+                operands,
+                line,
+            } => {
+                if let Some(dire) = DIRECTIVES.get(name) {
+                    dire.handle(self.context, &operands).map_err(|e| {
+                        anyhow!(
+                            "Error handling directive at line {}: '{}' ({})",
+                            line.0,
+                            line.1,
+                            e
+                        )
+                    })?;
+                    return Ok(());
+                }
+
+                let instrs = if !self.context.settings.disable_macro
+                    && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
+                    && let Some(expanded) = mc_instr
+                        .expand(self.context, pc as u32, name, &operands)
+                        .map_err(|e| {
+                            anyhow!(
+                                "Error expanding macro-instruction at line {}: '{}' ({})",
+                                line.0,
+                                line.1,
+                                e
+                            )
+                        })? {
+                    expanded
+                } else {
+                    vec![(name, operands)]
+                };
+
+                for (name, ops) in instrs.into_iter() {
+                    if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
+                        let expanded = ps_instr.expand(self.context, &ops).map_err(|e| {
+                            anyhow!("Error expanding pseudo-instruction '{}': {}", name, e)
+                        })?;
+                        for instr in expanded {
+                            self.handle_instr(instr, line)?;
+                        }
+                    } else {
+                        self.handle_instr((name, ops), line)?;
+                    }
+                }
+            },
+        }
+
+        Ok(())
+    }
+
+    fn handle_instr(&mut self, instr: Instr<'src>, line: (usize, &'src str)) -> Result<()> {
+        let pc = self.context.codes.len() * 4;
+
+        let (name, ops) = instr;
+
+        let code = INSTRUCTIONS
+            .get(name)
+            .ok_or(anyhow!("Unknown instruction: '{}'", name))?
+            .encode(self.context, pc, &ops)?;
+
+        self.context.codes.push(code);
+        self.context.instrs.push((name, ops));
+        self.context.source_map.push(line);
+
+        Ok(())
     }
 }

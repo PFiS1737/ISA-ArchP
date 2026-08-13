@@ -13,6 +13,8 @@ pseudo_instruction! {
     }
 }
 
+// TODO: '%hi' and '%lo' modifiers
+
 const F: ExpandFn = |_, ops| {
     if let Ok(n) = encode_immediate(&ops[1])
         && let (lo, hi) = split_hi_lo(n, 12, true)

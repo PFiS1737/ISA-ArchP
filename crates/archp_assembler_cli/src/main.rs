@@ -31,7 +31,7 @@ fn main() -> Result<()> {
         .map_err(|e| anyhow!("Can't read source file '{}': {}", cli.src_file, e))?;
 
     let asmblr = Assembler::new(settings);
-    let ((codes, instrs), context) = asmblr.assemble(&file_content)?;
+    let context = asmblr.assemble(&file_content)?;
 
     let mut out = BufWriter::new(if cli.stdout {
         Box::new(stdout()) as Box<dyn Write>
@@ -46,8 +46,9 @@ fn main() -> Result<()> {
             .map(|(k, v)| (v, k))
             .collect::<HashMap<_, _>>();
 
-        for (code, display) in codes.into_iter().zip(align_tabbed_lines(
-            &instrs
+        for (code, display) in context.codes.into_iter().zip(align_tabbed_lines(
+            &context
+                .instrs
                 .into_iter()
                 .enumerate()
                 .map(|(idx, (name, ops))| {
@@ -74,7 +75,7 @@ fn main() -> Result<()> {
             writeln!(out, "{:#010X} # {}", code, display)?;
         }
     } else {
-        for code in codes {
+        for code in context.codes {
             out.write_all(&code.to_le_bytes())?;
         }
     }

@@ -12,7 +12,7 @@ pub fn instr(cmd: &str) -> impl Fn(&[&str]) -> String {
         ops.iter().for_each(|op| {
             operand(&Context::default(), op, &mut v).unwrap();
         });
-        match instr.encode(&Context::test(), 0, &v) {
+        match instr.encode(&mut Context::test(), 0, &v) {
             Ok(code) => fmt_bits(code),
             Err(e) => format!("Error: {}", e),
         }

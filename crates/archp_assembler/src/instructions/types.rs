@@ -37,7 +37,6 @@ impl InstrType {
         }
     }
 
-    #[allow(unused)] // FIXME: unused
     pub fn decode(&self, code: u32) -> SmallVec<[u32; 3]> {
         match self {
             InstrType::R => self.decode_r(code),

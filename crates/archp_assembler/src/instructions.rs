@@ -16,7 +16,9 @@ use anyhow::{Result, bail};
 
 use crate::{
     context::Context,
-    encoder::{address::encode_address, immediate::encode_immediate_as, register::encode_register},
+    encoder::{
+        address::encode_address_as, immediate::encode_immediate_as, register::encode_register,
+    },
     instructions::types::InstrType,
     operand::{Operand, OperandType},
 };
@@ -53,22 +55,46 @@ impl Entry {
         }
     }
 
-    pub fn encode(&self, ctx: &Context, pc: u32, operands: &[Operand]) -> Result<u32> {
+    pub fn encode<'src>(
+        &'static self,
+        ctx: &mut Context<'src>,
+        pc: usize,
+        operands: &[Operand<'src>],
+    ) -> Result<u32> {
         let operands = self.parse(ctx, pc, operands)?;
 
         Ok(self.itype.encode(self.opcode, self.funct3, &operands))
     }
 
-    fn parse(&self, ctx: &Context, pc: u32, operands: &[Operand]) -> Result<Vec<u32>> {
-        let format = self.operands_format;
+    pub fn apply_relocation(&self, code: &mut u32, addr: i64, base: u32) -> Result<()> {
+        for (idx, slot) in self.operands_format.iter().enumerate() {
+            if let Some(op_ty) = slot
+                && let OperandType::Addr(bits) = op_ty
+            {
+                let addr = encode_address_as(addr, *bits, base)?;
+                let mut ops = self.itype.decode(*code);
+                ops[idx] = addr;
+                *code = self.itype.encode(self.opcode, self.funct3, &ops);
+                return Ok(());
+            }
+        }
 
-        let expected = format.iter().filter(|x| x.is_some()).count();
+        bail!("Instruction '{}' does not support relocation", self.name);
+    }
+
+    fn parse<'src>(
+        &'static self,
+        ctx: &mut Context<'src>,
+        pc: usize,
+        operands: &[Operand<'src>],
+    ) -> Result<Vec<u32>> {
+        let expected = self.operands_format.iter().filter(|x| x.is_some()).count();
         self.assert_operand_count(operands.len(), expected)?;
 
-        let mut ret = Vec::with_capacity(format.len());
+        let mut ret = Vec::with_capacity(self.operands_format.len());
         let mut op_idx = 0;
 
-        for slot in format {
+        for slot in self.operands_format {
             match slot {
                 Some(op_ty) => {
                     let op = &operands[op_idx];
@@ -77,7 +103,11 @@ impl Entry {
                     let val = match *op_ty {
                         OperandType::RegD | OperandType::RegS => encode_register(ctx, op)?,
                         OperandType::Imm(bits, signed) => encode_immediate_as(op, bits, signed)?,
-                        OperandType::Addr(bits) => encode_address(ctx, op)?.as_field(bits, pc)?,
+                        OperandType::Addr(..) => {
+                            // TODO: can we put the addend into the instruction code?
+                            ctx.add_relocation(self, pc, op)?;
+                            0
+                        },
                     };
 
                     ret.push(val);
@@ -272,8 +302,8 @@ mod tests {
     fn enocde_b() {
         let cmd = instr("beq");
         // Same to I-type, omitting ...
-        assert_snapshot!(cmd(&["r1", "r0", "over"]), @"Error: Address offset '596523' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(cmd(&["r1", "r0", "loop"]), @"0001 001 000 00000 00001 0000010 00000");
+        assert_snapshot!(cmd(&["r1", "r0", "over"]), @"0001 001 000 00000 00001 0000000 00000");
+        assert_snapshot!(cmd(&["r1", "r0", "loop"]), @"0001 001 000 00000 00001 0000000 00000");
 
         let cmd = instr("sw");
 

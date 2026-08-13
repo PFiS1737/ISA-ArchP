@@ -1,6 +1,6 @@
-use anyhow::{Result, anyhow};
+use anyhow::Result;
 
-use crate::{assembler::Instr, context::Context, instructions::INSTRUCTIONS};
+use crate::context::Context;
 
 pub struct Pass2<'ctx, 'src> {
     context: &'ctx mut Context<'src>,
@@ -11,39 +11,23 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
         Pass2 { context }
     }
 
-    pub fn run(&self, processed: Vec<Instr<'src>>) -> Result<(Vec<u32>, Vec<Instr<'src>>)> {
-        let mut codes = Vec::with_capacity(processed.len());
-        let mut instrs = Vec::with_capacity(processed.len());
+    pub fn run(&mut self) -> Result<()> {
+        for reloc in &self.context.relocations {
+            let addr = self
+                .context
+                .labels
+                .get(reloc.label)
+                .ok_or_else(|| anyhow::anyhow!("Undefined label: {}", reloc.label))?;
 
-        for (idx, instr) in processed.into_iter().enumerate() {
-            let (original_idx, original_line) = self.context.source_map[idx];
+            let addr = *addr as i64 + reloc.addend;
 
-            let (code, instr) = self.line_handler(idx, instr).map_err(|e| {
-                anyhow!(
-                    "Error encoding line {}: '{}' ({})",
-                    original_idx + 1,
-                    original_line,
-                    e
-                )
-            })?;
+            let code = &mut self.context.codes[reloc.offset / 4];
 
-            codes.push(code);
-            instrs.push(instr);
+            reloc
+                .instr
+                .apply_relocation(code, addr, reloc.offset as u32)?;
         }
 
-        Ok((codes, instrs))
-    }
-
-    fn line_handler(&self, idx: usize, instr: Instr<'src>) -> Result<(u32, Instr<'src>)> {
-        let pc = (idx * 4) as u32;
-
-        let (name, ops) = instr;
-
-        let code = INSTRUCTIONS
-            .get(name)
-            .ok_or(anyhow!("Unknown instruction: '{}'", name))?
-            .encode(self.context, pc, &ops)?;
-
-        Ok((code, (name, ops)))
+        Ok(())
     }
 }
