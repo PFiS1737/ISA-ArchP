@@ -13,8 +13,8 @@ pseudo_instruction! {
     }
 }
 
-const F: ExpandFn = |ctx, ops| {
-    if let Ok(n) = encode_immediate(ctx, &ops[1])
+const F: ExpandFn = |_, ops| {
+    if let Ok(n) = encode_immediate(&ops[1])
         && let (lo, hi) = split_hi_lo(n, 12, true)
         && hi != 0
     {

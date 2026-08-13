@@ -76,9 +76,7 @@ impl Entry {
 
                     let val = match *op_ty {
                         OperandType::RegD | OperandType::RegS => encode_register(ctx, op)?,
-                        OperandType::Imm(bits, signed) => {
-                            encode_immediate_as(ctx, op, bits, signed)?
-                        },
+                        OperandType::Imm(bits, signed) => encode_immediate_as(op, bits, signed)?,
                         OperandType::Addr(bits) => encode_address(ctx, op)?.as_field(bits, pc)?,
                     };
 

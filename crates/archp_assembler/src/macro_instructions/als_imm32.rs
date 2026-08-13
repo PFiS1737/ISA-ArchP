@@ -17,7 +17,7 @@ macro_instruction! {
     }
 }
 
-const F: ExpandFn = |ctx, _, name, ops| {
+const F: ExpandFn = |_, _, name, ops| {
     let inst = match name {
         "mulhiu" => "mulhu",
         "mulhisu" => "mulhsu",
@@ -26,7 +26,7 @@ const F: ExpandFn = |ctx, _, name, ops| {
         _ => &name[..name.len() - 1],
     };
 
-    if let Ok(n) = encode_immediate(ctx, &ops[2])
+    if let Ok(n) = encode_immediate(&ops[2])
         && let (_, hi) = split_hi_lo(n, 12, true)
         && hi != 0
     {

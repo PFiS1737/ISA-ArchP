@@ -1,10 +1,8 @@
 use anyhow::{Result, bail};
 
-use crate::{assembler::Context, operand::Operand, utils::sig_ext::sign_extend};
+use crate::{operand::Operand, utils::sig_ext::sign_extend};
 
-pub fn encode_immediate(_ctx: &Context, imm: &Operand) -> Result<i64> {
-    // TODO: remove 'ctx' argument
-
+pub fn encode_immediate(imm: &Operand) -> Result<i64> {
     let Operand::Num(n) = imm else {
         bail!("Expected immediate, got: {}", imm);
     };
@@ -12,8 +10,8 @@ pub fn encode_immediate(_ctx: &Context, imm: &Operand) -> Result<i64> {
     Ok(*n)
 }
 
-pub fn encode_immediate_as(ctx: &Context, imm: &Operand, bits: u8, signed: bool) -> Result<u32> {
-    let (low, hi) = split_hi_lo(encode_immediate(ctx, imm)?, bits, signed);
+pub fn encode_immediate_as(imm: &Operand, bits: u8, signed: bool) -> Result<u32> {
+    let (low, hi) = split_hi_lo(encode_immediate(imm)?, bits, signed);
 
     if hi != 0 {
         bail!(
