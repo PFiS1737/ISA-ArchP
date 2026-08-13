@@ -55,7 +55,7 @@ instruction! {
         opcode: 0b0000101,
         funct3: 0b000,
         itype: I,
-        operands_format: [ RegD, RegS, Imm(5, u) ],
+        format: [ RegD, RegS, Imm(5, u) ],
     }
 }
 
@@ -65,7 +65,7 @@ instruction! {
         opcode: 0b0000101,
         funct3: 0b001,
         itype: I,
-        operands_format: [ RegD, RegS, Imm(5, u) ],
+        format: [ RegD, RegS, Imm(5, u) ],
     }
 }
 
@@ -75,7 +75,7 @@ instruction! {
         opcode: 0b0000101,
         funct3: 0b011,
         itype: I,
-        operands_format: [ RegD, RegS, Imm(5, u) ],
+        format: [ RegD, RegS, Imm(5, u) ],
     }
 }
 
@@ -85,7 +85,7 @@ instruction! {
         opcode: 0b0000101,
         funct3: 0b100,
         itype: I,
-        operands_format: [ RegD, RegS, Imm(5, u) ],
+        format: [ RegD, RegS, Imm(5, u) ],
     }
 }
 
@@ -95,6 +95,6 @@ instruction! {
         opcode: 0b0000101,
         funct3: 0b101,
         itype: I,
-        operands_format: [ RegD, RegS, Imm(5, u) ],
+        format: [ RegD, RegS, Imm(5, u) ],
     }
 }

@@ -60,36 +60,24 @@ pub enum OperandType {
     RegS,
     Imm(u8, bool),
     Addr(u8),
-}
-
-pub macro op_fmt {
-    ( $( $type:tt $(( $v:literal $( , $s:tt )? ))? ),* ) => {
-        &[
-            $(
-                $crate::operand::op_fmt!(@one $type $(( $v $( , $s )? ))?)
-            ),*
-        ]
-    },
-
-    (@one _) => { None },
-
-    (@one $type:tt $(( $v:literal $( , $s:tt )? ))?) => {
-        Some(
-            $crate::operand::OperandType::$type $(( $v $( , crate::operand::op_fmt!(@sig $s) )? ))?
-        )
-    },
-
-    (@sig i) => { true },
-    (@sig u) => { false },
+    None,
 }
 
 pub macro op_types {
-    ( $( $type:ident $(( $v:literal $( , $s:tt )? ))? ),* ) => {
+    ( $( $type:tt $(( $v:literal $( , $s:tt )? ))? ),* ) => {
         &[
             $(
-                $crate::operand::OperandType::$type $(( $v $( , crate::operand::op_types!(@sig $s) )? ))?
+                $crate::operand::op_types!(@one $type $(( $v $( , $s )? ))?)
             ),*
         ]
+    },
+
+    (@one _) => {
+        $crate::operand::OperandType::None
+    },
+
+    (@one $type:tt $(( $v:literal $( , $s:tt )? ))?) => {
+        $crate::operand::OperandType::$type $(( $v $( , crate::operand::op_types!(@sig $s) )? ))?
     },
 
     (@sig i) => { true },

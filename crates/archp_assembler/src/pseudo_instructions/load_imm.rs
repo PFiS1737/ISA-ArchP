@@ -8,7 +8,7 @@ use crate::{
 pseudo_instruction! {
     pub Li {
         name: "li",
-        operand_types: [ RegD, Imm(12, i) ],
+        format: [ RegD, Imm(12, i) ],
         expander: F,
     }
 }

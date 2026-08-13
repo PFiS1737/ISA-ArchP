@@ -6,7 +6,7 @@ instruction! {
         opcode: 0b1111110,
         funct3: 0b000,
         itype: I,
-        operands_format: [ RegD, _, _ ],
+        format: [ RegD, _, _ ],
     }
 }
 
@@ -16,7 +16,7 @@ instruction! {
         opcode: 0b1111110,
         funct3: 0b001,
         itype: I,
-        operands_format: [ _, RegS, _ ],
+        format: [ _, RegS, _ ],
     }
 }
 
@@ -26,7 +26,7 @@ instruction! {
         opcode: 0b1111110,
         funct3: 0b010,
         itype: I,
-        operands_format: [ _, _, _ ],
+        format: [ _, _, _ ],
     }
 }
 
@@ -36,7 +36,7 @@ instruction! {
         opcode: 0b1111110,
         funct3: 0b011,
         itype: I,
-        operands_format: [ _, RegS, Imm(12, i) ],
+        format: [ _, RegS, Imm(12, i) ],
     }
 }
 
@@ -45,6 +45,6 @@ instruction! {
         name: "call",
         opcode: 0b1111101,
         itype: J,
-        operands_format: [ _, Addr(20) ],
+        format: [ _, Addr(20) ],
     }
 }

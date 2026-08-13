@@ -3,7 +3,7 @@ use crate::{operand::ops, pseudo_instructions::pseudo_instruction};
 pseudo_instruction! {
     pub Inc {
         name: "inc",
-        operand_types: [ RegD ],
+        format: [ RegD ],
         expander: F!("addi"),
     }
 }
@@ -11,7 +11,7 @@ pseudo_instruction! {
 pseudo_instruction! {
     pub Dec {
         name: "dec",
-        operand_types: [ RegD ],
+        format: [ RegD ],
         expander: F!("subi"),
     }
 }

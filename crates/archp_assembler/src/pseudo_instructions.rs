@@ -27,13 +27,13 @@ pub static PSEUDO_INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static Entry>> 
 
 pub struct Entry {
     name: &'static str,
-    operand_types: &'static [OperandType],
+    format: &'static [OperandType],
     expander: ExpandFn,
 }
 
 trait PseudoInstruction: Send + Sync {
     const NAME: &'static str;
-    const OPERAND_TYPES: &'static [OperandType];
+    const FORMAT: &'static [OperandType];
     const EXPANDER: ExpandFn;
 }
 
@@ -41,7 +41,7 @@ impl Entry {
     const fn of<T: PseudoInstruction>() -> Self {
         Self {
             name: T::NAME,
-            operand_types: T::OPERAND_TYPES,
+            format: T::FORMAT,
             expander: T::EXPANDER,
         }
     }
@@ -57,18 +57,18 @@ impl Entry {
     }
 
     fn assert_operand_format(&self, operands: &[Operand]) -> Result<()> {
-        if operands.len() != self.operand_types.len() {
+        if operands.len() != self.format.len() {
             bail!(
                 "Pseudo-instruction '{}' requires {} operands, got {}",
                 self.name,
-                self.operand_types.len(),
+                self.format.len(),
                 operands.len()
             );
         }
 
         // TODO: change this
         for (i, op) in operands.iter().enumerate() {
-            match self.operand_types[i] {
+            match self.format[i] {
                 OperandType::RegD | OperandType::RegS => {
                     if !matches!(op, Operand::Ident(..)) {
                         bail!(
@@ -99,6 +99,12 @@ impl Entry {
                         );
                     }
                 },
+                OperandType::None => {
+                    panic!(
+                        "Internal error: Pseudo-instruction '{}' has an operand type of None",
+                        self.name
+                    );
+                },
             };
         }
 
@@ -111,7 +117,7 @@ macro pseudo_instruction {
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
             name: $name:literal,
-            operand_types: $types:tt,
+            format: $types:tt,
             expander: $expander:expr,
         }
     ) => {
@@ -120,7 +126,7 @@ macro pseudo_instruction {
 
         impl $crate::pseudo_instructions::PseudoInstruction for $id {
             const NAME: &'static str = $name;
-            const OPERAND_TYPES: &'static [ $crate::operand::OperandType] = $crate::operand::op_types! $types;
+            const FORMAT: &'static [$crate::operand::OperandType] = $crate::operand::op_types! $types;
             const EXPANDER: $crate::pseudo_instructions::ExpandFn = $expander;
         }
 

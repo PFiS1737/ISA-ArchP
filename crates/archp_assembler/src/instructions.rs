@@ -13,6 +13,7 @@ mod upper_imm;
 use std::{collections::HashMap, sync::LazyLock};
 
 use anyhow::{Result, bail};
+use smallvec::SmallVec;
 
 use crate::{
     context::Context,
@@ -33,7 +34,7 @@ pub struct Entry {
     opcode: u32,
     funct3: u32,
     itype: InstrType,
-    operands_format: &'static [Option<OperandType>],
+    format: &'static [OperandType],
 }
 
 trait Instruction: Send + Sync {
@@ -41,7 +42,7 @@ trait Instruction: Send + Sync {
     const OPCODE: u32;
     const FUNCT3: u32;
     const ITYPE: InstrType;
-    const OPERANDS_FORMAT: &'static [Option<OperandType>];
+    const FORMAT: &'static [OperandType];
 }
 
 impl Entry {
@@ -51,7 +52,7 @@ impl Entry {
             opcode: T::OPCODE,
             funct3: T::FUNCT3,
             itype: T::ITYPE,
-            operands_format: T::OPERANDS_FORMAT,
+            format: T::FORMAT,
         }
     }
 
@@ -67,10 +68,8 @@ impl Entry {
     }
 
     pub fn apply_relocation(&self, code: &mut u32, addr: i64, base: u32) -> Result<()> {
-        for (idx, slot) in self.operands_format.iter().enumerate() {
-            if let Some(op_ty) = slot
-                && let OperandType::Addr(bits) = op_ty
-            {
+        for (idx, op_ty) in self.format.iter().enumerate() {
+            if let OperandType::Addr(bits) = op_ty {
                 let addr = encode_address_as(addr, *bits, base)?;
                 let mut ops = self.itype.decode(*code);
                 ops[idx] = addr;
@@ -87,35 +86,33 @@ impl Entry {
         ctx: &mut Context<'src>,
         pc: usize,
         operands: &[Operand<'src>],
-    ) -> Result<Vec<u32>> {
-        let expected = self.operands_format.iter().filter(|x| x.is_some()).count();
+    ) -> Result<SmallVec<[u32; 3]>> {
+        let expected = self
+            .format
+            .iter()
+            .filter(|x| !matches!(x, OperandType::None))
+            .count();
         self.assert_operand_count(operands.len(), expected)?;
 
-        let mut ret = Vec::with_capacity(self.operands_format.len());
-        let mut op_idx = 0;
+        let mut ops = operands.iter();
 
-        for slot in self.operands_format {
-            match slot {
-                Some(op_ty) => {
-                    let op = &operands[op_idx];
-                    op_idx += 1;
+        let mut ret = SmallVec::new();
 
-                    let val = match *op_ty {
-                        OperandType::RegD | OperandType::RegS => encode_register(ctx, op)?,
-                        OperandType::Imm(bits, signed) => encode_immediate_as(op, bits, signed)?,
-                        OperandType::Addr(..) => {
-                            // TODO: can we put the addend into the instruction code?
-                            ctx.add_relocation(self, pc, op)?;
-                            0
-                        },
-                    };
-
-                    ret.push(val);
+        for op_ty in self.format {
+            let val = match *op_ty {
+                OperandType::RegD | OperandType::RegS => encode_register(ctx, ops.next().unwrap())?,
+                OperandType::Imm(bits, signed) => {
+                    encode_immediate_as(ops.next().unwrap(), bits, signed)?
                 },
-                None => {
-                    ret.push(0);
+                OperandType::Addr(..) => {
+                    // TODO: can we put the addend into the instruction code?
+                    ctx.add_relocation(self, pc, ops.next().unwrap())?;
+                    0
                 },
-            }
+                OperandType::None => 0,
+            };
+
+            ret.push(val);
         }
 
         Ok(ret)
@@ -143,7 +140,7 @@ macro instruction {
             opcode: $opcode:literal,
             funct3: $funct3:literal,
             itype: $itype:ident,
-            operands_format: $format:expr,
+            format: $format:expr,
         }
     ) => {
         $( #[doc = $doc] )*
@@ -154,7 +151,7 @@ macro instruction {
             const OPCODE: u32 = $opcode;
             const FUNCT3: u32 = $funct3;
             const ITYPE: $crate::instructions::InstrType = $crate::instructions::InstrType::$itype;
-            const OPERANDS_FORMAT: &'static [Option<$crate::operand::OperandType>] = $format;
+            const FORMAT: &'static [$crate::operand::OperandType] = $format;
         }
 
         inventory::submit! {
@@ -178,7 +175,7 @@ macro instruction {
                 opcode: $opcode,
                 funct3: $funct3,
                 itype: $itype,
-                operands_format: instruction!(@fmt $itype),
+                format: instruction!(@fmt $itype),
             }
         }
     },
@@ -198,7 +195,7 @@ macro instruction {
                 opcode: $opcode,
                 funct3: 0,
                 itype: $itype,
-                operands_format: instruction!(@fmt $itype),
+                format: instruction!(@fmt $itype),
             }
         }
     },
@@ -210,7 +207,7 @@ macro instruction {
             opcode: $opcode:literal,
             funct3: $funct3:literal,
             itype: $itype:ident,
-            operands_format: $format:tt,
+            format: $format:tt,
         }
     ) => {
         instruction! {@impl
@@ -220,7 +217,7 @@ macro instruction {
                 opcode: $opcode,
                 funct3: $funct3,
                 itype: $itype,
-                operands_format: $crate::operand::op_fmt! $format,
+                format: $crate::operand::op_types! $format,
             }
         }
     },
@@ -231,7 +228,7 @@ macro instruction {
             name: $name:literal,
             opcode: $opcode:literal,
             itype: $itype:ident,
-            operands_format: $format:tt,
+            format: $format:tt,
         }
     ) => {
         instruction! {@impl
@@ -241,17 +238,17 @@ macro instruction {
                 opcode: $opcode,
                 funct3: 0,
                 itype: $itype,
-                operands_format: $crate::operand::op_fmt! $format,
+                format: $crate::operand::op_types! $format,
             }
         }
     },
 
-    (@fmt R) => { $crate::operand::op_fmt![RegD, RegS, RegS] },
-    (@fmt I) => { $crate::operand::op_fmt![RegD, RegS, Imm(12, i)] },
-    (@fmt B) => { $crate::operand::op_fmt![RegS, RegS, Addr(12)] },
-    (@fmt S) => { $crate::operand::op_fmt![RegS, RegS, Imm(12, i)] },
-    (@fmt U) => { $crate::operand::op_fmt![RegD, Imm(20, u)] },
-    (@fmt J) => { $crate::operand::op_fmt![RegD, Addr(20)] },
+    (@fmt R) => { $crate::operand::op_types![RegD, RegS, RegS] },
+    (@fmt I) => { $crate::operand::op_types![RegD, RegS, Imm(12, i)] },
+    (@fmt B) => { $crate::operand::op_types![RegS, RegS, Addr(12)] },
+    (@fmt S) => { $crate::operand::op_types![RegS, RegS, Imm(12, i)] },
+    (@fmt U) => { $crate::operand::op_types![RegD, Imm(20, u)] },
+    (@fmt J) => { $crate::operand::op_types![RegD, Addr(20)] },
 }
 
 #[cfg(test)]

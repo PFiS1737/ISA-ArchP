@@ -3,7 +3,7 @@ use crate::{operand::ops, pseudo_instructions::pseudo_instruction};
 pseudo_instruction! {
     pub Sgt {
         name: "sgt",
-        operand_types: [ RegD, RegS, RegS ],
+        format: [ RegD, RegS, RegS ],
         expander: F1!("slt"),
     }
 }
@@ -11,7 +11,7 @@ pseudo_instruction! {
 pseudo_instruction! {
     pub Sle {
         name: "sle",
-        operand_types: [ RegD, RegS, RegS ],
+        format: [ RegD, RegS, RegS ],
         expander: F1!("sge"),
     }
 }
@@ -19,7 +19,7 @@ pseudo_instruction! {
 pseudo_instruction! {
     pub Sgtu {
         name: "sgtu",
-        operand_types: [ RegD, RegS, RegS ],
+        format: [ RegD, RegS, RegS ],
         expander: F1!("sltu"),
     }
 }
@@ -27,7 +27,7 @@ pseudo_instruction! {
 pseudo_instruction! {
     pub Sleu {
         name: "sleu",
-        operand_types: [ RegD, RegS, RegS ],
+        format: [ RegD, RegS, RegS ],
         expander: F1!("sgeu"),
     }
 }
@@ -35,7 +35,7 @@ pseudo_instruction! {
 pseudo_instruction! {
     pub Seqz {
         name: "seqz",
-        operand_types: [ RegD, RegS ],
+        format: [ RegD, RegS ],
         expander: F2!("seq"),
     }
 }
@@ -43,7 +43,7 @@ pseudo_instruction! {
 pseudo_instruction! {
     pub Snez {
         name: "snez",
-        operand_types: [ RegD, RegS ],
+        format: [ RegD, RegS ],
         expander: F2!("sne"),
     }
 }
@@ -51,7 +51,7 @@ pseudo_instruction! {
 pseudo_instruction! {
     pub Sltz {
         name: "sltz",
-        operand_types: [ RegD, RegS ],
+        format: [ RegD, RegS ],
         expander: F2!("slt"),
     }
 }
@@ -59,7 +59,7 @@ pseudo_instruction! {
 pseudo_instruction! {
     pub Sgez {
         name: "sgez",
-        operand_types: [ RegD, RegS ],
+        format: [ RegD, RegS ],
         expander: F2!("sge"),
     }
 }
@@ -67,7 +67,7 @@ pseudo_instruction! {
 pseudo_instruction! {
     pub Slez {
         name: "slez",
-        operand_types: [ RegD, RegS ],
+        format: [ RegD, RegS ],
         expander: F3!("sge"),
     }
 }
@@ -75,7 +75,7 @@ pseudo_instruction! {
 pseudo_instruction! {
     pub Sgtz {
         name: "sgtz",
-        operand_types: [ RegD, RegS ],
+        format: [ RegD, RegS ],
         expander: F3!("slt"),
     }
 }
