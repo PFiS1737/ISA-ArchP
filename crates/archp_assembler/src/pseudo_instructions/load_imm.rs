@@ -36,26 +36,24 @@ const F: ExpandFn = |_, ops| {
 mod tests {
     use insta::assert_snapshot;
 
-    use crate::testkit::*;
+    use super::{super::test_ps_instr, *};
 
     #[test]
     fn load_imm32() {
-        let li = ps_instr("li");
+        assert_snapshot!(test_ps_instr!(Li "r1"), @"Error: Pseudo-instruction 'li' requires 2 operands, got 1");
+        assert_snapshot!(test_ps_instr!(Li "r1", "r2"), @"Error: Pseudo-instruction 'li' requires operand 2 to be an immediate, got r2");
+        assert_snapshot!(test_ps_instr!(Li 123, "r2"), @"Error: Pseudo-instruction 'li' requires operand 1 to be a register, got 123");
 
-        assert_snapshot!(li(&["r1"]), @"Error: Pseudo-instruction 'li' requires 2 operands, got 1");
-        assert_snapshot!(li(&["r1", "r2"]), @"Error: Pseudo-instruction 'li' requires operand 2 to be an immediate, got r2");
-        assert_snapshot!(li(&["123", "456"]), @"Error: Pseudo-instruction 'li' requires operand 1 to be a register, got 123");
+        assert_snapshot!(test_ps_instr!(Li "r1", 0x123), @"addi r1 r0 291");
+        assert_snapshot!(test_ps_instr!(Li "r1", 0x1234), @"lui r1 1; addi r1 r1 564");
+        assert_snapshot!(test_ps_instr!(Li "r1", 0x12345678), @"lui r1 0x12345; addi r1 r1 0x678");
+        assert_snapshot!(test_ps_instr!(Li "r1", 0x10000000), @"lui r1 0x10000");
+        assert_snapshot!(test_ps_instr!(Li "r1", 0xFFFFFFF), @"lui r1 0x10000; addi r1 r1 0xFFFFFFFF");
+        assert_snapshot!(test_ps_instr!(Li "r1", 0xFFFFFFFF_i64), @"addi r1 r0 0xFFFFFFFF");
 
-        assert_snapshot!(li(&["r1", "0x123"]), @"addi r1 r0 291");
-        assert_snapshot!(li(&["r1", "0x1234"]), @"lui r1 1; addi r1 r1 564");
-        assert_snapshot!(li(&["r1", "0x12345678"]), @"lui r1 0x12345; addi r1 r1 0x678");
-        assert_snapshot!(li(&["r1", "0x10000000"]), @"lui r1 0x10000");
-        assert_snapshot!(li(&["r1", "0xFFFFFFF"]), @"lui r1 0x10000; addi r1 r1 0xFFFFFFFF");
-        assert_snapshot!(li(&["r1", "0xFFFFFFFF"]), @"addi r1 r0 0xFFFFFFFF");
-
-        assert_snapshot!(li(&["r1", "123"]), @"addi r1 r0 123");
-        assert_snapshot!(li(&["r1", "3000"]), @"lui r1 1; addi r1 r1 0xFFFFFBB8");
-        assert_snapshot!(li(&["r1", "-123"]), @"addi r1 r0 -123");
-        assert_snapshot!(li(&["r1", "-3000"]), @"lui r1 0xFFFFF; addi r1 r1 0x448");
+        assert_snapshot!(test_ps_instr!(Li "r1", 123), @"addi r1 r0 123");
+        assert_snapshot!(test_ps_instr!(Li "r1", 3000), @"lui r1 1; addi r1 r1 0xFFFFFBB8");
+        assert_snapshot!(test_ps_instr!(Li "r1", -123), @"addi r1 r0 -123");
+        assert_snapshot!(test_ps_instr!(Li "r1", -3000), @"lui r1 0xFFFFF; addi r1 r1 0x448");
     }
 }

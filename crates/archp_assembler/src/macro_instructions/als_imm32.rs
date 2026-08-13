@@ -43,29 +43,27 @@ const F: ExpandFn = |_, name, ops| {
 mod tests {
     use insta::assert_snapshot;
 
-    use crate::testkit::*;
+    use super::super::test_mc_instr;
 
     #[test]
     fn als_imm32() {
-        let addi = mc_instr("addi");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2"), @"Error: Macro-instruction 'addi' requires 3 operands, got 2");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2", 123, "r4"), @"Error: Macro-instruction 'addi' requires 3 operands, got 4");
+        assert_snapshot!(test_mc_instr!("addi" "r0", "r2", 123), @"");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2", "r3"), @"");
+        assert_snapshot!(test_mc_instr!("addi" 123, "r1", 456), @"");
 
-        assert_snapshot!(addi(&["r1", "r2"]), @"Error: Macro-instruction 'addi' requires 3 operands, got 2");
-        assert_snapshot!(addi(&["r1", "r2", "123", "r4"]), @"Error: Macro-instruction 'addi' requires 3 operands, got 4");
-        assert_snapshot!(addi(&["r0", "r2", "123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "r3"]), @"");
-        assert_snapshot!(addi(&["123", "r1", "456"]), @"");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2", 0x123), @"");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2", 0x1234), @"li r31 0x1234; add r1 r2 r31");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2", 0x12345678), @"li r31 0x12345678; add r1 r2 r31");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2", 0xFFFFFFFF_i64), @"");
 
-        assert_snapshot!(addi(&["r1", "r2", "0x123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "0x1234"]), @"li r31 0x1234; add r1 r2 r31");
-        assert_snapshot!(addi(&["r1", "r2", "0x12345678"]), @"li r31 0x12345678; add r1 r2 r31");
-        assert_snapshot!(addi(&["r1", "r2", "0xFFFFFFFF"]), @"");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2", 123), @"");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2", 3000), @"li r31 0xBB8; add r1 r2 r31");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2", -123), @"");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2", -3000), @"li r31 -3000; add r1 r2 r31");
 
-        assert_snapshot!(addi(&["r1", "r2", "123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "3000"]), @"li r31 0xBB8; add r1 r2 r31");
-        assert_snapshot!(addi(&["r1", "r2", "-123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "-3000"]), @"li r31 -3000; add r1 r2 r31");
-
-        assert_snapshot!(addi(&["r1", "r2", "0x123"]), @"");
-        assert_snapshot!(addi(&["r1", "r2", "0x1234"]), @"li r31 0x1234; add r1 r2 r31");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2", 0x123), @"");
+        assert_snapshot!(test_mc_instr!("addi" "r1", "r2", 0x1234), @"li r31 0x1234; add r1 r2 r31");
     }
 }

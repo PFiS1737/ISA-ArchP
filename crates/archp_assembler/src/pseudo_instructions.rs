@@ -135,3 +135,25 @@ macro pseudo_instruction {
         }
     },
 }
+
+#[cfg(test)]
+macro ps_instr( @($ctx:expr) $name:ident $($ops:expr),* $(;)? ) {{
+    let name = <$name as $crate::pseudo_instructions::PseudoInstruction>::NAME;
+    let ps_instr = $crate::pseudo_instructions::PSEUDO_INSTRUCTIONS.get(name).unwrap();
+    ps_instr.expand($ctx, &$crate::operand::ops![$($ops),*])
+}}
+
+#[cfg(test)]
+macro test_ps_instr( $name:ident $($ops:expr),* $(;)? ) {{
+    use $crate::pseudo_instructions::ps_instr;
+    use $crate::utils::fmt::fmt_line;
+    use $crate::context::Context;
+    match ps_instr!{ @(&Context::test()) $name $($ops),* } {
+        Ok(expanded) => expanded
+            .into_iter()
+            .map(|(name, ops)| fmt_line(name, &ops))
+            .collect::<Vec<_>>()
+            .join("; "),
+        Err(e) => format!("Error: {}", e),
+    }
+}}

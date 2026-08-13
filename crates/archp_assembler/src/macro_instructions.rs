@@ -163,3 +163,27 @@ macro macro_instruction {
         }
     },
 }
+
+#[cfg(test)]
+macro mc_instr( @($ctx:expr) $name:literal $($ops:expr),* $(;)? ) {{
+    let mc_instr = $crate::macro_instructions::MACRO_INSTRUCTIONS.get($name).unwrap();
+    mc_instr.expand($ctx, $name, &$crate::operand::ops![$($ops),*])
+}}
+
+#[cfg(test)]
+macro test_mc_instr( $name:literal $($ops:expr),* $(;)? ) {{
+    use $crate::macro_instructions::mc_instr;
+    use $crate::utils::fmt::fmt_line;
+    use $crate::context::Context;
+    match mc_instr!{ @(&Context::test()) $name $($ops),* } {
+        Ok(expanded) => match expanded {
+            Some(expanded) => expanded
+                .into_iter()
+                .map(|(name, ops)| fmt_line(name, &ops))
+                .collect::<Vec<_>>()
+                .join("; "),
+            None => "".to_string(),
+        },
+        Err(e) => format!("Error: {}", e),
+    }
+}}
