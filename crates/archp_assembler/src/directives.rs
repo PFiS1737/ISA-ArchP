@@ -3,7 +3,7 @@ mod equate;
 
 use std::{collections::HashMap, sync::LazyLock};
 
-use anyhow::{Result, bail};
+use anyhow::Result;
 
 use crate::{context::Context, operand::DirectiveOperand};
 
@@ -16,13 +16,11 @@ pub static DIRECTIVES: LazyLock<HashMap<&'static str, &'static Entry>> =
 
 pub struct Entry {
     name: &'static str,
-    operand_count: Option<usize>,
     handler: HandlerFn,
 }
 
 trait Directive: Send + Sync {
     const NAME: &'static str;
-    const OPERAND_COUNT: Option<usize>;
     const HANDLER: HandlerFn;
 }
 
@@ -30,7 +28,6 @@ impl Entry {
     const fn of<T: Directive>() -> Self {
         Self {
             name: T::NAME,
-            operand_count: T::OPERAND_COUNT,
             handler: T::HANDLER,
         }
     }
@@ -40,24 +37,7 @@ impl Entry {
         ctx: &mut Context<'a>,
         operands: &[DirectiveOperand<'a>],
     ) -> Result<()> {
-        self.assert_operand_count(operands)?;
-
         (self.handler)(ctx, operands)
-    }
-
-    fn assert_operand_count(&self, operands: &[DirectiveOperand]) -> Result<()> {
-        if let Some(count) = self.operand_count
-            && operands.len() != count
-        {
-            bail!(
-                "Directive '{}' requires {} operands, got {}",
-                self.name,
-                count,
-                operands.len()
-            );
-        }
-
-        Ok(())
     }
 }
 
@@ -66,7 +46,6 @@ macro directive {
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
             name: $name:literal,
-            operand_count: $count:ident $( ($value:literal) )? ,
             handler: $handler:expr,
         }
     ) => {
@@ -75,7 +54,6 @@ macro directive {
 
         impl $crate::directives::Directive for $id {
             const NAME: &'static str = $name;
-            const OPERAND_COUNT: Option<usize> = $count $( ( $value ) )?;
             const HANDLER: $crate::directives::HandlerFn = $handler;
         }
 
@@ -88,34 +66,20 @@ macro directive {
         $( #[doc = $doc:literal] )*
         $vis:vis $id:ident {
             name: $name:literal,
-            operand_count: $count:literal,
-            handler: $handler:expr,
+            matches: $matches:tt,
+            handler: |$ctx:ident| $handler:expr,
         }
     ) => {
         directive! {@impl
             $( #[doc = $doc] )*
             $vis $id {
                 name: $name,
-                operand_count: Some($count),
-                handler: $handler,
+                handler: |$ctx, ops| {
+                    let $matches = ops else { anyhow::bail!("operands mismatch"); };
+                    $handler;
+                    Ok(())
+                },
             }
         }
     },
-
-(
-        $( #[doc = $doc:literal] )*
-        $vis:vis $id:ident {
-            name: $name:literal,
-            handler: $handler:expr,
-        }
-    ) => {
-        directive! {@impl
-            $( #[doc = $doc] )*
-            $vis $id {
-                name: $name,
-                operand_count: None,
-                handler: $handler,
-            }
-        }
-    }
 }
