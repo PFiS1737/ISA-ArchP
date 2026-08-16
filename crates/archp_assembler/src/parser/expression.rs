@@ -9,7 +9,7 @@ use nom::{
 
 use crate::{
     expression::{BinaryOp, Expr, UnaryOp},
-    parser::{Result, ident, parens, ws},
+    parser::{Result, identifier::ident, parens, ws},
 };
 
 fn binary(input: &str) -> Result<'_, i64> {

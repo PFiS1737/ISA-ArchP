@@ -2,7 +2,7 @@ use anyhow::{anyhow, bail};
 use nom::{
     Parser,
     branch::alt,
-    character::complete::{char, space1},
+    character::complete::{char, space0, space1},
     combinator::{map, opt},
     multi::separated_list0,
     sequence::{preceded, terminated},
@@ -13,11 +13,11 @@ use crate::{
     assembler::Line,
     context::Context,
     operand::{DirectiveOperand, Operand},
-    parser::{Result, expression::expr, ident, operand::operand, string::string, ws},
+    parser::{Result, expression::expr, identifier::ident, operand::operand, string::string, ws},
 };
 
 fn label(input: &str) -> Result<'_, &str> {
-    terminated(ident, ws(char(':'))).parse(input)
+    terminated(alt((string, ident)), (char(':'), space0)).parse(input)
 }
 
 fn operands<'ctx, 'src: 'ctx>(
@@ -272,13 +272,13 @@ mod tests {
     fn expect_more_operand() {
         assert_debug_snapshot!(parse_source("addi x1,"), @r#"
         Err(
-            "Error parsing line 1: 'addi x1,': Parsing requires more data",
+            "Error parsing line 1: 'addi x1,': Parsing Error: Nom(Error { input: \"\", code: Char })",
         )
         "#
         );
         assert_debug_snapshot!(parse_source("addi x1, 123,"), @r#"
         Err(
-            "Error parsing line 1: 'addi x1, 123,': Parsing requires more data",
+            "Error parsing line 1: 'addi x1, 123,': Parsing Error: Nom(Error { input: \"\", code: Char })",
         )
         "#
         );
@@ -547,6 +547,37 @@ mod tests {
         ]
         "#
         );
+    }
+
+    #[test]
+    fn string_label() {
+        assert_debug_snapshot!(
+            parse_ok(
+                r#"
+"fib(int n)":
+  j "fib(int n)"
+                "#
+        ),
+        @r#"
+        [
+            Label(
+                "fib(int n)",
+            ),
+            Instruction {
+                name: "j",
+                operands: [
+                    Ident(
+                        "fib(int n)",
+                    ),
+                ],
+                line: (
+                    3,
+                    "j \"fib(int n)\"",
+                ),
+            },
+        ]
+        "#
+        )
     }
 
     #[test]

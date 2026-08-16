@@ -4,7 +4,7 @@ use smallvec::SmallVec;
 use crate::{
     context::Context,
     operand::Operand,
-    parser::{Result, expression::expr, ident, parens},
+    parser::{Result, expression::expr, identifier::ident, parens, string::string},
 };
 
 pub fn operand<'ctx, 'src: 'ctx>(
@@ -12,18 +12,24 @@ pub fn operand<'ctx, 'src: 'ctx>(
     input: &'src str,
     out: &mut SmallVec<[Operand<'src>; 3]>,
 ) -> Result<'src, ()> {
-    // case 1: (ident)
+    // case 1: "string"
+    if let Ok((input, s)) = string(input) {
+        out.push(Operand::Ident(s));
+        return Ok((input, ()));
+    }
+
+    // case 2: (ident)
     if let Ok((input, ident)) = parens(ident).parse(input) {
         out.push(Operand::Ident(ident));
         out.push(Operand::Num(0));
         return Ok((input, ()));
     }
 
-    // case 2: expr
+    // case 3: expr
     let (input, expr) = expr(input)?;
     out.push(expr.eval_to_operand_with(&ctx.equates)?);
 
-    // case 3: expr(ident)
+    // case 4: expr(ident)
     let Ok((input, ident)) = parens(ident).parse(input) else {
         return Ok((input, ()));
     };
