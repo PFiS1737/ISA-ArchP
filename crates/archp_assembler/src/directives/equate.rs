@@ -7,8 +7,10 @@ use crate::{
 };
 
 directive! {
-    pub Equ {
-        name: ".equ",
+    pub [
+        Equ ".equ";
+        Set ".set";
+    ] {
         matches: [Expr(Ident(name)), Expr(expr)],
         handler: |ctx| {
             let value = match expr.eval_to_operand_with(&ctx.equates)? {
