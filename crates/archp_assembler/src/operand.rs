@@ -45,6 +45,7 @@ impl Display for Operand<'_> {
 
 #[derive(Debug)]
 pub enum DirectiveOperand<'src> {
+    Empty,
     Expr(Expr<'src>),
     String(&'src str),
 }
@@ -52,6 +53,7 @@ pub enum DirectiveOperand<'src> {
 impl Display for DirectiveOperand<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            DirectiveOperand::Empty => write!(f, ""),
             DirectiveOperand::Expr(expr) => write!(f, "{}", expr),
             DirectiveOperand::String(s) => write!(f, "\"{}\"", s),
         }

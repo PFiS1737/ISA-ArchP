@@ -55,6 +55,7 @@ fn directive_operands<'src>(input: &'src str) -> Result<'src, Vec<DirectiveOpera
             alt((
                 map(string, DirectiveOperand::String),
                 map(expr, DirectiveOperand::Expr),
+                map(space0, |_| DirectiveOperand::Empty),
             )),
         ),
     ))
@@ -578,6 +579,35 @@ mod tests {
         ]
         "#
         )
+    }
+
+    #[test]
+    fn omit_directive_operands() {
+        assert_debug_snapshot!(parse_ok(".align 2 , , max"), @r#"
+        [
+            Directive {
+                name: ".align",
+                operands: [
+                    Expr(
+                        Num(
+                            2,
+                        ),
+                    ),
+                    Empty,
+                    Expr(
+                        Ident(
+                            "max",
+                        ),
+                    ),
+                ],
+                line: (
+                    1,
+                    ".align 2 , , max",
+                ),
+            },
+        ]
+        "#
+        );
     }
 
     #[test]
