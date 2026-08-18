@@ -15,6 +15,8 @@ pub struct Context<'src> {
     /// Maps processed instructions to the (original line number, original line content)
     pub source_map: Vec<(usize, &'src str)>,
 
+    word_buffer: [u8; 4],
+    word_buffer_len: usize,
     prev_code_idx: usize,
 
     pub labels: HashMap<&'src str, usize>,
@@ -37,8 +39,33 @@ pub struct Relocation<'a> {
 
 impl<'src> Context<'src> {
     pub fn add_code(&mut self, code: u32, instr: Option<Instr<'src>>) {
+        if self.word_buffer_len > 0 {
+            self.emit_buffered_word();
+        }
+
         self.codes.push(code);
         self.instrs.push(instr);
+    }
+
+    pub fn add_byte(&mut self, byte: u8) {
+        self.word_buffer[self.word_buffer_len] = byte;
+        self.word_buffer_len += 1;
+        if self.word_buffer_len == 4 {
+            self.emit_buffered_word();
+        }
+    }
+
+    pub fn emit_buffered_word(&mut self) {
+        if self.word_buffer_len == 0 {
+            return;
+        }
+
+        let word = u32::from_le_bytes(self.word_buffer);
+        self.word_buffer = [0; 4];
+        // INFO: change this before calling add_code to avoid infinite recursion
+        self.word_buffer_len = 0;
+
+        self.add_code(word, None);
     }
 
     pub fn resolve_source_map(&mut self, line: (usize, &'src str)) {

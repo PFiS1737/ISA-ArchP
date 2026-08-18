@@ -1,6 +1,7 @@
 mod alias;
 mod align;
 mod equate;
+mod string;
 
 use std::{collections::HashMap, sync::LazyLock};
 

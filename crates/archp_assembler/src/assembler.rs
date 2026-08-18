@@ -48,6 +48,9 @@ impl Assembler {
         let mut pass2 = Pass2::new(&mut context);
         pass2.run()?;
 
+        // INFO: Emit any remaining bytes in the buffer
+        context.emit_buffered_word();
+
         Ok(context)
     }
 }

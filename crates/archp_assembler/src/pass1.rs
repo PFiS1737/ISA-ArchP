@@ -50,6 +50,9 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                         )
                     })?
                 }
+                // FIXME: 如果上述操作导致 ctx.word_buffer 中有剩余，
+                //        则对应部分的 souce_map 会被记录为下一条指令的行，
+                //        而不是当前行。
                 self.context.resolve_source_map(line);
             },
             Line::Instruction {
