@@ -50,6 +50,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                         )
                     })?
                 }
+                self.context.resolve_source_map(line);
             },
             Line::Instruction {
                 name,

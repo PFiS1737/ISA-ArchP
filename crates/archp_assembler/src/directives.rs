@@ -1,4 +1,5 @@
 mod alias;
+mod align;
 mod equate;
 
 use std::{collections::HashMap, sync::LazyLock};
@@ -84,6 +85,22 @@ macro directive {
     },
 
     (
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident {
+            name: $name:literal,
+            handler: $handler:expr,
+        }
+    ) => {
+        directive! {@impl
+            $( #[doc = $doc] )*
+            $vis $id {
+                name: $name,
+                handler: $handler,
+            }
+        }
+    },
+
+    (
         $vis:vis [
             $(
                 $( #[doc = $doc:literal] )*
@@ -101,6 +118,27 @@ macro directive {
                     name: $name,
                     matches: $matches,
                     handler: |$ctx| $handler,
+                }
+            }
+        )+
+    },
+
+    (
+        $vis:vis [
+            $(
+                $( #[doc = $doc:literal] )*
+                $id:ident $name:literal
+            );+ $(;)?
+        ] {
+            handler: $handler:expr,
+        }
+    ) => {
+        $(
+            directive! {
+                $( #[doc = $doc] )*
+                $vis $id {
+                    name: $name,
+                    handler: $handler,
                 }
             }
         )+
