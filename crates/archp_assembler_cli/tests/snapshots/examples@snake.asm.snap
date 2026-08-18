@@ -5,188 +5,188 @@ input_file: crates/archp_assembler/examples/snake.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x14000162 # jal r0 main                                 [j main]
-0x01140000 # addi x r0 0                                 [li x, 0]                                               <label: init_screen>
-0x01160000 # addi y r0 0                                 [li y, 0]
-0x01180000 # addi color r0 0                             [li color, COLOR_BACK]
-0x16230000 # lui r17 0x10000                             [ecall 0x10000000]                                      <label: draw_back>
-0x40000000 # ecall                                       [ecall 0x10000000]
-0x0114A001 # addi x x 1                                  [inc x]
-0x013E0040 # addi r31 r0 64                              [blt x, SCREEN_WIDTH, draw_back]
-0x12BEAF1F # blt x r31 draw_back                         [blt x, SCREEN_WIDTH, draw_back]
-0x0116B001 # addi y y 1                                  [inc y]
-0x01140000 # addi x r0 0                                 [li x, 0]
-0x013E0024 # addi r31 r0 36                              [blt y, SCREEN_HEIGHT, draw_back]
-0x12BEBE1F # blt y r31 draw_back                         [blt y, SCREEN_HEIGHT, draw_back]
+0x14000162 # jal r0 main
+0x01140000 # addi x r0 0                                 <label: init_screen>
+0x01160000 # addi y r0 0
+0x01180000 # addi color r0 0
+0x16230000 # lui r17 0x10000                             <label: draw_back>
+0x40000000 # ecall
+0x0114A001 # addi x x 1
+0x013E0040 # addi r31 r0 64
+0x12BEAF1F # blt x r31 draw_back
+0x0116B001 # addi y y 1
+0x01140000 # addi x r0 0
+0x013E0024 # addi r31 r0 36
+0x12BEBE1F # blt y r31 draw_back
 0xFC800000 # ret
-0x16180FF0 # lui color 0xFF0                             [li color, COLOR_HEAD]                                  <label: init_snake>
-0x01020005 # addi head_x r0 5                            [li head_x, INIT_X]
-0x01040012 # addi head_y r0 18                           [li head_y, INIT_Y]
-0x01141000 # addi x head_x 0                             [mv x, head_x]
-0x01162000 # addi y head_y 0                             [mv y, head_y]
-0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
-0x40000000 # ecall                                       [ecall 0x10000000]
-0x16181000 # lui color 0x1000                            [li color, COLOR_BODY]
-0x0118CFFF # addi color color 0xFFFFFFFF                 [li color, COLOR_BODY]
-0x011A0003 # addi i r0 3                                 [li i, 3]
-0x0054100D # sub x head_x i                              [sub x, head_x, i]                                      <label: init_body_loop>
-0x01162000 # addi y head_y 0                             [mv y, head_y]
+0x16180FF0 # lui color 0xFF0                             <label: init_snake>
+0x01020005 # addi head_x r0 5
+0x01040012 # addi head_y r0 18
+0x01141000 # addi x head_x 0
+0x01162000 # addi y head_y 0
+0x16230000 # lui r17 0x10000
+0x40000000 # ecall
+0x16181000 # lui color 0x1000
+0x0118CFFF # addi color color 0xFFFFFFFF
+0x011A0003 # addi i r0 3
+0x0054100D # sub x head_x i                              <label: init_body_loop>
+0x01162000 # addi y head_y 0
 0xFA0000A2 # call body_push
-0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
-0x40000000 # ecall                                       [ecall 0x10000000]
-0x015AD001 # subi i i 1                                  [dec i]
-0x013E0001 # addi r31 r0 1                               [bge i, 1, init_body_loop]
-0x12FEDE5F # bge i r31 init_body_loop                    [bge i, 1, init_body_loop]
+0x16230000 # lui r17 0x10000
+0x40000000 # ecall
+0x015AD001 # subi i i 1
+0x013E0001 # addi r31 r0 1
+0x12FEDE5F # bge i r31 init_body_loop
 0xFC800000 # ret
-0x013E0067 # addi r31 r0 103                             [beq key_code, KEY_UP, move_snake_up]                   <label: move_snake>
-0x1200921F # beq key_code r31 move_snake_up              [beq key_code, KEY_UP, move_snake_up]
-0x013E006C # addi r31 r0 108                             [beq key_code, KEY_DOWN, move_snake_down]
-0x1200925F # beq key_code r31 move_snake_down            [beq key_code, KEY_DOWN, move_snake_down]
-0x013E0069 # addi r31 r0 105                             [beq key_code, KEY_LEFT, move_snake_left]
-0x1200929F # beq key_code r31 move_snake_left            [beq key_code, KEY_LEFT, move_snake_left]
-0x013E006A # addi r31 r0 106                             [beq key_code, KEY_RIGHT, move_snake_right]
-0x120092DF # beq key_code r31 move_snake_right           [beq key_code, KEY_RIGHT, move_snake_right]
+0x013E0067 # addi r31 r0 103                             <label: move_snake>
+0x1200921F # beq key_code r31 move_snake_up
+0x013E006C # addi r31 r0 108
+0x1200925F # beq key_code r31 move_snake_down
+0x013E0069 # addi r31 r0 105
+0x1200929F # beq key_code r31 move_snake_left
+0x013E006A # addi r31 r0 106
+0x120092DF # beq key_code r31 move_snake_right
 0xFC800000 # ret
-0x010E1000 # addi nx head_x 0                            [mv nx, head_x]                                         <label: move_snake_up>
-0x01502001 # subi ny head_y 1                            [sub ny, head_y, 1]
-0x14000014 # jal r0 move_snake_common                    [j move_snake_common]
-0x010E1000 # addi nx head_x 0                            [mv nx, head_x]                                         <label: move_snake_down>
-0x01102001 # addi ny head_y 1                            [add ny, head_y, 1]
-0x1400000E # jal r0 move_snake_common                    [j move_snake_common]
-0x014E1001 # subi nx head_x 1                            [sub nx, head_x, 1]                                     <label: move_snake_left>
-0x01102000 # addi ny head_y 0                            [mv ny, head_y]
-0x14000008 # jal r0 move_snake_common                    [j move_snake_common]
-0x010E1001 # addi nx head_x 1                            [add nx, head_x, 1]                                     <label: move_snake_right>
-0x01102000 # addi ny head_y 0                            [mv ny, head_y]
-0x14000002 # jal r0 move_snake_common                    [j move_snake_common]
-0x01141000 # addi x head_x 0                             [mv x, head_x]                                          <label: move_snake_common>
-0x01162000 # addi y head_y 0                             [mv y, head_y]
+0x010E1000 # addi nx head_x 0                            <label: move_snake_up>
+0x01502001 # subi ny head_y 1
+0x14000014 # jal r0 move_snake_common
+0x010E1000 # addi nx head_x 0                            <label: move_snake_down>
+0x01102001 # addi ny head_y 1
+0x1400000E # jal r0 move_snake_common
+0x014E1001 # subi nx head_x 1                            <label: move_snake_left>
+0x01102000 # addi ny head_y 0
+0x14000008 # jal r0 move_snake_common
+0x010E1001 # addi nx head_x 1                            <label: move_snake_right>
+0x01102000 # addi ny head_y 0
+0x14000002 # jal r0 move_snake_common
+0x01141000 # addi x head_x 0                             <label: move_snake_common>
+0x01162000 # addi y head_y 0
 0xFA000066 # call body_push
-0x16181000 # lui color 0x1000                            [li color, COLOR_BODY]
-0x0118CFFF # addi color color 0xFFFFFFFF                 [li color, COLOR_BODY]
-0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
-0x40000000 # ecall                                       [ecall 0x10000000]
-0x12C07080 # bge nx r0 move_snake_common_x_ge_0          [bge nx, 0, move_snake_common_x_ge_0]
-0x010E003F # addi nx r0 63                               [li nx, MAX_X]
-0x013E0040 # addi r31 r0 64                              [blt nx, SCREEN_WIDTH, move_snake_common_x_lt_width]    <label: move_snake_common_x_ge_0>
-0x1280709F # blt nx r31 move_snake_common_x_lt_width     [blt nx, SCREEN_WIDTH, move_snake_common_x_lt_width]
-0x010E0000 # addi nx r0 0                                [li nx, 0]
-0x12C08080 # bge ny r0 move_snake_common_y_ge_0          [bge ny, 0, move_snake_common_y_ge_0]                   <label: move_snake_common_x_lt_width>
-0x01100023 # addi ny r0 35                               [li ny, MAX_Y]
-0x013E0024 # addi r31 r0 36                              [blt ny, SCREEN_HEIGHT, move_snake_common_y_lt_height]  <label: move_snake_common_y_ge_0>
-0x1280809F # blt ny r31 move_snake_common_y_lt_height    [blt ny, SCREEN_HEIGHT, move_snake_common_y_lt_height]
-0x01100000 # addi ny r0 0                                [li ny, 0]
-0x01027000 # addi head_x nx 0                            [mv head_x, nx]                                         <label: move_snake_common_y_lt_height>
-0x01048000 # addi head_y ny 0                            [mv head_y, ny]
-0x16180FF0 # lui color 0xFF0                             [li color, COLOR_HEAD]
-0x01141000 # addi x head_x 0                             [mv x, head_x]
-0x01162000 # addi y head_y 0                             [mv y, head_y]
-0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
-0x40000000 # ecall                                       [ecall 0x10000000]
+0x16181000 # lui color 0x1000
+0x0118CFFF # addi color color 0xFFFFFFFF
+0x16230000 # lui r17 0x10000
+0x40000000 # ecall
+0x12C07080 # bge nx r0 move_snake_common_x_ge_0
+0x010E003F # addi nx r0 63
+0x013E0040 # addi r31 r0 64                              <label: move_snake_common_x_ge_0>
+0x1280709F # blt nx r31 move_snake_common_x_lt_width
+0x010E0000 # addi nx r0 0
+0x12C08080 # bge ny r0 move_snake_common_y_ge_0          <label: move_snake_common_x_lt_width>
+0x01100023 # addi ny r0 35
+0x013E0024 # addi r31 r0 36                              <label: move_snake_common_y_ge_0>
+0x1280809F # blt ny r31 move_snake_common_y_lt_height
+0x01100000 # addi ny r0 0
+0x01027000 # addi head_x nx 0                            <label: move_snake_common_y_lt_height>
+0x01048000 # addi head_y ny 0
+0x16180FF0 # lui color 0xFF0
+0x01141000 # addi x head_x 0
+0x01162000 # addi y head_y 0
+0x16230000 # lui r17 0x10000
+0x40000000 # ecall
 0xFA00004A # call body_contains
-0x013E0001 # addi r31 r0 1                               [beq rt, 1, lose_loop]
-0x1202E9DF # beq rt r31 lose_loop                        [beq rt, 1, lose_loop]
-0x12401103 # bne head_x food_x move_snake_not_eat        [bne head_x, food_x, move_snake_not_eat]
-0x124020C4 # bne head_y food_y move_snake_not_eat        [bne head_y, food_y, move_snake_not_eat]
+0x013E0001 # addi r31 r0 1
+0x1202E9DF # beq rt r31 lose_loop
+0x12401103 # bne head_x food_x move_snake_not_eat
+0x124020C4 # bne head_y food_y move_snake_not_eat
 0xFA00000E # call gen_food
 0xFC800000 # ret
-0xFA000034 # call body_pop                                                                                       <label: move_snake_not_eat>
-0x01180000 # addi color r0 0                             [li color, COLOR_BACK]
-0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
-0x40000000 # ecall                                       [ecall 0x10000000]
+0xFA000034 # call body_pop                               <label: move_snake_not_eat>
+0x01180000 # addi color r0 0
+0x16230000 # lui r17 0x10000
+0x40000000 # ecall
 0xFC800000 # ret
-0x01220029 # addi r17 r0 41                              [ecall 41]                                              <label: gen_food>
-0x40000000 # ecall                                       [ecall 41]
-0x0116A000 # addi y x 0                                  [mv y, x]
-0x01220029 # addi r17 r0 41                              [ecall 41]
-0x40000000 # ecall                                       [ecall 41]
-0x0754A040 # remi x x 64                                 [rem x, x, SCREEN_WIDTH]
-0x0756B024 # remi y y 36                                 [rem y, y, SCREEN_HEIGHT]
+0x01220029 # addi r17 r0 41                              <label: gen_food>
+0x40000000 # ecall
+0x0116A000 # addi y x 0
+0x01220029 # addi r17 r0 41
+0x40000000 # ecall
+0x0754A040 # remi x x 64
+0x0756B024 # remi y y 36
 0xFA000024 # call body_contains
-0x013E0001 # addi r31 r0 1                               [beq rt, 1, gen_food]
-0x123EEDDF # beq rt r31 gen_food                         [beq rt, 1, gen_food]
-0x0106A000 # addi food_x x 0                             [mv food_x, x]
-0x0108B000 # addi food_y y 0                             [mv food_y, y]
-0x16181000 # lui color 0x1000                            [li color, COLOR_FOOD]
-0x0118CF00 # addi color color 0xFFFFFF00                 [li color, COLOR_FOOD]
-0x16230000 # lui r17 0x10000                             [ecall 0x10000000]
-0x40000000 # ecall                                       [ecall 0x10000000]
+0x013E0001 # addi r31 r0 1
+0x123EEDDF # beq rt r31 gen_food
+0x0106A000 # addi food_x x 0
+0x0108B000 # addi food_y y 0
+0x16181000 # lui color 0x1000
+0x0118CF00 # addi color color 0xFFFFFF00
+0x16230000 # lui r17 0x10000
+0x40000000 # ecall
 0xFC800000 # ret
-0x0A24A008 # slli que_val x 8                            [sll que_val, x, 8]                                     <label: body_push>
-0x00E5200B # or que_val que_val y                        [or que_val, que_val, y]
+0x0A24A008 # slli que_val x 8                            <label: body_push>
+0x00E5200B # or que_val que_val y
 0xFA000014 # call queue_push
 0xFC800000 # ret
-0xFA00002A # call queue_pop                                                                                      <label: body_pop>
-0x0A552008 # srli x que_val 8                            [srl x, que_val, 8]
-0x019720FF # andi y que_val 255                          [and y, que_val, 0x0FF]
+0xFA00002A # call queue_pop                              <label: body_pop>
+0x0A552008 # srli x que_val 8
+0x019720FF # andi y que_val 255
 0xFC800000 # ret
-0x0A24A008 # slli que_val x 8                            [sll que_val, x, 8]                                     <label: body_contains>
-0x00E5200B # or que_val que_val y                        [or que_val, que_val, y]
+0x0A24A008 # slli que_val x 8                            <label: body_contains>
+0x00E5200B # or que_val que_val y
 0xFA000038 # call queue_contains
 0xFC800000 # ret
-0x013E0064 # addi r31 r0 100                             [beq que_len, QUEUE_SIZE, queue_push_full]              <label: queue_push>
-0x1200F29F # beq que_len r31 queue_push_full             [beq que_len, QUEUE_SIZE, queue_push_full]
-0x05270002 # muli que_tmp que_head 2                     [mul que_tmp, que_head, 2]
-0x163E0100 # lui r31 256                                 [add que_tmp, que_tmp, BASE_ADDR]
-0x0027301F # add que_tmp que_tmp r31                     [add que_tmp, que_tmp, BASE_ADDR]
-0x11813012 # sh que_val que_tmp 0                        [sh que_val, (que_tmp)]
-0x01210001 # addi que_head que_head 1                    [inc que_head]
-0x07610064 # remi que_head que_head 100                  [rem que_head, que_head, QUEUE_SIZE]
-0x011EF001 # addi que_len que_len 1                      [inc que_len]
-0x011C0000 # addi rt r0 0                                [li rt, 0]
+0x013E0064 # addi r31 r0 100                             <label: queue_push>
+0x1200F29F # beq que_len r31 queue_push_full
+0x05270002 # muli que_tmp que_head 2
+0x163E0100 # lui r31 256
+0x0027301F # add que_tmp que_tmp r31
+0x11813012 # sh que_val que_tmp 0
+0x01210001 # addi que_head que_head 1
+0x07610064 # remi que_head que_head 100
+0x011EF001 # addi que_len que_len 1
+0x011C0000 # addi rt r0 0
 0xFC800000 # ret
-0x011C0001 # addi rt r0 1                                [li rt, 1]                                              <label: queue_push_full>
+0x011C0001 # addi rt r0 1                                <label: queue_push_full>
 0xFC800000 # ret
-0x1200F2C0 # beq que_len r0 queue_pop_empty              [beqz que_len, queue_pop_empty]                         <label: queue_pop>
-0x0067000F # sub que_tmp que_head que_len                [sub que_tmp, que_head, que_len]
-0x01273064 # addi que_tmp que_tmp 100                    [add que_tmp, que_tmp, QUEUE_SIZE]
-0x07673064 # remi que_tmp que_tmp 100                    [rem que_tmp, que_tmp, QUEUE_SIZE]
-0x05273002 # muli que_tmp que_tmp 2                      [mul que_tmp, que_tmp, 2]
-0x163E0100 # lui r31 256                                 [add que_tmp, que_tmp, BASE_ADDR]
-0x0027301F # add que_tmp que_tmp r31                     [add que_tmp, que_tmp, BASE_ADDR]
-0x10A53000 # lhu que_val que_tmp 0                       [lhu que_val, (que_tmp)]
-0x015EF001 # subi que_len que_len 1                      [dec que_len]
-0x011C0000 # addi rt r0 0                                [li rt, 0]
+0x1200F2C0 # beq que_len r0 queue_pop_empty              <label: queue_pop>
+0x0067000F # sub que_tmp que_head que_len
+0x01273064 # addi que_tmp que_tmp 100
+0x07673064 # remi que_tmp que_tmp 100
+0x05273002 # muli que_tmp que_tmp 2
+0x163E0100 # lui r31 256
+0x0027301F # add que_tmp que_tmp r31
+0x10A53000 # lhu que_val que_tmp 0
+0x015EF001 # subi que_len que_len 1
+0x011C0000 # addi rt r0 0
 0xFC800000 # ret
-0x011C0001 # addi rt r0 1                                [li rt, 1]                                              <label: queue_pop_empty>
+0x011C0001 # addi rt r0 1                                <label: queue_pop_empty>
 0xFC800000 # ret
-0x1200F440 # beq que_len r0 queue_contains_not_found     [beqz que_len, queue_contains_not_found]                <label: queue_contains>
-0x0067000F # sub que_tmp que_head que_len                [sub que_tmp, que_head, que_len]
-0x01273064 # addi que_tmp que_tmp 100                    [add que_tmp, que_tmp, QUEUE_SIZE]
-0x07673064 # remi que_tmp que_tmp 100                    [rem que_tmp, que_tmp, QUEUE_SIZE]
-0x01280000 # addi que_i r0 0                             [li que_i, 0]
-0x1201430F # beq que_i que_len queue_contains_not_found  [beq que_i, que_len, queue_contains_not_found]          <label: queue_contains_loop>
-0x052D3002 # muli que_addr que_tmp 2                     [mul que_addr, que_tmp, 2]
-0x163E0100 # lui r31 256                                 [add que_addr, que_addr, BASE_ADDR]
-0x002D601F # add que_addr que_addr r31                   [add que_addr, que_addr, BASE_ADDR]
-0x10AB6000 # lhu que_cur que_addr 0                      [lhu que_cur, (que_addr)]
-0x12015152 # beq que_cur que_val queue_contains_found    [beq que_cur, que_val, queue_contains_found]
-0x01273001 # addi que_tmp que_tmp 1                      [inc que_tmp]
-0x07673064 # remi que_tmp que_tmp 100                    [rem que_tmp, que_tmp, QUEUE_SIZE]
-0x01294001 # addi que_i que_i 1                          [inc que_i]
-0x15C1FFEE # jal r0 queue_contains_loop                  [j queue_contains_loop]
-0x011C0001 # addi rt r0 1                                [li rt, 1]                                              <label: queue_contains_found>
+0x1200F440 # beq que_len r0 queue_contains_not_found     <label: queue_contains>
+0x0067000F # sub que_tmp que_head que_len
+0x01273064 # addi que_tmp que_tmp 100
+0x07673064 # remi que_tmp que_tmp 100
+0x01280000 # addi que_i r0 0
+0x1201430F # beq que_i que_len queue_contains_not_found  <label: queue_contains_loop>
+0x052D3002 # muli que_addr que_tmp 2
+0x163E0100 # lui r31 256
+0x002D601F # add que_addr que_addr r31
+0x10AB6000 # lhu que_cur que_addr 0
+0x12015152 # beq que_cur que_val queue_contains_found
+0x01273001 # addi que_tmp que_tmp 1
+0x07673064 # remi que_tmp que_tmp 100
+0x01294001 # addi que_i que_i 1
+0x15C1FFEE # jal r0 queue_contains_loop
+0x011C0001 # addi rt r0 1                                <label: queue_contains_found>
 0xFC800000 # ret
-0x011C0000 # addi rt r0 0                                [li rt, 0]                                              <label: queue_contains_not_found>
+0x011C0000 # addi rt r0 0                                <label: queue_contains_not_found>
 0xFC800000 # ret
-0x170B0000 # lui t0 0x90000                              [li t0, KBD_BASE]                                       <label: read_key>
-0x100A5000 # lw t0 t0 0                                  [lw t0, (t0)]
-0x013E0067 # addi r31 r0 103                             [beq t0, KEY_UP, read_key_ok]
-0x1200521F # beq t0 r31 read_key_ok                      [beq t0, KEY_UP, read_key_ok]
-0x013E006C # addi r31 r0 108                             [beq t0, KEY_DOWN, read_key_ok]
-0x1200519F # beq t0 r31 read_key_ok                      [beq t0, KEY_DOWN, read_key_ok]
-0x013E0069 # addi r31 r0 105                             [beq t0, KEY_LEFT, read_key_ok]
-0x1200511F # beq t0 r31 read_key_ok                      [beq t0, KEY_LEFT, read_key_ok]
-0x013E006A # addi r31 r0 106                             [beq t0, KEY_RIGHT, read_key_ok]
-0x1200509F # beq t0 r31 read_key_ok                      [beq t0, KEY_RIGHT, read_key_ok]
+0x170B0000 # lui t0 0x90000                              <label: read_key>
+0x100A5000 # lw t0 t0 0
+0x013E0067 # addi r31 r0 103
+0x1200521F # beq t0 r31 read_key_ok
+0x013E006C # addi r31 r0 108
+0x1200519F # beq t0 r31 read_key_ok
+0x013E0069 # addi r31 r0 105
+0x1200511F # beq t0 r31 read_key_ok
+0x013E006A # addi r31 r0 106
+0x1200509F # beq t0 r31 read_key_ok
 0xFC800000 # ret
-0x01125000 # addi key_code t0 0                          [mv key_code, t0]                                       <label: read_key_ok>
-0xFC800000 # ret                                                                                                 <label: read_key_ret>
-0xFBC1FEA0 # call init_screen                                                                                    <label: main>
+0x01125000 # addi key_code t0 0                          <label: read_key_ok>
+0xFC800000 # ret                                         <label: read_key_ret>
+0xFBC1FEA0 # call init_screen                            <label: main>
 0xFBC1FEB8 # call init_snake
 0xFBC1FF4E # call gen_food
-0xFBC1FFE0 # call read_key                                                                                       <label: main_loop>
+0xFBC1FFE0 # call read_key                               <label: main_loop>
 0xFBC1FED8 # call move_snake
-0x15C1FFFC # jal r0 main_loop                            [j main_loop]
-0x14000000 # jal r0 lose_loop                            [j lose_loop]                                           <label: lose_loop>
+0x15C1FFFC # jal r0 main_loop
+0x14000000 # jal r0 lose_loop                            <label: lose_loop>
 ----- stderr -----

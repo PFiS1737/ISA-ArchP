@@ -50,10 +50,6 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                         )
                     })?
                 }
-                // FIXME: 如果上述操作导致 ctx.word_buffer 中有剩余，
-                //        则对应部分的 souce_map 会被记录为下一条指令的行，
-                //        而不是当前行。
-                self.context.resolve_source_map(line);
             },
             Line::Instruction {
                 name,
@@ -84,10 +80,10 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                             anyhow!("Error expanding pseudo-instruction '{}': {}", name, e)
                         })?;
                         for instr in expanded {
-                            self.handle_instr(instr, line)?;
+                            self.handle_instr(instr)?;
                         }
                     } else {
-                        self.handle_instr((name, ops), line)?;
+                        self.handle_instr((name, ops))?;
                     }
                 }
             },
@@ -96,7 +92,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
         Ok(())
     }
 
-    fn handle_instr(&mut self, instr: Instr<'src>, line: (usize, &'src str)) -> Result<()> {
+    fn handle_instr(&mut self, instr: Instr<'src>) -> Result<()> {
         let pc = self.context.codes.len() * 4;
 
         let (name, ops) = instr;
@@ -107,7 +103,6 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
             .encode(self.context, pc, &ops)?;
 
         self.context.add_code(code, Some((name, ops)));
-        self.context.resolve_source_map(line);
 
         Ok(())
     }

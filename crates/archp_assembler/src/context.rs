@@ -12,12 +12,9 @@ pub struct Context<'src> {
     pub codes: Vec<u32>,
     /// The processed instructions, after macro and pseudo-instruction expansion
     pub instrs: Vec<Option<Instr<'src>>>,
-    /// Maps processed instructions to the (original line number, original line content)
-    pub source_map: Vec<(usize, &'src str)>,
 
     word_buffer: [u8; 4],
     word_buffer_len: usize,
-    prev_code_idx: usize,
 
     pub labels: HashMap<&'src str, usize>,
 
@@ -66,15 +63,6 @@ impl<'src> Context<'src> {
         self.word_buffer_len = 0;
 
         self.add_code(word, None);
-    }
-
-    pub fn resolve_source_map(&mut self, line: (usize, &'src str)) {
-        let start = self.prev_code_idx;
-        let end = self.codes.len();
-        for _ in start..end {
-            self.source_map.push(line);
-        }
-        self.prev_code_idx = end;
     }
 
     pub fn add_relocation(

@@ -51,18 +51,9 @@ fn main() -> Result<()> {
             .into_iter()
             .enumerate()
             .map(|(idx, instr)| {
-                let mut display = context.source_map[idx].1.to_string();
-
-                if let Some((name, ops)) = instr {
-                    let line = fmt_line(name, &ops);
-                    if line != display {
-                        display = format!("{line}\t[{display}]");
-                    } else {
-                        display += "\t"
-                    }
-                } else {
-                    display = format!("\t[{display}]");
-                }
+                let mut display = instr
+                    .map(|(name, ops)| fmt_line(name, &ops))
+                    .unwrap_or("".to_string());
 
                 if let Some(label) = labels.get(&(idx * 4)) {
                     display = format!("{display}\t<label: {label}>");

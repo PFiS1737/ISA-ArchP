@@ -5,13 +5,13 @@ input_file: crates/archp_assembler/examples/hello_world.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x6C6C6548 #                 [.asciz "Hello World!\n"]
-0x6F57206F #                 [.asciz "Hello World!\n"]
-0x21646C72 #                 [.asciz "Hello World!\n"]
-0x0000000A #                 [li a0, 0]
-0x01140000 # addi a0 r0 0    [li a0, 0]
-0x01220004 # addi r17 r0 4   [ecall 4]
-0x40000000 # ecall           [ecall 4]
-0x0122000A # addi r17 r0 10  [ecall 10]
-0x40000000 # ecall           [ecall 10]
+0x6C6C6548 # 
+0x6F57206F # 
+0x21646C72 # 
+0x0000000A # 
+0x01140000 # addi a0 r0 0
+0x01220004 # addi r17 r0 4
+0x40000000 # ecall
+0x0122000A # addi r17 r0 10
+0x40000000 # ecall
 ----- stderr -----
