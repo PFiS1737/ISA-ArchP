@@ -11,9 +11,11 @@ pub struct Context<'src> {
     /// The generated machine code
     pub codes: Vec<u32>,
     /// The processed instructions, after macro and pseudo-instruction expansion
-    pub instrs: Vec<Instr<'src>>,
+    pub instrs: Vec<Option<Instr<'src>>>,
     /// Maps processed instructions to the (original line number, original line content)
     pub source_map: Vec<(usize, &'src str)>,
+
+    prev_code_idx: usize,
 
     pub labels: HashMap<&'src str, usize>,
 
@@ -34,6 +36,20 @@ pub struct Relocation<'a> {
 }
 
 impl<'src> Context<'src> {
+    pub fn add_code(&mut self, code: u32, instr: Option<Instr<'src>>) {
+        self.codes.push(code);
+        self.instrs.push(instr);
+    }
+
+    pub fn resolve_source_map(&mut self, line: (usize, &'src str)) {
+        let start = self.prev_code_idx;
+        let end = self.codes.len();
+        for _ in start..end {
+            self.source_map.push(line);
+        }
+        self.prev_code_idx = end;
+    }
+
     pub fn add_relocation(
         &mut self,
         instr: &'static Entry,

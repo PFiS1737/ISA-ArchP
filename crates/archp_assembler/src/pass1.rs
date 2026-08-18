@@ -102,9 +102,8 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
             .ok_or(anyhow!("Unknown instruction: '{}'", name))?
             .encode(self.context, pc, &ops)?;
 
-        self.context.codes.push(code);
-        self.context.instrs.push((name, ops));
-        self.context.source_map.push(line);
+        self.context.add_code(code, Some((name, ops)));
+        self.context.resolve_source_map(line);
 
         Ok(())
     }

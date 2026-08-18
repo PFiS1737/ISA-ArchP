@@ -46,32 +46,35 @@ fn main() -> Result<()> {
             .map(|(k, v)| (v, k))
             .collect::<HashMap<_, _>>();
 
-        for (code, display) in context.codes.into_iter().zip(align_tabbed_lines(
-            &context
-                .instrs
-                .into_iter()
-                .enumerate()
-                .map(|(idx, (name, ops))| {
-                    let mut display = fmt_line(name, &ops);
+        let displays = context
+            .instrs
+            .into_iter()
+            .enumerate()
+            .map(|(idx, instr)| {
+                let mut display = context.source_map[idx].1.to_string();
 
-                    let (_, original_line) = context.source_map[idx];
-
-                    if display != original_line {
-                        display = format!("{display}\t[{original_line}]");
+                if let Some((name, ops)) = instr {
+                    let line = fmt_line(name, &ops);
+                    if line != display {
+                        display = format!("{line}\t[{display}]");
                     } else {
-                        display += "\t";
+                        display += "\t"
                     }
+                } else {
+                    display = format!("\t[{display}]");
+                }
 
-                    if let Some(label) = labels.get(&(idx * 4)) {
-                        display = format!("{display}\t<label: {label}>");
-                    } else {
-                        display += "\t";
-                    }
+                if let Some(label) = labels.get(&(idx * 4)) {
+                    display = format!("{display}\t<label: {label}>");
+                } else {
+                    display += "\t";
+                }
 
-                    display
-                })
-                .collect::<Vec<String>>(),
-        )) {
+                display
+            })
+            .collect::<Vec<_>>();
+
+        for (code, display) in context.codes.into_iter().zip(align_tabbed_lines(&displays)) {
             writeln!(out, "{:#010X} # {}", code, display)?;
         }
     } else {
