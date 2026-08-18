@@ -1,6 +1,7 @@
 mod branch;
 mod inc_dec;
 mod jump;
+mod load_address;
 mod load_imm;
 mod mv;
 mod negate;
@@ -18,7 +19,7 @@ use crate::{
     operand::{Operand, OperandType},
 };
 
-type ExpandFn = for<'a> fn(&Context<'a>, &[Operand<'a>]) -> SmallVec<[Instr<'a>; 2]>;
+type ExpandFn = for<'a> fn(&mut Context<'a>, &[Operand<'a>]) -> SmallVec<[Instr<'a>; 2]>;
 
 inventory::collect!(Entry);
 
@@ -48,7 +49,7 @@ impl Entry {
 
     pub fn expand<'a>(
         &self,
-        ctx: &Context<'a>,
+        ctx: &mut Context<'a>,
         operands: &[Operand<'a>],
     ) -> Result<SmallVec<[Instr<'a>; 2]>> {
         self.assert_operand_format(operands)?;
@@ -148,7 +149,7 @@ macro test_ps_instr( $name:ident $($ops:expr),* $(;)? ) {{
     use $crate::pseudo_instructions::ps_instr;
     use $crate::utils::fmt::fmt_line;
     use $crate::context::Context;
-    match ps_instr!{ @(&Context::test()) $name $($ops),* } {
+    match ps_instr!{ @(&mut Context::test()) $name $($ops),* } {
         Ok(expanded) => expanded
             .into_iter()
             .map(|(name, ops)| fmt_line(name, &ops))

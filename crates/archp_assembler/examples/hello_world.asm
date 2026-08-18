@@ -1,7 +1,6 @@
-.asciz "Hello World!\n"
-
-li a0, 0 ; TODO: add 'la'
-
+la a0, hello
 ecall 4 ; print string
-
 ecall 10 ; exit
+
+hello:
+  .asciz "Hello World!\n"

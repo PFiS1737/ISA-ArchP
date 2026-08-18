@@ -59,18 +59,28 @@ impl Entry {
     pub fn encode<'src>(
         &'static self,
         ctx: &mut Context<'src>,
-        pc: usize,
         operands: &[Operand<'src>],
     ) -> Result<u32> {
-        let operands = self.parse(ctx, pc, operands)?;
+        let operands = self.parse(ctx, operands)?;
 
         Ok(self.itype.encode(self.opcode, self.funct3, &operands))
     }
 
     pub fn apply_relocation(&self, code: &mut u32, addr: i64, base: u32) -> Result<()> {
         for (idx, op_ty) in self.format.iter().enumerate() {
-            if let OperandType::Addr(bits) = op_ty {
-                let addr = encode_address_as(addr, *bits, base)?;
+            if let OperandType::Imm(_, signed) = op_ty
+                && !*signed
+            {
+                bail!(
+                    "Instruction '{}' does not support relocation for unsigned immediate",
+                    self.name
+                );
+            }
+
+            if let OperandType::Addr(bits) | OperandType::Imm(bits, _) = op_ty {
+                let addr =
+                    encode_address_as(addr, *bits, base, matches!(op_ty, OperandType::Addr(..)))?;
+
                 let mut ops = self.itype.decode(*code);
                 ops[idx] = addr;
                 *code = self.itype.encode(self.opcode, self.funct3, &ops);
@@ -84,7 +94,6 @@ impl Entry {
     fn parse<'src>(
         &'static self,
         ctx: &mut Context<'src>,
-        pc: usize,
         operands: &[Operand<'src>],
     ) -> Result<SmallVec<[u32; 3]>> {
         let expected = self
@@ -105,6 +114,7 @@ impl Entry {
                     encode_immediate_as(ops.next().unwrap(), bits, signed)?
                 },
                 OperandType::Addr(..) => {
+                    let pc = ctx.codes.len() * 4;
                     // TODO: can we put the addend into the instruction code?
                     ctx.add_relocation(self, pc, ops.next().unwrap())?;
                     0
@@ -252,17 +262,17 @@ macro instruction {
 }
 
 #[cfg(test)]
-macro instr( @($ctx:expr, $pc:expr) $name:ident $($ops:expr),* $(;)? ) {{
+macro instr( @($ctx:expr) $name:ident $($ops:expr),* $(;)? ) {{
     let name = <$name as $crate::instructions::Instruction>::NAME;
     let instr = $crate::instructions::INSTRUCTIONS.get(name).unwrap();
-    instr.encode($ctx, $pc, &$crate::operand::ops![$($ops),*])
+    instr.encode($ctx, &$crate::operand::ops![$($ops),*])
 }}
 
 #[cfg(test)]
 macro test_instr($name:ident $($ops:expr),*) {{
     use $crate::instructions::instr;
     use $crate::context::Context;
-    match instr!{ @(&mut Context::test(), 0) $name $($ops),* } {
+    match instr!{ @(&mut Context::test()) $name $($ops),* } {
         Ok(code) => format!("{:#010X}", code),
         Err(e) => format!("Error: {}", e),
     }

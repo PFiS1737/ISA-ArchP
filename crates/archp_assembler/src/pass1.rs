@@ -93,14 +93,12 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
     }
 
     fn handle_instr(&mut self, instr: Instr<'src>) -> Result<()> {
-        let pc = self.context.codes.len() * 4;
-
         let (name, ops) = instr;
 
         let code = INSTRUCTIONS
             .get(name)
             .ok_or(anyhow!("Unknown instruction: '{}'", name))?
-            .encode(self.context, pc, &ops)?;
+            .encode(self.context, &ops)?;
 
         self.context.add_code(code, Some((name, ops)));
 
