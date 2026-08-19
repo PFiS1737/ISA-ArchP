@@ -12,7 +12,10 @@ use archp_assembler::{Assembler, AssemblerSettings, fmt_line};
 use clap::{CommandFactory, Parser};
 use clap_complete::CompleteEnv;
 
-use crate::{command::Cli, utils::align_tabbed_lines};
+use crate::{
+    command::Cli,
+    utils::{align_tabbed_lines, merge_maps},
+};
 
 fn main() -> Result<()> {
     CompleteEnv::with_factory(Cli::command)
@@ -40,38 +43,48 @@ fn main() -> Result<()> {
     });
 
     if cli.hex {
-        let labels = context
-            .labels
+        let lines = merge_maps(
+            context.instrs,
+            context.labels.into_iter().map(|(k, v)| (v, k)),
+        );
+
+        let displays = align_tabbed_lines(
+            lines
+                .into_iter()
+                .map(|(offset, (instr, label))| {
+                    let mut display = instr
+                        .flatten()
+                        .map(|(name, ops)| fmt_line(name, &ops))
+                        .unwrap_or("".to_string());
+
+                    if let Some(label) = label {
+                        display = format!("{display}\t<label: {label}>");
+                    } else {
+                        display += "\t";
+                    }
+
+                    (offset, display)
+                })
+                .collect::<HashMap<_, _>>(),
+        );
+
+        for (idx, code) in context
+            .text
+            .as_chunks::<4>()
+            .0
             .iter()
-            .map(|(k, v)| (v, k))
-            .collect::<HashMap<_, _>>();
-
-        let displays = context
-            .instrs
-            .into_iter()
+            .map(|x| u32::from_le_bytes(*x))
             .enumerate()
-            .map(|(idx, instr)| {
-                let mut display = instr
-                    .map(|(name, ops)| fmt_line(name, &ops))
-                    .unwrap_or("".to_string());
-
-                if let Some(label) = labels.get(&(idx * 4)) {
-                    display = format!("{display}\t<label: {label}>");
-                } else {
-                    display += "\t";
-                }
-
-                display
-            })
-            .collect::<Vec<_>>();
-
-        for (code, display) in context.codes.into_iter().zip(align_tabbed_lines(&displays)) {
-            writeln!(out, "{:#010X} # {}", code, display)?;
+        {
+            writeln!(
+                out,
+                "{:#010X} # {}",
+                code,
+                displays.get(&(idx * 4)).unwrap_or(&"".to_string())
+            )?;
         }
     } else {
-        for code in context.codes {
-            out.write_all(&code.to_le_bytes())?;
-        }
+        out.write_all(&context.text)?;
     }
 
     Ok(())

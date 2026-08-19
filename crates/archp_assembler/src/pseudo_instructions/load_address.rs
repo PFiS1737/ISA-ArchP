@@ -23,10 +23,10 @@ pseudo_instruction! {
 
 const F: ExpandFn = |ctx, ops| {
     let instr = INSTRUCTIONS.get("addi").unwrap();
-    let pc = ctx.codes.len() * 4;
+    let offset = ctx.text.len();
     // INFO: Safe to unwrap because we have checked the operands
     //       by [crate::pseudo_instructions::Entry::assert_operand_format]
-    ctx.add_relocation(instr, pc, &ops[1]).unwrap();
+    ctx.add_relocation(instr, offset, &ops[1]).unwrap();
 
     smallvec::smallvec![("addi", ops![ops[0], ops[0], 0])]
 };

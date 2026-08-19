@@ -76,7 +76,7 @@ fn align(ctx: &mut Context, bytes: i64, value: i64, max: i64) -> Result<()> {
         return Ok(());
     }
 
-    let pc_bytes = ctx.codes.len() as i64 * 4;
+    let pc_bytes = ctx.text.len() as i64;
 
     let aligned_pc = (pc_bytes + bytes - 1) / bytes * bytes;
 
@@ -108,9 +108,12 @@ mod tests {
         align(&mut ctx, 2_i64.pow(3), 0, i64::MAX).unwrap();
         ctx.add_code(0x12345678, None);
 
-        assert_debug_snapshot!(ctx.codes, @"
+        assert_debug_snapshot!(ctx.text, @"
         [
-            305419896,
+            120,
+            86,
+            52,
+            18,
             0,
             0,
             0,
@@ -118,13 +121,55 @@ mod tests {
             0,
             0,
             0,
-            305419896,
             0,
             0,
             0,
-            305419896,
             0,
-            305419896,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            120,
+            86,
+            52,
+            18,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            120,
+            86,
+            52,
+            18,
+            0,
+            0,
+            0,
+            0,
+            120,
+            86,
+            52,
+            18,
         ]
         ");
     }

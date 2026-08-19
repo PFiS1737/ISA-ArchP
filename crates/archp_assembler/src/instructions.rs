@@ -29,6 +29,7 @@ inventory::collect!(Entry);
 pub static INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static Entry>> =
     LazyLock::new(|| HashMap::from_iter(inventory::iter::<Entry>.into_iter().map(|e| (e.name, e))));
 
+#[derive(Debug, Clone)]
 pub struct Entry {
     name: &'static str,
     opcode: u32,
@@ -66,7 +67,7 @@ impl Entry {
         Ok(self.itype.encode(self.opcode, self.funct3, &operands))
     }
 
-    pub fn apply_relocation(&self, code: &mut u32, addr: i64, base: u32) -> Result<()> {
+    pub fn apply_relocation(&self, code: u32, addr: i64, base: u32) -> Result<u32> {
         for (idx, op_ty) in self.format.iter().enumerate() {
             if let OperandType::Imm(_, signed) = op_ty
                 && !*signed
@@ -81,10 +82,11 @@ impl Entry {
                 let addr =
                     encode_address_as(addr, *bits, base, matches!(op_ty, OperandType::Addr(..)))?;
 
-                let mut ops = self.itype.decode(*code);
+                let mut ops = self.itype.decode(code);
                 ops[idx] = addr;
-                *code = self.itype.encode(self.opcode, self.funct3, &ops);
-                return Ok(());
+                let word = self.itype.encode(self.opcode, self.funct3, &ops);
+
+                return Ok(word);
             }
         }
 
@@ -114,9 +116,9 @@ impl Entry {
                     encode_immediate_as(ops.next().unwrap(), bits, signed)?
                 },
                 OperandType::Addr(..) => {
-                    let pc = ctx.codes.len() * 4;
+                    let offset = ctx.text.len();
                     // TODO: can we put the addend into the instruction code?
-                    ctx.add_relocation(self, pc, ops.next().unwrap())?;
+                    ctx.add_relocation(self, offset, ops.next().unwrap())?;
                     0
                 },
                 OperandType::None => 0,

@@ -32,7 +32,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
     fn handle_line(&mut self, line: Line<'src>) -> Result<()> {
         match line {
             Line::Label(label) => {
-                let pc = self.context.codes.len() * 4;
+                let pc = self.context.text.len();
                 self.context.labels.insert(label, pc);
             },
             Line::Directive {

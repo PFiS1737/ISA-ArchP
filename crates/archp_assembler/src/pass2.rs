@@ -12,7 +12,10 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
     }
 
     pub fn run(&mut self) -> Result<()> {
-        for reloc in &self.context.relocations {
+        // TODO: optimize this
+        let relocations = self.context.relocations.clone();
+
+        for reloc in relocations {
             let addr = self
                 .context
                 .labels
@@ -21,11 +24,13 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
 
             let addr = *addr as i64 + reloc.addend;
 
-            let code = &mut self.context.codes[reloc.offset / 4];
+            let code = self.context.get_code(reloc.offset);
 
-            reloc
+            let code = reloc
                 .instr
                 .apply_relocation(code, addr, reloc.offset as u32)?;
+
+            self.context.set_code(reloc.offset, code);
         }
 
         Ok(())

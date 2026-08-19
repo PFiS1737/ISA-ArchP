@@ -8,13 +8,11 @@ use crate::{AssemblerSettings, assembler::Instr, instructions::Entry, operand::O
 pub struct Context<'src> {
     pub settings: AssemblerSettings,
 
-    /// The generated machine code
-    pub codes: Vec<u32>,
-    /// The processed instructions, after macro and pseudo-instruction expansion
-    pub instrs: Vec<Option<Instr<'src>>>,
+    /// The generated machine code (raw bytes, little-endian)
+    pub text: Vec<u8>,
 
-    word_buffer: [u8; 4],
-    word_buffer_len: usize,
+    /// The processed instructions, after macro and pseudo-instruction expansion
+    pub instrs: HashMap<usize, Option<Instr<'src>>>,
 
     pub labels: HashMap<&'src str, usize>,
 
@@ -27,6 +25,7 @@ pub struct Context<'src> {
     pub relocations: Vec<Relocation<'src>>,
 }
 
+#[derive(Debug, Clone)]
 pub struct Relocation<'a> {
     pub offset: usize,
     pub label: &'a str,
@@ -35,40 +34,57 @@ pub struct Relocation<'a> {
 }
 
 impl<'src> Context<'src> {
-    pub fn add_code(&mut self, code: u32, instr: Option<Instr<'src>>) {
-        if self.word_buffer_len > 0 {
-            self.emit_buffered_word();
-        }
-
-        self.codes.push(code);
-        self.instrs.push(instr);
-    }
-
     pub fn add_byte(&mut self, byte: u8) {
-        self.word_buffer[self.word_buffer_len] = byte;
-        self.word_buffer_len += 1;
-        if self.word_buffer_len == 4 {
-            self.emit_buffered_word();
-        }
+        self.text.push(byte);
     }
 
-    pub fn emit_buffered_word(&mut self) {
-        if self.word_buffer_len == 0 {
-            return;
-        }
+    pub fn add_code(&mut self, code: u32, instr: Option<Instr<'src>>) {
+        let offset = self.text.len();
 
-        let word = u32::from_le_bytes(self.word_buffer);
-        self.word_buffer = [0; 4];
-        // INFO: change this before calling add_code to avoid infinite recursion
-        self.word_buffer_len = 0;
+        let bytes = code.to_le_bytes();
+        self.text.extend_from_slice(&bytes);
 
-        self.add_code(word, None);
+        self.instrs.insert(offset, instr);
     }
 
+    pub fn get_code(&self, offset: usize) -> u32 {
+        let end = offset + 4;
+        assert!(end <= self.text.len(), "get_code out of bounds");
+
+        let bytes: [u8; 4] = self.text[offset..end].try_into().unwrap();
+
+        u32::from_le_bytes(bytes)
+    }
+
+    pub fn set_code(&mut self, offset: usize, value: u32) {
+        let end = offset + 4;
+        assert!(end <= self.text.len(), "set_code out of bounds");
+
+        let bytes = value.to_le_bytes();
+        self.text[offset..end].copy_from_slice(&bytes);
+    }
+}
+
+impl Context<'_> {
+    pub fn finish(&mut self) {
+        self.align4();
+    }
+
+    fn align4(&mut self) {
+        let rem = self.text.len() & 3;
+        if rem != 0 {
+            let padding = 4 - rem;
+            self.text.reserve(padding);
+            self.text.extend_from_slice(&[0u8; 4][..padding]);
+        }
+    }
+}
+
+impl<'src> Context<'src> {
     pub fn add_relocation(
         &mut self,
         instr: &'static Entry,
-        pc: usize,
+        offset: usize,
         op: &Operand<'src>,
     ) -> Result<()> {
         let (label, addend) = match op {
@@ -78,7 +94,7 @@ impl<'src> Context<'src> {
         };
 
         self.relocations.push(Relocation {
-            offset: pc,
+            offset,
             label,
             addend,
             instr,
