@@ -5,6 +5,7 @@ mod load_address;
 mod load_imm;
 mod mv;
 mod negate;
+mod nop;
 mod not;
 mod set;
 
