@@ -26,6 +26,9 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
             }
         }
 
+        // INFO: Make sure the text section is aligned to 4 bytes after processing all lines
+        self.context.align4();
+
         Ok(())
     }
 
@@ -56,6 +59,9 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                 operands,
                 line,
             } => {
+                // INFO: Make sure the text section is aligned to 4 bytes before adding instructions
+                self.context.align4();
+
                 let instrs = if !self.context.settings.disable_macro
                     && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
                     && let Some(expanded) =

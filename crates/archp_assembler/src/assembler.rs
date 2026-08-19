@@ -48,8 +48,6 @@ impl Assembler {
         let mut pass2 = Pass2::new(&mut context);
         pass2.run()?;
 
-        context.finish();
-
         Ok(context)
     }
 }

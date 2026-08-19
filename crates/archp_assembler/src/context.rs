@@ -66,12 +66,8 @@ impl<'src> Context<'src> {
 }
 
 impl Context<'_> {
-    pub fn finish(&mut self) {
-        self.align4();
-    }
-
-    fn align4(&mut self) {
-        let rem = self.text.len() & 3;
+    pub fn align4(&mut self) {
+        let rem = self.text.len() & 0b11;
         if rem != 0 {
             let padding = 4 - rem;
             self.text.reserve(padding);
