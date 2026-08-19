@@ -35,6 +35,9 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
     fn handle_line(&mut self, line: Line<'src>) -> Result<()> {
         match line {
             Line::Label(label) => {
+                // INFO: Make sure the text section is aligned to 4 bytes before adding labels
+                self.context.align4();
+
                 let pc = self.context.text.len();
                 self.context.labels.insert(label, pc);
             },
