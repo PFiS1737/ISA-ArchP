@@ -5,7 +5,8 @@ input_file: crates/archp_assembler/examples/hello_world.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x0114A014 # addi a0 a0 0
+0x14000002 # jal r0 main
+0x0114A018 # addi a0 a0 0    <label: main>
 0x01220004 # addi r17 r0 4
 0x40000000 # ecall
 0x0122000A # addi r17 r0 10

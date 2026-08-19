@@ -79,8 +79,18 @@ impl Entry {
             }
 
             if let OperandType::Addr(bits) | OperandType::Imm(bits, _) = op_ty {
-                let addr =
-                    encode_address_as(addr, *bits, base, matches!(op_ty, OperandType::Addr(..)))?;
+                let addr = encode_address_as(
+                    addr,
+                    *bits,
+                    // TODO: remove this
+                    // 对于 addi 这样的 relocation（由 la 使用），临时强制使用绝对地址
+                    if matches!(op_ty, OperandType::Imm(..)) {
+                        0
+                    } else {
+                        base
+                    },
+                    matches!(op_ty, OperandType::Addr(..)),
+                )?;
 
                 let mut ops = self.itype.decode(code);
                 ops[idx] = addr;
