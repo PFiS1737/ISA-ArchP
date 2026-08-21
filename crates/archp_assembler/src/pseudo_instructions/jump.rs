@@ -13,6 +13,9 @@ pseudo_instruction! {
 
 pseudo_instruction! {
     pub Jr "jr" |ops| {
+        [ Ident(..) ] => [
+            ("jalr", ops!["r0", ops[0], 0])
+        ];
         [ Ident(..), Num(..) ] => [
             ("jalr", ops!["r0", ops[0], ops[1]])
         ];
