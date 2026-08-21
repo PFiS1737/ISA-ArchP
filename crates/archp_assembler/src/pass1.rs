@@ -26,9 +26,6 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
             }
         }
 
-        // INFO: Make sure the text section is aligned to 4 bytes after processing all lines
-        self.context.align4();
-
         Ok(())
     }
 

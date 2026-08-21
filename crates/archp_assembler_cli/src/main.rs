@@ -68,20 +68,21 @@ fn main() -> Result<()> {
                 .collect::<HashMap<_, _>>(),
         );
 
-        for (idx, code) in context
-            .text
-            .as_chunks::<4>()
-            .0
-            .iter()
-            .map(|x| u32::from_le_bytes(*x))
-            .enumerate()
-        {
+        let (codes, rem) = context.text.as_chunks::<4>();
+
+        for (idx, code) in codes.iter().map(|x| u32::from_le_bytes(*x)).enumerate() {
             writeln!(
                 out,
                 "{:#010X} # {}",
                 code,
                 displays.get(&(idx * 4)).unwrap_or(&"".to_string())
             )?;
+        }
+
+        if !rem.is_empty() {
+            let mut code = [0u8; 4];
+            code[..rem.len()].copy_from_slice(rem);
+            writeln!(out, "{:#010X} # ", u32::from_le_bytes(code))?;
         }
     } else {
         out.write_all(&context.text)?;
