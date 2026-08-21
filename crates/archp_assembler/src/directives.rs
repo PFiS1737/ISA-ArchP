@@ -3,6 +3,7 @@ mod alias;
 mod align;
 mod equate;
 mod string;
+mod zero;
 
 use std::{collections::HashMap, sync::LazyLock};
 
