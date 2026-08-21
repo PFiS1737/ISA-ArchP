@@ -1,6 +1,6 @@
 mod branch;
 mod inc_dec;
-mod jump;
+mod jump_and_link;
 mod load_address;
 mod load_imm;
 mod mv;
