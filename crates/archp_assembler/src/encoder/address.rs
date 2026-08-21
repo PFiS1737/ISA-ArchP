@@ -1,6 +1,6 @@
 use anyhow::{Result, bail};
 
-pub fn encode_address_as(addr: i64, bits: u8, base: u32, shift: bool) -> Result<u32> {
+pub fn encode_address(addr: i64, bits: u8, base: u32, shift: bool) -> Result<u32> {
     if bits == 0 || bits > 32 {
         bail!("Invalid address offset field width: {}", bits);
     }

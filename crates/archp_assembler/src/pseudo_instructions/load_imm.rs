@@ -1,5 +1,5 @@
 use crate::{
-    encoder::immediate::{encode_immediate, split_hi_lo},
+    encoder::immediate::split_hi_lo,
     operand::ops,
     pseudo_instructions::{ExpandFn, pseudo_instruction},
     utils::sig_ext::sign_extend,
@@ -16,7 +16,7 @@ pseudo_instruction! {
 // TODO: '%hi' and '%lo' modifiers
 
 const F: ExpandFn = |_, ops| {
-    if let Ok(n) = encode_immediate(&ops[1])
+    if let Ok(n) = ops[1].cast_immediate()
         && let (lo, hi) = split_hi_lo(n, 12, true)
         && hi != 0
     {

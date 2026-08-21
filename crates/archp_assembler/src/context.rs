@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use anyhow::{Result, bail};
+use anyhow::Result;
 
 use crate::{AssemblerSettings, assembler::Instr, instructions::Entry, operand::Operand};
 
@@ -83,11 +83,7 @@ impl<'src> Context<'src> {
         offset: usize,
         op: &Operand<'src>,
     ) -> Result<()> {
-        let (label, addend) = match op {
-            Operand::Ident(s) => (s, 0),
-            Operand::Addition(s, n) => (s, *n),
-            _ => bail!("Expected address label, got: {}", op),
-        };
+        let (label, addend) = op.cast_address()?;
 
         self.relocations.push(Relocation {
             offset,

@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 
 use crate::{context::Context, expression::Expr};
 
@@ -9,6 +9,30 @@ pub enum Operand<'src> {
     Num(i64),
     Ident(&'src str),
     Addition(&'src str, i64),
+}
+
+impl<'src> Operand<'src> {
+    pub fn cast_register(&self) -> Result<&'src str> {
+        match self {
+            Operand::Ident(s) => Ok(s),
+            _ => bail!("Expected register, got: {}", self),
+        }
+    }
+
+    pub fn cast_immediate(&self) -> Result<i64> {
+        match self {
+            Operand::Num(n) => Ok(*n),
+            _ => bail!("Expected immediate, got: {}", self),
+        }
+    }
+
+    pub fn cast_address(&self) -> Result<(&'src str, i64)> {
+        match self {
+            Operand::Ident(s) => Ok((s, 0)),
+            Operand::Addition(s, n) => Ok((s, *n)),
+            _ => bail!("Expected address label, got: {}", self),
+        }
+    }
 }
 
 impl<'a> From<&'a str> for Operand<'a> {

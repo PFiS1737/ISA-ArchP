@@ -17,9 +17,7 @@ use smallvec::SmallVec;
 
 use crate::{
     context::Context,
-    encoder::{
-        address::encode_address_as, immediate::encode_immediate_as, register::encode_register,
-    },
+    encoder::{address::encode_address, immediate::encode_immediate, register::encode_register},
     instructions::types::InstrType,
     operand::{Operand, OperandType},
 };
@@ -79,7 +77,7 @@ impl Entry {
             }
 
             if let OperandType::Addr(bits) | OperandType::Imm(bits, _) = op_ty {
-                let addr = encode_address_as(
+                let addr = encode_address(
                     addr,
                     *bits,
                     // TODO: remove this
@@ -121,9 +119,14 @@ impl Entry {
 
         for op_ty in self.format {
             let val = match *op_ty {
-                OperandType::RegD | OperandType::RegS => encode_register(ctx, ops.next().unwrap())?,
+                OperandType::RegD | OperandType::RegS => {
+                    let s = ops.next().unwrap().cast_register()?;
+                    let reg = ctx.aliases.get(s).unwrap_or(&s);
+                    encode_register(reg)?
+                },
                 OperandType::Imm(bits, signed) => {
-                    encode_immediate_as(ops.next().unwrap(), bits, signed)?
+                    let n = ops.next().unwrap().cast_immediate()?;
+                    encode_immediate(n, bits, signed)?
                 },
                 OperandType::Addr(..) => {
                     let offset = ctx.text.len();
@@ -303,7 +306,7 @@ mod tests {
         assert_snapshot!(test_instr!(Add "r1", "r2"), @"Error: Instruction 'add' requires 3 operands, got 2");
         assert_snapshot!(test_instr!(Add "r1", "r2", "r3", "r4"), @"Error: Instruction 'add' requires 3 operands, got 4");
         assert_snapshot!(test_instr!(Add "r1", "r2", "rrr"), @"Error: Invalid register: rrr");
-        assert_snapshot!(test_instr!(Add "r1", "r2", 123), @"Error: Invalid register: 123");
+        assert_snapshot!(test_instr!(Add "r1", "r2", 123), @"Error: Expected register, got: 123");
 
         assert_snapshot!(test_instr!(Add "r1", "r2", "r3"), @"0x00022003");
     }

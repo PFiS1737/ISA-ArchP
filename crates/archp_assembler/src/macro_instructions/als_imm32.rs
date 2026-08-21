@@ -1,5 +1,5 @@
 use crate::{
-    encoder::immediate::{encode_immediate, split_hi_lo},
+    encoder::immediate::split_hi_lo,
     macro_instructions::{ExpandFn, macro_instruction},
     operand::ops,
 };
@@ -26,7 +26,7 @@ const F: ExpandFn = |_, name, ops| {
         _ => &name[..name.len() - 1],
     };
 
-    if let Ok(n) = encode_immediate(&ops[2])
+    if let Ok(n) = ops[2].cast_immediate()
         && let (_, hi) = split_hi_lo(n, 12, true)
         && hi != 0
     {

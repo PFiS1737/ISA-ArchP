@@ -1,22 +1,14 @@
 use anyhow::{Result, bail};
 
-use crate::{operand::Operand, utils::sig_ext::sign_extend};
+use crate::utils::sig_ext::sign_extend;
 
-pub fn encode_immediate(imm: &Operand) -> Result<i64> {
-    let Operand::Num(n) = imm else {
-        bail!("Expected immediate, got: {}", imm);
-    };
-
-    Ok(*n)
-}
-
-pub fn encode_immediate_as(imm: &Operand, bits: u8, signed: bool) -> Result<u32> {
-    let (low, hi) = split_hi_lo(encode_immediate(imm)?, bits, signed);
+pub fn encode_immediate(n: i64, bits: u8, signed: bool) -> Result<u32> {
+    let (low, hi) = split_hi_lo(n, bits, signed);
 
     if hi != 0 {
         bail!(
             "Immediate '{}' out of range for {}{} ({} ..= {})",
-            imm,
+            n,
             if signed { "i" } else { "u" },
             bits,
             if signed { i32::MIN >> (32 - bits) } else { 0 },

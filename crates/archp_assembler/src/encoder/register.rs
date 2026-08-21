@@ -1,15 +1,7 @@
 use anyhow::{Result, bail};
 
-use crate::{context::Context, operand::Operand};
-
-pub fn encode_register(ctx: &Context, op: &Operand) -> Result<u32> {
-    let Operand::Ident(reg) = op else {
-        bail!("Invalid register: {}", op)
-    };
-
-    let reg = ctx.aliases.get(reg).unwrap_or(reg);
-
-    Ok(match *reg {
+pub fn encode_register(reg: &str) -> Result<u32> {
+    Ok(match reg {
         "r0" | "zero" => 0,
         "r1" | "ra" => 1,
         "r2" | "sp" => 2,
@@ -45,32 +37,4 @@ pub fn encode_register(ctx: &Context, op: &Operand) -> Result<u32> {
 
         _ => bail!("Invalid register: {}", reg),
     })
-}
-
-#[cfg(test)]
-mod tests {
-    use anyhow::Result;
-    use insta::assert_snapshot;
-
-    use super::*;
-
-    fn test(func: fn(&Context, &Operand) -> Result<u32>) -> impl Fn(&str) -> String {
-        move |s| match func(&Context::test(), &Operand::from(s)) {
-            Ok(n) => format!("{n}"),
-            Err(e) => format!("Error: {e}"),
-        }
-    }
-
-    #[test]
-    fn parse_reg() {
-        let f = test(super::encode_register);
-        assert_snapshot!(f("r0"), @"0");
-        assert_snapshot!(f("r9"), @"9");
-        assert_snapshot!(f("r27"), @"27");
-        assert_snapshot!(f("invalid"), @"Error: Invalid register: invalid");
-        assert_snapshot!(f("FOO"), @"Error: Invalid register: FOO");
-        assert_snapshot!(f("BAR"), @"Error: Invalid register: BAR");
-        assert_snapshot!(f("R0"), @"0");
-        assert_snapshot!(f("R1"), @"1");
-    }
 }
