@@ -1,93 +1,84 @@
-use crate::{operand::ops, pseudo_instructions::pseudo_instruction};
+use crate::{
+    operand::{Operand::*, ops},
+    pseudo_instructions::pseudo_instruction,
+};
 
 pseudo_instruction! {
-    pub Sgt {
-        name: "sgt",
-        format: [ RegD, RegS, RegS ],
-        expander: F1!("slt"),
+    pub Sgt "sgt" |ops| {
+        [ Ident(..), Ident(..), Ident(..) ] => [
+            ("slt", ops![ops[0], ops[2], ops[1]])
+        ];
     }
 }
 
 pseudo_instruction! {
-    pub Sle {
-        name: "sle",
-        format: [ RegD, RegS, RegS ],
-        expander: F1!("sge"),
+    pub Sle "sle" |ops| {
+        [ Ident(..), Ident(..), Ident(..) ] => [
+            ("sge", ops![ops[0], ops[2], ops[1]])
+        ];
     }
 }
 
 pseudo_instruction! {
-    pub Sgtu {
-        name: "sgtu",
-        format: [ RegD, RegS, RegS ],
-        expander: F1!("sltu"),
+    pub Sgtu "sgtu" |ops| {
+        [ Ident(..), Ident(..), Ident(..) ] => [
+            ("sltu", ops![ops[0], ops[2], ops[1]])
+        ];
     }
 }
 
 pseudo_instruction! {
-    pub Sleu {
-        name: "sleu",
-        format: [ RegD, RegS, RegS ],
-        expander: F1!("sgeu"),
+    pub Sleu "sleu" |ops| {
+        [ Ident(..), Ident(..), Ident(..) ] => [
+            ("sgeu", ops![ops[0], ops[2], ops[1]])
+        ];
     }
 }
 
 pseudo_instruction! {
-    pub Seqz {
-        name: "seqz",
-        format: [ RegD, RegS ],
-        expander: F2!("seq"),
+    pub Seqz "seqz" |ops| {
+        [ Ident(..), Ident(..) ] => [
+            ("seq", ops![ops[0], ops[1], "r0"])
+        ];
     }
 }
 
 pseudo_instruction! {
-    pub Snez {
-        name: "snez",
-        format: [ RegD, RegS ],
-        expander: F2!("sne"),
+    pub Snez "snez" |ops| {
+        [ Ident(..), Ident(..) ] => [
+            ("sne", ops![ops[0], ops[1], "r0"])
+        ];
     }
 }
 
 pseudo_instruction! {
-    pub Sltz {
-        name: "sltz",
-        format: [ RegD, RegS ],
-        expander: F2!("slt"),
+    pub Sltz "sltz" |ops| {
+        [ Ident(..), Ident(..) ] => [
+            ("slt", ops![ops[0], ops[1], "r0"])
+        ];
     }
 }
 
 pseudo_instruction! {
-    pub Sgez {
-        name: "sgez",
-        format: [ RegD, RegS ],
-        expander: F2!("sge"),
+    pub Sgez "sgez" |ops| {
+        [ Ident(..), Ident(..) ] => [
+            ("sge", ops![ops[0], ops[1], "r0"])
+        ];
     }
 }
 
 pseudo_instruction! {
-    pub Slez {
-        name: "slez",
-        format: [ RegD, RegS ],
-        expander: F3!("sge"),
+    pub Slez "slez" |ops| {
+        [ Ident(..), Ident(..) ] => [
+            ("sge", ops![ops[0], "r0", ops[1]])
+        ];
     }
 }
 
 pseudo_instruction! {
-    pub Sgtz {
-        name: "sgtz",
-        format: [ RegD, RegS ],
-        expander: F3!("slt"),
+    pub Sgtz "sgtz" |ops| {
+        [ Ident(..), Ident(..) ] => [
+            ("slt", ops![ops[0], "r0", ops[1]])
+        ];
     }
-}
-
-macro F1($instr:literal) {
-    |_, ops| smallvec::smallvec![($instr, ops![ops[0], ops[2], ops[1]])]
-}
-
-macro F2($instr:literal) {
-    |_, ops| smallvec::smallvec![($instr, ops![ops[0], ops[1], "r0"])]
-}
-
-macro F3($instr:literal) {
-    |_, ops| smallvec::smallvec![($instr, ops![ops[0], "r0", ops[1]])]
 }

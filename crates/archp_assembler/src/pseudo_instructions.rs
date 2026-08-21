@@ -11,16 +11,12 @@ mod set;
 
 use std::{collections::HashMap, sync::LazyLock};
 
-use anyhow::{Result, bail};
+use anyhow::Result;
 use smallvec::SmallVec;
 
-use crate::{
-    assembler::Instr,
-    context::Context,
-    operand::{Operand, OperandType},
-};
+use crate::{assembler::Instr, context::Context, operand::Operand};
 
-type ExpandFn = for<'a> fn(&mut Context<'a>, &[Operand<'a>]) -> SmallVec<[Instr<'a>; 2]>;
+type ExpandFn = for<'a> fn(&mut Context<'a>, &[Operand<'a>]) -> Result<SmallVec<[Instr<'a>; 2]>>;
 
 inventory::collect!(Entry);
 
@@ -29,13 +25,11 @@ pub static PSEUDO_INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static Entry>> 
 
 pub struct Entry {
     name: &'static str,
-    format: &'static [OperandType],
     expander: ExpandFn,
 }
 
 trait PseudoInstruction: Send + Sync {
     const NAME: &'static str;
-    const FORMAT: &'static [OperandType];
     const EXPANDER: ExpandFn;
 }
 
@@ -43,7 +37,6 @@ impl Entry {
     const fn of<T: PseudoInstruction>() -> Self {
         Self {
             name: T::NAME,
-            format: T::FORMAT,
             expander: T::EXPANDER,
         }
     }
@@ -53,74 +46,15 @@ impl Entry {
         ctx: &mut Context<'a>,
         operands: &[Operand<'a>],
     ) -> Result<SmallVec<[Instr<'a>; 2]>> {
-        self.assert_operand_format(operands)?;
-
-        Ok((self.expander)(ctx, operands))
-    }
-
-    fn assert_operand_format(&self, operands: &[Operand]) -> Result<()> {
-        if operands.len() != self.format.len() {
-            bail!(
-                "Pseudo-instruction '{}' requires {} operands, got {}",
-                self.name,
-                self.format.len(),
-                operands.len()
-            );
-        }
-
-        // TODO: change this
-        for (i, op) in operands.iter().enumerate() {
-            match self.format[i] {
-                OperandType::RegD | OperandType::RegS => {
-                    if !matches!(op, Operand::Ident(..)) {
-                        bail!(
-                            "Pseudo-instruction '{}' requires operand {} to be a register, got {}",
-                            self.name,
-                            i + 1,
-                            op
-                        );
-                    }
-                },
-                OperandType::Imm(..) => {
-                    if !matches!(op, Operand::Num(..)) {
-                        bail!(
-                            "Pseudo-instruction '{}' requires operand {} to be an immediate, got {}",
-                            self.name,
-                            i + 1,
-                            op
-                        );
-                    }
-                },
-                OperandType::Addr(..) => {
-                    if !matches!(op, Operand::Ident(..) | Operand::Addition(..)) {
-                        bail!(
-                            "Pseudo-instruction '{}' requires operand {} to be an address, got {}",
-                            self.name,
-                            i + 1,
-                            op
-                        );
-                    }
-                },
-                OperandType::None => {
-                    panic!(
-                        "Internal error: Pseudo-instruction '{}' has an operand type of None",
-                        self.name
-                    );
-                },
-            };
-        }
-
-        Ok(())
+        (self.expander)(ctx, operands)
     }
 }
 
 macro pseudo_instruction {
-    (
+    (@impl
         $( #[doc = $doc:literal] )*
-        $vis:vis $id:ident {
-            name: $name:literal,
-            format: $types:tt,
-            expander: $expander:expr,
+        $vis:vis $id:ident $name:literal {
+            $expander:expr
         }
     ) => {
         $( #[doc = $doc] )*
@@ -128,12 +62,59 @@ macro pseudo_instruction {
 
         impl $crate::pseudo_instructions::PseudoInstruction for $id {
             const NAME: &'static str = $name;
-            const FORMAT: &'static [$crate::operand::OperandType] = $crate::operand::op_types! $types;
             const EXPANDER: $crate::pseudo_instructions::ExpandFn = $expander;
         }
 
         inventory::submit! {
             $crate::pseudo_instructions::Entry::of::<$id>()
+        }
+    },
+
+    (
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident $name:literal |$ops:tt| {
+            $(
+                $matches:tt => [ $( $op:expr ),* $(,)? ]
+            );+ ;
+        }
+    ) => {
+        pseudo_instruction! {@impl
+            $( #[doc = $doc] )*
+            $vis $id $name {
+                |_, $ops| {
+                    $(
+                        if let $matches = $ops {
+                            return Ok(smallvec::smallvec![ $( $op) ,* ])
+                        }
+                    )+
+
+                    anyhow::bail!("operands mismatch")
+                }
+            }
+        }
+    },
+
+    (
+        $( #[doc = $doc:literal] )*
+        $vis:vis $id:ident $name:literal {
+            $(
+                $matches:tt => $expander:expr
+            );+ ;
+        }
+    ) => {
+        pseudo_instruction! {@impl
+            $( #[doc = $doc] )*
+            $vis $id $name {
+                |ctx, ops| {
+                    $(
+                        if let $matches = ops {
+                            return ($expander)(ctx, ops)
+                        }
+                    )+
+
+                    anyhow::bail!("operands mismatch")
+                }
+            }
         }
     },
 }

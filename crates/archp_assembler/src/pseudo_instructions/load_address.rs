@@ -1,23 +1,20 @@
+use smallvec::smallvec;
+
 use crate::{
     instructions::INSTRUCTIONS,
-    operand::ops,
+    operand::{Operand::*, ops},
     pseudo_instructions::{ExpandFn, pseudo_instruction},
 };
 
-// TODO: change this
 pseudo_instruction! {
-    pub La {
-        name: "la",
-        format: [ RegD, Addr(12) ],
-        expander: F,
+    pub La "la" {
+        [ Ident(..), Ident(..) | Addition(..) ] => F;
     }
 }
 
 pseudo_instruction! {
-    pub Lla {
-        name: "lla",
-        format: [ RegD, Addr(12) ],
-        expander: F,
+    pub Lla "lla" {
+        [ Ident(..), Ident(..) | Addition(..) ] => F;
     }
 }
 
@@ -31,8 +28,8 @@ const F: ExpandFn = |ctx, ops| {
     ctx.add_relocation(instr, offset + 4, offset, &ops[1])
         .unwrap();
 
-    smallvec::smallvec![
+    Ok(smallvec![
         ("auipc", ops![ops[0], 0]),
         ("addi", ops![ops[0], ops[0], 0])
-    ]
+    ])
 };

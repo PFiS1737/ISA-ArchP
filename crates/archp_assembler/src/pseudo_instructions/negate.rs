@@ -1,9 +1,12 @@
-use crate::{operand::ops, pseudo_instructions::pseudo_instruction};
+use crate::{
+    operand::{Operand::*, ops},
+    pseudo_instructions::pseudo_instruction,
+};
 
 pseudo_instruction! {
-    pub Neg {
-        name: "neg",
-        format: [ RegD, RegS ],
-        expander: |_, ops| smallvec::smallvec![("sub", ops![ops[0], "r0", ops[1]])],
+    pub Neg "neg" |ops| {
+        [ Ident(..), Ident(..) ] => [
+            ("sub", ops![ops[0], "r0", ops[1]])
+        ];
     }
 }

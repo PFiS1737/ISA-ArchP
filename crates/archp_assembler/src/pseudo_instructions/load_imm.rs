@@ -1,34 +1,32 @@
+use smallvec::smallvec;
+
 use crate::{
     encoder::immediate::split_hi_lo,
-    operand::ops,
+    operand::{Operand::*, ops},
     pseudo_instructions::{ExpandFn, pseudo_instruction},
     utils::sig_ext::sign_extend,
 };
 
 pseudo_instruction! {
-    pub Li {
-        name: "li",
-        format: [ RegD, Imm(12, i) ],
-        expander: F,
+    pub Li "li" {
+        [ Ident(..), Num(..) ] => F;
     }
 }
-
-// TODO: '%hi' and '%lo' modifiers
 
 const F: ExpandFn = |_, ops| {
     if let Ok(n) = ops[1].cast_immediate()
         && let (lo, hi) = split_hi_lo(n, 12, true)
         && hi != 0
     {
-        let mut ret = smallvec::smallvec![("lui", ops![ops[0], hi])];
+        let mut ret = smallvec![("lui", ops![ops[0], hi])];
 
         if lo != 0 {
             ret.push(("addi", ops![ops[0], ops[0], sign_extend(lo, 12)]))
         }
 
-        ret
+        Ok(ret)
     } else {
-        smallvec::smallvec![("addi", ops![ops[0], "r0", ops[1]])]
+        Ok(smallvec![("addi", ops![ops[0], "r0", ops[1]])])
     }
 };
 
@@ -40,9 +38,9 @@ mod tests {
 
     #[test]
     fn load_imm32() {
-        assert_snapshot!(test_ps_instr!(Li "r1"), @"Error: Pseudo-instruction 'li' requires 2 operands, got 1");
-        assert_snapshot!(test_ps_instr!(Li "r1", "r2"), @"Error: Pseudo-instruction 'li' requires operand 2 to be an immediate, got r2");
-        assert_snapshot!(test_ps_instr!(Li 123, "r2"), @"Error: Pseudo-instruction 'li' requires operand 1 to be a register, got 123");
+        assert_snapshot!(test_ps_instr!(Li "r1"), @"Error: operands mismatch");
+        assert_snapshot!(test_ps_instr!(Li "r1", "r2"), @"Error: operands mismatch");
+        assert_snapshot!(test_ps_instr!(Li 123, "r2"), @"Error: operands mismatch");
 
         assert_snapshot!(test_ps_instr!(Li "r1", 0x123), @"addi r1 r0 291");
         assert_snapshot!(test_ps_instr!(Li "r1", 0x1234), @"lui r1 1; addi r1 r1 564");

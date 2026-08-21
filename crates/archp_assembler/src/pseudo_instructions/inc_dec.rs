@@ -1,21 +1,20 @@
-use crate::{operand::ops, pseudo_instructions::pseudo_instruction};
+use crate::{
+    operand::{Operand::*, ops},
+    pseudo_instructions::pseudo_instruction,
+};
 
 pseudo_instruction! {
-    pub Inc {
-        name: "inc",
-        format: [ RegD ],
-        expander: F!("addi"),
+    pub Inc "inc" |ops| {
+        [ Ident(..) ] => [
+            ("addi", ops![ops[0], ops[0], 1])
+        ];
     }
 }
 
 pseudo_instruction! {
-    pub Dec {
-        name: "dec",
-        format: [ RegD ],
-        expander: F!("subi"),
+    pub Dec "dec" |ops| {
+        [ Ident(..) ] => [
+            ("subi", ops![ops[0], ops[0], 1])
+        ];
     }
-}
-
-macro F($instr:literal) {
-    |_, ops| smallvec::smallvec![($instr, ops![ops[0], ops[0], 1])]
 }
