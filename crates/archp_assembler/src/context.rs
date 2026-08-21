@@ -26,7 +26,15 @@ pub struct Context<'src> {
 }
 
 #[derive(Debug, Clone)]
+pub enum RelocationType {
+    LowUnchecked, // TODO: remove this
+    Low,
+    High,
+}
+
+#[derive(Debug, Clone)]
 pub struct Relocation<'a> {
+    pub rtype: RelocationType,
     /// Offset of target instruction in the text section
     pub offset: usize,
     /// Base address for the relative address calculation.
@@ -87,6 +95,7 @@ impl<'src> Context<'src> {
     pub fn add_relocation(
         &mut self,
         instr: &'static Entry,
+        rtype: RelocationType,
         offset: usize,
         base: usize,
         op: &Operand<'src>,
@@ -94,6 +103,7 @@ impl<'src> Context<'src> {
         let (label, addend) = op.cast_address()?;
 
         self.relocations.push(Relocation {
+            rtype,
             offset,
             base,
             label,

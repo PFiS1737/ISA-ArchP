@@ -16,10 +16,15 @@ use anyhow::{Result, bail};
 use smallvec::SmallVec;
 
 use crate::{
-    context::Context,
-    encoder::{address::encode_address, immediate::encode_immediate, register::encode_register},
+    context::{Context, RelocationType},
+    encoder::{
+        address::{encode_address, encode_address_check},
+        immediate::encode_immediate,
+        register::encode_register,
+    },
     instructions::types::InstrType,
     operand::{Operand, OperandType},
+    utils::split::split_hi_lo,
 };
 
 inventory::collect!(Entry);
@@ -65,18 +70,26 @@ impl Entry {
         Ok(self.itype.encode(self.opcode, self.funct3, &operands))
     }
 
-    pub fn apply_relocation(&self, code: u32, addr: i64, base: u32) -> Result<u32> {
+    pub fn apply_relocation(
+        &self,
+        rtype: RelocationType,
+        code: u32,
+        addr: i64,
+        base: u32,
+    ) -> Result<u32> {
         for (idx, op_ty) in self.format.iter().enumerate() {
-            if let OperandType::Imm(.., false) = op_ty {
-                bail!(
-                    "Instruction '{}' does not support relocation for unsigned immediate",
-                    self.name
-                );
-            }
+            if let OperandType::Addr(bits) | OperandType::Imm(bits, ..) = op_ty {
+                let shift = matches!(op_ty, OperandType::Addr(..));
 
-            if let OperandType::Addr(bits) | OperandType::Imm(bits, true) = op_ty {
-                let addr =
-                    encode_address(addr, *bits, base, matches!(op_ty, OperandType::Addr(..)))?;
+                let v = encode_address(addr, base, shift);
+                let (lo, hi) = split_hi_lo(v, 12, true);
+
+                let addr = match rtype {
+                    // TODO: remove this
+                    RelocationType::LowUnchecked => encode_address_check(addr, base, shift, *bits)?,
+                    RelocationType::Low => lo,
+                    RelocationType::High => hi,
+                };
 
                 let mut ops = self.itype.decode(code);
                 ops[idx] = addr;
@@ -119,7 +132,13 @@ impl Entry {
                 OperandType::Addr(..) => {
                     let offset = ctx.text.len();
                     // TODO: can we put the addend into the instruction code?
-                    ctx.add_relocation(self, offset, offset, ops.next().unwrap())?;
+                    ctx.add_relocation(
+                        self,
+                        RelocationType::LowUnchecked,
+                        offset,
+                        offset,
+                        ops.next().unwrap(),
+                    )?;
                     0
                 },
                 OperandType::None => 0,

@@ -1,6 +1,7 @@
 use smallvec::smallvec;
 
 use crate::{
+    context::RelocationType,
     instructions::INSTRUCTIONS,
     operand::{Operand::*, ops},
     pseudo_instructions::{ExpandFn, pseudo_instruction},
@@ -19,13 +20,15 @@ pseudo_instruction! {
 }
 
 const F: ExpandFn = |ctx, ops| {
-    let instr = INSTRUCTIONS.get("addi").unwrap();
+    let auipc = INSTRUCTIONS.get("auipc").unwrap();
+    let addi = INSTRUCTIONS.get("addi").unwrap();
 
     let offset = ctx.text.len();
 
-    // NOTE: Safe to unwrap because we have checked the operands
-    //       by [crate::pseudo_instructions::Entry::assert_operand_format]
-    ctx.add_relocation(instr, offset + 4, offset, &ops[1])
+    ctx.add_relocation(auipc, RelocationType::High, offset, offset, &ops[1])
+        .unwrap();
+
+    ctx.add_relocation(addi, RelocationType::Low, offset + 4, offset, &ops[1])
         .unwrap();
 
     Ok(smallvec![
