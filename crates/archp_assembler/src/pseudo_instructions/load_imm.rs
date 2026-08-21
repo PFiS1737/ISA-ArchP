@@ -1,10 +1,9 @@
 use smallvec::smallvec;
 
 use crate::{
-    encoder::immediate::split_hi_lo,
     operand::{Operand::*, ops},
     pseudo_instructions::{ExpandFn, pseudo_instruction},
-    utils::sig_ext::sign_extend,
+    utils::{sig_ext::sign_extend, split::split_hi_lo},
 };
 
 pseudo_instruction! {

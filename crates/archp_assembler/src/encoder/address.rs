@@ -1,34 +1,25 @@
 use anyhow::{Result, bail};
 
+use crate::utils::split::split_hi_lo;
+
 pub fn encode_address(addr: i64, bits: u8, base: u32, shift: bool) -> Result<u32> {
-    if bits == 0 || bits > 32 {
-        bail!("Invalid address offset field width: {}", bits);
-    }
-
-    let mask = if bits == 32 {
-        u32::MAX
-    } else {
-        (1u32 << bits) - 1
-    };
-
     let mut v = addr - (base as i64);
 
     if shift {
         v >>= 1;
     }
 
-    let min = -(1i64 << (bits - 1));
-    let max = (1i64 << (bits - 1)) - 1;
+    let (lo, hi) = split_hi_lo(v, bits, true);
 
-    if v < min || v > max {
+    if hi != 0 {
         bail!(
             "Address offset '{}' out of range for i{} ({} ..= {})",
             v,
             bits,
-            min,
-            max
+            i32::MIN >> (32 - bits),
+            i32::MAX >> (32 - bits),
         );
     }
 
-    Ok((v as u32) & mask)
+    Ok(lo)
 }

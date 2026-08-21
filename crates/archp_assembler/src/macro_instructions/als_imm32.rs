@@ -1,7 +1,7 @@
 use crate::{
-    encoder::immediate::split_hi_lo,
     macro_instructions::{ExpandFn, macro_instruction},
     operand::ops,
+    utils::split::split_hi_lo,
 };
 
 macro_instruction! {
