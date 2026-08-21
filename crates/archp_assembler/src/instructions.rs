@@ -67,28 +67,16 @@ impl Entry {
 
     pub fn apply_relocation(&self, code: u32, addr: i64, base: u32) -> Result<u32> {
         for (idx, op_ty) in self.format.iter().enumerate() {
-            if let OperandType::Imm(_, signed) = op_ty
-                && !*signed
-            {
+            if let OperandType::Imm(.., false) = op_ty {
                 bail!(
                     "Instruction '{}' does not support relocation for unsigned immediate",
                     self.name
                 );
             }
 
-            if let OperandType::Addr(bits) | OperandType::Imm(bits, _) = op_ty {
-                let addr = encode_address(
-                    addr,
-                    *bits,
-                    // TODO: remove this
-                    // 对于 addi 这样的 relocation（由 la 使用），临时强制使用绝对地址
-                    if matches!(op_ty, OperandType::Imm(..)) {
-                        0
-                    } else {
-                        base
-                    },
-                    matches!(op_ty, OperandType::Addr(..)),
-                )?;
+            if let OperandType::Addr(bits) | OperandType::Imm(bits, true) = op_ty {
+                let addr =
+                    encode_address(addr, *bits, base, matches!(op_ty, OperandType::Addr(..)))?;
 
                 let mut ops = self.itype.decode(code);
                 ops[idx] = addr;
@@ -131,7 +119,7 @@ impl Entry {
                 OperandType::Addr(..) => {
                     let offset = ctx.text.len();
                     // TODO: can we put the addend into the instruction code?
-                    ctx.add_relocation(self, offset, ops.next().unwrap())?;
+                    ctx.add_relocation(self, offset, offset, ops.next().unwrap())?;
                     0
                 },
                 OperandType::None => 0,

@@ -28,7 +28,7 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
 
             let code = reloc
                 .instr
-                .apply_relocation(code, addr, reloc.offset as u32)?;
+                .apply_relocation(code, addr, reloc.base as u32)?;
 
             self.context.set_code(reloc.offset, code);
         }

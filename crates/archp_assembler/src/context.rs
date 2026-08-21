@@ -27,9 +27,16 @@ pub struct Context<'src> {
 
 #[derive(Debug, Clone)]
 pub struct Relocation<'a> {
+    /// Offset of target instruction in the text section
     pub offset: usize,
+    /// Base address for the relative address calculation.
+    /// Usually the offset of the instruction itself, or to an 'auipc'
+    pub base: usize,
+    /// Label to be resolved
     pub label: &'a str,
+    /// Addend to be added to the resolved label address
     pub addend: i64,
+    /// Instruction entry for the target instruction
     pub instr: &'static Entry,
 }
 
@@ -81,12 +88,14 @@ impl<'src> Context<'src> {
         &mut self,
         instr: &'static Entry,
         offset: usize,
+        base: usize,
         op: &Operand<'src>,
     ) -> Result<()> {
         let (label, addend) = op.cast_address()?;
 
         self.relocations.push(Relocation {
             offset,
+            base,
             label,
             addend,
             instr,
