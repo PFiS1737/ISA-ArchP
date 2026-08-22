@@ -2,8 +2,6 @@ use std::fmt::Display;
 
 use anyhow::{Result, bail};
 
-use crate::{context::Context, expression::Expr};
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Operand<'src> {
     Num(i64),
@@ -66,34 +64,6 @@ impl Display for Operand<'_> {
             Operand::Ident(s) => write!(f, "{}", s),
             Operand::Addition(s, n) => write!(f, "{}{:+}", s, n),
         }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum DirectiveOperand<'src> {
-    Empty,
-    Expr(Expr<'src>),
-    Operand(Operand<'src>),
-    String(&'src str),
-}
-
-impl Display for DirectiveOperand<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            DirectiveOperand::Empty => write!(f, ""),
-            DirectiveOperand::Expr(expr) => write!(f, "{}", expr),
-            DirectiveOperand::Operand(op) => write!(f, "{}", op),
-            DirectiveOperand::String(s) => write!(f, "\"{}\"", s),
-        }
-    }
-}
-
-impl<'src> DirectiveOperand<'src> {
-    pub fn as_evaluated(&self, ctx: &Context<'src>) -> Result<Self> {
-        Ok(match self {
-            DirectiveOperand::Expr(expr) => Self::Operand(expr.eval_to_operand_with(&ctx.equates)?),
-            _ => self.clone(),
-        })
     }
 }
 

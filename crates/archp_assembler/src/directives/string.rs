@@ -5,8 +5,7 @@ use nom::AsChar;
 
 use crate::{
     context::Context,
-    directives::{HandlerFn, directive},
-    operand::DirectiveOperand,
+    directives::{DirectiveOperand, HandlerFn, directive},
 };
 
 directive! {

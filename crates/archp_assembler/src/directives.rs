@@ -2,6 +2,7 @@ mod _reserved;
 mod alias;
 mod align;
 mod equate;
+mod operand;
 mod string;
 mod zero;
 
@@ -9,7 +10,8 @@ use std::{collections::HashMap, sync::LazyLock};
 
 use anyhow::Result;
 
-use crate::{context::Context, operand::DirectiveOperand};
+use crate::context::Context;
+pub use crate::directives::operand::DirectiveOperand;
 
 type HandlerFn = for<'a> fn(&mut Context<'a>, &[DirectiveOperand<'a>]) -> Result<()>;
 

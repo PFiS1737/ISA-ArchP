@@ -4,11 +4,8 @@ use anyhow::{Result, bail};
 
 use crate::{
     context::Context,
-    directives::{HandlerFn, directive},
-    operand::{
-        DirectiveOperand::{self, *},
-        Operand::*,
-    },
+    directives::{DirectiveOperand, HandlerFn, directive, operand::EvaluatedDirectiveOperand::*},
+    operand::Operand::*,
 };
 
 directive! {

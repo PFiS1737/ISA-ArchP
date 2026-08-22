@@ -1,4 +1,4 @@
-use crate::{directives::directive, operand::DirectiveOperand::*};
+use crate::directives::{DirectiveOperand::*, directive};
 
 directive! {
     pub Zero {

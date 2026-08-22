@@ -1,4 +1,7 @@
-use crate::{directives::directive, expression::Expr::*, operand::DirectiveOperand::*};
+use crate::{
+    directives::{DirectiveOperand::*, directive},
+    expression::Expr::*,
+};
 
 directive! {
     pub Alias {

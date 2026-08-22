@@ -2,10 +2,7 @@ use anyhow::Result;
 use smallvec::SmallVec;
 
 use crate::{
-    context::Context,
-    operand::{DirectiveOperand, Operand},
-    pass1::Pass1,
-    pass2::Pass2,
+    context::Context, directives::DirectiveOperand, operand::Operand, pass1::Pass1, pass2::Pass2,
 };
 
 pub struct Assembler {
