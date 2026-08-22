@@ -43,16 +43,18 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                 operands,
                 line,
             } => {
-                if let Some(dire) = DIRECTIVES.get(name) {
-                    dire.handle(self.context, &operands).map_err(|e| {
+                DIRECTIVES
+                    .get(name)
+                    .ok_or(anyhow!("Unknown directive: '{}'", name))?
+                    .handle(self.context, &operands)
+                    .map_err(|e| {
                         anyhow!(
                             "Error handling directive at line {}: '{}' ({})",
                             line.0,
                             line.1,
                             e
                         )
-                    })?
-                }
+                    })?;
             },
             Line::Instruction {
                 name,
@@ -83,7 +85,12 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                 for (name, ops) in instrs.into_iter() {
                     if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
                         let expanded = ps_instr.expand(self.context, &ops).map_err(|e| {
-                            anyhow!("Error expanding pseudo-instruction '{}': {}", name, e)
+                            anyhow!(
+                                "Error expanding pseudo-instruction at line {}: '{}' ({})",
+                                line.0,
+                                line.1,
+                                e
+                            )
                         })?;
                         for instr in expanded {
                             self.handle_instr(instr)?;
