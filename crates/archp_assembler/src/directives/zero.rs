@@ -1,19 +1,11 @@
-use anyhow::bail;
-
-use crate::{
-    directives::directive,
-    operand::{DirectiveOperand::*, Operand},
-};
+use crate::{directives::directive, operand::DirectiveOperand::*};
 
 directive! {
     pub Zero {
         name: ".zero",
         matches: [Expr(expr)],
         handler: |ctx| {
-            let bytes = match expr.eval_to_operand_with(&ctx.equates)? {
-                Operand::Num(value) => value,
-                _ => bail!("expected absolute expression, got {}", expr),
-            };
+            let bytes = expr.cast_absolute(ctx)?;
 
             for _ in 0..bytes {
                 ctx.add_byte(0);

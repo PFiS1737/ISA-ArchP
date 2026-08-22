@@ -1,23 +1,22 @@
-use anyhow::bail;
-
-use crate::{
-    directives::directive,
-    expression::Expr::*,
-    operand::{DirectiveOperand::*, Operand},
-};
+use crate::{directives::directive, expression::Expr::*, operand::DirectiveOperand::*};
 
 directive! {
-    pub [
-        Equ ".equ";
-        Set ".set";
-    ] {
+    pub Equ {
+        name: ".equ",
         matches: [Expr(Ident(name)), Expr(expr)],
         handler: |ctx| {
-            let value = match expr.eval_to_operand_with(&ctx.equates)? {
-                Operand::Num(value) => value,
-                _ => bail!("expected absolute expression, got {}", expr),
-            };
+            let value = expr.cast_absolute(ctx)?;
+            ctx.equates.insert(name, value);
+        },
+    }
+}
 
+directive! {
+    pub Set {
+        name: ".set",
+        matches: [Expr(Ident(name)), Expr(expr)],
+        handler: |ctx| {
+            let value = expr.cast_absolute(ctx)?;
             ctx.equates.insert(name, value);
         },
     }

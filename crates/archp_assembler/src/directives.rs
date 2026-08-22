@@ -102,48 +102,4 @@ macro directive {
             }
         }
     },
-
-    (
-        $vis:vis [
-            $(
-                $( #[doc = $doc:literal] )*
-                $id:ident $name:literal
-            );+ $(;)?
-        ] {
-            matches: $matches:tt,
-            handler: |$ctx:ident| $handler:expr,
-        }
-    ) => {
-        $(
-            directive! {
-                $( #[doc = $doc] )*
-                $vis $id {
-                    name: $name,
-                    matches: $matches,
-                    handler: |$ctx| $handler,
-                }
-            }
-        )+
-    },
-
-    (
-        $vis:vis [
-            $(
-                $( #[doc = $doc:literal] )*
-                $id:ident $name:literal
-            );+ $(;)?
-        ] {
-            handler: $handler:expr,
-        }
-    ) => {
-        $(
-            directive! {
-                $( #[doc = $doc] )*
-                $vis $id {
-                    name: $name,
-                    handler: $handler,
-                }
-            }
-        )+
-    },
 }

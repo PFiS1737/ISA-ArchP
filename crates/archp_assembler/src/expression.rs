@@ -1,8 +1,9 @@
 use std::{collections::HashMap, fmt::Display};
 
+use anyhow::bail;
 use thiserror::Error;
 
-use crate::operand::Operand;
+use crate::{context::Context, operand::Operand};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr<'src> {
@@ -80,6 +81,13 @@ impl<'ctx, 'src: 'ctx> Expr<'src> {
             Operand::Addition(ident, 0) => Operand::Ident(ident),
             _ => op,
         })
+    }
+
+    pub fn cast_absolute(&self, ctx: &Context<'src>) -> anyhow::Result<i64> {
+        match self.eval_to_operand_with(&ctx.equates)? {
+            Operand::Num(value) => Ok(value),
+            _ => bail!("expected absolute expression, got {}", self),
+        }
     }
 }
 
