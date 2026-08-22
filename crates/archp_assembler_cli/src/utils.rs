@@ -24,6 +24,10 @@ where
 }
 
 pub fn align_tabbed_lines(lines: HashMap<usize, String>) -> HashMap<usize, String> {
+    if lines.is_empty() {
+        return HashMap::new();
+    }
+
     let split_lines: Vec<Vec<&str>> = lines
         .values()
         .map(|line| line.split('\t').collect())

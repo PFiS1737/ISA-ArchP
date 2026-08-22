@@ -33,6 +33,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
         match line {
             Line::Label(label) => {
                 // INFO: Make sure the text section is aligned to 4 bytes before adding labels
+                // FIXME: Don't align if it is labeled on a data
                 self.context.align4();
 
                 let pc = self.context.text.len();

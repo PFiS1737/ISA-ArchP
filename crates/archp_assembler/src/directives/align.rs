@@ -1,3 +1,5 @@
+use std::iter::repeat_n;
+
 use anyhow::{Result, bail};
 
 use crate::{
@@ -31,23 +33,23 @@ directive! {
 }
 
 const F1: HandlerFn = |ctx, ops| {
-    let (bytes, value, max) = matches(ctx, ops)?;
+    let (p2, value, max) = matches(ctx, ops)?;
 
-    let bytes = 2_i64.pow(bytes as u32);
+    let align = 2_usize.pow(p2 as u32);
 
-    align(ctx, bytes, value, max)
+    align_bytes(ctx, align, value as u8, max as usize)
 };
 
 const F2: HandlerFn = |ctx, ops| {
-    let (bytes, value, max) = matches(ctx, ops)?;
+    let (align, value, max) = matches(ctx, ops)?;
 
-    align(ctx, bytes, value, max)
+    align_bytes(ctx, align as usize, value as u8, max as usize)
 };
 
 fn matches<'a>(ctx: &mut Context<'a>, ops: &[DirectiveOperand<'a>]) -> Result<(i64, i64, i64)> {
     let mut it = ops.iter().map(|op| op.as_evaluated(ctx));
 
-    let bytes = match it.next().transpose()? {
+    let align = match it.next().transpose()? {
         Some(Operand(Num(bytes))) => bytes,
         _ => bail!("operands mismatch"),
     };
@@ -68,23 +70,25 @@ fn matches<'a>(ctx: &mut Context<'a>, ops: &[DirectiveOperand<'a>]) -> Result<(i
         bail!("operands mismatch");
     }
 
-    Ok((bytes, value, max))
-}
-
-fn align(ctx: &mut Context, bytes: i64, value: i64, max: i64) -> Result<()> {
-    if bytes > max {
-        return Ok(());
+    if align < 0 || max < 0 {
+        bail!("alignment and max must be non-negative");
     }
 
-    let pc_bytes = ctx.text.len() as i64;
+    Ok((align, value, max))
+}
 
-    let aligned_pc = (pc_bytes + bytes - 1) / bytes * bytes;
+fn align_bytes(ctx: &mut Context, align: usize, value: u8, max: usize) -> Result<()> {
+    let rem = ctx.text.len() % align;
 
-    let pad_bytes = aligned_pc - pc_bytes;
-    let pad_instrs = pad_bytes / 4;
+    if rem != 0 {
+        let padding = align - rem;
 
-    for _ in 0..pad_instrs {
-        ctx.add_code(value as u32, None);
+        if padding > max {
+            return Ok(());
+        }
+
+        ctx.text.reserve(padding);
+        ctx.text.extend(repeat_n(value, padding));
     }
 
     Ok(())
@@ -101,11 +105,11 @@ mod tests {
         let mut ctx = Context::test();
 
         ctx.add_code(0x12345678, None);
-        align(&mut ctx, 2_i64.pow(5), 0, i64::MAX).unwrap();
+        align_bytes(&mut ctx, 2_usize.pow(5), 0, usize::MAX).unwrap();
         ctx.add_code(0x12345678, None);
-        align(&mut ctx, 2_i64.pow(4), 0, i64::MAX).unwrap();
+        align_bytes(&mut ctx, 2_usize.pow(4), 0, usize::MAX).unwrap();
         ctx.add_code(0x12345678, None);
-        align(&mut ctx, 2_i64.pow(3), 0, i64::MAX).unwrap();
+        align_bytes(&mut ctx, 2_usize.pow(3), 0, usize::MAX).unwrap();
         ctx.add_code(0x12345678, None);
 
         assert_debug_snapshot!(ctx.text, @"
