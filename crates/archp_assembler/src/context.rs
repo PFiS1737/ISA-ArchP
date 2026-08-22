@@ -53,11 +53,20 @@ impl<'src> Context<'src> {
         self.text.push(byte);
     }
 
+    pub fn add_half(&mut self, half: u16) {
+        let bytes = half.to_le_bytes();
+        self.text.extend_from_slice(&bytes);
+    }
+
+    pub fn add_word(&mut self, word: u32) {
+        let bytes = word.to_le_bytes();
+        self.text.extend_from_slice(&bytes);
+    }
+
     pub fn add_code(&mut self, code: u32, instr: Option<Instr<'src>>) {
         let offset = self.text.len();
 
-        let bytes = code.to_le_bytes();
-        self.text.extend_from_slice(&bytes);
+        self.add_word(code);
 
         self.instrs.insert(offset, instr);
     }
