@@ -29,6 +29,7 @@ impl<'a> Memory<'a> {
             keyboard_start,
             keyboard_grab: grab_keyboard,
             hz: _,
+            trace_file: _,
         } = config;
 
         regions.push(Region {

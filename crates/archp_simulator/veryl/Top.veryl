@@ -117,11 +117,4 @@ module Top (
 
     assign pcwe = pcwe_bjlu | pcwe_csu;
     assign pcwdata = pcwdata_bjlu | pcwdata_csu;
-
-    #[ifdef(TRACE)]
-    initial {
-        $display("Tracing enabled...");
-        $dumpfile("__dump__.fst"); // TODO: able to set dump file path from command line
-        $dumpvars();
-    }
 }

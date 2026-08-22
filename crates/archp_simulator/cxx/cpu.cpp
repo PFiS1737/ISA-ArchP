@@ -8,10 +8,6 @@ CPU::CPU() {
   ctx->randReset(2);
   ctx->randSeed(std::time(0));
 
-#ifdef VM_TRACE
-  ctx->traceEverOn(true);
-#endif
-
   top = std::make_unique<Vtop>(ctx.get());
 
   top->rst = 1;
@@ -43,6 +39,26 @@ void CPU::set_rst(bool rst) const {
 
 void CPU::eval() const {
   top->eval();
+}
+
+#if VM_TRACE
+void CPU::init_trace(rust::String file) const {
+  ctx->traceEverOn(true);
+  tfp = std::make_unique<VerilatedFstC>();
+  top->trace(tfp.get(), 99);
+  tfp->open(file.c_str());
+}
+
+void CPU::dump() const {
+  tfp->dump(ctx->time());
+}
+#endif
+
+void CPU::finish() const {
+  top->final();
+#if VM_TRACE
+  tfp->close();
+#endif
 }
 
 std::unique_ptr<CPU> create_cpu() {

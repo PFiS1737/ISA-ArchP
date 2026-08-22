@@ -2,9 +2,7 @@
 
 source ./scripts/common.fish
 
-# TODO: trace
-
-argparse h/help s/asm c/console -- $argv
+argparse h/help s/asm t/trace c/console -- $argv
 or return 1
 
 if set -q _flag_help
@@ -13,6 +11,7 @@ if set -q _flag_help
     echo "Options:"
     echo "  -h, --help      Show this help message and exit"
     echo "  -s, --asm       <file> is an assembly file, assemble it before running"
+    echo "  -t, --trace     Enable tracing and open the trace viewer after running"
     echo "  -c, --console   Start program on a new virtual terminal"
     return 0
 end
@@ -29,10 +28,14 @@ end
 
 set -e argv[1]
 
-trap "rm -rf output.bin" EXIT INT QUIT TERM
+if set -q _flag_trace
+    trap "rm -rf output.bin __dump__.fst .surfer/mappings/Instr" EXIT INT QUIT TERM
+else
+    trap "rm -rf output.bin" EXIT INT QUIT TERM
+end
 
 echo_h1 "Building..."
-cargo build
+cargo build --all-features
 echo
 
 if set -q _flag_asm
@@ -43,6 +46,12 @@ if set -q _flag_asm
     ./target/debug/archp-as $file -o output.bin
     or return 1
     and echo Done
+
+    if set -q _flag_trace
+        mkdir -p .surfer/mappings/
+        ./target/debug/archp-as $file --hex -o .surfer/mappings/Instr 2>&1 >/dev/null
+        sed -i '1i Bits = 32' .surfer/mappings/Instr
+    end
 
     set file output.bin
 
@@ -55,8 +64,17 @@ if test "$argv[1]" = --
     set argv $argv[2..-1]
 end
 
+if set -q _flag_trace
+    set -a argv -T __dump__.fst
+end
+
 if set -q _flag_console
     sudo openvt -sw -- ./target/debug/archp $file -fk $argv
 else
-    cargo run -p archp_simulator -- $file $argv
+    ./target/debug/archp $file $argv
+end
+
+if set -q _flag_trace
+    echo_h1 "Opening trace viewer..."
+    ./scripts/trace __dump__.fst
 end

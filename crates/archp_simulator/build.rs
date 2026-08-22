@@ -39,6 +39,8 @@ struct VerilatorMakeConfigSources {
 fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
+    let is_trace_featured = env::var("CARGO_FEATURE_TRACE").is_ok();
+
     // ====================
     //     Veryl Build
     // ====================
@@ -87,6 +89,11 @@ fn main() {
             "fast",
             "--no-assert",
         ])
+        .args(if is_trace_featured {
+            &["--trace-fst", "-DTRACE"][..]
+        } else {
+            &[]
+        })
         .args(dpi_files)
         .arg(veryl_out_dir.join("bundled.sv"))
         .status()
@@ -146,6 +153,13 @@ fn main() {
         .files(config.sources.support_fast)
         .file("cxx/cpu.cpp")
         .compile("archp_cpu");
+
+    if is_trace_featured {
+        // NOTE: Required by verilator > v5.050
+        //       See https://github.com/verilator/verilator/pull/6992
+        println!("cargo:rustc-link-lib=lz4");
+        println!("cargo:rustc-link-lib=z");
+    }
 
     println!("cargo:rerun-if-changed=src/cpu.rs");
     println!("cargo:rerun-if-changed=cxx");

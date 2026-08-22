@@ -9,6 +9,10 @@ pub struct Cli {
     /// File path to the binary machine code file to be simulated.
     pub file: PathBuf,
 
+    /// Output file path for the simulation trace, requires 'trace' feature to be enabled.
+    #[arg(short = 'T', long = "trace", default_value = "dump.fst")]
+    pub trace_file: String,
+
     /// Max simulation frequency in Hz, optional unit is supported.
     #[arg(short = 'F', long, value_parser = parse_united::<f64>)]
     pub hz: Option<f64>,

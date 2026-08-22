@@ -13,5 +13,11 @@ pub mod ffi {
         fn flip_clk(&self);
         fn set_rst(&self, rst: bool);
         fn eval(&self);
+        fn finish(&self);
+
+        #[cfg(feature = "trace")]
+        fn dump(&self);
+        #[cfg(feature = "trace")]
+        fn init_trace(&self, file: String);
     }
 }

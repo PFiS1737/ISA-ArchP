@@ -11,6 +11,7 @@ Arguments:
   <FILE>  File path to the binary machine code file to be simulated
 
 Options:
+  -T, --trace <TRACE_FILE>           Output file path for the simulation trace, requires 'trace' feature to be enabled [default: dump.fst]
   -F, --hz <HZ>                      Max simulation frequency in Hz, optional unit is supported
       --ram-size <SIZE>              RAM size in byte, optional unit is supported [default: 64M]
   -f, --framebuffer                  Add a XRGB8888 framebuffer to the simulation

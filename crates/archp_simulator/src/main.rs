@@ -31,6 +31,9 @@ fn main() -> Result<ExitCode> {
 
     let cpu_top = cpu::ffi::create_cpu();
 
+    #[cfg(feature = "trace")]
+    cpu_top.init_trace(cli.trace_file);
+
     let mut exit_code = 0;
     let mut last_time = Instant::now();
 
@@ -50,6 +53,9 @@ fn main() -> Result<ExitCode> {
 
         cpu_top.eval();
 
+        #[cfg(feature = "trace")]
+        cpu_top.dump();
+
         if let Some(hz) = cli.hz {
             let elapsed = last_time.elapsed();
             let duration = Duration::from_secs_f64(1.0 / hz);
@@ -59,6 +65,8 @@ fn main() -> Result<ExitCode> {
             last_time = Instant::now();
         }
     }
+
+    cpu_top.finish();
 
     Ok(exit_code.into())
 }
