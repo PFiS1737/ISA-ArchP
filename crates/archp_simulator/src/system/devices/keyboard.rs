@@ -21,7 +21,7 @@ pub struct Keyboard {
 }
 
 impl Keyboard {
-    pub fn new(tx: mpsc::Sender<bool>, grab_keyboard: bool) -> Self {
+    pub fn new(tx: mpsc::Sender<u8>, grab_keyboard: bool) -> Self {
         let data = Arc::new(AtomicU64::new(0));
 
         let mut devices = evdev::enumerate()
@@ -61,7 +61,7 @@ impl Keyboard {
                                         }
 
                                         if ctrl && code == KeyCode::KEY_C {
-                                            let _ = tx.send(true);
+                                            let _ = tx.send(130);
                                         }
 
                                         data.store(code.0 as u64, Ordering::Relaxed);

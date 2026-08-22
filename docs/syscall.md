@@ -85,6 +85,12 @@
 
 - `a0`: number of bytes written, or -1 on error
 
+### 93. Exit With Code
+
+#### Arguments
+
+- `a0`: exit code
+
 ### 0x1000_0000. Set Pixel
 
 #### Arguments

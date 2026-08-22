@@ -21,7 +21,7 @@ impl RegisterFile {
         self.regs.write().unwrap()[index] = value;
     }
 
-    pub fn rw_args(&self) -> Regs<'_> {
+    pub fn read_write(&self) -> Regs<'_> {
         self.regs.write().unwrap()
     }
 }

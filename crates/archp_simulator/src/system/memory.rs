@@ -15,7 +15,7 @@ pub struct Region<'a> {
 }
 
 impl<'a> Memory<'a> {
-    pub fn with_config(tx: mpsc::Sender<bool>, config: &Cli) -> Result<Self> {
+    pub fn with_config(tx: mpsc::Sender<u8>, config: &Cli) -> Result<Self> {
         let mut regions = Vec::new();
 
         let &Cli {

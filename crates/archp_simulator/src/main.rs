@@ -4,6 +4,7 @@ mod dpi;
 mod system;
 
 use std::{
+    process::ExitCode,
     sync::mpsc,
     thread,
     time::{Duration, Instant},
@@ -15,7 +16,7 @@ use clap_complete::CompleteEnv;
 
 use crate::{command::Cli, dpi::SYSTEM, system::System};
 
-fn main() -> Result<()> {
+fn main() -> Result<ExitCode> {
     CompleteEnv::with_factory(Cli::command)
         .var("ARCHP_COMPLETE")
         .complete();
@@ -24,12 +25,13 @@ fn main() -> Result<()> {
 
     let cli = Cli::parse();
 
-    let (tx, rx) = mpsc::channel::<bool>();
+    let (tx, rx) = mpsc::channel::<u8>();
 
     let _ = SYSTEM.set(System::with_config(tx, &cli)?);
 
     let cpu_top = cpu::ffi::create_cpu();
 
+    let mut exit_code = 0;
     let mut last_time = Instant::now();
 
     while !cpu_top.got_finish() {
@@ -41,9 +43,8 @@ fn main() -> Result<()> {
 
         cpu_top.flip_clk();
 
-        if let Ok(stopped) = rx.try_recv()
-            && stopped
-        {
+        if let Ok(code) = rx.try_recv() {
+            exit_code = code;
             break;
         }
 
@@ -59,5 +60,5 @@ fn main() -> Result<()> {
         }
     }
 
-    Ok(())
+    Ok(exit_code.into())
 }
