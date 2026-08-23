@@ -1,10 +1,10 @@
 use smallvec::smallvec;
 
 use crate::{
-    context::RelocationType,
     instructions::INSTRUCTIONS,
     operand::{Operand::*, ops},
     pseudo_instructions::{ExpandFn, pseudo_instruction},
+    relocation::RelocationType,
 };
 
 pseudo_instruction! {

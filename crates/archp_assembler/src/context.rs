@@ -2,7 +2,13 @@ use std::collections::HashMap;
 
 use anyhow::Result;
 
-use crate::{AssemblerSettings, assembler::Instr, instructions::Entry, operand::Operand};
+use crate::{
+    AssemblerSettings,
+    assembler::Instr,
+    instructions::Entry,
+    operand::Operand,
+    relocation::{Relocation, RelocationType},
+};
 
 #[derive(Default)]
 pub struct Context<'src> {
@@ -23,29 +29,6 @@ pub struct Context<'src> {
     pub equates: HashMap<&'src str, i64>,
 
     pub relocations: Vec<Relocation<'src>>,
-}
-
-#[derive(Debug, Clone)]
-pub enum RelocationType {
-    LowUnchecked, // TODO: remove this
-    Low,
-    High,
-}
-
-#[derive(Debug, Clone)]
-pub struct Relocation<'a> {
-    pub rtype: RelocationType,
-    /// Offset of target instruction in the text section
-    pub offset: usize,
-    /// Base address for the relative address calculation.
-    /// Usually the offset of the instruction itself, or to an 'auipc'
-    pub base: usize,
-    /// Label to be resolved
-    pub label: &'a str,
-    /// Addend to be added to the resolved label address
-    pub addend: i64,
-    /// Instruction entry for the target instruction
-    pub instr: &'static Entry,
 }
 
 impl<'src> Context<'src> {

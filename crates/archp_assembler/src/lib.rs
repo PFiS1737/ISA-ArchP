@@ -12,6 +12,7 @@ mod parser;
 mod pass1;
 mod pass2;
 mod pseudo_instructions;
+mod relocation;
 mod utils;
 
 pub use assembler::{Assembler, AssemblerSettings};

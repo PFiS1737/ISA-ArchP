@@ -16,15 +16,11 @@ use anyhow::{Result, bail};
 use smallvec::SmallVec;
 
 use crate::{
-    context::{Context, RelocationType},
-    encoder::{
-        address::{encode_address, encode_address_check},
-        immediate::encode_immediate,
-        register::encode_register,
-    },
+    context::Context,
+    encoder::{immediate::encode_immediate, register::encode_register},
     instructions::types::InstrType,
     operand::{Operand, OperandType},
-    utils::split::split_hi_lo,
+    relocation::RelocationType,
 };
 
 inventory::collect!(Entry);
@@ -34,11 +30,11 @@ pub static INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static Entry>> =
 
 #[derive(Debug, Clone)]
 pub struct Entry {
-    name: &'static str,
-    opcode: u32,
-    funct3: u32,
-    itype: InstrType,
-    format: &'static [OperandType],
+    pub name: &'static str,
+    pub opcode: u32,
+    pub funct3: u32,
+    pub itype: InstrType,
+    pub format: &'static [OperandType],
 }
 
 trait Instruction: Send + Sync {
@@ -70,38 +66,6 @@ impl Entry {
         Ok(self.itype.encode(self.opcode, self.funct3, &operands))
     }
 
-    pub fn apply_relocation(
-        &self,
-        rtype: RelocationType,
-        code: u32,
-        addr: i64,
-        base: u32,
-    ) -> Result<u32> {
-        for (idx, op_ty) in self.format.iter().enumerate() {
-            if let OperandType::Addr(bits) | OperandType::Imm(bits, ..) = op_ty {
-                let shift = matches!(op_ty, OperandType::Addr(..));
-
-                let v = encode_address(addr, base, shift);
-                let (lo, hi) = split_hi_lo(v, 12, true);
-
-                let addr = match rtype {
-                    // TODO: remove this
-                    RelocationType::LowUnchecked => encode_address_check(addr, base, shift, *bits)?,
-                    RelocationType::Low => lo,
-                    RelocationType::High => hi,
-                };
-
-                let mut ops = self.itype.decode(code);
-                ops[idx] = addr;
-                let word = self.itype.encode(self.opcode, self.funct3, &ops);
-
-                return Ok(word);
-            }
-        }
-
-        bail!("Instruction '{}' does not support relocation", self.name);
-    }
-
     fn parse<'src>(
         &'static self,
         ctx: &mut Context<'src>,
@@ -129,12 +93,11 @@ impl Entry {
                     let n = ops.next().unwrap().cast_immediate()?;
                     encode_immediate(n, bits, signed)?
                 },
-                OperandType::Addr(..) => {
+                OperandType::Addr(bits) => {
                     let offset = ctx.text.len();
-                    // TODO: can we put the addend into the instruction code?
                     ctx.add_relocation(
                         self,
-                        RelocationType::LowUnchecked,
+                        RelocationType::Bits(bits),
                         offset,
                         offset,
                         ops.next().unwrap(),
