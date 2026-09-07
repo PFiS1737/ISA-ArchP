@@ -10,6 +10,7 @@ publish = false
 
 [dependencies]
 anyhow = { workspace = true }
+base64 = { workspace = true }
 inventory = { workspace = true }
 nom = { workspace = true }
 smallvec = { workspace = true }

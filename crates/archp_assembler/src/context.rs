@@ -46,11 +46,15 @@ impl<'src> Context<'src> {
         self.text.extend_from_slice(&bytes);
     }
 
+    pub fn reserve_text(&mut self, additional: usize) -> &mut [u8] {
+        let len = self.text.len();
+        self.text.resize(len + additional, 0);
+        &mut self.text[len..]
+    }
+
     pub fn add_code(&mut self, code: u32, instr: Option<Instr<'src>>) {
         let offset = self.text.len();
-
         self.add_word(code);
-
         self.instrs.insert(offset, instr);
     }
 

@@ -1,6 +1,7 @@
 mod _reserved;
 mod alias;
 mod align;
+mod base64;
 mod bytes;
 mod equate;
 mod operand;
