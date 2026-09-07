@@ -2,7 +2,7 @@ mod branch;
 mod inc_dec;
 mod jump_and_link;
 mod load_address;
-mod load_imm;
+mod load_immediate;
 mod mv;
 mod negate;
 mod nop;
