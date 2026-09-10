@@ -101,7 +101,11 @@ pub fn run(
             .status()?
     };
     if !status.success() {
-        bail!("simulator failed");
+        if trace {
+            eprintln!("simulator failed");
+        } else {
+            bail!("simulator failed");
+        }
     }
 
     if trace {
