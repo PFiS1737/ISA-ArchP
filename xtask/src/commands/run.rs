@@ -12,6 +12,7 @@ use crate::utils::print_h1;
 
 pub fn run(
     file: PathBuf,
+    mut features: Vec<String>,
     asm: bool,
     trace: bool,
     console: bool,
@@ -30,14 +31,15 @@ pub fn run(
     create_dir_all(&surfer_dir)?;
     let mapping_file = surfer_dir.join("mapping");
 
+    if trace {
+        features.push("trace".to_string());
+    }
+
     print_h1("Building...");
     let status = Command::new("cargo")
         .arg("build")
-        .args(if trace {
-            &["--features", "trace"][..]
-        } else {
-            &[]
-        })
+        .arg("--features")
+        .arg(features.join(","))
         .status()?;
     if !status.success() {
         bail!("cargo build failed");

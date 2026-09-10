@@ -14,5 +14,5 @@ const F: ExpandFn = |_, _, ops| {
     if ops.len() != 1 {
         return None;
     }
-    Some(vec![("li", ops!["r17", ops[0]]), ("ecall", ops![])])
+    Some(vec![("li", ops!["a7", ops[0]]), ("ecall", ops![])])
 };

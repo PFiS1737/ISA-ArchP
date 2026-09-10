@@ -28,7 +28,7 @@ exit_code: 0
 0x010A5001 # addi t0 t0 1
 0x15C1FFDC # jal r0 .Linsertion_sort_outer
 0xFC800000 # ret                                  <label: .Linsertion_sort_done>
-0x01220005 # addi r17 r0 5                        <label: main>
+0x01220005 # addi a7 r0 5                         <label: main>
 0x40000000 # ecall
 0x0116A000 # addi a1 a0 0
 0x0A10B002 # slli s0 a1 2
@@ -36,7 +36,7 @@ exit_code: 0
 0x0138B000 # addi t3 a1 0
 0x010C2000 # addi t1 sp 0
 0x1201C200 # beq t3 r0 .Lmain_input_done          <label: .Lmain_input_loop>
-0x01220005 # addi r17 r0 5
+0x01220005 # addi a7 r0 5
 0x40000000 # ecall
 0x010EA000 # addi t2 a0 0
 0x11406007 # sw t2 t1 0
@@ -48,16 +48,16 @@ exit_code: 0
 0x010AA000 # addi t0 a0 0
 0x1200B280 # beq a1 zero .Lmain_output_done       <label: .Lmain_output_loop>
 0x10145000 # lw a0 t0 0
-0x01220001 # addi r17 r0 1
+0x01220001 # addi a7 r0 1
 0x40000000 # ecall
 0x0114000A # addi a0 r0 10
-0x0122000B # addi r17 r0 11
+0x0122000B # addi a7 r0 11
 0x40000000 # ecall
 0x010A5004 # addi t0 t0 4
 0x0156B001 # subi a1 a1 1
 0x15C1FFEE # jal r0 .Lmain_output_loop
 0x00042008 # add sp sp s0                         <label: .Lmain_output_done>
 0x14000002 # jal r0 halt
-0x0122000A # addi r17 r0 10                       <label: halt>
+0x0122000A # addi a7 r0 10                        <label: halt>
 0x40000000 # ecall
 ----- stderr -----

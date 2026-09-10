@@ -1,10 +1,13 @@
 li sp, 4096
 
 main:
-  ecall 5 ; read int
+  li a7, 5 ; read int
+  ecall
   jal ra, fib
-  ecall 1 ; print int
-  ecall 10 ; exit
+  li a7, 1 ; print int
+  ecall
+  li a7, 10 ; exit
+  ecall
 
 fib:
   bgt a0, 2, .L0

@@ -9,7 +9,7 @@ exit_code: 0
 0x01140000 # addi x r0 0                                 <label: init_screen>
 0x01160000 # addi y r0 0
 0x01180000 # addi color r0 0
-0x16230000 # lui r17 0x10000                             <label: draw_back>
+0x16230000 # lui a7 0x10000                              <label: draw_back>
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x013E0040 # addi r31 r0 64
@@ -24,7 +24,7 @@ exit_code: 0
 0x01040012 # addi head_y r0 18
 0x01141000 # addi x head_x 0
 0x01162000 # addi y head_y 0
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x16181000 # lui color 0x1000
 0x0118CFFF # addi color color 0xFFFFFFFF
@@ -32,7 +32,7 @@ exit_code: 0
 0x0054100D # sub x head_x i                              <label: init_body_loop>
 0x01162000 # addi y head_y 0
 0xFA0000A2 # call body_push
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x015AD001 # subi i i 1
 0x013E0001 # addi r31 r0 1
@@ -64,7 +64,7 @@ exit_code: 0
 0xFA000066 # call body_push
 0x16181000 # lui color 0x1000
 0x0118CFFF # addi color color 0xFFFFFFFF
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x12C07080 # bge nx r0 move_snake_common_x_ge_0
 0x010E003F # addi nx r0 63
@@ -81,7 +81,7 @@ exit_code: 0
 0x16180FF0 # lui color 0xFF0
 0x01141000 # addi x head_x 0
 0x01162000 # addi y head_y 0
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0xFA00004A # call body_contains
 0x013E0001 # addi r31 r0 1
@@ -92,13 +92,13 @@ exit_code: 0
 0xFC800000 # ret
 0xFA000034 # call body_pop                               <label: move_snake_not_eat>
 0x01180000 # addi color r0 0
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0xFC800000 # ret
-0x01220029 # addi r17 r0 41                              <label: gen_food>
+0x01220029 # addi a7 r0 41                               <label: gen_food>
 0x40000000 # ecall
 0x0116A000 # addi y x 0
-0x01220029 # addi r17 r0 41
+0x01220029 # addi a7 r0 41
 0x40000000 # ecall
 0x0754A040 # remi x x 64
 0x0756B024 # remi y y 36
@@ -109,7 +109,7 @@ exit_code: 0
 0x0108B000 # addi food_y y 0
 0x16181000 # lui color 0x1000
 0x0118CF00 # addi color color 0xFFFFFF00
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0xFC800000 # ret
 0x0A24A008 # slli que_val x 8                            <label: body_push>

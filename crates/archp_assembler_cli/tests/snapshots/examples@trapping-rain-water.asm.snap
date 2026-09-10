@@ -5,19 +5,19 @@ input_file: crates/archp_assembler/examples/trapping-rain-water.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x01220005 # addi r17 r0 5       <label: main>
+0x01220005 # addi a7 r0 5        <label: main>
 0x40000000 # ecall
 0x0102A000 # addi len a0 0
 0x010E1000 # addi t0 len 0
 0x16100100 # lui t1 256
-0x01220005 # addi r17 r0 5       <label: input>
+0x01220005 # addi a7 r0 5        <label: input>
 0x40000000 # ecall
 0x11C0800A # sb a0 t1 0
 0x01108001 # addi t1 t1 1
 0x014E7001 # subi t0 t0 1
 0x12BE0EC7 # blt r0 t0 input
 0xFA000008 # call solve
-0x01220001 # addi r17 r0 1
+0x01220001 # addi a7 r0 1
 0x40000000 # ecall
 0x1400003E # jal r0 halt
 0x16040100 # lui l 256           <label: solve>
@@ -50,6 +50,6 @@ exit_code: 0
 0x1280B08A # blt a1 a0 max_ret   <label: max>
 0x0114B000 # addi a0 a1 0
 0xFC800000 # ret                 <label: max_ret>
-0x0122000A # addi r17 r0 10      <label: halt>
+0x0122000A # addi a7 r0 10       <label: halt>
 0x40000000 # ecall
 ----- stderr -----

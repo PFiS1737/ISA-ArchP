@@ -1,11 +1,12 @@
 use anyhow::{Result, anyhow};
+use smallvec::SmallVec;
 
 use crate::{
     assembler::{Instr, Line},
     context::Context,
     directives::DIRECTIVES,
     instructions::INSTRUCTIONS,
-    macro_instructions::MACRO_INSTRUCTIONS,
+    operand::Operand,
     parser::parse_line,
     pseudo_instructions::PSEUDO_INSTRUCTIONS,
 };
@@ -65,10 +66,10 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                 // INFO: Make sure the text section is aligned to 4 bytes before adding instructions
                 self.context.align4();
 
-                let instrs = if !self.context.settings.disable_macro
-                    && let Some(mc_instr) = MACRO_INSTRUCTIONS.get(name)
-                    && let Some(expanded) =
-                        mc_instr
+                #[cfg(feature = "macros")]
+                {
+                    if let Some(mc_instr) = crate::macro_instructions::MACRO_INSTRUCTIONS.get(name)
+                        && let Some(expanded) = mc_instr
                             .expand(self.context, name, &operands)
                             .map_err(|e| {
                                 anyhow!(
@@ -77,28 +78,19 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                                     line.1,
                                     e
                                 )
-                            })? {
-                    expanded
-                } else {
-                    vec![(name, operands)]
-                };
-
-                for (name, ops) in instrs.into_iter() {
-                    if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
-                        let expanded = ps_instr.expand(self.context, &ops).map_err(|e| {
-                            anyhow!(
-                                "Error expanding pseudo-instruction at line {}: '{}' ({})",
-                                line.0,
-                                line.1,
-                                e
-                            )
-                        })?;
-                        for instr in expanded {
-                            self.handle_instr(instr)?;
+                            })?
+                    {
+                        for (name, ops) in expanded.into_iter() {
+                            self.handle_instr(name, ops, line)?;
                         }
                     } else {
-                        self.handle_instr((name, ops))?;
-                    }
+                        self.handle_instr(name, operands, line)?;
+                    };
+                }
+
+                #[cfg(not(feature = "macros"))]
+                {
+                    self.handle_instr(name, operands, line)?;
                 }
             },
         }
@@ -106,7 +98,32 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
         Ok(())
     }
 
-    fn handle_instr(&mut self, instr: Instr<'src>) -> Result<()> {
+    fn handle_instr(
+        &mut self,
+        name: &'src str,
+        ops: SmallVec<[Operand<'src>; 3]>,
+        line: (usize, &'src str),
+    ) -> Result<()> {
+        if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
+            let expanded = ps_instr.expand(self.context, &ops).map_err(|e| {
+                anyhow!(
+                    "Error expanding pseudo-instruction at line {}: '{}' ({})",
+                    line.0,
+                    line.1,
+                    e
+                )
+            })?;
+            for instr in expanded {
+                self.encode_instr(instr)?;
+            }
+        } else {
+            self.encode_instr((name, ops))?;
+        }
+
+        Ok(())
+    }
+
+    fn encode_instr(&mut self, instr: Instr<'src>) -> Result<()> {
         let (name, ops) = instr;
 
         let code = INSTRUCTIONS

@@ -22,3 +22,6 @@ archp_assembler = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true, features = ["glob"] }
+
+[features]
+macros = ["archp_assembler/macros"]

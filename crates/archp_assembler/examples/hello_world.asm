@@ -12,12 +12,15 @@ zero1:
 
 main:
   la a0, hello
-  ecall 4 ; print string
+  li a7, 4 ; print string
+  ecall
 
   la a0, world
-  ecall 4 ; print string
+  li a7, 4 ; print string
+  ecall
 
-  ecall 10 ; exit
+  li a7, 10 ; exit
+  ecall
 
 zero2:
   .zero 2048

@@ -16,6 +16,10 @@ pub enum Command {
         /// File path to run
         file: PathBuf,
 
+        /// Build features
+        #[arg(short = 'F', long)]
+        features: Vec<String>,
+
         /// <FILE> is an assembly file, assemble it before running
         #[arg(short = 's', long)]
         asm: bool,

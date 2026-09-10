@@ -8,6 +8,7 @@ fn examples() {
         prepend_module_to_snapshot => false,
         omit_expression => true,
     }, {
+        // TODO: specify features
         glob!("../../archp_assembler/examples", "*.asm", |path| {
             let output = cli().arg(path).args(["--hex", "--stdout"]).env("RUST_LOG", "debug").output().unwrap();
             assert_snapshot!(format!(

@@ -10,7 +10,7 @@ exit_code: 0
 0x01160000 # addi y r0 0
 0x16180182 # lui color 386
 0x0118CA1B # addi color color 0xFFFFFA1B
-0x16230000 # lui r17 0x10000                            <label: draw_back>
+0x16230000 # lui a7 0x10000                             <label: draw_back>
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x013E0080 # addi r31 r0 128
@@ -23,7 +23,7 @@ exit_code: 0
 0x01160000 # addi y r0 0
 0x161804C5 # lui color 0x4C5
 0x0118C45C # addi color color 0x45C
-0x16230000 # lui r17 0x10000                            <label: draw_grid>
+0x16230000 # lui a7 0x10000                             <label: draw_grid>
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x013E0079 # addi r31 r0 121
@@ -36,7 +36,7 @@ exit_code: 0
 0x01160000 # addi y r0 0
 0x16180222 # lui color 546
 0x0118C62E # addi color color 0x62E
-0x16230000 # lui r17 0x10000                            <label: draw_grid_line_row>
+0x16230000 # lui a7 0x10000                             <label: draw_grid_line_row>
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x013E0079 # addi r31 r0 121
@@ -47,7 +47,7 @@ exit_code: 0
 0x12BEBE1F # blt y r31 draw_grid_line_row
 0x01140000 # addi x r0 0
 0x01160000 # addi y r0 0
-0x16230000 # lui r17 0x10000                            <label: draw_grid_line_col>
+0x16230000 # lui a7 0x10000                             <label: draw_grid_line_col>
 0x40000000 # ecall
 0x0116B001 # addi y y 1
 0x013E0041 # addi r31 r0 65
@@ -64,16 +64,16 @@ exit_code: 0
 0xFC800000 # ret
 0x012A0010 # addi mine_num r0 16                        <label: init_mines>
 0x01155000 # addi a0 mine_num 0
-0x01220001 # addi r17 r0 1
+0x01220001 # addi a7 r0 1
 0x40000000 # ecall
 0x0114000A # addi a0 r0 10
-0x0122000B # addi r17 r0 11
+0x0122000B # addi a7 r0 11
 0x40000000 # ecall
 0x01020000 # addi i r0 0
-0x01220029 # addi r17 r0 41                             <label: init_mines_loop>
+0x01220029 # addi a7 r0 41                              <label: init_mines_loop>
 0x40000000 # ecall
 0x0108A000 # addi t1 a0 0
-0x01220029 # addi r17 r0 41
+0x01220029 # addi a7 r0 41
 0x40000000 # ecall
 0x010AA000 # addi t2 a0 0
 0x0754400F # remi x t1 15
@@ -168,7 +168,7 @@ exit_code: 0
 0x01040000 # addi j r0 0
 0x05146008 # muli x cursor_x 8
 0x05167008 # muli y cursor_y 8
-0x16230000 # lui r17 0x10000                            <label: update_cursor_loop1>
+0x16230000 # lui a7 0x10000                             <label: update_cursor_loop1>
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x01021001 # addi i i 1
@@ -182,7 +182,7 @@ exit_code: 0
 0x123E2D5F # beq j r31 update_cursor_loop1
 0x05146008 # muli x cursor_x 8
 0x05167008 # muli y cursor_y 8
-0x16230000 # lui r17 0x10000                            <label: update_cursor_loop2>
+0x16230000 # lui a7 0x10000                             <label: update_cursor_loop2>
 0x40000000 # ecall
 0x0116B001 # addi y y 1
 0x01021001 # addi i i 1
@@ -282,10 +282,10 @@ exit_code: 0
 0xFA000012 # call draw_tile
 0x11408004 # sw t1 addr 0                               <label: toggle_flag_store>
 0x01155000 # addi a0 mine_num 0
-0x01220001 # addi r17 r0 1
+0x01220001 # addi a7 r0 1
 0x40000000 # ecall
 0x0114000A # addi a0 r0 10
-0x0122000B # addi r17 r0 11
+0x0122000B # addi a7 r0 11
 0x40000000 # ecall
 0xFC800000 # ret                                        <label: toggle_flag_ret>
 0x01020000 # addi i r0 0                                <label: draw_tile>
@@ -294,7 +294,7 @@ exit_code: 0
 0x05174008 # muli y arg_y 8
 0x0114A001 # addi x x 1
 0x0116B001 # addi y y 1
-0x16230000 # lui r17 0x10000                            <label: draw_tile_loop>
+0x16230000 # lui a7 0x10000                             <label: draw_tile_loop>
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x01021001 # addi i i 1
@@ -314,34 +314,34 @@ exit_code: 0
 0x0118C050 # addi color color 80
 0x0114A004 # addi x x 4
 0x0116B002 # addi y y 2
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0116B001 # addi y y 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0116B001 # addi y y 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0154A001 # subi x x 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0154A001 # subi x x 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x0156B001 # subi y y 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x0116B002 # addi y y 2
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0154A002 # subi x x 2
 0x0116B001 # addi y y 1
 0x16180D8E # lui color 0xD8E
 0x0118C0E8 # addi color color 232
 0x01020000 # addi i r0 0
-0x16230000 # lui r17 0x10000                            <label: draw_pole>
+0x16230000 # lui a7 0x10000                             <label: draw_pole>
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x01021001 # addi i i 1
@@ -353,45 +353,45 @@ exit_code: 0
 0x0114A004 # addi x x 4
 0x0116B002 # addi y y 2
 0x01180000 # addi color r0 0
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0116B001 # addi y y 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0154A001 # subi x x 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0114A002 # addi x x 2
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0116B001 # addi y y 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0114A001 # addi x x 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0154A002 # subi x x 2
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0154A001 # subi x x 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0154A001 # subi x x 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x0116B001 # addi y y 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0114A001 # addi x x 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0114A001 # addi x x 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0154A001 # subi x x 1
 0x0116B001 # addi y y 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0xFC800000 # ret
 0x013E0001 # addi r31 r0 1                              <label: draw_num>
@@ -421,7 +421,7 @@ exit_code: 0
 0x0116B002 # addi y y 2
 0x161807CC # lui color 0x7CC
 0x0118C7FF # addi color color 0x7FF
-0x16230000 # lui r17 0x10000                            <label: draw_num1_loop>
+0x16230000 # lui a7 0x10000                             <label: draw_num1_loop>
 0x40000000 # ecall
 0x0116B001 # addi y y 1
 0x01021001 # addi i i 1
@@ -439,7 +439,7 @@ exit_code: 0
 0x0116B002 # addi y y 2
 0x1618066C # lui color 0x66C
 0x0118C266 # addi color color 614
-0x16230000 # lui r17 0x10000                            <label: draw_num2_loop>
+0x16230000 # lui a7 0x10000                             <label: draw_num2_loop>
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x01021001 # addi i i 1
@@ -452,11 +452,11 @@ exit_code: 0
 0x013E0003 # addi r31 r0 3
 0x12BE2D5F # blt j r31 draw_num2_loop
 0x0156B003 # subi y y 3
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0114A002 # addi x x 2
 0x0156B002 # subi y y 2
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0xFC800000 # ret
 0x16180384 # lui color 900                              <label: draw_num3>
@@ -470,7 +470,7 @@ exit_code: 0
 0x0116B002 # addi y y 2
 0x16180FF7 # lui color 0xFF7
 0x0118C788 # addi color color 0x788
-0x16230000 # lui r17 0x10000                            <label: draw_num3_loop>
+0x16230000 # lui a7 0x10000                             <label: draw_num3_loop>
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x01021001 # addi i i 1
@@ -484,10 +484,10 @@ exit_code: 0
 0x12BE2D5F # blt j r31 draw_num3_loop
 0x0114A002 # addi x x 2
 0x0156B003 # subi y y 3
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0156B002 # subi y y 2
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0xFC800000 # ret
 0x16180384 # lui color 900                              <label: draw_num4>
@@ -500,7 +500,7 @@ exit_code: 0
 0x0116B002 # addi y y 2
 0x16180EE9 # lui color 0xEE9
 0x0118C8FF # addi color color 0xFFFFF8FF
-0x16230000 # lui r17 0x10000                            <label: draw_num4_loop1>
+0x16230000 # lui a7 0x10000                             <label: draw_num4_loop1>
 0x40000000 # ecall
 0x0116B001 # addi y y 1
 0x01021001 # addi i i 1
@@ -508,11 +508,11 @@ exit_code: 0
 0x12BE1EDF # blt i r31 draw_num4_loop1
 0x0114A001 # addi x x 1
 0x0156B001 # subi y y 1
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x0156B002 # subi y y 2
-0x16230000 # lui r17 0x10000                            <label: draw_num4_loop2>
+0x16230000 # lui a7 0x10000                             <label: draw_num4_loop2>
 0x40000000 # ecall
 0x0116B001 # addi y y 1
 0x01021001 # addi i i 1
@@ -530,7 +530,7 @@ exit_code: 0
 0x0116B002 # addi y y 2
 0x16180DDB # lui color 0xDDB
 0x0118CA22 # addi color color 0xFFFFFA22
-0x16230000 # lui r17 0x10000                            <label: draw_num5_loop>
+0x16230000 # lui a7 0x10000                             <label: draw_num5_loop>
 0x40000000 # ecall
 0x0114A001 # addi x x 1
 0x01021001 # addi i i 1
@@ -543,11 +543,11 @@ exit_code: 0
 0x013E0003 # addi r31 r0 3
 0x12BE2D5F # blt j r31 draw_num5_loop
 0x0156B005 # subi y y 5
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x0114A002 # addi x x 2
 0x0116B002 # addi y y 2
-0x16230000 # lui r17 0x10000
+0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0xFC800000 # ret
 0x17070000 # lui t0 0x90000                             <label: read_key>
