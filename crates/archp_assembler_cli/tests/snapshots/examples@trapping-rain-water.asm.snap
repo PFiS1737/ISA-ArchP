@@ -5,51 +5,56 @@ input_file: crates/archp_assembler/examples/trapping-rain-water.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x01220005 # addi a7 r0 5        <label: main>
+0x16040100 # lui sp 256
+0x01042FFF # addi sp sp 0xFFFFFFFF
+0x01220005 # addi a7 r0 5           <label: main>
 0x40000000 # ecall
-0x0102A000 # addi len a0 0
-0x010E1000 # addi t0 len 0
-0x16100100 # lui t1 256
-0x01220005 # addi a7 r0 5        <label: input>
+0x0110A000 # addi len a0 0
+0x010A8000 # addi t0 len 0
+0x160C0100 # lui t1 256
+0x01220005 # addi a7 r0 5           <label: input>
 0x40000000 # ecall
-0x11C0800A # sb a0 t1 0
-0x01108001 # addi t1 t1 1
-0x014E7001 # subi t0 t0 1
-0x12BE0EC7 # blt r0 t0 input
-0xFA000008 # call solve
+0x11C0600A # sb a0 t1 0
+0x010C6001 # addi t1 t1 1
+0x014A5001 # subi t0 t0 1
+0x12BE0EC5 # blt r0 t0 input
+0xFA00000A # call solve
 0x01220001 # addi a7 r0 1
 0x40000000 # ecall
-0x1400003E # jal r0 halt
-0x16040100 # lui l 256           <label: solve>
-0x00062001 # add r l len
-0x01463001 # subi r r 1
-0x11082000 # lbu lmax l 0
-0x110A3000 # lbu rmax r 0
-0x12C02503 # bge l r endwhile    <label: while>
-0x12C04285 # bge lmax rmax else
-0x01042001 # addi l l 1
-0x110E2000 # lbu t0 l 0
-0x01147000 # addi a0 t0 0
-0x01164000 # addi a1 lmax 0
-0xFA000020 # call max
-0x0108A000 # addi lmax a0 0
-0x00504007 # sub t1 lmax t0
-0x000C6008 # add water water t1
-0x14000012 # jal r0 endif
-0x01463001 # subi r r 1          <label: else>
-0x110E3000 # lbu t0 r 0
-0x01147000 # addi a0 t0 0
-0x01165000 # addi a1 rmax 0
-0xFA00000E # call max
-0x010AA000 # addi rmax a0 0
-0x00505007 # sub t1 rmax t0
-0x000C6008 # add water water t1
-0x15C1FFDA # jal r0 while        <label: endif>
-0x01146000 # addi a0 water 0     <label: endwhile>
-0xFC800000 # ret
-0x1280B08A # blt a1 a0 max_ret   <label: max>
-0x0114B000 # addi a0 a1 0
-0xFC800000 # ret                 <label: max_ret>
-0x0122000A # addi a7 r0 10       <label: halt>
+0x0122000A # addi a7 r0 10
 0x40000000 # ecall
+0x01442004 # subi sp sp 4           <label: solve>
+0x11402001 # sw ra sp 0
+0x16120100 # lui l 256
+0x00249008 # add r l len
+0x01652001 # subi r r 1
+0x11269000 # lbu lmax l 0
+0x11292000 # lbu rmax r 0
+0x12C09512 # bge l r endwhile       <label: while>
+0x12C13294 # bge lmax rmax else
+0x01129001 # addi l l 1
+0x110A9000 # lbu t0 l 0
+0x01145000 # addi a0 t0 0
+0x01173000 # addi a1 lmax 0
+0xFA000024 # call max
+0x0126A000 # addi lmax a0 0
+0x004D3005 # sub t1 lmax t0
+0x002B5006 # add water water t1
+0x14000012 # jal r0 endif
+0x01652001 # subi r r 1             <label: else>
+0x110B2000 # lbu t0 r 0
+0x01145000 # addi a0 t0 0
+0x01174000 # addi a1 rmax 0
+0xFA000012 # call max
+0x0128A000 # addi rmax a0 0
+0x004D4005 # sub t1 rmax t0
+0x002B5006 # add water water t1
+0x15C1FFDA # jal r0 while           <label: endif>
+0x01155000 # addi a0 water 0        <label: endwhile>
+0x10022000 # lw ra sp 0
+0x01042004 # addi sp sp 4
+0xFC800000 # ret
+0x1280B08A # blt a1 a0 max_ret      <label: max>
+0x0114B000 # addi a0 a1 0
+0xFC800000 # ret                    <label: max_ret>
 ----- stderr -----

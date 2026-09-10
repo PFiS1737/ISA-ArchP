@@ -25,3 +25,4 @@ insta = { workspace = true, features = ["glob"] }
 
 [features]
 macros = ["archp_assembler/macros"]
+stack = ["archp_assembler/stack"]

@@ -30,4 +30,5 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 
 [features]
+stack = []
 trace = []

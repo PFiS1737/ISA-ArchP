@@ -17,57 +17,71 @@ module CSU (
     pcwe: output logic,
     pcwdata: output bit<32>,
 ) {
-    let imm_call: signed bit<32> = {
-        funct3[msb] repeat 11, funct3, rs1, imm12, 1'b0
-    };
-    let pc_call: bit<32> = pc + imm_call;
+    #[ifdef(HW_STACK)]
+    {
+        let imm_call: signed bit<32> = {
+            funct3[msb] repeat 11, funct3, rs1, imm12, 1'b0
+        };
+        let pc_call: bit<32> = pc + imm_call;
 
-    let imm_callr: signed bit<32> = {imm12[msb] repeat 20, imm12};
-    let pc_callr: bit<32> = (rdata1 + imm_callr) & ~1;
+        let imm_callr: signed bit<32> = {imm12[msb] repeat 20, imm12};
+        let pc_callr: bit<32> = (rdata1 + imm_callr) & ~1;
 
-    always_ff {
-        if_reset {} else {
+        always_ff {
+            if_reset {} else {
+                if /* CALL */ opcode == 'b1111101 {
+                    $sv::call_stack_push(pc + 4);
+                } else if opcode == 'b1111110 {
+                    #[cond_type(unique)]
+                    case funct3 {
+                        'b000 /* POP */: $sv::data_stack_pop();
+                        'b001 /* PUSH */: $sv::data_stack_push(rdata1);
+                        'b010 /* RET */: $sv::call_stack_pop();
+                        'b011 /* CALLR */: $sv::call_stack_push(pc + 4);
+                        default: {}
+                    }
+                }
+            }
+        }
+
+        always_comb {
+            rfwe = 0;
+            wdata = '0;
+            pcwe = 0;
+            pcwdata = '0;
+
             if /* CALL */ opcode == 'b1111101 {
-                $sv::call_stack_push(pc + 4);
+                pcwe = 1;
+                pcwdata = pc_call;
             } else if opcode == 'b1111110 {
                 #[cond_type(unique)]
                 case funct3 {
-                    'b000 /* POP */: $sv::data_stack_pop();
-                    'b001 /* PUSH */: $sv::data_stack_push(rdata1);
-                    'b010 /* RET */: $sv::call_stack_pop();
-                    'b011 /* CALLR */: $sv::call_stack_push(pc + 4);
+                    'b000 /* POP */: {
+                        rfwe = 1;
+                        wdata = $sv::data_stack_peek();
+                    }
+                    'b010 /* RET */: {
+                        pcwe = 1;
+                        pcwdata = $sv::call_stack_peek();
+                    }
+                    'b011 /* CALLR */: {
+                        pcwe = 1;
+                        pcwdata = pc_callr;
+                    }
                     default: {}
                 }
             }
         }
     }
+    #[else]
+    {
+        // INFO: See https://verilator.org/warn/UNUSEDSIGNAL
+        let _unused_ok: logic = 1'b0
+            && &{1'b0, clk, rst, opcode, funct3, rs1, imm12, rdata1, pc, 1'b0};
 
-    always_comb {
-        rfwe = 0;
-        wdata = '0;
-        pcwe = 0;
-        pcwdata = '0;
-
-        if /* CALL */ opcode == 'b1111101 {
-            pcwe = 1;
-            pcwdata = pc_call;
-        } else if opcode == 'b1111110 {
-            #[cond_type(unique)]
-            case funct3 {
-                'b000 /* POP */: {
-                    rfwe = 1;
-                    wdata = $sv::data_stack_peek();
-                }
-                'b010 /* RET */: {
-                    pcwe = 1;
-                    pcwdata = $sv::call_stack_peek();
-                }
-                'b011 /* CALLR */: {
-                    pcwe = 1;
-                    pcwdata = pc_callr;
-                }
-                default: {}
-            }
-        }
+        assign rfwe = 0;
+        assign wdata = '0;
+        assign pcwe = 0;
+        assign pcwdata = '0;
     }
 }

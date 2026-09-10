@@ -1,4 +1,4 @@
-j main
+jump main, t0
 
 hello:
   .asciz "Hello"

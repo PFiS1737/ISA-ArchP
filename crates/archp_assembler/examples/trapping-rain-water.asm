@@ -1,16 +1,16 @@
 # leetcode: trapping-rain-water
 # solutions/5126477
 
-.alias len, r1
-.alias l, r2
-.alias r, r3
-.alias lmax, r4
-.alias rmax, r5
-.alias water, r6
-.alias t0, r7
-.alias t1, r8
+.alias len, s0
+.alias l, s1
+.alias r, s2
+.alias lmax, s3
+.alias rmax, s4
+.alias water, s5
 
 .equ BASE_ADDR, 0x00100000
+
+li sp, 0x000FFFFF
 
 main:
   ecall 5 ; read int
@@ -29,9 +29,11 @@ main:
 
   ecall 1 ; print int
 
-  j halt
+  ecall 10 ; exit
 
 solve:
+  sub sp, sp, 4
+  sw ra, 0(sp)
   # l = 0
   li l, BASE_ADDR
   # r = len - 1
@@ -78,6 +80,8 @@ solve:
 
   endwhile:
     mv a0, water
+    lw ra, 0(sp)
+    add sp, sp, 4
     ret
 
 max:
@@ -85,6 +89,3 @@ max:
   mv a0, a1
   max_ret:
   ret
-
-halt:
-  ecall 10 ; exit

@@ -21,3 +21,4 @@ insta = { workspace = true }
 
 [features]
 macros = []
+stack = []

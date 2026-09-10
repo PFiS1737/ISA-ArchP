@@ -5,10 +5,12 @@ mod load_store;
 mod mul_div;
 mod set;
 mod shift_rotate;
-mod stack_call_return;
 mod system;
 mod types;
 mod upper_imm;
+
+#[cfg(feature = "stack")]
+mod stack_call_return;
 
 use std::{collections::HashMap, sync::LazyLock};
 

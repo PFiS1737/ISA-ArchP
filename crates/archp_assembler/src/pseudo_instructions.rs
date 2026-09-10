@@ -9,6 +9,9 @@ mod nop;
 mod not;
 mod set;
 
+#[cfg(not(feature = "stack"))]
+mod call_ret;
+
 use std::{collections::HashMap, sync::LazyLock};
 
 use anyhow::Result;

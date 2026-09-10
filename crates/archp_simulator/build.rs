@@ -40,6 +40,7 @@ fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
     let is_trace_featured = env::var("CARGO_FEATURE_TRACE").is_ok();
+    let is_stack_featured = env::var("CARGO_FEATURE_STACK").is_ok();
 
     // ====================
     //     Veryl Build
@@ -90,7 +91,12 @@ fn main() {
             "--no-assert",
         ])
         .args(if is_trace_featured {
-            &["--trace-fst", "-DTRACE"][..]
+            &["--trace-fst"][..]
+        } else {
+            &[]
+        })
+        .args(if is_stack_featured {
+            &["-DHW_STACK"][..]
         } else {
             &[]
         })

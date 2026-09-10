@@ -5,7 +5,7 @@ use anyhow::Result;
 use crate::{
     AssemblerSettings,
     assembler::Instr,
-    instructions::Entry,
+    instructions::{Entry, INSTRUCTIONS},
     operand::Operand,
     relocation::{Relocation, RelocationType},
 };
@@ -106,6 +106,22 @@ impl<'src> Context<'src> {
             addend,
             instr,
         });
+
+        Ok(())
+    }
+
+    pub fn add_auipc_relocation(
+        &mut self,
+        low_instr: &'static str,
+        op: &Operand<'src>,
+    ) -> Result<()> {
+        let auipc = INSTRUCTIONS.get("auipc").unwrap();
+        let low_instr = INSTRUCTIONS.get(low_instr).unwrap();
+
+        let offset = self.text.len();
+
+        self.add_relocation(auipc, RelocationType::High, offset, offset, op)?;
+        self.add_relocation(low_instr, RelocationType::Low, offset + 4, offset, op)?;
 
         Ok(())
     }

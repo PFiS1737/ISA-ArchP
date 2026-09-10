@@ -5,7 +5,8 @@ input_file: crates/archp_assembler/examples/hello_world.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x14000412 # jal r0 main
+0x180A0001 # auipc t0 0
+0x13C05828 # jalr r0 t0 0
 0x6C6C6548 #                <label: hello>
 0x0000006F # 
 0x02010101 #                <label: zero1>
