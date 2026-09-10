@@ -3,6 +3,7 @@ mod inc_dec;
 mod jump_and_link;
 mod load_address;
 mod load_immediate;
+mod load_store_global;
 mod mv;
 mod negate;
 mod nop;
