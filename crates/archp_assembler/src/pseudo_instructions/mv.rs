@@ -5,8 +5,8 @@ use crate::{
 
 pseudo_instruction! {
     pub Mv "mv" |ops| {
-        [ Ident(..), Ident(..) ] => [
-            ("addi", ops![ops[0], ops[1], 0])
+        [ Ident(rd), Ident(rs) ] => [
+            ("addi", ops![rd, rs, 0])
         ];
     }
 }

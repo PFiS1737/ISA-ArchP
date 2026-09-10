@@ -7,8 +7,8 @@ use crate::{
 
 pseudo_instruction! {
     pub J "j" |ops| {
-        [ Ident(..) | Addition(..) ] => [
-            ("jal", ops!["r0", ops[0]])
+        [ addr @ (Ident(..) | Addition(..)) ] => [
+            ("jal", ops!["r0", addr])
         ];
     }
 }
@@ -31,39 +31,39 @@ const F: ExpandFn = |ctx, ops| {
 
 pseudo_instruction! {
     pub Jal "jal" |ops| {
-        [ Ident(..) | Addition(..) ] => [
-            ("jal", ops!["ra", ops[0]])
+        [ addr @ (Ident(..) | Addition(..)) ] => [
+            ("jal", ops!["ra", addr])
         ];
-        [ Ident(..), Ident(..) | Addition(..) ] => [
-            ("jal", ops![ops[0], ops[1]])
+        [ Ident(rd), addr @ (Ident(..) | Addition(..)) ] => [
+            ("jal", ops![rd, addr])
         ];
     }
 }
 
 pseudo_instruction! {
     pub Jr "jr" |ops| {
-        [ Ident(..) ] => [
-            ("jalr", ops!["r0", ops[0], 0])
+        [ Ident(rs) ] => [
+            ("jalr", ops!["r0", rs, 0])
         ];
-        [ Ident(..), Num(..) ] => [
-            ("jalr", ops!["r0", ops[0], ops[1]])
+        [ Ident(rs), Num(imm) ] => [
+            ("jalr", ops!["r0", rs, imm])
         ];
     }
 }
 
 pseudo_instruction! {
     pub Jalr "jalr" |ops| {
-        [ Ident(..) ] => [
-            ("jalr", ops!["ra", ops[0], 0])
+        [ Ident(rs) ] => [
+            ("jalr", ops!["ra", rs, 0])
         ];
-        [ Ident(..), Num(..) ] => [
-            ("jalr", ops!["ra", ops[0], ops[1]])
+        [ Ident(rs), Num(imm) ] => [
+            ("jalr", ops!["ra", rs, imm])
         ];
-        [ Ident(..), Ident(..) ] => [
-            ("jalr", ops![ops[0], ops[1], 0])
+        [ Ident(rd), Ident(rs) ] => [
+            ("jalr", ops![rd, rs, 0])
         ];
-        [ Ident(..), Ident(..), Num(..) ] => [
-            ("jalr", ops![ops[0], ops[1], ops[2]])
+        [ Ident(rd), Ident(rs), Num(imm) ] => [
+            ("jalr", ops![rd, rs, imm])
         ];
     }
 }

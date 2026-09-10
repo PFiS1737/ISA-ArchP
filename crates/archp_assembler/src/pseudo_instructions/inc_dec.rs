@@ -5,16 +5,16 @@ use crate::{
 
 pseudo_instruction! {
     pub Inc "inc" |ops| {
-        [ Ident(..) ] => [
-            ("addi", ops![ops[0], ops[0], 1])
+        [ Ident(rd) ] => [
+            ("addi", ops![rd, rd, 1])
         ];
     }
 }
 
 pseudo_instruction! {
     pub Dec "dec" |ops| {
-        [ Ident(..) ] => [
-            ("subi", ops![ops[0], ops[0], 1])
+        [ Ident(rd) ] => [
+            ("subi", ops![rd, rd, 1])
         ];
     }
 }

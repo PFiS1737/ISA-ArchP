@@ -87,7 +87,7 @@ macro pseudo_instruction {
             $vis $id $name {
                 |_, $ops| {
                     $(
-                        if let $matches = $ops {
+                        if let $matches = *$ops {
                             return Ok(smallvec::smallvec![ $( $op) ,* ])
                         }
                     )+

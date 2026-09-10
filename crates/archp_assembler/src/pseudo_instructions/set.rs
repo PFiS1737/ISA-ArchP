@@ -5,80 +5,80 @@ use crate::{
 
 pseudo_instruction! {
     pub Sgt "sgt" |ops| {
-        [ Ident(..), Ident(..), Ident(..) ] => [
-            ("slt", ops![ops[0], ops[2], ops[1]])
+        [ Ident(rd), Ident(rs1), Ident(rs2) ] => [
+            ("slt", ops![rd, rs2, rs1])
         ];
     }
 }
 
 pseudo_instruction! {
     pub Sle "sle" |ops| {
-        [ Ident(..), Ident(..), Ident(..) ] => [
-            ("sge", ops![ops[0], ops[2], ops[1]])
+        [ Ident(rd), Ident(rs1), Ident(rs2) ] => [
+            ("sge", ops![rd, rs2, rs1])
         ];
     }
 }
 
 pseudo_instruction! {
     pub Sgtu "sgtu" |ops| {
-        [ Ident(..), Ident(..), Ident(..) ] => [
-            ("sltu", ops![ops[0], ops[2], ops[1]])
+        [ Ident(rd), Ident(rs1), Ident(rs2) ] => [
+            ("sltu", ops![rd, rs2, rs1])
         ];
     }
 }
 
 pseudo_instruction! {
     pub Sleu "sleu" |ops| {
-        [ Ident(..), Ident(..), Ident(..) ] => [
-            ("sgeu", ops![ops[0], ops[2], ops[1]])
+        [ Ident(rd), Ident(rs1), Ident(rs2) ] => [
+            ("sgeu", ops![rd, rs2, rs1])
         ];
     }
 }
 
 pseudo_instruction! {
     pub Seqz "seqz" |ops| {
-        [ Ident(..), Ident(..) ] => [
-            ("seq", ops![ops[0], ops[1], "r0"])
+        [ Ident(rd), Ident(rs) ] => [
+            ("seq", ops![rd, rs, "r0"])
         ];
     }
 }
 
 pseudo_instruction! {
     pub Snez "snez" |ops| {
-        [ Ident(..), Ident(..) ] => [
-            ("sne", ops![ops[0], ops[1], "r0"])
+        [ Ident(rd), Ident(rs) ] => [
+            ("sne", ops![rd, rs, "r0"])
         ];
     }
 }
 
 pseudo_instruction! {
     pub Sltz "sltz" |ops| {
-        [ Ident(..), Ident(..) ] => [
-            ("slt", ops![ops[0], ops[1], "r0"])
+        [ Ident(rd), Ident(rs) ] => [
+            ("slt", ops![rd, rs, "r0"])
         ];
     }
 }
 
 pseudo_instruction! {
     pub Sgez "sgez" |ops| {
-        [ Ident(..), Ident(..) ] => [
-            ("sge", ops![ops[0], ops[1], "r0"])
+        [ Ident(rd), Ident(rs) ] => [
+            ("sge", ops![rd, rs, "r0"])
         ];
     }
 }
 
 pseudo_instruction! {
     pub Slez "slez" |ops| {
-        [ Ident(..), Ident(..) ] => [
-            ("sge", ops![ops[0], "r0", ops[1]])
+        [ Ident(rd), Ident(rs) ] => [
+            ("sge", ops![rd, "r0", rs])
         ];
     }
 }
 
 pseudo_instruction! {
     pub Sgtz "sgtz" |ops| {
-        [ Ident(..), Ident(..) ] => [
-            ("slt", ops![ops[0], "r0", ops[1]])
+        [ Ident(rd), Ident(rs) ] => [
+            ("slt", ops![rd, "r0", rs])
         ];
     }
 }

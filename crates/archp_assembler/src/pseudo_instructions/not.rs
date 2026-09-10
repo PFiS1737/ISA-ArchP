@@ -5,8 +5,8 @@ use crate::{
 
 pseudo_instruction! {
     pub Not "not" |ops| {
-        [ Ident(..), Ident(..) ] => [
-            ("xori", ops![ops[0], ops[1], -1])
+        [ Ident(rd), Ident(rs) ] => [
+            ("xori", ops![rd, rs, -1])
         ];
     }
 }
