@@ -165,8 +165,40 @@ mod tests {
 
     #[test]
     fn empty_and_comment() {
-        assert_debug_snapshot!(parse_ok("# comment \n; comment"), @"[]"
-        );
+        assert_debug_snapshot!(parse_ok("# comment \n; comment"), @"[]");
+    }
+
+    #[test]
+    fn directive_operands() {
+        assert_debug_snapshot!(parse_ok(".set .LANCHOR0,. + 0"), @r#"
+        [
+            Directive {
+                name: ".set",
+                operands: [
+                    Expr(
+                        Ident(
+                            ".LANCHOR0",
+                        ),
+                    ),
+                    Expr(
+                        Binary {
+                            lhs: Ident(
+                                ".",
+                            ),
+                            op: Add,
+                            rhs: Num(
+                                0,
+                            ),
+                        },
+                    ),
+                ],
+                line: (
+                    1,
+                    ".set .LANCHOR0,. + 0",
+                ),
+            },
+        ]
+        "#);
     }
 
     #[test]

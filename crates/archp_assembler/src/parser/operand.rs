@@ -27,7 +27,7 @@ pub fn operand<'ctx, 'src: 'ctx>(
 
     // case 3: expr
     let (input, expr) = expr(input)?;
-    out.push(expr.eval_to_operand_with(&ctx.equates)?);
+    out.push(expr.eval_to_operand_with(ctx)?);
 
     // case 4: expr(ident)
     let Ok((input, ident)) = parens(ident).parse(input) else {

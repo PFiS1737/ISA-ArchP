@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display};
+use std::fmt::Display;
 
 use anyhow::bail;
 use thiserror::Error;
@@ -43,7 +43,7 @@ pub enum EvalError {
     NotAbsolute,
 }
 
-impl<'ctx, 'src: 'ctx> Expr<'src> {
+impl<'src> Expr<'src> {
     fn eval_to_operand<F>(&self, resolve: &F) -> Result<Operand<'src>, EvalError>
     where
         F: Fn(&'src str) -> Option<i64>,
@@ -72,11 +72,15 @@ impl<'ctx, 'src: 'ctx> Expr<'src> {
         }
     }
 
-    pub fn eval_to_operand_with(
-        &self,
-        env: &'ctx HashMap<&'src str, i64>,
-    ) -> Result<Operand<'src>, EvalError> {
-        let op = self.eval_to_operand(&|s| env.get(s).copied())?;
+    pub fn eval_to_operand_with(&self, ctx: &Context<'src>) -> Result<Operand<'src>, EvalError> {
+        let op = self.eval_to_operand(&|s| {
+            if s == "." {
+                Some(ctx.text.len() as i64)
+            } else {
+                ctx.equates.get(s).copied()
+            }
+        })?;
+
         Ok(match op {
             Operand::Addition(ident, 0) => Operand::Ident(ident),
             _ => op,
@@ -84,7 +88,7 @@ impl<'ctx, 'src: 'ctx> Expr<'src> {
     }
 
     pub fn cast_absolute(&self, ctx: &Context<'src>) -> anyhow::Result<i64> {
-        match self.eval_to_operand_with(&ctx.equates)? {
+        match self.eval_to_operand_with(ctx)? {
             Operand::Num(value) => Ok(value),
             _ => bail!("expected absolute expression, got {}", self),
         }

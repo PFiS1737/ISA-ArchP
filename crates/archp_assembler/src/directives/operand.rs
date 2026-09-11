@@ -42,7 +42,7 @@ impl<'src> DirectiveOperand<'src> {
     pub fn as_evaluated(&self, ctx: &Context<'src>) -> Result<EvaluatedDirectiveOperand<'src>> {
         Ok(match self {
             DirectiveOperand::Expr(expr) => {
-                EvaluatedDirectiveOperand::Operand(expr.eval_to_operand_with(&ctx.equates)?)
+                EvaluatedDirectiveOperand::Operand(expr.eval_to_operand_with(ctx)?)
             },
             DirectiveOperand::String(s) => EvaluatedDirectiveOperand::String(s),
             DirectiveOperand::Empty => EvaluatedDirectiveOperand::Empty,
