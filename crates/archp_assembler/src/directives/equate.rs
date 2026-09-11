@@ -10,6 +10,7 @@ directive! {
         handler: |ctx| {
             let value = expr.cast_absolute(ctx)?;
             ctx.equates.insert(name, value);
+            ctx.labels.insert(name, value as usize)
         },
     }
 }
@@ -21,6 +22,7 @@ directive! {
         handler: |ctx| {
             let value = expr.cast_absolute(ctx)?;
             ctx.equates.insert(name, value);
+            ctx.labels.insert(name, value as usize)
         },
     }
 }
