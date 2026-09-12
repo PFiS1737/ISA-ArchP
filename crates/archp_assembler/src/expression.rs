@@ -73,14 +73,7 @@ impl<'src> Expr<'src> {
     }
 
     pub fn eval_to_operand_with(&self, ctx: &Context<'src>) -> Result<Operand<'src>, EvalError> {
-        let op = self.eval_to_operand(&|s| {
-            if s == "." {
-                Some(ctx.text.len() as i64)
-            } else {
-                ctx.equates.get(s).copied()
-            }
-        })?;
-
+        let op = self.eval_to_operand(&|s| ctx.equates.get(s).copied())?;
         Ok(match op {
             Operand::Addition(ident, 0) => Operand::Ident(ident),
             _ => op,
@@ -88,10 +81,19 @@ impl<'src> Expr<'src> {
     }
 
     pub fn cast_absolute(&self, ctx: &Context<'src>) -> anyhow::Result<i64> {
-        match self.eval_to_operand_with(ctx)? {
-            Operand::Num(value) => Ok(value),
+        Ok(match self.eval_to_operand_with(ctx)? {
+            Operand::Num(value) => value,
             _ => bail!("expected absolute expression, got {}", self),
-        }
+        })
+    }
+
+    pub fn cast_absolute_or_relative(&self, ctx: &Context<'src>) -> anyhow::Result<(bool, i64)> {
+        Ok(match self.eval_to_operand_with(ctx)? {
+            Operand::Num(value) => (false, value),
+            Operand::Ident(".") => (true, ctx.text.len() as i64),
+            Operand::Addition(".", add) => (true, ctx.text.len() as i64 + add),
+            _ => bail!("expected absolute or relative (.) expression, got {}", self),
+        })
     }
 }
 

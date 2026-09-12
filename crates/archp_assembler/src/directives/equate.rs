@@ -8,9 +8,13 @@ directive! {
         name: ".equ",
         matches: [Expr(Ident(name)), Expr(expr)],
         handler: |ctx| {
-            let value = expr.cast_absolute(ctx)?;
+            let (is_relative, value) = expr.cast_absolute_or_relative(ctx)?;
+
             ctx.equates.insert(name, value);
-            ctx.labels.insert(name, value as usize)
+
+            if is_relative {
+                ctx.labels.insert(name, value as usize);
+            }
         },
     }
 }
@@ -20,9 +24,13 @@ directive! {
         name: ".set",
         matches: [Expr(Ident(name)), Expr(expr)],
         handler: |ctx| {
-            let value = expr.cast_absolute(ctx)?;
+            let (is_relative, value) = expr.cast_absolute_or_relative(ctx)?;
+
             ctx.equates.insert(name, value);
-            ctx.labels.insert(name, value as usize)
+
+            if is_relative {
+                ctx.labels.insert(name, value as usize);
+            }
         },
     }
 }
