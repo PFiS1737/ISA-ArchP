@@ -2,6 +2,7 @@ use anyhow::{anyhow, bail};
 use nom::{
     Parser,
     branch::alt,
+    bytes::complete::is_not,
     character::complete::{char, space0, space1},
     combinator::{map, opt},
     multi::separated_list0,
@@ -56,6 +57,7 @@ fn directive_operands<'src>(input: &'src str) -> Result<'src, Vec<DirectiveOpera
             alt((
                 map(string, DirectiveOperand::String),
                 map(expr, DirectiveOperand::Expr),
+                map(is_not(","), DirectiveOperand::Unknown),
                 map(space0, |_| DirectiveOperand::Empty),
             )),
         ),
@@ -198,6 +200,58 @@ mod tests {
                 ),
             },
         ]
+        "#);
+        assert_debug_snapshot!(parse_ok(".size foo, .-foo"), @r#"
+        [
+            Directive {
+                name: ".size",
+                operands: [
+                    Expr(
+                        Ident(
+                            "foo",
+                        ),
+                    ),
+                    Expr(
+                        Binary {
+                            lhs: Ident(
+                                ".",
+                            ),
+                            op: Sub,
+                            rhs: Ident(
+                                "foo",
+                            ),
+                        },
+                    ),
+                ],
+                line: (
+                    1,
+                    ".size foo, .-foo",
+                ),
+            },
+        ]
+        "#);
+        assert_debug_snapshot!(parse_source(".type bar, @function"), @r#"
+        Ok(
+            [
+                Directive {
+                    name: ".type",
+                    operands: [
+                        Expr(
+                            Ident(
+                                "bar",
+                            ),
+                        ),
+                        Unknown(
+                            "@function",
+                        ),
+                    ],
+                    line: (
+                        1,
+                        ".type bar, @function",
+                    ),
+                },
+            ],
+        )
         "#);
     }
 

@@ -9,6 +9,7 @@ pub enum DirectiveOperand<'src> {
     Empty,
     Expr(Expr<'src>),
     String(&'src str),
+    Unknown(&'src str),
 }
 
 impl Display for DirectiveOperand<'_> {
@@ -17,6 +18,7 @@ impl Display for DirectiveOperand<'_> {
             DirectiveOperand::Empty => write!(f, ""),
             DirectiveOperand::Expr(expr) => write!(f, "{}", expr),
             DirectiveOperand::String(s) => write!(f, "\"{}\"", s),
+            DirectiveOperand::Unknown(s) => write!(f, "{}", s),
         }
     }
 }
@@ -26,6 +28,7 @@ pub enum EvaluatedDirectiveOperand<'src> {
     Empty,
     Operand(Operand<'src>),
     String(&'src str),
+    Unknown(&'src str),
 }
 
 impl Display for EvaluatedDirectiveOperand<'_> {
@@ -34,6 +37,7 @@ impl Display for EvaluatedDirectiveOperand<'_> {
             EvaluatedDirectiveOperand::Empty => write!(f, ""),
             EvaluatedDirectiveOperand::Operand(op) => write!(f, "{}", op),
             EvaluatedDirectiveOperand::String(s) => write!(f, "\"{}\"", s),
+            EvaluatedDirectiveOperand::Unknown(s) => write!(f, "{}", s),
         }
     }
 }
@@ -46,6 +50,7 @@ impl<'src> DirectiveOperand<'src> {
             },
             DirectiveOperand::String(s) => EvaluatedDirectiveOperand::String(s),
             DirectiveOperand::Empty => EvaluatedDirectiveOperand::Empty,
+            DirectiveOperand::Unknown(s) => EvaluatedDirectiveOperand::Unknown(s),
         })
     }
 
