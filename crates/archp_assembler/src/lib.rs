@@ -17,5 +17,5 @@ mod utils;
 #[cfg(feature = "macros")]
 mod macro_instructions;
 
-pub use assembler::{Assembler, AssemblerSettings};
+pub use assembler::Assembler;
 pub use utils::fmt::fmt_line;

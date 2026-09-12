@@ -8,7 +8,7 @@ use std::{
 };
 
 use anyhow::{Result, anyhow};
-use archp_assembler::{Assembler, AssemblerSettings, fmt_line};
+use archp_assembler::{Assembler, fmt_line};
 use clap::{CommandFactory, Parser};
 use clap_complete::CompleteEnv;
 
@@ -26,15 +26,10 @@ fn main() -> Result<()> {
 
     let cli = Cli::parse();
 
-    let settings = AssemblerSettings {
-        disable_macro: cli.disable_macro,
-    };
-
     let file_content = read_to_string(&cli.src_file)
         .map_err(|e| anyhow!("Can't read source file '{}': {}", cli.src_file, e))?;
 
-    let asmblr = Assembler::new(settings);
-    let context = asmblr.assemble(&file_content)?;
+    let context = Assembler::assemble(&file_content)?;
 
     let mut out = BufWriter::new(if cli.stdout {
         Box::new(stdout()) as Box<dyn Write>

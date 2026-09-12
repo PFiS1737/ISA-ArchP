@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use anyhow::Result;
 
 use crate::{
-    AssemblerSettings,
     assembler::Instr,
     instructions::{Entry, INSTRUCTIONS},
     operand::Operand,
@@ -12,8 +11,6 @@ use crate::{
 
 #[derive(Default)]
 pub struct Context<'src> {
-    pub settings: AssemblerSettings,
-
     /// The generated machine code (raw bytes, little-endian)
     pub text: Vec<u8>,
 
@@ -128,13 +125,6 @@ impl<'src> Context<'src> {
 }
 
 impl<'src> Context<'src> {
-    pub fn new(settings: AssemblerSettings) -> Self {
-        Self {
-            settings,
-            ..Default::default()
-        }
-    }
-
     #[cfg(test)]
     pub fn test() -> Self {
         Self {

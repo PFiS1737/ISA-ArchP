@@ -23,10 +23,6 @@ pub struct Cli {
     /// Output formatted hex instead of binary machine code.
     #[arg(long)]
     pub hex: bool,
-
-    /// Disable the macro-instructions.
-    #[arg(long)]
-    pub disable_macro: bool,
 }
 
 fn get_styles() -> Styles {
