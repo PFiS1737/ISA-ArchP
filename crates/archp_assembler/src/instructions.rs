@@ -6,7 +6,6 @@ mod mul_div;
 mod set;
 mod shift_rotate;
 mod system;
-mod types;
 mod upper_imm;
 
 #[cfg(feature = "stack")]
@@ -18,9 +17,12 @@ use anyhow::{Result, bail};
 use smallvec::SmallVec;
 
 use crate::{
+    codec::{
+        immediate::encode_immediate,
+        instruction::{InstrType, encode_instruction},
+        register::encode_register,
+    },
     context::Context,
-    encoder::{immediate::encode_immediate, register::encode_register},
-    instructions::types::InstrType,
     operand::{Operand, OperandType},
     relocation::RelocationType,
 };
@@ -65,7 +67,12 @@ impl Entry {
     ) -> Result<u32> {
         let operands = self.parse(ctx, operands)?;
 
-        Ok(self.itype.encode(self.opcode, self.funct3, &operands))
+        Ok(encode_instruction(
+            self.itype,
+            self.opcode,
+            self.funct3,
+            &operands,
+        ))
     }
 
     fn parse<'src>(

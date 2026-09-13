@@ -1,7 +1,10 @@
 use anyhow::{Result, bail};
 
 use crate::{
-    encoder::address::{encode_address, encode_address_check},
+    codec::{
+        address::{encode_address, encode_address_check},
+        instruction::{decode_instruction, encode_instruction},
+    },
     instructions::Entry,
     operand::OperandType,
     utils::split::split_hi_lo,
@@ -51,9 +54,9 @@ impl Entry {
                     RelocationType::High => hi,
                 };
 
-                let mut ops = self.itype.decode(code);
+                let mut ops = decode_instruction(self.itype, code);
                 ops[idx] = addr;
-                let word = self.itype.encode(self.opcode, self.funct3, &ops);
+                let word = encode_instruction(self.itype, self.opcode, self.funct3, &ops);
 
                 return Ok(word);
             }
