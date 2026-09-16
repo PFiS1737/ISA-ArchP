@@ -13,18 +13,15 @@ mod stack_call_return;
 
 use std::{collections::HashMap, sync::LazyLock};
 
-use anyhow::{Result, bail};
-use smallvec::SmallVec;
+use anyhow::Result;
 
 use crate::{
     codec::{
-        immediate::encode_immediate,
         instruction::{InstrType, encode_instruction},
-        register::encode_register,
+        operands::encode_operands,
     },
     context::Context,
     operand::{Operand, OperandType},
-    relocation::RelocationType,
 };
 
 inventory::collect!(Entry);
@@ -65,74 +62,9 @@ impl Entry {
         ctx: &mut Context<'src>,
         operands: &[Operand<'src>],
     ) -> Result<u32> {
-        let operands = self.parse(ctx, operands)?;
-
-        Ok(encode_instruction(
-            self.itype,
-            self.opcode,
-            self.funct3,
-            &operands,
-        ))
-    }
-
-    fn parse<'src>(
-        &'static self,
-        ctx: &mut Context<'src>,
-        operands: &[Operand<'src>],
-    ) -> Result<SmallVec<[u32; 3]>> {
-        let expected = self
-            .format
-            .iter()
-            .filter(|x| !matches!(x, OperandType::None))
-            .count();
-        self.assert_operand_count(operands.len(), expected)?;
-
-        let mut ops = operands.iter();
-
-        let mut ret = SmallVec::new();
-
-        for op_ty in self.format {
-            let val = match *op_ty {
-                OperandType::RegD | OperandType::RegS => {
-                    let s = ops.next().unwrap().cast_register()?;
-                    let reg = ctx.aliases.get(s).unwrap_or(&s);
-                    encode_register(reg)?
-                },
-                OperandType::Imm(bits, signed) => {
-                    let n = ops.next().unwrap().cast_immediate()?;
-                    encode_immediate(n, bits, signed)?
-                },
-                OperandType::Addr(bits) => {
-                    let offset = ctx.text.len();
-                    ctx.add_relocation(
-                        self.name,
-                        RelocationType::Bits(bits),
-                        offset,
-                        offset,
-                        ops.next().unwrap(),
-                    )?;
-                    0
-                },
-                OperandType::None => 0,
-            };
-
-            ret.push(val);
-        }
-
-        Ok(ret)
-    }
-
-    fn assert_operand_count(&self, count: usize, expected: usize) -> Result<()> {
-        if count != expected {
-            bail!(
-                "Instruction '{}' requires {} operands, got {}",
-                self.name,
-                expected,
-                count
-            );
-        }
-
-        Ok(())
+        let ops = encode_operands(ctx, self.name, self.format, operands)?;
+        let code = encode_instruction(self.itype, self.opcode, self.funct3, &ops);
+        Ok(code)
     }
 }
 
