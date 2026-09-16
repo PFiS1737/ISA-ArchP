@@ -1,6 +1,6 @@
 use anyhow::{Result, anyhow};
 
-use crate::context::Context;
+use crate::{context::Context, instructions::INSTRUCTIONS};
 
 pub struct Pass2<'ctx, 'src> {
     context: &'ctx mut Context<'src>,
@@ -26,9 +26,12 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
 
             let code = self.context.get_code(reloc.offset);
 
-            let code = reloc
-                .instr
-                .apply_relocation(reloc.rtype, code, addr, reloc.base as u32)?;
+            let code = INSTRUCTIONS.get(reloc.instr).unwrap().apply_relocation(
+                reloc.rtype,
+                code,
+                addr,
+                reloc.base as u32,
+            )?;
 
             self.context.set_code(reloc.offset, code);
         }

@@ -5,8 +5,9 @@ use crate::{
         address::{encode_address, encode_address_check},
         instruction::{decode_instruction, encode_instruction},
     },
+    context::Context,
     instructions::Entry,
-    operand::OperandType,
+    operand::{Operand, OperandType},
     utils::split::split_hi_lo,
 };
 
@@ -18,7 +19,7 @@ pub enum RelocationType {
 }
 
 #[derive(Debug, Clone)]
-pub struct Relocation<'a> {
+pub struct Relocation<'src> {
     pub rtype: RelocationType,
     /// Offset of target instruction in the text section
     pub offset: usize,
@@ -26,11 +27,48 @@ pub struct Relocation<'a> {
     /// Usually the offset of the instruction itself, or to an 'auipc'
     pub base: usize,
     /// Label to be resolved
-    pub label: &'a str,
+    pub label: &'src str,
     /// Addend to be added to the resolved label address
     pub addend: i64,
     /// Instruction entry for the target instruction
-    pub instr: &'static Entry,
+    pub instr: &'src str,
+}
+
+impl<'src> Context<'src> {
+    pub fn add_relocation(
+        &mut self,
+        instr: &'src str,
+        rtype: RelocationType,
+        offset: usize,
+        base: usize,
+        op: &Operand<'src>,
+    ) -> Result<()> {
+        let (label, addend) = op.cast_address()?;
+
+        self.relocations.push(Relocation {
+            rtype,
+            offset,
+            base,
+            label,
+            addend,
+            instr,
+        });
+
+        Ok(())
+    }
+
+    pub fn add_auipc_relocation(
+        &mut self,
+        low_instr: &'static str,
+        op: &Operand<'src>,
+    ) -> Result<()> {
+        let offset = self.text.len();
+
+        self.add_relocation("auipc", RelocationType::High, offset, offset, op)?;
+        self.add_relocation(low_instr, RelocationType::Low, offset + 4, offset, op)?;
+
+        Ok(())
+    }
 }
 
 impl Entry {

@@ -1,13 +1,6 @@
 use std::collections::HashMap;
 
-use anyhow::Result;
-
-use crate::{
-    assembler::Instr,
-    instructions::{Entry, INSTRUCTIONS},
-    operand::Operand,
-    relocation::{Relocation, RelocationType},
-};
+use crate::{assembler::Instr, relocation::Relocation};
 
 #[derive(Default)]
 pub struct Context<'src> {
@@ -81,46 +74,6 @@ impl Context<'_> {
             self.text.reserve(padding);
             self.text.extend_from_slice(&[0u8; 4][..padding]);
         }
-    }
-}
-
-impl<'src> Context<'src> {
-    pub fn add_relocation(
-        &mut self,
-        instr: &'static Entry,
-        rtype: RelocationType,
-        offset: usize,
-        base: usize,
-        op: &Operand<'src>,
-    ) -> Result<()> {
-        let (label, addend) = op.cast_address()?;
-
-        self.relocations.push(Relocation {
-            rtype,
-            offset,
-            base,
-            label,
-            addend,
-            instr,
-        });
-
-        Ok(())
-    }
-
-    pub fn add_auipc_relocation(
-        &mut self,
-        low_instr: &'static str,
-        op: &Operand<'src>,
-    ) -> Result<()> {
-        let auipc = INSTRUCTIONS.get("auipc").unwrap();
-        let low_instr = INSTRUCTIONS.get(low_instr).unwrap();
-
-        let offset = self.text.len();
-
-        self.add_relocation(auipc, RelocationType::High, offset, offset, op)?;
-        self.add_relocation(low_instr, RelocationType::Low, offset + 4, offset, op)?;
-
-        Ok(())
     }
 }
 

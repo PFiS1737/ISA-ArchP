@@ -105,7 +105,7 @@ impl Entry {
                 OperandType::Addr(bits) => {
                     let offset = ctx.text.len();
                     ctx.add_relocation(
-                        self,
+                        self.name,
                         RelocationType::Bits(bits),
                         offset,
                         offset,
