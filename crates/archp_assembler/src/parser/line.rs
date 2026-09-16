@@ -13,8 +13,7 @@ use smallvec::SmallVec;
 use crate::{
     assembler::Line,
     context::Context,
-    directives::DirectiveOperand,
-    operand::Operand,
+    operand::{DirectiveOperand, Operand},
     parser::{Result, expression::expr, identifier::ident, operand::operand, string::string, ws},
 };
 

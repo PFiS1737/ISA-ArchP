@@ -2,7 +2,10 @@ use anyhow::Result;
 use smallvec::SmallVec;
 
 use crate::{
-    context::Context, directives::DirectiveOperand, operand::Operand, pass1::Pass1, pass2::Pass2,
+    context::Context,
+    operand::{DirectiveOperand, Operand},
+    pass1::Pass1,
+    pass2::Pass2,
 };
 
 pub type Instr<'src> = (&'src str, SmallVec<[Operand<'src>; 3]>);

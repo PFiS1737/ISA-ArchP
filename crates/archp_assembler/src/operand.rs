@@ -2,6 +2,8 @@ use std::fmt::Display;
 
 use anyhow::{Result, bail};
 
+use crate::{context::Context, expression::Expr};
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Operand<'src> {
     Num(i64),
@@ -106,4 +108,32 @@ pub macro op_types {
 
     (@sig i) => { true },
     (@sig u) => { false },
+}
+
+#[derive(Debug, Clone)]
+pub enum DirectiveOperand<'src> {
+    Empty,
+    Expr(Expr<'src>),
+    String(&'src str),
+    Unknown(&'src str),
+}
+
+impl Display for DirectiveOperand<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DirectiveOperand::Empty => write!(f, ""),
+            DirectiveOperand::Expr(expr) => write!(f, "{}", expr),
+            DirectiveOperand::String(s) => write!(f, "\"{}\"", s),
+            DirectiveOperand::Unknown(s) => write!(f, "{}", s),
+        }
+    }
+}
+
+impl<'src> DirectiveOperand<'src> {
+    pub fn cast_absolute(&self, ctx: &Context<'src>) -> Result<i64> {
+        match self {
+            DirectiveOperand::Expr(expr) => expr.cast_absolute(ctx),
+            _ => bail!("Expected absolute expression, got: {}", self),
+        }
+    }
 }

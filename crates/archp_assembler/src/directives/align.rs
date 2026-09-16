@@ -4,8 +4,8 @@ use anyhow::{Result, bail};
 
 use crate::{
     context::Context,
-    directives::{DirectiveOperand, HandlerFn, directive, operand::EvaluatedDirectiveOperand::*},
-    operand::Operand::*,
+    directives::{HandlerFn, directive},
+    operand::DirectiveOperand::{self, *},
 };
 
 directive! {
@@ -44,21 +44,21 @@ const F2: HandlerFn = |ctx, ops| {
 };
 
 fn matches<'a>(ctx: &mut Context<'a>, ops: &[DirectiveOperand<'a>]) -> Result<(i64, i64, i64)> {
-    let mut it = ops.iter().map(|op| op.as_evaluated(ctx));
+    let mut it = ops.iter();
 
-    let align = match it.next().transpose()? {
-        Some(Operand(Num(bytes))) => bytes,
+    let align = match it.next() {
+        Some(Expr(expr)) => expr.cast_absolute(ctx)?,
         _ => bail!("operands mismatch"),
     };
 
-    let value = match it.next().transpose()? {
-        Some(Operand(Num(value))) => value,
+    let value = match it.next() {
+        Some(Expr(expr)) => expr.cast_absolute(ctx)?,
         Some(Empty) | None => 0,
         _ => bail!("operands mismatch"),
     };
 
-    let max = match it.next().transpose()? {
-        Some(Operand(Num(max))) => max,
+    let max = match it.next() {
+        Some(Expr(expr)) => expr.cast_absolute(ctx)?,
         None => i64::MAX,
         _ => bail!("operands mismatch"),
     };
