@@ -5,7 +5,7 @@ pub mod ffi {
 
         type CPU;
 
-        fn create_cpu() -> UniquePtr<CPU>;
+        fn create_cpu(file: String) -> UniquePtr<CPU>;
 
         fn got_finish(&self) -> bool;
         fn time(&self) -> u64;
@@ -17,7 +17,5 @@ pub mod ffi {
 
         #[cfg(feature = "trace")]
         fn dump(&self);
-        #[cfg(feature = "trace")]
-        fn init_trace(&self, file: String);
     }
 }

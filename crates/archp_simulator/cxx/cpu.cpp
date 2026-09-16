@@ -1,6 +1,6 @@
 #include "./cpu.hpp"
 
-CPU::CPU() {
+CPU::CPU(const char *file) {
   ctx = std::make_unique<VerilatedContext>();
 
   ctx->debug(0);
@@ -11,6 +11,13 @@ CPU::CPU() {
   top = std::make_unique<Vtop>(ctx.get());
 
   top->rst = 1;
+
+#if VM_TRACE
+  ctx->traceEverOn(true);
+  tfp = std::make_unique<VerilatedFstC>();
+  top->trace(tfp.get(), 99);
+  tfp->open(file);
+#endif
 }
 
 CPU::~CPU() {
@@ -42,13 +49,6 @@ void CPU::eval() const {
 }
 
 #if VM_TRACE
-void CPU::init_trace(rust::String file) const {
-  ctx->traceEverOn(true);
-  tfp = std::make_unique<VerilatedFstC>();
-  top->trace(tfp.get(), 99);
-  tfp->open(file.c_str());
-}
-
 void CPU::dump() const {
   tfp->dump(ctx->time());
 }
@@ -61,6 +61,6 @@ void CPU::finish() const {
 #endif
 }
 
-std::unique_ptr<CPU> create_cpu() {
-  return std::make_unique<CPU>();
+std::unique_ptr<CPU> create_cpu(rust::String file) {
+  return std::make_unique<CPU>(file.c_str());
 }

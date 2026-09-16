@@ -29,10 +29,7 @@ fn main() -> Result<ExitCode> {
 
     let _ = SYSTEM.set(System::with_config(tx, &cli)?);
 
-    let cpu_top = cpu::ffi::create_cpu();
-
-    #[cfg(feature = "trace")]
-    cpu_top.init_trace(cli.trace_file);
+    let cpu_top = cpu::ffi::create_cpu(cli.trace_file);
 
     let mut exit_code = 0;
     let mut last_time = Instant::now();
