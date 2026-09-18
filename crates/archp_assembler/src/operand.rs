@@ -80,36 +80,6 @@ pub macro ops {
     }},
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum OperandType {
-    RegD,
-    RegS,
-    Imm(u8, bool),
-    Addr(u8),
-    None,
-}
-
-pub macro op_types {
-    ( $( $type:tt $(( $v:literal $( , $s:tt )? ))? ),* ) => {
-        &[
-            $(
-                $crate::operand::op_types!(@one $type $(( $v $( , $s )? ))?)
-            ),*
-        ]
-    },
-
-    (@one _) => {
-        $crate::operand::OperandType::None
-    },
-
-    (@one $type:tt $(( $v:literal $( , $s:tt )? ))?) => {
-        $crate::operand::OperandType::$type $(( $v $( , crate::operand::op_types!(@sig $s) )? ))?
-    },
-
-    (@sig i) => { true },
-    (@sig u) => { false },
-}
-
 #[derive(Debug, Clone)]
 pub enum DirectiveOperand<'src> {
     Empty,

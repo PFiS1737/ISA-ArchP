@@ -12,6 +12,7 @@ mod pass1;
 mod pass2;
 mod pseudo_instructions;
 mod relocation;
+mod types;
 mod utils;
 
 #[cfg(feature = "macros")]

@@ -7,7 +7,8 @@ use crate::{
     },
     context::Context,
     instructions::Entry,
-    operand::{Operand, OperandType},
+    operand::Operand,
+    types::OperandType,
     utils::split::split_hi_lo,
 };
 

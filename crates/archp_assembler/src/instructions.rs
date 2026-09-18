@@ -16,12 +16,10 @@ use std::{collections::HashMap, sync::LazyLock};
 use anyhow::Result;
 
 use crate::{
-    codec::{
-        instruction::{InstrType, encode_instruction},
-        operands::encode_operands,
-    },
+    codec::{instruction::encode_instruction, operands::encode_operands},
     context::Context,
-    operand::{Operand, OperandType},
+    operand::Operand,
+    types::{InstructionType, OperandType},
 };
 
 inventory::collect!(Entry);
@@ -34,7 +32,7 @@ pub struct Entry {
     pub name: &'static str,
     pub opcode: u32,
     pub funct3: u32,
-    pub itype: InstrType,
+    pub itype: InstructionType,
     pub format: &'static [OperandType],
 }
 
@@ -42,7 +40,7 @@ trait Instruction: Send + Sync {
     const NAME: &'static str;
     const OPCODE: u32;
     const FUNCT3: u32;
-    const ITYPE: InstrType;
+    const ITYPE: InstructionType;
     const FORMAT: &'static [OperandType];
 }
 
@@ -86,8 +84,9 @@ macro instruction {
             const NAME: &'static str = $name;
             const OPCODE: u32 = $opcode;
             const FUNCT3: u32 = $funct3;
-            const ITYPE: $crate::instructions::InstrType = $crate::instructions::InstrType::$itype;
-            const FORMAT: &'static [$crate::operand::OperandType] = $format;
+            const ITYPE: $crate::instructions::InstructionType =
+                $crate::instructions::InstructionType::$itype;
+            const FORMAT: &'static [$crate::types::OperandType] = $format;
         }
 
         inventory::submit! {
@@ -153,7 +152,7 @@ macro instruction {
                 opcode: $opcode,
                 funct3: $funct3,
                 itype: $itype,
-                format: $crate::operand::op_types! $format,
+                format: $crate::types::op_types! $format,
             }
         }
     },
@@ -174,17 +173,17 @@ macro instruction {
                 opcode: $opcode,
                 funct3: 0,
                 itype: $itype,
-                format: $crate::operand::op_types! $format,
+                format: $crate::types::op_types! $format,
             }
         }
     },
 
-    (@fmt R) => { $crate::operand::op_types![RegD, RegS, RegS] },
-    (@fmt I) => { $crate::operand::op_types![RegD, RegS, Imm(12, i)] },
-    (@fmt B) => { $crate::operand::op_types![RegS, RegS, Addr(12)] },
-    (@fmt S) => { $crate::operand::op_types![RegS, RegS, Imm(12, i)] },
-    (@fmt U) => { $crate::operand::op_types![RegD, Imm(20, u)] },
-    (@fmt J) => { $crate::operand::op_types![RegD, Addr(20)] },
+    (@fmt R) => { $crate::types::op_types![RegD, RegS, RegS] },
+    (@fmt I) => { $crate::types::op_types![RegD, RegS, Imm(12, i)] },
+    (@fmt B) => { $crate::types::op_types![RegS, RegS, Addr(12)] },
+    (@fmt S) => { $crate::types::op_types![RegS, RegS, Imm(12, i)] },
+    (@fmt U) => { $crate::types::op_types![RegD, Imm(20, u)] },
+    (@fmt J) => { $crate::types::op_types![RegD, Addr(20)] },
 }
 
 #[cfg(test)]

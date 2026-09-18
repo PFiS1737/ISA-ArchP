@@ -4,8 +4,9 @@ use smallvec::SmallVec;
 use crate::{
     codec::{immediate::encode_immediate, register::encode_register},
     context::Context,
-    operand::{Operand, OperandType},
+    operand::Operand,
     relocation::RelocationType,
+    types::OperandType,
 };
 
 pub fn encode_operands<'src>(
