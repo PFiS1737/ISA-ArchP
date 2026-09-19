@@ -24,6 +24,12 @@ pub fn decode_instruction(itype: InstructionType, code: u32) -> SmallVec<[u32; 3
     }
 }
 
+pub fn decode_opcode(code: u32) -> (u32, u32) {
+    let opcode = code >> 25;
+    let funct3 = (code >> 22) & 0b111;
+    (opcode, funct3)
+}
+
 instr_codec!(
     [
         opcode => (25, 7) => _;

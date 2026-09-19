@@ -2,14 +2,27 @@
 mod generated;
 
 use anyhow::Result;
-pub use generated::get_by_name;
 
 use crate::{
-    codec::{instruction::encode_instruction, operands::encode_operands},
+    codec::{
+        instruction::{decode_opcode, encode_instruction},
+        operands::encode_operands,
+    },
     context::Context,
+    instructions::generated::{get_by_name, get_by_opcode},
     operand::Operand,
     types::{InstructionType, OperandType},
 };
+
+pub fn get_instruction_by_name(name: &str) -> Option<&'static Instruction> {
+    get_by_name(name)
+}
+
+#[allow(dead_code)]
+pub fn match_instruction(code: u32) -> Option<&'static Instruction> {
+    let (opcode, funct3) = decode_opcode(code);
+    get_by_opcode(opcode, funct3)
+}
 
 pub struct Instruction {
     pub name: &'static str,
