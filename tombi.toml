@@ -1,5 +1,7 @@
+toml-version = "v1.1.0"
+
 [files]
 include = ["**/*.toml"]
 
 [format.rules]
-line-width = 120
+line-width = 100

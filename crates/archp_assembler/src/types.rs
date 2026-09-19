@@ -1,4 +1,9 @@
-#[derive(Debug, Clone, Copy, PartialEq)]
+use std::fmt::Display;
+
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub enum InstructionType {
     R,
     I,
@@ -8,7 +13,35 @@ pub enum InstructionType {
     J,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl Display for InstructionType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            InstructionType::R => write!(f, "R"),
+            InstructionType::I => write!(f, "I"),
+            InstructionType::B => write!(f, "B"),
+            InstructionType::S => write!(f, "S"),
+            InstructionType::U => write!(f, "U"),
+            InstructionType::J => write!(f, "J"),
+        }
+    }
+}
+
+impl InstructionType {
+    pub fn default_format(&self) -> &'static [OperandType] {
+        use OperandType::*;
+        match self {
+            InstructionType::R => &[RegD, RegS, RegS],
+            InstructionType::I => &[RegD, RegS, Imm(12, true)],
+            InstructionType::B => &[RegS, RegS, Addr(12)],
+            InstructionType::S => &[RegS, RegS, Imm(12, true)],
+            InstructionType::U => &[RegD, Imm(20, false)],
+            InstructionType::J => &[RegD, Addr(20)],
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "type", content = "value")]
 pub enum OperandType {
     RegD,
     RegS,
@@ -17,23 +50,14 @@ pub enum OperandType {
     None,
 }
 
-pub macro op_types {
-    ( $( $type:tt $(( $v:literal $( , $s:tt )? ))? ),* ) => {
-        &[
-            $(
-                $crate::types::op_types!(@one $type $(( $v $( , $s )? ))?)
-            ),*
-        ]
-    },
-
-    (@one _) => {
-        $crate::types::OperandType::None
-    },
-
-    (@one $type:tt $(( $v:literal $( , $s:tt )? ))?) => {
-        $crate::types::OperandType::$type $(( $v $( , crate::types::op_types!(@sig $s) )? ))?
-    },
-
-    (@sig i) => { true },
-    (@sig u) => { false },
+impl Display for OperandType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            OperandType::RegD => write!(f, "RegD"),
+            OperandType::RegS => write!(f, "RegS"),
+            OperandType::Imm(size, signed) => write!(f, "Imm({}, {})", size, signed),
+            OperandType::Addr(size) => write!(f, "Addr({})", size),
+            OperandType::None => write!(f, "None"),
+        }
+    }
 }

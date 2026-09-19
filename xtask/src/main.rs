@@ -24,6 +24,9 @@ fn main() -> Result<()> {
         Command::Trace { file } => {
             commands::trace::trace(file, ".".into())?;
         },
+        Command::Codegen { targets } => {
+            commands::codegen::codegen(targets)?;
+        },
     }
 
     Ok(())

@@ -5,7 +5,7 @@ use crate::{
     assembler::{Instr, Line},
     context::Context,
     directives::DIRECTIVES,
-    instructions::INSTRUCTIONS,
+    instructions,
     operand::Operand,
     parser::parse_line,
     pseudo_instructions::PSEUDO_INSTRUCTIONS,
@@ -126,8 +126,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
     fn encode_instr(&mut self, instr: Instr<'src>) -> Result<()> {
         let (name, ops) = instr;
 
-        let code = INSTRUCTIONS
-            .get(name)
+        let code = instructions::get_by_name(name)
             .ok_or(anyhow!("Unknown instruction: '{}'", name))?
             .encode(self.context, &ops)?;
 

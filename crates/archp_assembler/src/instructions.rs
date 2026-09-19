@@ -1,19 +1,8 @@
-mod arithmetic_logic;
-mod branch;
-mod jump_and_link;
-mod load_store;
-mod mul_div;
-mod set;
-mod shift_rotate;
-mod system;
-mod upper_imm;
-
-#[cfg(feature = "stack")]
-mod stack_call_return;
-
-use std::{collections::HashMap, sync::LazyLock};
+#[path = "_generated/instructions.rs"]
+mod generated;
 
 use anyhow::Result;
+pub use generated::get_by_name;
 
 use crate::{
     codec::{instruction::encode_instruction, operands::encode_operands},
@@ -22,13 +11,7 @@ use crate::{
     types::{InstructionType, OperandType},
 };
 
-inventory::collect!(Entry);
-
-pub static INSTRUCTIONS: LazyLock<HashMap<&'static str, &'static Entry>> =
-    LazyLock::new(|| HashMap::from_iter(inventory::iter::<Entry>.into_iter().map(|e| (e.name, e))));
-
-#[derive(Debug, Clone)]
-pub struct Entry {
+pub struct Instruction {
     pub name: &'static str,
     pub opcode: u32,
     pub funct3: u32,
@@ -36,25 +19,7 @@ pub struct Entry {
     pub format: &'static [OperandType],
 }
 
-trait Instruction: Send + Sync {
-    const NAME: &'static str;
-    const OPCODE: u32;
-    const FUNCT3: u32;
-    const ITYPE: InstructionType;
-    const FORMAT: &'static [OperandType];
-}
-
-impl Entry {
-    const fn of<T: Instruction>() -> Self {
-        Self {
-            name: T::NAME,
-            opcode: T::OPCODE,
-            funct3: T::FUNCT3,
-            itype: T::ITYPE,
-            format: T::FORMAT,
-        }
-    }
-
+impl Instruction {
     pub fn encode<'src>(
         &'static self,
         ctx: &mut Context<'src>,
@@ -66,131 +31,9 @@ impl Entry {
     }
 }
 
-macro instruction {
-    (@impl
-        $( #[doc = $doc:literal] )*
-        $vis:vis $id:ident {
-            name: $name:literal,
-            opcode: $opcode:literal,
-            funct3: $funct3:literal,
-            itype: $itype:ident,
-            format: $format:expr,
-        }
-    ) => {
-        $( #[doc = $doc] )*
-        $vis struct $id;
-
-        impl $crate::instructions::Instruction for $id {
-            const NAME: &'static str = $name;
-            const OPCODE: u32 = $opcode;
-            const FUNCT3: u32 = $funct3;
-            const ITYPE: $crate::instructions::InstructionType =
-                $crate::instructions::InstructionType::$itype;
-            const FORMAT: &'static [$crate::types::OperandType] = $format;
-        }
-
-        inventory::submit! {
-            $crate::instructions::Entry::of::<$id>()
-        }
-    },
-
-    (
-        $( #[doc = $doc:literal] )*
-        $vis:vis $id:ident {
-            name: $name:literal,
-            opcode: $opcode:literal,
-            funct3: $funct3:literal,
-            itype: $itype:ident,
-        }
-    ) => {
-        instruction! {@impl
-            $( #[doc = $doc] )*
-            $vis $id {
-                name: $name,
-                opcode: $opcode,
-                funct3: $funct3,
-                itype: $itype,
-                format: instruction!(@fmt $itype),
-            }
-        }
-    },
-
-    (
-        $( #[doc = $doc:literal] )*
-        $vis:vis $id:ident {
-            name: $name:literal,
-            opcode: $opcode:literal,
-            itype: $itype:ident,
-        }
-    ) => {
-        instruction! {@impl
-            $( #[doc = $doc] )*
-            $vis $id {
-                name: $name,
-                opcode: $opcode,
-                funct3: 0,
-                itype: $itype,
-                format: instruction!(@fmt $itype),
-            }
-        }
-    },
-
-    (
-        $( #[doc = $doc:literal] )*
-        $vis:vis $id:ident {
-            name: $name:literal,
-            opcode: $opcode:literal,
-            funct3: $funct3:literal,
-            itype: $itype:ident,
-            format: $format:tt,
-        }
-    ) => {
-        instruction! {@impl
-            $( #[doc = $doc] )*
-            $vis $id {
-                name: $name,
-                opcode: $opcode,
-                funct3: $funct3,
-                itype: $itype,
-                format: $crate::types::op_types! $format,
-            }
-        }
-    },
-
-    (
-        $( #[doc = $doc:literal] )*
-        $vis:vis $id:ident {
-            name: $name:literal,
-            opcode: $opcode:literal,
-            itype: $itype:ident,
-            format: $format:tt,
-        }
-    ) => {
-        instruction! {@impl
-            $( #[doc = $doc] )*
-            $vis $id {
-                name: $name,
-                opcode: $opcode,
-                funct3: 0,
-                itype: $itype,
-                format: $crate::types::op_types! $format,
-            }
-        }
-    },
-
-    (@fmt R) => { $crate::types::op_types![RegD, RegS, RegS] },
-    (@fmt I) => { $crate::types::op_types![RegD, RegS, Imm(12, i)] },
-    (@fmt B) => { $crate::types::op_types![RegS, RegS, Addr(12)] },
-    (@fmt S) => { $crate::types::op_types![RegS, RegS, Imm(12, i)] },
-    (@fmt U) => { $crate::types::op_types![RegD, Imm(20, u)] },
-    (@fmt J) => { $crate::types::op_types![RegD, Addr(20)] },
-}
-
 #[cfg(test)]
 macro instr( @($ctx:expr) $name:ident $($ops:expr),* $(;)? ) {{
-    let name = <$name as $crate::instructions::Instruction>::NAME;
-    let instr = $crate::instructions::INSTRUCTIONS.get(name).unwrap();
-    instr.encode($ctx, &$crate::operand::ops![$($ops),*])
+    $name.encode($ctx, &$crate::operand::ops![$($ops),*])
 }}
 
 #[cfg(test)]
@@ -211,65 +54,65 @@ mod tests {
 
     #[test]
     fn encode_r() {
-        use arithmetic_logic::Add;
+        use generated::ADD;
 
-        assert_snapshot!(test_instr!(Add "r1", "r2"), @"Error: Instruction 'add' requires 3 operands, got 2");
-        assert_snapshot!(test_instr!(Add "r1", "r2", "r3", "r4"), @"Error: Instruction 'add' requires 3 operands, got 4");
-        assert_snapshot!(test_instr!(Add "r1", "r2", "rrr"), @"Error: Invalid register: rrr");
-        assert_snapshot!(test_instr!(Add "r1", "r2", 123), @"Error: Expected register, got: 123");
+        assert_snapshot!(test_instr!(ADD "r1", "r2"), @"Error: Instruction 'add' requires 3 operands, got 2");
+        assert_snapshot!(test_instr!(ADD "r1", "r2", "r3", "r4"), @"Error: Instruction 'add' requires 3 operands, got 4");
+        assert_snapshot!(test_instr!(ADD "r1", "r2", "rrr"), @"Error: Invalid register: rrr");
+        assert_snapshot!(test_instr!(ADD "r1", "r2", 123), @"Error: Expected register, got: 123");
 
-        assert_snapshot!(test_instr!(Add "r1", "r2", "r3"), @"0x00022003");
+        assert_snapshot!(test_instr!(ADD "r1", "r2", "r3"), @"0x00022003");
     }
 
     #[test]
     fn encode_i() {
-        use arithmetic_logic::Addi;
+        use generated::ADDI;
 
-        assert_snapshot!(test_instr!(Addi "r1", "r2"), @"Error: Instruction 'addi' requires 3 operands, got 2");
-        assert_snapshot!(test_instr!(Addi "r1", "r2", "r3", "r4"), @"Error: Instruction 'addi' requires 3 operands, got 4");
-        assert_snapshot!(test_instr!(Addi "r1", "rrr", 123), @"Error: Invalid register: rrr");
-        assert_snapshot!(test_instr!(Addi "r1", "r2", "r3"), @"Error: Expected immediate, got: r3");
-        assert_snapshot!(test_instr!(Addi "r1", "r2", 0xFFF), @"Error: Immediate '4095' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(test_instr!(Addi "r1", "r2", 0x7FF), @"0x010227FF");
-        assert_snapshot!(test_instr!(Addi "r1", "r2", 0xFFFF), @"Error: Immediate '65535' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(test_instr!(Addi "r1", "r2", 0xFFFFFFFF_i64), @"0x01022FFF");
-        assert_snapshot!(test_instr!(Addi "r1", "r2", -1), @"0x01022FFF");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2"), @"Error: Instruction 'addi' requires 3 operands, got 2");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", "r3", "r4"), @"Error: Instruction 'addi' requires 3 operands, got 4");
+        assert_snapshot!(test_instr!(ADDI "r1", "rrr", 123), @"Error: Invalid register: rrr");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", "r3"), @"Error: Expected immediate, got: r3");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", 0xFFF), @"Error: Immediate '4095' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", 0x7FF), @"0x010227FF");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", 0xFFFF), @"Error: Immediate '65535' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", 0xFFFFFFFF_i64), @"0x01022FFF");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", -1), @"0x01022FFF");
 
-        assert_snapshot!(test_instr!(Addi "r1", "r2", 3), @"0x01022003");
-        assert_snapshot!(test_instr!(Addi "r1", "r2", 2047), @"0x010227FF");
-        assert_snapshot!(test_instr!(Addi "r1", "r2", 2048), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(test_instr!(Addi "r1", "r2", -3), @"0x01022FFD");
-        assert_snapshot!(test_instr!(Addi "r1", "r2", -2048), @"0x01022800");
-        assert_snapshot!(test_instr!(Addi "r1", "r2", -2049), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", 3), @"0x01022003");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", 2047), @"0x010227FF");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", 2048), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", -3), @"0x01022FFD");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", -2048), @"0x01022800");
+        assert_snapshot!(test_instr!(ADDI "r1", "r2", -2049), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
 
-        use shift_rotate::Srli;
+        use generated::SRLI;
 
-        assert_snapshot!(test_instr!(Srli "r1", "r2", 32), @"Error: Immediate '32' out of range for u5 (0 ..= 31)");
-        assert_snapshot!(test_instr!(Srli "r1", "r2", 31), @"0x0A42201F");
+        assert_snapshot!(test_instr!(SRLI "r1", "r2", 32), @"Error: Immediate '32' out of range for u5 (0 ..= 31)");
+        assert_snapshot!(test_instr!(SRLI "r1", "r2", 31), @"0x0A42201F");
     }
 
     #[test]
     fn enocde_b() {
-        use load_store::Sw;
+        use generated::SW;
 
-        assert_snapshot!(test_instr!(Sw "r1", "r2", 3), @"0x11402061");
-        assert_snapshot!(test_instr!(Sw "r1", "r2", 2047), @"0x115E2FE1");
-        assert_snapshot!(test_instr!(Sw "r1", "r2", 2048), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
-        assert_snapshot!(test_instr!(Sw "r1", "r2", -3), @"0x117E2FA1");
-        assert_snapshot!(test_instr!(Sw "r1", "r2", -2048), @"0x11602001");
-        assert_snapshot!(test_instr!(Sw "r1", "r2", -2049), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(test_instr!(SW "r1", "r2", 3), @"0x11402061");
+        assert_snapshot!(test_instr!(SW "r1", "r2", 2047), @"0x115E2FE1");
+        assert_snapshot!(test_instr!(SW "r1", "r2", 2048), @"Error: Immediate '2048' out of range for i12 (-2048 ..= 2047)");
+        assert_snapshot!(test_instr!(SW "r1", "r2", -3), @"0x117E2FA1");
+        assert_snapshot!(test_instr!(SW "r1", "r2", -2048), @"0x11602001");
+        assert_snapshot!(test_instr!(SW "r1", "r2", -2049), @"Error: Immediate '-2049' out of range for i12 (-2048 ..= 2047)");
     }
 
     #[test]
     fn encode_u() {
-        use upper_imm::Lui;
+        use generated::LUI;
 
-        assert_snapshot!(test_instr!(Lui "r1"), @"Error: Instruction 'lui' requires 2 operands, got 1");
-        assert_snapshot!(test_instr!(Lui "r1", "r2", "r3"), @"Error: Instruction 'lui' requires 2 operands, got 3");
-        assert_snapshot!(test_instr!(Lui "r1", "r2"), @"Error: Expected immediate, got: r2");
-        assert_snapshot!(test_instr!(Lui "r3", 0x200000), @"Error: Immediate '2097152' out of range for u20 (0 ..= 1048575)");
-        assert_snapshot!(test_instr!(Lui "r3", -123), @"Error: Immediate '-123' out of range for u20 (0 ..= 1048575)");
+        assert_snapshot!(test_instr!(LUI "r1"), @"Error: Instruction 'lui' requires 2 operands, got 1");
+        assert_snapshot!(test_instr!(LUI "r1", "r2", "r3"), @"Error: Instruction 'lui' requires 2 operands, got 3");
+        assert_snapshot!(test_instr!(LUI "r1", "r2"), @"Error: Expected immediate, got: r2");
+        assert_snapshot!(test_instr!(LUI "r3", 0x200000), @"Error: Immediate '2097152' out of range for u20 (0 ..= 1048575)");
+        assert_snapshot!(test_instr!(LUI "r3", -123), @"Error: Immediate '-123' out of range for u20 (0 ..= 1048575)");
 
-        assert_snapshot!(test_instr!(Lui "r3", 0xABCDE), @"0x1746BCDE");
+        assert_snapshot!(test_instr!(LUI "r3", 0xABCDE), @"0x1746BCDE");
     }
 }

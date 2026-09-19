@@ -13,6 +13,8 @@ anyhow = { workspace = true }
 base64 = { workspace = true }
 inventory = { workspace = true }
 nom = { workspace = true }
+schemars = { workspace = true }
+serde = { workspace = true }
 smallvec = { workspace = true }
 thiserror = { workspace = true }
 

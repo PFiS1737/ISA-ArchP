@@ -6,7 +6,7 @@ use crate::{
         instruction::{decode_instruction, encode_instruction},
     },
     context::Context,
-    instructions::Entry,
+    instructions::Instruction,
     operand::Operand,
     types::OperandType,
     utils::split::split_hi_lo,
@@ -72,7 +72,7 @@ impl<'src> Context<'src> {
     }
 }
 
-impl Entry {
+impl Instruction {
     pub fn apply_relocation(
         &self,
         rtype: RelocationType,

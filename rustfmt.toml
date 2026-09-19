@@ -16,3 +16,6 @@ overflow_delimited_expr = true
 reorder_impl_items = true
 normalize_comments = true
 normalize_doc_attributes = true
+# not work when formatOnSave which using rustfmt with stdin
+# https://github.com/rust-lang/rustfmt/issues/6620
+format_generated_files = false
