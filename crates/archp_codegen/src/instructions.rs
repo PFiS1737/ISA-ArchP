@@ -84,6 +84,8 @@ impl Root {
 
         out.extend(self.generate_name_matcher()?);
 
+        out.extend(self.generate_opcode_matcher()?);
+
         Ok(out)
     }
 
@@ -159,6 +161,33 @@ impl Root {
         Ok(quote! {
             pub fn get_by_name(name: &str) -> Option<&'static Instruction> {
                 match name {
+                    #(#match_arms)*
+                    _ => None,
+                }
+            }
+        })
+    }
+
+    fn generate_opcode_matcher(&self) -> Result<TokenStream> {
+        let match_arms = self
+            .instructions()
+            .map(|(opcode, funct3, instruction, feature)| {
+                let name_ident: Ident = syn::parse_str(&instruction.name.to_uppercase())?;
+
+                let feature_attr = feature.as_ref().map(|f| {
+                    quote! { #[cfg(feature = #f)] }
+                });
+
+                Ok(quote! {
+                    #feature_attr
+                    (#opcode, #funct3) => Some(#name_ident),
+                })
+            })
+            .collect::<Result<Vec<_>>>()?;
+
+        Ok(quote! {
+            pub fn get_by_opcode(opcode: u32, funct3: u32) -> Option<&'static Instruction> {
+                match (opcode, funct3) {
                     #(#match_arms)*
                     _ => None,
                 }
