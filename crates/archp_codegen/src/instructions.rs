@@ -89,14 +89,30 @@ impl Root {
         Ok(out)
     }
 
-    fn instructions(&self) -> impl Iterator<Item = (u32, u32, &Instruction, &Option<String>)> {
+    fn instructions(
+        &self,
+    ) -> impl Iterator<Item = (u32, Option<u32>, &Instruction, &Option<String>)> {
         self.opcodes.iter().flat_map(|o| match &o.instructions {
             Funct3OrInstruction::Funct3 { funct3s } => funct3s
                 .iter()
-                .map(|f| (o.opcode, f.funct3, &f.instruction, &o.feature))
+                .map(|f| {
+                    assert!(
+                        f.instruction.itype.has_funct3(),
+                        "Instruction {} of type {} must have funct3",
+                        f.instruction.name,
+                        f.instruction.itype
+                    );
+                    (o.opcode, Some(f.funct3), &f.instruction, &o.feature)
+                })
                 .collect(),
             Funct3OrInstruction::Instruction { instruction } => {
-                vec![(o.opcode, 0, instruction, &o.feature)]
+                assert!(
+                    !instruction.itype.has_funct3(),
+                    "Instruction {} of type {} must not have funct3",
+                    instruction.name,
+                    instruction.itype
+                );
+                vec![(o.opcode, None, instruction, &o.feature)]
             },
         })
     }
@@ -105,6 +121,8 @@ impl Root {
         self.instructions()
             .map(
                 |(opcode, funct3, instruction, feature)| -> Result<TokenStream> {
+                    let funct3 = funct3.unwrap_or(0);
+
                     let name = &instruction.name;
 
                     let name_ident: Ident = syn::parse_str(&name.to_uppercase())?;
@@ -172,6 +190,8 @@ impl Root {
         let match_arms = self
             .instructions()
             .map(|(opcode, funct3, instruction, feature)| {
+                let funct3 = funct3.map(|f| quote! { #f }).unwrap_or(quote! { .. });
+
                 let name_ident: Ident = syn::parse_str(&instruction.name.to_uppercase())?;
 
                 let feature_attr = feature.as_ref().map(|f| {

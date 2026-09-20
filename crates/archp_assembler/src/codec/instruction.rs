@@ -30,6 +30,15 @@ pub fn decode_opcode(code: u32) -> (u32, u32) {
     (opcode, funct3)
 }
 
+impl InstructionType {
+    pub fn has_funct3(&self) -> bool {
+        matches!(
+            self,
+            InstructionType::R | InstructionType::I | InstructionType::B | InstructionType::S
+        )
+    }
+}
+
 instr_codec!(
     [
         opcode => (25, 7) => _;

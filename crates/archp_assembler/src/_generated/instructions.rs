@@ -712,12 +712,12 @@ pub fn get_by_opcode(opcode: u32, funct3: u32) -> Option<&'static Instruction> {
         (9u32, 4u32) => Some(BLTU),
         (9u32, 5u32) => Some(BGEU),
         (9u32, 7u32) => Some(JALR),
-        (10u32, 0u32) => Some(JAL),
-        (11u32, 0u32) => Some(LUI),
-        (12u32, 0u32) => Some(AUIPC),
+        (10u32, ..) => Some(JAL),
+        (11u32, ..) => Some(LUI),
+        (12u32, ..) => Some(AUIPC),
         (32u32, 0u32) => Some(ECALL),
         #[cfg(feature = "stack")]
-        (125u32, 0u32) => Some(CALL),
+        (125u32, ..) => Some(CALL),
         #[cfg(feature = "stack")]
         (126u32, 0u32) => Some(POP),
         #[cfg(feature = "stack")]
