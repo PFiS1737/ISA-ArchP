@@ -93,9 +93,9 @@ impl Instruction {
                     RelocationType::High => hi,
                 };
 
-                let mut ops = decode_instruction(self.itype, code);
+                let mut ops = decode_instruction(&self.itype, code);
                 ops[idx] = addr;
-                let word = encode_instruction(self.itype, self.opcode, self.funct3, &ops);
+                let word = encode_instruction(&self.itype, self.opcode, self.funct3, &ops);
 
                 return Ok(word);
             }

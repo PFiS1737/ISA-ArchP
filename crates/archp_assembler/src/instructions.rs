@@ -39,12 +39,12 @@ impl Instruction {
         operands: &[Operand<'src>],
     ) -> Result<u32> {
         let ops = encode_operands(ctx, self.name, self.format, operands)?;
-        let code = encode_instruction(self.itype, self.opcode, self.funct3, &ops);
+        let code = encode_instruction(&self.itype, self.opcode, self.funct3, &ops);
         Ok(code)
     }
 
     pub fn decode(&'static self, code: u32) -> SmallVec<[Operand<'static>; 3]> {
-        let ops = decode_instruction(self.itype, code);
+        let ops = decode_instruction(&self.itype, code);
         decode_operands(self.format, ops)
     }
 }

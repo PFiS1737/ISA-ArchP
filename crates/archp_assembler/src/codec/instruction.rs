@@ -2,7 +2,7 @@ use smallvec::SmallVec;
 
 use crate::types::InstructionType;
 
-pub fn encode_instruction(itype: InstructionType, opcode: u32, funct3: u32, ops: &[u32]) -> u32 {
+pub fn encode_instruction(itype: &InstructionType, opcode: u32, funct3: u32, ops: &[u32]) -> u32 {
     match itype {
         InstructionType::R => encode_r(opcode, funct3, ops),
         InstructionType::I => encode_i(opcode, funct3, ops),
@@ -13,7 +13,7 @@ pub fn encode_instruction(itype: InstructionType, opcode: u32, funct3: u32, ops:
     }
 }
 
-pub fn decode_instruction(itype: InstructionType, code: u32) -> SmallVec<[u32; 3]> {
+pub fn decode_instruction(itype: &InstructionType, code: u32) -> SmallVec<[u32; 3]> {
     match itype {
         InstructionType::R => decode_r(code),
         InstructionType::I => decode_i(code),
@@ -157,8 +157,8 @@ mod tests {
     use super::*;
 
     fn test(instr_type: InstructionType, opcode: u32, funct3: u32, ops: &[u32]) {
-        let code = encode_instruction(instr_type, opcode, funct3, ops);
-        let decoded = decode_instruction(instr_type, code);
+        let code = encode_instruction(&instr_type, opcode, funct3, ops);
+        let decoded = decode_instruction(&instr_type, code);
 
         assert_eq!(decoded.as_slice(), ops);
     }
