@@ -6,55 +6,55 @@ success: true
 exit_code: 0
 ----- stdout -----
 0x16040100 # lui sp 256
-0x01042FFF # addi sp sp 0xFFFFFFFF
-0x01220005 # addi a7 r0 5           <label: main>
+0x01042FFF # addi sp sp -1
+0x01220005 # addi a7 zero 5   <label: main>
 0x40000000 # ecall
-0x0110A000 # addi len a0 0
-0x010A8000 # addi t0 len 0
+0x0110A000 # addi s0 a0 0
+0x010A8000 # addi t0 s0 0
 0x160C0100 # lui t1 256
-0x01220005 # addi a7 r0 5           <label: input>
+0x01220005 # addi a7 zero 5   <label: input>
 0x40000000 # ecall
 0x11C0600A # sb a0 t1 0
 0x010C6001 # addi t1 t1 1
 0x014A5001 # subi t0 t0 1
-0x12BE0EC5 # blt r0 t0 input
-0xFA00000A # call solve
-0x01220001 # addi a7 r0 1
+0x12BE0EC5 # blt zero t0 -10
+0xFA00000A # call 10
+0x01220001 # addi a7 zero 1
 0x40000000 # ecall
-0x0122000A # addi a7 r0 10
+0x0122000A # addi a7 zero 10
 0x40000000 # ecall
-0x01442004 # subi sp sp 4           <label: solve>
+0x01442004 # subi sp sp 4     <label: solve>
 0x11402001 # sw ra sp 0
-0x16120100 # lui l 256
-0x00249008 # add r l len
-0x01652001 # subi r r 1
-0x11269000 # lbu lmax l 0
-0x11292000 # lbu rmax r 0
-0x12C09512 # bge l r endwhile       <label: while>
-0x12C13294 # bge lmax rmax else
-0x01129001 # addi l l 1
-0x110A9000 # lbu t0 l 0
+0x16120100 # lui s1 256
+0x00249008 # add s2 s1 s0
+0x01652001 # subi s2 s2 1
+0x11269000 # lbu s3 s1 0
+0x11292000 # lbu s4 s2 0
+0x12C09512 # bge s1 s2 40     <label: while>
+0x12C13294 # bge s3 s4 20
+0x01129001 # addi s1 s1 1
+0x110A9000 # lbu t0 s1 0
 0x01145000 # addi a0 t0 0
-0x01173000 # addi a1 lmax 0
-0xFA000024 # call max
-0x0126A000 # addi lmax a0 0
-0x004D3005 # sub t1 lmax t0
-0x002B5006 # add water water t1
-0x14000012 # jal r0 endif
-0x01652001 # subi r r 1             <label: else>
-0x110B2000 # lbu t0 r 0
+0x01173000 # addi a1 s3 0
+0xFA000024 # call 36
+0x0126A000 # addi s3 a0 0
+0x004D3005 # sub t1 s3 t0
+0x002B5006 # add s5 s5 t1
+0x14000012 # jal zero 18
+0x01652001 # subi s2 s2 1     <label: else>
+0x110B2000 # lbu t0 s2 0
 0x01145000 # addi a0 t0 0
-0x01174000 # addi a1 rmax 0
-0xFA000012 # call max
-0x0128A000 # addi rmax a0 0
-0x004D4005 # sub t1 rmax t0
-0x002B5006 # add water water t1
-0x15C1FFDA # jal r0 while           <label: endif>
-0x01155000 # addi a0 water 0        <label: endwhile>
+0x01174000 # addi a1 s4 0
+0xFA000012 # call 18
+0x0128A000 # addi s4 a0 0
+0x004D4005 # sub t1 s4 t0
+0x002B5006 # add s5 s5 t1
+0x15C1FFDA # jal zero -38     <label: endif>
+0x01155000 # addi a0 s5 0     <label: endwhile>
 0x10022000 # lw ra sp 0
 0x01042004 # addi sp sp 4
 0xFC800000 # ret
-0x1280B08A # blt a1 a0 max_ret      <label: max>
+0x1280B08A # blt a1 a0 4      <label: max>
 0x0114B000 # addi a0 a1 0
-0xFC800000 # ret                    <label: max_ret>
+0xFC800000 # ret              <label: max_ret>
 ----- stderr -----

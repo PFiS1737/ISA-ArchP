@@ -24,13 +24,13 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
 
             let addr = *addr as i64 + reloc.addend;
 
-            let code = self.context.get_code(reloc.offset);
+            let code = self.context.get_word(reloc.offset);
 
             let code = Instruction::get_by_name(reloc.instr)
                 .unwrap()
                 .apply_relocation(reloc.rtype, code, addr, reloc.base as u32)?;
 
-            self.context.set_code(reloc.offset, code);
+            self.context.set_word(reloc.offset, code);
         }
 
         Ok(())

@@ -5,1074 +5,1074 @@ input_file: crates/archp_assembler/examples/hello_world.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x180A0001 # auipc t0 0
-0x13C05828 # jalr r0 t0 0
-0x6C6C6548 #                <label: hello>
-0x0000006F # 
-0x02010101 #                <label: zero1>
-0x02000200 # 
-0x00000300 # 
-0x00000300 # 
-0x00000300 # 
-0x04040400 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x19D5FFFF # auipc a0 0     <label: main>
-0x0114A7E0 # addi a0 a0 0
-0x01220004 # addi a7 r0 4
+0x180A0001 # auipc t0 1
+0x13C05828 # jalr zero t0 -2008
+0x6C6C6548 #                     <label: hello>
+0x0000006F # add zero zero a5
+0x02010101 # xor zero a6 ra      <label: zero1>
+0x02000200 # xor zero zero zero
+0x00000300 # add zero zero zero
+0x00000300 # add zero zero zero
+0x00000300 # add zero zero zero
+0x04040400 # mul sp zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x19D5FFFF # auipc a0 0xFFFFF    <label: main>
+0x0114A7E0 # addi a0 a0 0x7E0
+0x01220004 # addi a7 zero 4
 0x40000000 # ecall
-0x18140001 # auipc a0 0
-0x0114A824 # addi a0 a0 0
-0x01220004 # addi a7 r0 4
+0x18140001 # auipc a0 1
+0x0114A824 # addi a0 a0 -2012
+0x01220004 # addi a7 zero 4
 0x40000000 # ecall
-0x18380001 # auipc t3 0
-0x0139C820 # addi t3 t3 0
+0x18380001 # auipc t3 1
+0x0139C820 # addi t3 t3 -2016
 0x13C3C000 # jalr ra t3 0
-0x0122000A # addi a7 r0 10
+0x0122000A # addi a7 zero 10
 0x40000000 # ecall
-0x00000000 #                <label: zero2>
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x00000000 # 
-0x726F5720 #                <label: world>
-0x0A21646C # 
-0x00000000 # 
-0x19D5FFFF # auipc a0 0     <label: test_load_store>
-0x1014AFA8 # lw a0 a0 0
-0x01220001 # addi a7 r0 1
+0x00000000 # add zero zero zero  <label: zero2>
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x00000000 # add zero zero zero
+0x726F5720 #                     <label: world>
+0x0A21646C # slli a6 s6 0x46C
+0x00000000 # add zero zero zero
+0x19D5FFFF # auipc a0 0xFFFFF    <label: test_load_store>
+0x1014AFA8 # lw a0 a0 -88
+0x01220001 # addi a7 zero 1
 0x40000000 # ecall
-0x19D5FFFF # auipc a0 0
-0x10D4AF90 # lb a0 a0 0
-0x0122000B # addi a7 r0 11
+0x19D5FFFF # auipc a0 0xFFFFF
+0x10D4AF90 # lb a0 a0 -112
+0x0122000B # addi a7 zero 11
 0x40000000 # ecall
 0x18140000 # auipc a0 0
-0x10D4AFDB # lb a0 a0 0
-0x0122000B # addi a7 r0 11
+0x10D4AFDB # lb a0 a0 -37
+0x0122000B # addi a7 zero 11
 0x40000000 # ecall
-0x01140041 # addi a0 r0 65
-0x19CBFFFF # auipc t0 0
-0x11FC5D8A # sb a0 t0 0
-0x19D5FFFF # auipc a0 0
-0x0114AF64 # addi a0 a0 0
-0x01220004 # addi a7 r0 4
+0x01140041 # addi a0 zero 65
+0x19CBFFFF # auipc t0 0xFFFFF
+0x11FC5D8A # sb a0 t0 -148
+0x19D5FFFF # auipc a0 0xFFFFF
+0x0114AF64 # addi a0 a0 -156
+0x01220004 # addi a7 zero 4
 0x40000000 # ecall
 0xFC800000 # ret
 ----- stderr -----

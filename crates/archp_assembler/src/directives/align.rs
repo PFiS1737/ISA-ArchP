@@ -101,13 +101,13 @@ mod tests {
     fn test_align() {
         let mut ctx = Context::test();
 
-        ctx.add_code(0x12345678, None);
+        ctx.add_word(0x12345678);
         align_bytes(&mut ctx, 2_usize.pow(5), 0, usize::MAX).unwrap();
-        ctx.add_code(0x12345678, None);
+        ctx.add_word(0x12345678);
         align_bytes(&mut ctx, 2_usize.pow(4), 0, usize::MAX).unwrap();
-        ctx.add_code(0x12345678, None);
+        ctx.add_word(0x12345678);
         align_bytes(&mut ctx, 2_usize.pow(3), 0, usize::MAX).unwrap();
-        ctx.add_code(0x12345678, None);
+        ctx.add_word(0x12345678);
 
         assert_debug_snapshot!(ctx.text, @"
         [

@@ -2,11 +2,12 @@
 mod generated;
 
 use anyhow::Result;
+use smallvec::SmallVec;
 
 use crate::{
     codec::{
-        instruction::{decode_opcode, encode_instruction},
-        operands::encode_operands,
+        instruction::{decode_instruction, decode_opcode, encode_instruction},
+        operands::{decode_operands, encode_operands},
     },
     context::Context,
     instructions::generated::{get_by_name, get_by_opcode},
@@ -27,7 +28,6 @@ impl Instruction {
         get_by_name(name)
     }
 
-    #[allow(unused)]
     pub fn get_by_code(code: u32) -> Option<&'static Self> {
         let (opcode, funct3) = decode_opcode(code);
         get_by_opcode(opcode, funct3)
@@ -41,6 +41,11 @@ impl Instruction {
         let ops = encode_operands(ctx, self.name, self.format, operands)?;
         let code = encode_instruction(self.itype, self.opcode, self.funct3, &ops);
         Ok(code)
+    }
+
+    pub fn decode(&'static self, code: u32) -> SmallVec<[Operand<'static>; 3]> {
+        let ops = decode_instruction(self.itype, code);
+        decode_operands(self.format, ops)
     }
 }
 
@@ -64,6 +69,25 @@ mod tests {
     use insta::assert_snapshot;
 
     use super::*;
+
+    #[test]
+    fn test_codec() {
+        let ops = crate::operand::ops!["a1", "a2", "a3"];
+        let code = Instruction::get_by_name("add")
+            .unwrap()
+            .encode(&mut Context::test(), &ops)
+            .unwrap();
+        let decoded_ops = Instruction::get_by_code(code).unwrap().decode(code);
+        assert_eq!(decoded_ops, ops);
+
+        let ops = crate::operand::ops!["a1", 0xF2345];
+        let code = Instruction::get_by_name("lui")
+            .unwrap()
+            .encode(&mut Context::test(), &ops)
+            .unwrap();
+        let decoded_ops = Instruction::get_by_code(code).unwrap().decode(code);
+        assert_eq!(decoded_ops, ops);
+    }
 
     #[test]
     fn encode_r() {

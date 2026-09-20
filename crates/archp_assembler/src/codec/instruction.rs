@@ -39,7 +39,7 @@ impl InstructionType {
     }
 }
 
-instr_codec!(
+codec!(
     [
         opcode => (25, 7) => _;
         funct3 => (22, 3) => _;
@@ -54,7 +54,7 @@ instr_codec!(
     decode_r() [ rd, rs1, rs2 ]
 );
 
-instr_codec!(
+codec!(
     [
         opcode => (25, 7) => _;
         funct3 => (22, 3) => _;
@@ -68,7 +68,7 @@ instr_codec!(
     decode_i() [ rd, rs1, imm12 ]
 );
 
-instr_codec!(
+codec!(
     [
         opcode            => (25, 7) => _;
         funct3            => (22, 3) => _;
@@ -83,7 +83,7 @@ instr_codec!(
     decode_b() [ rs1, rs2, (offset12_hi << 7) | offset12_lo ]
 );
 
-instr_codec!(
+codec!(
     [
         opcode            => (25, 7) => _;
         funct3            => (22, 3) => _;
@@ -98,7 +98,7 @@ instr_codec!(
     decode_s() [ rs2, rs1, (offset12_hi << 7) | offset12_lo ]
 );
 
-instr_codec!(
+codec!(
     [
         opcode            => (25, 7) => _;
         (imm20 >> 17)     => (22, 3) => imm20_hi;
@@ -111,7 +111,7 @@ instr_codec!(
     decode_u() [ rd, (imm20_hi << 17) | imm20_lo ]
 );
 
-instr_codec!(
+codec!(
     [
         opcode            => (25, 7) => _;
         (imm20 >> 17)     => (22, 3) => imm20_hi;
@@ -124,7 +124,7 @@ instr_codec!(
     decode_j() [ rd, (imm20_hi << 17) | imm20_lo ]
 );
 
-macro instr_codec {
+macro codec {
     (
         [
             $( $enc_var:expr => ($shift:literal, $len:literal) => $dec_var:tt );+ $(;)?

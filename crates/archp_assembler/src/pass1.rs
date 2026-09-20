@@ -130,7 +130,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
             .ok_or(anyhow!("Unknown instruction: '{}'", name))?
             .encode(self.context, &ops)?;
 
-        self.context.add_code(code, Some((name, ops)));
+        self.context.add_word(code);
 
         Ok(())
     }

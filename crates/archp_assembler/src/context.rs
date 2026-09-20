@@ -1,14 +1,11 @@
 use std::collections::HashMap;
 
-use crate::{assembler::Instr, relocation::Relocation};
+use crate::relocation::Relocation;
 
 #[derive(Default)]
 pub struct Context<'src> {
     /// The generated machine code (raw bytes, little-endian)
     pub text: Vec<u8>,
-
-    /// The processed instructions, after macro and pseudo-instruction expansion
-    pub instrs: HashMap<usize, Option<Instr<'src>>>,
 
     pub labels: HashMap<&'src str, usize>,
 
@@ -42,13 +39,7 @@ impl<'src> Context<'src> {
         &mut self.text[len..]
     }
 
-    pub fn add_code(&mut self, code: u32, instr: Option<Instr<'src>>) {
-        let offset = self.text.len();
-        self.add_word(code);
-        self.instrs.insert(offset, instr);
-    }
-
-    pub fn get_code(&self, offset: usize) -> u32 {
+    pub fn get_word(&self, offset: usize) -> u32 {
         let end = offset + 4;
         assert!(end <= self.text.len(), "get_code out of bounds");
 
@@ -57,7 +48,7 @@ impl<'src> Context<'src> {
         u32::from_le_bytes(bytes)
     }
 
-    pub fn set_code(&mut self, offset: usize, value: u32) {
+    pub fn set_word(&mut self, offset: usize, value: u32) {
         let end = offset + 4;
         assert!(end <= self.text.len(), "set_code out of bounds");
 

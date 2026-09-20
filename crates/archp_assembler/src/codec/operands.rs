@@ -2,11 +2,15 @@ use anyhow::{Result, bail};
 use smallvec::SmallVec;
 
 use crate::{
-    codec::{immediate::encode_immediate, register::encode_register},
+    codec::{
+        immediate::encode_immediate,
+        register::{decode_register, encode_register},
+    },
     context::Context,
     operand::Operand,
     relocation::RelocationType,
     types::OperandType,
+    utils::sig_ext::sign_extend,
 };
 
 pub fn encode_operands<'src>(
@@ -64,4 +68,32 @@ pub fn encode_operands<'src>(
     }
 
     Ok(ret)
+}
+
+pub fn decode_operands(
+    format: &'static [OperandType],
+    operands: SmallVec<[u32; 3]>,
+) -> SmallVec<[Operand<'static>; 3]> {
+    assert_eq!(format.len(), operands.len());
+
+    let mut ret = SmallVec::new();
+
+    for (op_ty, val) in format.iter().zip(operands) {
+        let op = match *op_ty {
+            OperandType::RegD | OperandType::RegS => Operand::Ident(decode_register(val)),
+            OperandType::Imm(bits, signed) => {
+                if signed {
+                    Operand::Num(sign_extend(val, bits) as i32 as i64)
+                } else {
+                    Operand::Num(val as i64)
+                }
+            },
+            OperandType::Addr(bits) => Operand::Num(sign_extend(val, bits) as i32 as i64),
+            OperandType::None => continue,
+        };
+
+        ret.push(op);
+    }
+
+    ret
 }

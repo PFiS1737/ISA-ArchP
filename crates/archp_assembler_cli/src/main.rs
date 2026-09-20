@@ -8,7 +8,11 @@ use std::{
 };
 
 use anyhow::{Result, anyhow};
-use archp_assembler::{Assembler, fmt_line};
+use archp_assembler::{
+    assembler::{Assembler, Instr},
+    instructions::Instruction,
+    utils::fmt::fmt_line,
+};
 use clap::{CommandFactory, Parser};
 use clap_complete::CompleteEnv;
 
@@ -39,7 +43,7 @@ fn main() -> Result<()> {
 
     if cli.hex {
         let lines = merge_maps(
-            context.instrs,
+            disassemble(&context.text)?,
             context.labels.into_iter().map(|(k, v)| (v, k)),
         );
 
@@ -84,4 +88,24 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+// TODO: Remove this after we implement the ELF and Disassembler
+// TODO: Can we have more metadata so we can differentiate between instructions and data,
+//       and about where the instruction jumps to?
+fn disassemble(codes: &[u8]) -> Result<HashMap<usize, Option<Instr<'static>>>> {
+    codes
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .enumerate()
+        .map(|(idx, code)| -> Result<(usize, Option<Instr<'static>>)> {
+            let code = u32::from_le_bytes(*code);
+
+            let instr =
+                Instruction::get_by_code(code).map(|instr| (instr.name, instr.decode(code)));
+
+            Ok((idx * 4, instr))
+        })
+        .collect()
 }
