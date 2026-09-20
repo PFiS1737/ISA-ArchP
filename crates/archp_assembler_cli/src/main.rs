@@ -10,7 +10,7 @@ use std::{
 use anyhow::{Result, anyhow};
 use archp_assembler::{
     assembler::{Assembler, Instr},
-    instructions::Instruction,
+    instruction::Instruction,
     utils::fmt::fmt_line,
 };
 use clap::{CommandFactory, Parser};

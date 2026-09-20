@@ -15,6 +15,5 @@ mod relocation;
 mod macro_instructions;
 
 pub mod assembler;
-pub mod instructions;
-pub mod types;
+pub mod instruction;
 pub mod utils;

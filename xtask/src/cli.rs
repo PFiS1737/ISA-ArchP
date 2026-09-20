@@ -2,8 +2,6 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
-use crate::commands::codegen::Codegens;
-
 #[derive(Parser)]
 #[command(name = env!("CARGO_BIN_NAME"), version, about, long_about = None)]
 pub struct Cli {
@@ -43,11 +41,5 @@ pub enum Command {
     Trace {
         /// Waveform file to open in the trace viewer
         file: PathBuf,
-    },
-
-    /// Run target code generations
-    Codegen {
-        /// Code generations to run
-        targets: Vec<Codegens>,
     },
 }

@@ -1,4 +1,5 @@
 use anyhow::{Result, bail};
+use archp_types::OperandType;
 
 use crate::{
     codec::{
@@ -6,9 +7,8 @@ use crate::{
         instruction::{decode_instruction, encode_instruction},
     },
     context::Context,
-    instructions::Instruction,
+    instruction::Instruction,
     operand::Operand,
-    types::OperandType,
     utils::split::split_hi_lo,
 };
 

@@ -1,6 +1,5 @@
+use archp_types::InstructionType;
 use smallvec::SmallVec;
-
-use crate::types::InstructionType;
 
 pub fn encode_instruction(itype: &InstructionType, opcode: u32, funct3: u32, ops: &[u32]) -> u32 {
     match itype {
@@ -28,15 +27,6 @@ pub fn decode_opcode(code: u32) -> (u32, u32) {
     let opcode = code >> 25;
     let funct3 = (code >> 22) & 0b111;
     (opcode, funct3)
-}
-
-impl InstructionType {
-    pub fn has_funct3(&self) -> bool {
-        matches!(
-            self,
-            InstructionType::R | InstructionType::I | InstructionType::B | InstructionType::S
-        )
-    }
 }
 
 codec!(

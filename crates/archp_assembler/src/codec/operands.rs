@@ -1,4 +1,5 @@
 use anyhow::{Result, bail};
+use archp_types::OperandType;
 use smallvec::SmallVec;
 
 use crate::{
@@ -9,7 +10,6 @@ use crate::{
     context::Context,
     operand::Operand,
     relocation::RelocationType,
-    types::OperandType,
     utils::sig_ext::sign_extend,
 };
 

@@ -1,6 +1,6 @@
 use anyhow::{Result, anyhow};
 
-use crate::{context::Context, instructions::Instruction};
+use crate::{context::Context, instruction::Instruction};
 
 pub struct Pass2<'ctx, 'src> {
     context: &'ctx mut Context<'src>,

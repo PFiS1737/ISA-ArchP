@@ -5,7 +5,7 @@ use crate::{
     assembler::{Instr, Line},
     context::Context,
     directives::DIRECTIVES,
-    instructions::Instruction,
+    instruction::Instruction,
     operand::Operand,
     parser::parse_line,
     pseudo_instructions::PSEUDO_INSTRUCTIONS,
