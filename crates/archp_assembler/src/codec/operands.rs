@@ -88,7 +88,7 @@ pub fn decode_operands(
                     Operand::Num(val as i64)
                 }
             },
-            OperandType::Addr(bits) => Operand::Num(sign_extend(val, bits) as i32 as i64),
+            OperandType::Addr(bits) => Operand::Num((sign_extend(val, bits) << 1) as i32 as i64),
             OperandType::None => continue,
         };
 

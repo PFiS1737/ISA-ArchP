@@ -8,13 +8,13 @@ exit_code: 0
 0x16040001 # lui sp 1
 0x01220005 # addi a7 zero 5   <label: main>
 0x40000000 # ecall
-0x1402000A # jal ra 10
+0x1402000A # jal ra 20
 0x01220001 # addi a7 zero 1
 0x40000000 # ecall
 0x0122000A # addi a7 zero 10
 0x40000000 # ecall
 0x013E0002 # addi t6 zero 2   <label: fib>
-0x1281F0CA # blt t6 a0 6
+0x1281F0CA # blt t6 a0 12
 0x01140001 # addi a0 zero 1
 0x13C01000 # jalr zero ra 0
 0x0144200C # subi sp sp 12    <label: .L0>
@@ -23,10 +23,10 @@ exit_code: 0
 0x11402009 # sw s1 sp 0
 0x0110A000 # addi s0 a0 0
 0x0114AFFF # addi a0 a0 -1
-0x15C3FFEC # jal ra -20
+0x15C3FFEC # jal ra -40
 0x0112A000 # addi s1 a0 0
 0x01148FFE # addi a0 s0 -2
-0x15C3FFE6 # jal ra -26
+0x15C3FFE6 # jal ra -52
 0x0014900A # add a0 s1 a0
 0x10022008 # lw ra sp 8
 0x10102004 # lw s0 sp 4

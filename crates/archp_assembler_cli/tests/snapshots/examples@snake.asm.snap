@@ -5,7 +5,7 @@ input_file: crates/archp_assembler/examples/snake.asm
 success: true
 exit_code: 0
 ----- stdout -----
-0x14000162 # jal zero 354
+0x14000162 # jal zero 708
 0x01140000 # addi a0 zero 0    <label: init_screen>
 0x01160000 # addi a1 zero 0
 0x01180000 # addi a2 zero 0
@@ -13,11 +13,11 @@ exit_code: 0
 0x40000000 # ecall
 0x0114A001 # addi a0 a0 1
 0x013E0040 # addi t6 zero 64
-0x12BEAF1F # blt a0 t6 -8
+0x12BEAF1F # blt a0 t6 -16
 0x0116B001 # addi a1 a1 1
 0x01140000 # addi a0 zero 0
 0x013E0024 # addi t6 zero 36
-0x12BEBE1F # blt a1 t6 -16
+0x12BEBE1F # blt a1 t6 -32
 0xFC800000 # ret
 0x16180FF0 # lui a2 0xFF0      <label: init_snake>
 0x01020005 # addi ra zero 5
@@ -31,50 +31,50 @@ exit_code: 0
 0x011A0003 # addi a3 zero 3
 0x0054100D # sub a0 ra a3      <label: init_body_loop>
 0x01162000 # addi a1 sp 0
-0xFA0000A2 # call 162
+0xFA0000A2 # call 324
 0x16230000 # lui a7 0x10000
 0x40000000 # ecall
 0x015AD001 # subi a3 a3 1
 0x013E0001 # addi t6 zero 1
-0x12FEDE5F # bge a3 t6 -14
+0x12FEDE5F # bge a3 t6 -28
 0xFC800000 # ret
 0x013E0067 # addi t6 zero 103  <label: move_snake>
-0x1200921F # beq s1 t6 16
+0x1200921F # beq s1 t6 32
 0x013E006C # addi t6 zero 108
-0x1200925F # beq s1 t6 18
+0x1200925F # beq s1 t6 36
 0x013E0069 # addi t6 zero 105
-0x1200929F # beq s1 t6 20
+0x1200929F # beq s1 t6 40
 0x013E006A # addi t6 zero 106
-0x120092DF # beq s1 t6 22
+0x120092DF # beq s1 t6 44
 0xFC800000 # ret
 0x010E1000 # addi t2 ra 0      <label: move_snake_up>
 0x01502001 # subi s0 sp 1
-0x14000014 # jal zero 20
+0x14000014 # jal zero 40
 0x010E1000 # addi t2 ra 0      <label: move_snake_down>
 0x01102001 # addi s0 sp 1
-0x1400000E # jal zero 14
+0x1400000E # jal zero 28
 0x014E1001 # subi t2 ra 1      <label: move_snake_left>
 0x01102000 # addi s0 sp 0
-0x14000008 # jal zero 8
+0x14000008 # jal zero 16
 0x010E1001 # addi t2 ra 1      <label: move_snake_right>
 0x01102000 # addi s0 sp 0
-0x14000002 # jal zero 2
+0x14000002 # jal zero 4
 0x01141000 # addi a0 ra 0      <label: move_snake_common>
 0x01162000 # addi a1 sp 0
-0xFA000066 # call 102
+0xFA000066 # call 204
 0x16181000 # lui a2 0x1000
 0x0118CFFF # addi a2 a2 -1
 0x16230000 # lui a7 0x10000
 0x40000000 # ecall
-0x12C07080 # bge t2 zero 4
+0x12C07080 # bge t2 zero 8
 0x010E003F # addi t2 zero 63
 0x013E0040 # addi t6 zero 64   <label: move_snake_common_x_ge_0>
-0x1280709F # blt t2 t6 4
+0x1280709F # blt t2 t6 8
 0x010E0000 # addi t2 zero 0
-0x12C08080 # bge s0 zero 4     <label: move_snake_common_x_lt_width>
+0x12C08080 # bge s0 zero 8     <label: move_snake_common_x_lt_width>
 0x01100023 # addi s0 zero 35
 0x013E0024 # addi t6 zero 36   <label: move_snake_common_y_ge_0>
-0x1280809F # blt s0 t6 4
+0x1280809F # blt s0 t6 8
 0x01100000 # addi s0 zero 0
 0x01027000 # addi ra t2 0      <label: move_snake_common_y_lt_height>
 0x01048000 # addi sp s0 0
@@ -83,14 +83,14 @@ exit_code: 0
 0x01162000 # addi a1 sp 0
 0x16230000 # lui a7 0x10000
 0x40000000 # ecall
-0xFA00004A # call 74
+0xFA00004A # call 148
 0x013E0001 # addi t6 zero 1
-0x1202E9DF # beq a4 t6 206
-0x12401103 # bne ra gp 8
-0x124020C4 # bne sp tp 6
-0xFA00000E # call 14
+0x1202E9DF # beq a4 t6 412
+0x12401103 # bne ra gp 16
+0x124020C4 # bne sp tp 12
+0xFA00000E # call 28
 0xFC800000 # ret
-0xFA000034 # call 52           <label: move_snake_not_eat>
+0xFA000034 # call 104          <label: move_snake_not_eat>
 0x01180000 # addi a2 zero 0
 0x16230000 # lui a7 0x10000
 0x40000000 # ecall
@@ -102,9 +102,9 @@ exit_code: 0
 0x40000000 # ecall
 0x0754A040 # remi a0 a0 64
 0x0756B024 # remi a1 a1 36
-0xFA000024 # call 36
+0xFA000024 # call 72
 0x013E0001 # addi t6 zero 1
-0x123EEDDF # beq a4 t6 -18
+0x123EEDDF # beq a4 t6 -36
 0x0106A000 # addi gp a0 0
 0x0108B000 # addi tp a1 0
 0x16181000 # lui a2 0x1000
@@ -114,18 +114,18 @@ exit_code: 0
 0xFC800000 # ret
 0x0A24A008 # slli s2 a0 8      <label: body_push>
 0x00E5200B # or s2 s2 a1
-0xFA000014 # call 20
+0xFA000014 # call 40
 0xFC800000 # ret
-0xFA00002A # call 42           <label: body_pop>
+0xFA00002A # call 84           <label: body_pop>
 0x0A552008 # srli a0 s2 8
 0x019720FF # andi a1 s2 255
 0xFC800000 # ret
 0x0A24A008 # slli s2 a0 8      <label: body_contains>
 0x00E5200B # or s2 s2 a1
-0xFA000038 # call 56
+0xFA000038 # call 112
 0xFC800000 # ret
 0x013E0064 # addi t6 zero 100  <label: queue_push>
-0x1200F29F # beq a5 t6 20
+0x1200F29F # beq a5 t6 40
 0x05270002 # muli s3 a6 2
 0x163E0100 # lui t6 256
 0x0027301F # add s3 s3 t6
@@ -137,7 +137,7 @@ exit_code: 0
 0xFC800000 # ret
 0x011C0001 # addi a4 zero 1    <label: queue_push_full>
 0xFC800000 # ret
-0x1200F2C0 # beq a5 zero 22    <label: queue_pop>
+0x1200F2C0 # beq a5 zero 44    <label: queue_pop>
 0x0067000F # sub s3 a6 a5
 0x01273064 # addi s3 s3 100
 0x07673064 # remi s3 s3 100
@@ -150,21 +150,21 @@ exit_code: 0
 0xFC800000 # ret
 0x011C0001 # addi a4 zero 1    <label: queue_pop_empty>
 0xFC800000 # ret
-0x1200F440 # beq a5 zero 34    <label: queue_contains>
+0x1200F440 # beq a5 zero 68    <label: queue_contains>
 0x0067000F # sub s3 a6 a5
 0x01273064 # addi s3 s3 100
 0x07673064 # remi s3 s3 100
 0x01280000 # addi s4 zero 0
-0x1201430F # beq s4 a5 24      <label: queue_contains_loop>
+0x1201430F # beq s4 a5 48      <label: queue_contains_loop>
 0x052D3002 # muli s6 s3 2
 0x163E0100 # lui t6 256
 0x002D601F # add s6 s6 t6
 0x10AB6000 # lhu s5 s6 0
-0x12015152 # beq s5 s2 10
+0x12015152 # beq s5 s2 20
 0x01273001 # addi s3 s3 1
 0x07673064 # remi s3 s3 100
 0x01294001 # addi s4 s4 1
-0x15C1FFEE # jal zero -18
+0x15C1FFEE # jal zero -36
 0x011C0001 # addi a4 zero 1    <label: queue_contains_found>
 0xFC800000 # ret
 0x011C0000 # addi a4 zero 0    <label: queue_contains_not_found>
@@ -172,21 +172,21 @@ exit_code: 0
 0x170B0000 # lui t0 0x90000    <label: read_key>
 0x100A5000 # lw t0 t0 0
 0x013E0067 # addi t6 zero 103
-0x1200521F # beq t0 t6 16
+0x1200521F # beq t0 t6 32
 0x013E006C # addi t6 zero 108
-0x1200519F # beq t0 t6 12
+0x1200519F # beq t0 t6 24
 0x013E0069 # addi t6 zero 105
-0x1200511F # beq t0 t6 8
+0x1200511F # beq t0 t6 16
 0x013E006A # addi t6 zero 106
-0x1200509F # beq t0 t6 4
+0x1200509F # beq t0 t6 8
 0xFC800000 # ret
 0x01125000 # addi s1 t0 0      <label: read_key_ok>
 0xFC800000 # ret               <label: read_key_ret>
-0xFBC1FEA0 # call -352         <label: main>
-0xFBC1FEB8 # call -328
-0xFBC1FF4E # call -178
-0xFBC1FFE0 # call -32          <label: main_loop>
-0xFBC1FED8 # call -296
-0x15C1FFFC # jal zero -4
+0xFBC1FEA0 # call -704         <label: main>
+0xFBC1FEB8 # call -656
+0xFBC1FF4E # call -356
+0xFBC1FFE0 # call -64          <label: main_loop>
+0xFBC1FED8 # call -592
+0x15C1FFFC # jal zero -8
 0x14000000 # jal zero 0        <label: lose_loop>
 ----- stderr -----
