@@ -1,4 +1,4 @@
-use anyhow::{Result, anyhow};
+use anyhow::{Context as _, Result, anyhow};
 
 use crate::{context::Context, instruction::Instruction};
 
@@ -20,7 +20,7 @@ impl<'ctx, 'src> Pass2<'ctx, 'src> {
                 .context
                 .labels
                 .get(reloc.label)
-                .ok_or(anyhow!("Undefined label: {}", reloc.label))?;
+                .with_context(|| anyhow!("Undefined label: {}", reloc.label))?;
 
             let addr = *addr as i64 + reloc.addend;
 

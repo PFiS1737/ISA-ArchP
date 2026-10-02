@@ -1,6 +1,6 @@
 use std::{iter::once, str::CharIndices};
 
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Context as _, Result, anyhow, bail};
 use nom::AsChar;
 
 use crate::{
@@ -69,7 +69,9 @@ fn push_str(ctx: &mut Context, s: &str) -> Result<()> {
 }
 
 fn unescape_char(iter: &mut CharIndices, raw: &str) -> Result<u8> {
-    let (i, c) = iter.next().ok_or(anyhow!("unexpected end of string"))?;
+    let (i, c) = iter
+        .next()
+        .with_context(|| anyhow!("unexpected end of string"))?;
 
     let byte = match c {
         '\'' | '"' | '?' | '\\' => c as u8,
@@ -84,7 +86,7 @@ fn unescape_char(iter: &mut CharIndices, raw: &str) -> Result<u8> {
             let hex = iter.take_while(|x| x.1.is_hex_digit());
             let end = hex
                 .last()
-                .ok_or(anyhow!("expected one or more hex digit after \\x"))?
+                .with_context(|| anyhow!("expected one or more hex digit after \\x"))?
                 .0;
 
             u8::from_str_radix(&raw[i + 1..=end], 16)?

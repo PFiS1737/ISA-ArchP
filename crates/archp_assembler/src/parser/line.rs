@@ -1,4 +1,4 @@
-use anyhow::{anyhow, bail};
+use anyhow::{Context as _, anyhow, bail};
 use nom::{
     Parser,
     branch::alt,
@@ -131,7 +131,8 @@ pub fn parse_line<'ctx, 'src: 'ctx>(
     }
 
     let (remain, line) = line(ctx, line_num, rest)
-        .map_err(|e| anyhow!("Error parsing line {}: '{}': {}", line_num, input, e))?;
+        .map_err(|e| anyhow!("{}", e))
+        .with_context(|| anyhow!("Error parsing line {}: '{}'", line_num, input))?;
 
     if !remain.is_empty() {
         bail!("Unexpected content after line {}: '{}'", line_num, remain);
@@ -359,13 +360,19 @@ mod tests {
     fn expect_more_operand() {
         assert_debug_snapshot!(parse_source("addi x1,"), @r#"
         Err(
-            "Error parsing line 1: 'addi x1,': Parsing Error: Nom(Error { input: \"\", code: Char })",
+            Error {
+                context: "Error parsing line 1: \'addi x1,\'",
+                source: "Parsing Error: Nom(Error { input: \"\", code: Char })",
+            },
         )
         "#
         );
         assert_debug_snapshot!(parse_source("addi x1, 123,"), @r#"
         Err(
-            "Error parsing line 1: 'addi x1, 123,': Parsing Error: Nom(Error { input: \"\", code: Char })",
+            Error {
+                context: "Error parsing line 1: \'addi x1, 123,\'",
+                source: "Parsing Error: Nom(Error { input: \"\", code: Char })",
+            },
         )
         "#
         );

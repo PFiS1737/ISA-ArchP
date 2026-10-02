@@ -1,6 +1,6 @@
 use std::{fs::File, io::Read, path::PathBuf, sync::RwLock};
 
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Context, Result, anyhow, bail};
 
 pub struct Ram {
     pub data: RwLock<Vec<u8>>,
@@ -10,13 +10,12 @@ pub struct Ram {
 impl Ram {
     pub fn new(size: usize, program_path: &PathBuf) -> Result<Self> {
         let mut file = File::open(program_path)
-            .map_err(|err| anyhow!("Failed to open file '{}': {}", program_path.display(), err))?;
+            .with_context(|| anyhow!("Failed to open file '{}'", program_path.display()))?;
 
-        let metadata = file.metadata().map_err(|err| {
+        let metadata = file.metadata().with_context(|| {
             anyhow!(
-                "Failed to get metadata for file '{}': {}",
+                "Failed to get metadata for file '{}'",
                 program_path.display(),
-                err
             )
         })?;
         let file_len = metadata.len() as usize;
@@ -33,7 +32,7 @@ impl Ram {
         let mut data = vec![0; size];
 
         file.read_exact(&mut data[..file_len])
-            .map_err(|err| anyhow!("Failed to read file '{}': {}", program_path.display(), err))?;
+            .with_context(|| anyhow!("Failed to read file '{}'", program_path.display()))?;
 
         Ok(Self {
             data: RwLock::new(data),

@@ -1,6 +1,6 @@
 use std::{fs::OpenOptions, path::PathBuf, sync::Mutex};
 
-use anyhow::{Result, anyhow};
+use anyhow::{Context, Result, anyhow};
 use drm::{
     buffer::DrmFourcc,
     control::{
@@ -32,18 +32,18 @@ impl<'a> FrameBuffer<'a> {
             .modes()
             .iter()
             .find(|mode| mode.size() == (w as u16, h as u16))
-            .ok_or(anyhow!("No modes found for connector"))?;
+            .with_context(|| anyhow!("No modes found for connector"))?;
 
         let (width, height) = mode.size();
 
         let mut db = Box::new(
             card.create_dumb_buffer((width.into(), height.into()), DrmFourcc::Xrgb8888, 32)
-                .map_err(|err| anyhow!("Could not create dumb buffer: {err}"))?,
+                .with_context(|| anyhow!("Could not create dumb buffer"))?,
         );
 
         let fb = card
             .add_framebuffer(db.as_ref(), 24, 32)
-            .map_err(|err| anyhow!("Could not create framebuffer: {err}"))?;
+            .with_context(|| anyhow!("Could not create framebuffer"))?;
 
         let mut data: DumbMapping<'a> =
             unsafe { std::mem::transmute(card.map_dumb_buffer(&mut db)?) };
@@ -59,7 +59,7 @@ impl<'a> FrameBuffer<'a> {
             &[connector.handle()],
             Some(mode),
         )
-        .map_err(|err| anyhow!("Could not set CRTC: {err}"))?;
+        .with_context(|| anyhow!("Could not set CRTC"))?;
 
         Ok(Self {
             card,
@@ -120,14 +120,14 @@ impl Card {
             .iter()
             .flat_map(|con| self.get_connector(*con, true))
             .find(|i| i.state() == connector::State::Connected)
-            .ok_or(anyhow!("No connected connectors"))?;
+            .with_context(|| anyhow!("No connected connectors"))?;
 
         let crtc = res
             .crtcs()
             .iter()
             .flat_map(|crtc| self.get_crtc(*crtc))
             .next()
-            .ok_or(anyhow!("No crtcs found"))?;
+            .with_context(|| anyhow!("No crtcs found"))?;
 
         Ok((connector, crtc))
     }

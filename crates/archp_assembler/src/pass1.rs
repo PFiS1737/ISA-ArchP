@@ -1,4 +1,4 @@
-use anyhow::{Result, anyhow};
+use anyhow::{Context as _, Result, anyhow};
 use smallvec::SmallVec;
 
 use crate::{
@@ -47,15 +47,10 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
             } => {
                 DIRECTIVES
                     .get(name)
-                    .ok_or(anyhow!("Unknown directive: '{}'", name))?
+                    .with_context(|| anyhow!("Unknown directive: '{}'", name))?
                     .handle(self.context, &operands)
-                    .map_err(|e| {
-                        anyhow!(
-                            "Error handling directive at line {}: '{}' ({})",
-                            line.0,
-                            line.1,
-                            e
-                        )
+                    .with_context(|| {
+                        anyhow!("Error handling directive at line {}: '{}'", line.0, line.1)
                     })?;
             },
             Line::Instruction {
@@ -71,12 +66,11 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
                     if let Some(mc_instr) = crate::macro_instructions::MACRO_INSTRUCTIONS.get(name)
                         && let Some(expanded) = mc_instr
                             .expand(self.context, name, &operands)
-                            .map_err(|e| {
+                            .with_context(|| {
                                 anyhow!(
-                                    "Error expanding macro-instruction at line {}: '{}' ({})",
+                                    "Error expanding macro-instruction at line {}: '{}'",
                                     line.0,
                                     line.1,
-                                    e
                                 )
                             })?
                     {
@@ -105,12 +99,11 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
         line: (usize, &'src str),
     ) -> Result<()> {
         if let Some(ps_instr) = PSEUDO_INSTRUCTIONS.get(name) {
-            let expanded = ps_instr.expand(self.context, &ops).map_err(|e| {
+            let expanded = ps_instr.expand(self.context, &ops).with_context(|| {
                 anyhow!(
-                    "Error expanding pseudo-instruction at line {}: '{}' ({})",
+                    "Error expanding pseudo-instruction at line {}: '{}'",
                     line.0,
                     line.1,
-                    e
                 )
             })?;
             for instr in expanded {
@@ -127,7 +120,7 @@ impl<'ctx, 'src> Pass1<'ctx, 'src> {
         let (name, ops) = instr;
 
         let code = Instruction::get_by_name(name)
-            .ok_or(anyhow!("Unknown instruction: '{}'", name))?
+            .with_context(|| anyhow!("Unknown instruction: '{}'", name))?
             .encode(self.context, &ops)?;
 
         self.context.add_word(code);

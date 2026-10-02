@@ -7,7 +7,7 @@ use std::{
     io::{BufWriter, Write, stdout},
 };
 
-use anyhow::{Result, anyhow};
+use anyhow::{Context, Result, anyhow};
 use archp_assembler::{
     assembler::{Assembler, Instr},
     instruction::Instruction,
@@ -31,7 +31,7 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     let file_content = read_to_string(&cli.src_file)
-        .map_err(|e| anyhow!("Can't read source file '{}': {}", cli.src_file, e))?;
+        .with_context(|| anyhow!("Can't read source file '{}'", cli.src_file))?;
 
     let context = Assembler::assemble(&file_content)?;
 
