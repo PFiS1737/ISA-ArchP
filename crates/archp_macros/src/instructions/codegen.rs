@@ -1,3 +1,4 @@
+use archp_types::OperandType;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use syn::{Ident, Result, parse_quote, parse_str};
@@ -37,23 +38,30 @@ impl Root {
                 let name_str = name.to_string();
                 let name_ident: Ident = parse_str(&name_str.to_uppercase())?;
 
-                let formats = formats
+                let format = formats
                     .as_ref()
                     .map(|f| f.iter().collect::<Vec<_>>())
-                    .unwrap_or(itype.default_format().iter().collect::<Vec<_>>())
+                    .unwrap_or(itype.default_format().iter().collect::<Vec<_>>());
+
+                let count = format
                     .iter()
-                    .map(|f| quote!(OperandType::#f))
-                    .collect::<Vec<_>>();
+                    .filter(|x| !matches!(x, OperandType::None))
+                    .count();
+
+                let formats = format.iter().map(|f| quote!(OperandType::#f));
 
                 tokens.extend(quote! {
                     #(#attrs_opcode)*
                     #(#attrs)*
                     pub static #name_ident: &Instruction = &Instruction {
                         name: #name_str,
+                        itype: InstructionType::#itype,
                         opcode: #opcode,
                         funct3: #funct3,
-                        itype: InstructionType::#itype,
-                        format: &[#(#formats),*],
+                        operands: OperandFormat {
+                            format: &[#(#formats),*],
+                            count: #count,
+                        },
                     };
                 });
             }

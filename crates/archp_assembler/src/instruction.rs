@@ -1,7 +1,7 @@
 mod instructions;
 
 use anyhow::Result;
-use archp_types::{InstructionType, OperandType};
+use archp_types::{InstructionType, OperandFormat};
 use smallvec::SmallVec;
 
 use crate::{
@@ -15,10 +15,10 @@ use crate::{
 
 pub struct Instruction {
     pub name: &'static str,
+    pub itype: InstructionType,
     pub opcode: u32,
     pub funct3: u32,
-    pub itype: InstructionType,
-    pub format: &'static [OperandType],
+    pub operands: OperandFormat,
 }
 
 impl Instruction {
@@ -34,16 +34,16 @@ impl Instruction {
     pub fn encode<'src>(
         &'static self,
         ctx: &mut Context<'src>,
-        operands: &[Operand<'src>],
+        ops: &[Operand<'src>],
     ) -> Result<u32> {
-        let ops = encode_operands(ctx, self.name, self.format, operands)?;
+        let ops = encode_operands(ctx, self.name, &self.operands, ops)?;
         let code = encode_instruction(&self.itype, self.opcode, self.funct3, &ops);
         Ok(code)
     }
 
     pub fn decode(&'static self, code: u32) -> SmallVec<[Operand<'static>; 3]> {
         let ops = decode_instruction(&self.itype, code);
-        decode_operands(self.format, ops)
+        decode_operands(&self.operands, ops)
     }
 }
 

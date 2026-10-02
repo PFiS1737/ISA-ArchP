@@ -1,5 +1,5 @@
 use archp_macros::instructions;
-use archp_types::{InstructionType, OperandType};
+use archp_types::{InstructionType, OperandFormat, OperandType};
 
 use crate::instruction::Instruction;
 

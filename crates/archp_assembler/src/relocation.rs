@@ -80,7 +80,7 @@ impl Instruction {
         addr: i64,
         base: u32,
     ) -> Result<u32> {
-        for (idx, op_ty) in self.format.iter().enumerate() {
+        for (idx, op_ty) in self.operands.format.iter().enumerate() {
             if let OperandType::Addr(..) | OperandType::Imm(..) = op_ty {
                 let shift = matches!(op_ty, OperandType::Addr(..));
 

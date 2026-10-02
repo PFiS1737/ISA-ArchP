@@ -1,5 +1,5 @@
 use anyhow::{Result, bail};
-use archp_types::OperandType;
+use archp_types::{OperandFormat, OperandType};
 use smallvec::SmallVec;
 
 use crate::{
@@ -16,30 +16,23 @@ use crate::{
 pub fn encode_operands<'src>(
     ctx: &mut Context<'src>,
     name: &'static str,
-    format: &'static [OperandType],
-    operands: &[Operand<'src>],
+    operands: &OperandFormat,
+    ops: &[Operand<'src>],
 ) -> Result<SmallVec<[u32; 3]>> {
-    // TODO: make this static
-    let expected = format
-        .iter()
-        .filter(|x| !matches!(x, OperandType::None))
-        .count();
-
-    let count = operands.len();
-    if count != expected {
+    if ops.len() != operands.count {
         bail!(
             "Instruction '{}' requires {} operands, got {}",
             name,
-            expected,
-            count
+            operands.count,
+            ops.len()
         );
     }
 
-    let mut ops = operands.iter();
+    let mut ops = ops.iter();
 
     let mut ret = SmallVec::new();
 
-    for op_ty in format {
+    for op_ty in operands.format {
         let val = match *op_ty {
             OperandType::RegD | OperandType::RegS => {
                 let s = ops.next().unwrap().cast_register()?;
@@ -71,14 +64,14 @@ pub fn encode_operands<'src>(
 }
 
 pub fn decode_operands(
-    format: &'static [OperandType],
-    operands: SmallVec<[u32; 3]>,
+    operands: &OperandFormat,
+    ops: SmallVec<[u32; 3]>,
 ) -> SmallVec<[Operand<'static>; 3]> {
-    assert_eq!(format.len(), operands.len());
+    assert_eq!(operands.format.len(), ops.len());
 
     let mut ret = SmallVec::new();
 
-    for (op_ty, val) in format.iter().zip(operands) {
+    for (op_ty, val) in operands.format.iter().zip(ops) {
         let op = match *op_ty {
             OperandType::RegD | OperandType::RegS => Operand::Ident(decode_register(val)),
             OperandType::Imm(bits, signed) => {

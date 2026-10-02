@@ -33,3 +33,9 @@ impl InstructionType {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy)]
+pub struct OperandFormat {
+    pub format: &'static [OperandType],
+    pub count: usize,
+}
